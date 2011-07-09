@@ -1,0 +1,442 @@
+<?php
+// $Id$
+/**
+ * @file
+ * Awesome minipanel style carousel setup thing.
+ *
+ * It should be noted that this module provides a panel type but it doesn't not
+ * export that as something panels can embed in other panes. This is done
+ * specifically to simplify the implementation.
+ *
+ * @TODO convert hook_block to a content plugin for panels since that's where
+ * we'll be mostly using this.
+ *
+ *
+ */
+
+/**
+ * Implementation of hook_perm().
+ */
+function sony_queuedcarousel_perm() {
+	return array('create sony queued carousel panel', 'administer sony queued carousel panels');
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function sony_queuedcarousel_menu() {
+
+  $items = array();
+  // Provide some common options to reduce code repetition.
+  // By using array addition and making sure these are the rightmost
+  // value, they won't override anything already set.
+  $base = array(
+    'access arguments' => array('create sony queued carousel panel'),
+    'file' => 'sony_queuedcarousel.queue.admin.inc',
+  );
+
+  // Queue management entries.
+  $items['admin/build/queuedcarousel'] = array(
+    'title' => 'Queued Carousel',
+    'page callback' => 'sony_queuedcarousel_queue_list_page',
+    'description' => 'Create and administer queued panels.',
+  ) + $base;
+  $items['admin/build/queuedcarousel/list'] = array(
+    'title' => 'List Queues',
+    'weight' => -10,
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  ) + $base;
+  $items['admin/build/queuedcarousel/add'] = array(
+    'title' => 'Add Queue',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_queuedcarousel_queue_edit', 'new'),
+    'type' => MENU_LOCAL_TASK,
+  ) + $base;
+  // This isn't really the Drupal Way(TM) but it fits mini panels and other panels systems.
+  $items['admin/build/queuedcarousel/settings'] = array(
+    'title' => 'Panel Settings',
+    'page callback' => 'sony_queuedcarousel_settings',
+    'type' => MENU_LOCAL_TASK,
+  ) + $base;
+  $items['admin/build/queuedcarousel/manage/%/delete'] = array(
+    'title' => 'Delete Queue',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_queuedcarousel_queue_delete_confirm', 4),
+    'type' => MENU_LOCAL_TASK,
+  ) + $base;
+
+  // Panel management entries.
+  // Update update the base with the new admin include.
+  $items['admin/build/queuedcarousel/manage/%'] = array(
+    'title' => 'Settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_queuedcarousel_queue_edit', 4),
+    'type' => MENU_CALLBACK,
+  ) + $base;
+  $items['admin/build/queuedcarousel/manage/%/settings'] = array(
+    'title' => 'Settings',
+    'weight' => -10,
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  ) + $base;
+  $base['file'] = 'sony_queuedcarousel.panel.admin.inc';
+  $items['admin/build/queuedcarousel/manage/%/list'] = array(
+    'title' => 'Manage panels',
+    'page callback' => 'sony_queuedcarousel_panel_list_page',
+    'page arguments' => array(4),
+    'weight' => -5,
+    'type' => MENU_LOCAL_TASK,
+  ) + $base;
+  $items['admin/build/queuedcarousel/manage/%/add'] = array(
+    'title' => 'Add panel',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_queuedcarousel_panel_add_form', 4),
+    'type' => MENU_LOCAL_TASK,
+  ) + $base;
+  $items['admin/build/queuedcarousel/manage/%/add/simple'] = array(
+    'title' => 'Add panel - Simple',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_queuedcarousel_panel_add_simple_form', 4),
+    'type' => MENU_LOCAL_TASK,
+  ) + $base;
+
+  // Panel edit/management items.
+  $items['admin/build/queuedcarousel/panel/%'] = array(
+    'title' => 'Panel Settings',
+    'page callback' => 'sony_queuedcarousel_panel_edit_page',
+    'page arguments' => array(4),
+    'weight' => 0,
+  ) + $base;
+  $items['admin/build/queuedcarousel/panel/%/layout'] = array(
+    'title' => 'Layout',
+    'page callback' => 'sony_queuedcarousel_panel_edit_layout_page',
+    'page arguments' => array(4),
+    'weight' => -1,
+    'type' => MENU_LOCAL_TASK,
+  ) + $base;
+  $items['admin/build/queuedcarousel/panel/%/edit'] = array(
+    'title' => 'Settings',
+    'page callback' => 'sony_queuedcarousel_panel_edit_page',
+    'page arguments' => array(4),
+    'weight' => 0,
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  ) + $base;
+  $items['admin/build/queuedcarousel/panel/%/content'] = array(
+    'title' => 'Content',
+    'page callback' => 'sony_queuedcarousel_panel_edit_content_page',
+    'page arguments' => array(4),
+    'weight' => 2,
+    'type' => MENU_LOCAL_TASK,
+  ) + $base;
+  $items['admin/build/queuedcarousel/panel/%/context'] = array(
+    'title' => 'Context',
+    'page callback' => 'sony_queuedcarousel_panel_edit_context_page',
+    'page arguments' => array(4),
+    'weight' => 3,
+    'type' => MENU_LOCAL_TASK,
+  ) + $base;
+  $items['admin/build/queuedcarousel/panel/%/delete'] = array(
+    'title' => 'Delete',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_queuedcarousel_panel_delete_confirm', 4),
+    'weight' => 4,
+    'type' => MENU_LOCAL_TASK,
+  ) + $base;
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function sony_queuedcarousel_theme() {
+  return array(
+    'sony_queuedcarousel_panel_list_form' => array(
+      'path' => drupal_get_path('module', 'sony_queuedcarousel'),
+      'file' => 'sony_queuedcarousel.panel.admin.inc',
+      'arguments' => array(
+        'form' => array(),
+      ),
+    ),
+    'sony_queuedcarousel' => array(
+      'path' => drupal_get_path('module', 'sony_queuedcarousel') . '/theme',
+      'template' => 'sony-queuedcarousel',
+      'arguments' => array(
+        'queue' => NULL,
+      ),
+    ),
+    'sony_queuedcarousel_panel' => array(
+      'path' => drupal_get_path('module', 'sony_queuedcarousel') . '/theme',
+      'template' => 'sony-queuedcarousel-panel',
+      'arguments' => array(
+        'panel' => NULL,
+      ),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_ctools_plugin_dierctory()
+ */
+function sony_queuedcarousel_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'ctools') {
+    return 'plugins/' . $plugin;
+  }
+}
+
+/**
+ * Preprocess queued carousel themeing to render panels into a variable.
+ */
+function template_preprocess_sony_queuedcarousel(&$vars) {
+  // If for some reason we where passed an id, try and load the queue.
+  // This is consisten with out other API methods.
+  if (!is_object($vars['queue'])) {
+    $vars['queue'] = sony_queuedcarousel_load($vars['queue']);
+  }
+  $vars['carousel_id'] = _sony_queuedcarousel_get_id($vars['queue']->name);
+
+  drupal_add_css(drupal_get_path('module', 'sony_queuedcarousel') . '/theme/sony_queuedcarousel.css');
+  drupal_add_js(drupal_get_path('module', 'sony_queuedcarousel') . '/theme/sony_queuedcarousel.js');
+
+  drupal_add_js(drupal_get_path('module', 'sony_queuedcarousel') . '/theme/jquery.url.packed.js');
+
+  drupal_add_js(array(
+    'queuedcarousel' => array(
+      '#' . $vars['carousel_id'] => array(
+        'auto' => $vars['queue']->conf['auto'] * 1000,
+      ),
+    ),
+  ), 'setting');
+  _sony_queuedcarousel_uicarousel_init();
+
+  $vars['panels'] = array();
+
+  foreach ($vars['queue']->panels as $panel) {
+    $vars['panels'][] = theme('sony_queuedcarousel_panel', $panel);
+  }
+}
+
+/**
+ * Preprocess queued carousel panel.
+ */
+function template_preprocess_sony_queuedcarousel_panel(&$vars) {
+  $panel = &$vars['panel'];
+
+  if (!is_object($panel)) {
+    $panel = sony_queuedcarousel_panel_load($panel);
+  }
+
+  // static recursion protection.
+  static $viewing = array();
+  if (!empty($viewing[$panel->pid])) {
+    return;
+  }
+  $viewing[$panel->pid] = TRUE;
+
+  ctools_include('context');
+
+  $panel->context = $panel->display->context = ctools_context_load_contexts($panel);
+  $panel->display->css_id = _sony_queuedcarousel_get_id($panel->name);
+
+  $vars['rendered_panel'] = panels_render_display($panel->display);
+
+  unset($viewing[$panel->pid]);
+}
+
+function _sony_queuedcarousel_uicarousel_init() {
+  static $init = false;
+
+  if (!$init) {
+    $init = true;
+    jquery_ui_add('ui.core');
+
+    $js_path = drupal_get_path('module', 'uicarousel') . '/js';
+    switch($compression = variable_get('jquery_update_compression_type', 'mini')) {
+      case 'mini':
+        if (file_exists($js_path . '/lib/jquery.ui.carousel.min.js')) {
+          drupal_add_js($js_path . '/lib/jquery.ui.carousel.min.js');
+          break;
+        }
+        // else drop though and include the uncompressed.
+
+      default:
+        if (file_exists($js_path . '/lib/jquery.ui.carousel.js')) {
+          drupal_add_js($js_path . '/lib/jquery.ui.carousel.js');
+          break;
+        }
+        drupal_set_message("Failed to load ui carousel library");
+    }
+
+    // This file handles adding our behavior to attach carousels.
+    // Commented out cause we really don't want/need this added. We have our own.
+    // drupal_add_js($js_path . '/uicarousel.js');
+
+    // Add in basic styling.
+    drupal_add_css($js_path . '/lib/css/ui.carousel.css');
+    drupal_add_css(drupal_get_path('module', 'uicarousel') . '/theme/uicarousel.css');
+  }
+}
+
+/**
+ * Helper function to ensure unique ids.
+ */
+function _sony_queuedcarousel_get_id($name) {
+  static $id_cache = array();
+
+  $id = 'queuedcarousel-' . $name;
+  if (!empty($id_cache[$name])) {
+    $id .= "-" . $id_cache[$name]++;
+  }
+  else {
+    $id_cache[$name] = 1;
+  }
+
+  return $id;
+}
+
+/******************************************************************************
+ * API METHODS
+ *****************************************************************************/
+
+/**
+ * Delete a queue and all associated panels.
+ *
+ * @param $queue
+ * A fully loaded queue object.
+ * @return
+ * No return.
+ */
+function sony_queuedcarousel_queue_delete($queue) {
+
+  foreach ($queue->panels as $panel) {
+    sony_queuedcarousel_panel_delete($panel);
+  }
+
+  db_query('DELETE FROM {sony_queuedcarousel} WHERE queue_id = %d', $queue->queue_id);
+}
+
+/**
+ * Load a queue.
+ *
+ * @param $queue_id
+ * ID of queue to load.
+ * @return
+ * A loaded queue object. FALSE on failure.
+ */
+function sony_queuedcarousel_queue_load($queue_id) {
+
+  $result = db_query('SELECT * FROM {sony_queuedcarousel} WHERE queue_id = %d', $queue_id);
+  if ($result) {
+    $queue = db_fetch_object($result);
+    $queue->panels = _sony_queuedcarouse_queue_load_panels($queue_id);
+    $queue->conf = unserialize($queue->conf);
+    return $queue;
+  }
+
+  return FALSE;
+}
+
+/**
+ * Helper function to load all panels associated with a given queue.
+ *
+ * This function shares a lot of functionality/logic with sony_queuedcarousel_panel_load
+ * but is optimized for loading a lot of objects.
+ *
+ * @param $queue_id
+ * Queue ID.
+ * @return
+ * A list of panels associated with the queue.
+ */
+function _sony_queuedcarouse_queue_load_panels($queue_id) {
+
+  $panels = array();
+  $result = db_query('SELECT * FROM {panels_queuedcarousel} WHERE queue_id = %d ORDER BY weight', $queue_id);
+  while ($panel = db_fetch_object($result)) {
+    $panel->display = panels_load_display($panel->did);
+    $panels[] = $panel;
+  }
+
+  return $panels;
+}
+
+/**
+ * Save queue to database.
+ *
+ * @param $queue
+ * A populated queue object.
+ * @return
+ * The saved queue object.
+ */
+function sony_queuedcarousel_queue_save($queue) {
+
+  $update = (isset($queue->queue_id) && $queue->queue_id != 'new') ? array('queue_id') : array();
+  drupal_write_record('sony_queuedcarousel', $queue, $update);
+
+  // Make sure all the panels are updated.
+  // @todo if this causes really slow saves at some point, we may have to optimize somehow.
+  foreach ($queue->panels as $panel) {
+    // Make sure the queue id is correctly set.
+    $panel->queue_id = $queue->queue_id;
+
+    // Save the panel just to make sure any updates that may have been made are stored.
+    sony_queuedcarousel_panel_save($panel);
+  }
+}
+
+/**
+ * Delete a panel.
+ *
+ * @param $panel
+ * A panel object.
+ * @return
+ * ...
+ */
+function sony_queuedcarousel_panel_delete($panel) {
+
+  db_query('DELETE FROM {panels_queuedcarousel} WHERE pid = %d', $panel->pid);
+  return panels_delete_display($panel->did);
+}
+
+/**
+ * Load panel.
+ *
+ * @param $pid
+ * Panel ID.
+ * @return
+ * A loaded panel object. FALSE on failure
+ */
+function sony_queuedcarousel_panel_load($pid) {
+
+  // @todo Investigate using ctools export.
+  $result = db_query('SELECT * FROM {panels_queuedcarousel} WHERE pid = %d', $pid);
+
+  if ($result) {
+    $panel = db_fetch_object($result);
+    $panel->conf = unserialize($panel->conf);
+    $panel->display = panels_load_display($panel->did);
+    return $panel;
+  }
+
+  return FALSE;
+}
+
+/**
+ * Save panel to database.
+ *
+ * @param $panel
+ * A populated panel object.
+ * @return
+ * The saved panel object.
+ */
+function sony_queuedcarousel_panel_save(&$panel) {
+
+  if (!empty($panel->display)) {
+    $display = panels_save_display($panel->display);
+    $panel->did = $display->did;
+  }
+
+  $update = (isset($panel->pid) && $panel->pid != 'new') ? array('pid') : array();
+  drupal_write_record('panels_queuedcarousel', $panel, $update);
+
+  return $panel;
+}
+

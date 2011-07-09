@@ -1,0 +1,218 @@
+/* $Id: advanced_forum.blue_lagoon.style.css,v 1.1.2.10 2009/07/15 02:54:04 michellec Exp $ */
+
+/*
+This file contains colors, graphics, and text effects. For structural markup,
+see advanced_forum-structure.css.
+
+Colors used:
+  #ffffff Text on headers
+  #0062A0 Pager number
+  #91CDF5 Borders & headers
+  #BDE0F5 Container background
+  #5F67A5 Container description
+  #898989 Forum description
+  #E6EDEC Sticky topic
+  #EDF5FA Author pane background
+
+Images used:
+  images/pager-bg.png Pager background gradient.
+*/
+
+/*** PAGER *******************************************************************/
+
+/* This is the pager on the topics in the list */
+#forum .topic-pager {
+  font-size: 90%;
+  font-style: italic;
+}
+
+/* Other pagers in the forum */
+#forum-comments .pager {
+  text-align: right;
+}
+
+#forum-comments .pager li {
+  padding: 0;
+  margin: 0;
+}
+
+
+#forum .pager a:link,
+#forum .pager a:visited,
+#forum-comments .pager a:link,
+#forum-comments .pager a:visited {
+  text-decoration: none;
+  border: 1px solid #91CDF5;
+  background: #ffffff url(images/pager-bg.png) repeat-x left top;
+  font-weight: bold;
+}
+
+#forum .pager-current,
+#forum .pager a:hover,
+#forum-comments .pager-current,
+#forum-comments .pager a:hover {
+  color: #0062A0; 
+}
+
+#forum .pager a.active,
+#forum-comments .pager a.active {
+  background: #fff url(images/pager-bg.png) repeat-x left top;
+  color: #0062A0; 
+}
+
+/*** FORUM & TOPIC LIST ******************************************************/
+
+/* General */
+#forum .forum-table,
+#forum .forum-topics {
+  border: 3px solid #91CDF5;
+}
+
+/* Headers */
+#forum .forum-table th,
+#forum .forum-table th a,
+#forum .forum-topics th,
+#forum .forum-topics th a,
+#forum .forum-topics th a:link,
+#forum .forum-topics th a:hover,
+#forum .forum-topics th a:visited {
+  background-color: #91CDF5;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+#forum .forum-table tbody,
+#forum .forum-topics tbody {
+  border-top: none;
+}
+
+/* Containers & Forums */
+#forum tr.even, 
+#forum tr.odd {
+  background-color: #EDF5FA;
+}
+
+#forum td.topics,
+#forum td.last-reply {
+  background-color: #ffffff;
+}
+
+/* Topic listings */
+#forum tr.sticky {
+  background-color: #E6EDEC;
+}
+
+#forum tr.forum-last-sticky {
+  border-bottom: 10px solid #91CDF5;
+}
+
+#forum .sticky-label {
+  font-weight: bold;
+}
+
+/*** FORUM STATISTICS *******************************************************/
+
+#forum-statistics {
+  border: 1px solid #91CDF5;
+}
+
+#forum-statistics-header {
+  background-color: #91CDF5;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.forum-statistics-sub-header {
+  background-color: #BDE0F5;
+  font-weight: bold;
+}
+
+/*** FORUM TOPICS **********************************************************/
+
+.forum-post {
+  border: 2px solid #91CDF5;
+}
+
+/* Header at the top of each post */
+.post-info {
+  background: #91CDF5 ;
+  color: #ffffff;
+  border-bottom: 1px solid #91CDF5;
+  margin-bottom: 0; /* Reset from Naked's structure*/
+}
+
+.posted-on {
+  font-size: .8em;
+  font-weight: bold;
+}
+
+.forum-post .new {
+  color: #ffffff;
+}
+
+.post-title {
+  font-weight: bold;
+  border-bottom: 1px solid #91CDF5;
+}
+
+.post-num a:link,
+.post-num a:visited,
+.post-num a:active,
+.post-num a:hover {
+  color: #ffffff;
+}
+
+/* Wrap around author pane and comment */
+.forum-post-wrapper {
+  background-color: #edf5fa;
+}
+
+/* Author information pane */
+/* Note: more CSS in the author pane css file */
+.forum-post-panel-sub  .author-pane .author-name {
+  font-size: 120%;
+  font-weight: bold;
+}
+
+.forum-post-panel-sub  .author-pane  .picture img {
+	border: 1px solid #91CDF5;
+	background: #ffffff;
+}
+
+.author-pane .author-pane-label {
+  font-weight: bold;
+}
+
+/* Post text area */
+.forum-post-panel-main {
+  background-color: #fff;
+  border-left: 1px solid #91CDF5;
+}
+
+/* Signature */
+.author-signature {
+  font-size: .8em;
+}
+
+/* Post footer */
+.forum-post-footer {
+  background-color: #fff;
+  border-top: 1px solid #91CDF5;
+}
+
+.forum-post-links {
+  background-color: #fff;
+  border-left: 1px solid #91CDF5;
+}
+
+.top-post-footer {
+  border: 2px solid #91CDF5;
+}
+
+/* Topic navigation */
+.forum-topic-navigation {
+  border: 2px solid #91CDF5;
+}
+
+
+

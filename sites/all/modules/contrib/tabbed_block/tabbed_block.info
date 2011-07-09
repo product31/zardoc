@@ -1,0 +1,5 @@
+; $Id: 
+name = Tabbed Block
+description = Provide tabbing blocks
+version = "6.x-dev"
+core = 6.x

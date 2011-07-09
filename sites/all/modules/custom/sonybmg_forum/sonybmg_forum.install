@@ -1,0 +1,172 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * file_description
+ */
+
+/**
+ * Implementation of hook_install().
+ */
+function sonybmg_forum_install() {
+  // Nodeforum needs to be heavier than taxonomy.
+  db_query("UPDATE {system} SET weight=3 WHERE name='nodeforum'");
+
+  // Enable offensive flagging for forum replies.
+  variable_set('flag_content_node_type_forum_reply', 1);
+
+  // Ensure nodeforum is installed first.
+  if (!module_exists('nodeforum')) {
+    drupal_install_modules(array('nodeforum'));
+  }
+
+  // Setup intial forums.
+  sonybmg_forum_default_forums();
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function sonybmg_forum_uninstall() {
+  // Delete the offensive flag variable.
+  variable_del('flag_content_node_type_forum_reply');
+
+  // Delete the forum vocabulary.
+  $vid = db_result(db_query('SELECT vid FROM {vocabulary} WHERE module = "nodeforum"'));
+  if ($vid) {
+    taxonomy_del_vocabulary($vid);
+  }
+
+  // Note, the menu item is automatically deleted when Node Forum is disabled.
+  // Manually uninstall Node Forum.
+  module_disable(array('nodeforum'));
+  drupal_uninstall_module('nodeforum');
+
+  // Delete forum nodes and replies.
+  $result = db_query("SELECT nid FROM {node} WHERE type IN ('forum_reply', 'forum')");
+  while ($node = db_fetch_object($result)) {
+    node_delete($node->nid);
+  }
+
+  // Delete node types.
+  node_type_delete('forum_reply');
+  node_type_delete('forum');
+}
+
+/**
+ * Implementation of hook_enable().
+ */
+function sonybmg_forum_enable() {
+  // Even though nodeforum is a dependency, manually enable to ensure it is
+  // enabled first, since the installer doesn't use any particular order. 
+  module_enable(array('install_profile_api', 'nodeforum'));
+
+  // Because nodeforum will probably be installed at the same time, we need to
+  // rebuild the menu now to make the "forum" item active, otherwise our custom
+  // link will automatically be deleted because the forum path doesn't exist.
+  menu_rebuild();
+
+  // Create a navigation menu item for the forum.
+  install_include(array('menu'));
+  install_menu_create_menu_item('forum', st('Forums'), '', 'primary-links', 0, 4);
+}
+
+/**
+ * Implementation of hook_disable().
+ */
+function sonybmg_forum_disable() {
+  // Disable the Node Forum module (this removes any menu items to "forum").
+  module_disable(array('nodeforum'));
+}
+
+/**
+ * Implementation of hook_requirements().
+ */
+function sonybmg_forum_requirements($phase) {
+  $requirements = array();
+  $t = get_t();
+
+  if ($phase == 'install') {
+    module_enable(array('install_profile_api'));
+    if (function_exists('install_include') == FALSE) {
+      $requirements['sonybmg_forum_install']['description'] = $t('Sony BMG Forum was not able to initialize it\'s settings because Install Profile API module is not available. Install this module and enable Sony BMG Forum again.');
+      $requirements['sonybmg_forum_install']['severity'] = REQUIREMENT_ERROR;
+    }
+  }
+
+  return $requirements;
+}
+
+function sonybmg_forum_default_forums() {
+  // Rebuild schema to avoid weird missing vocabulary schema bug
+  // if we don't do this taxonomy_save_vocabulary() call in _nodeforum_get_vid()
+  // will cause a fatal error because drupal_write_record changes the $edit
+  // var from an array to an object and then expect it to still be an array.
+  drupal_get_schema('vocabulary', TRUE);
+  $forums = array(
+    array(
+      'name' => 'Official announcements',
+      'description' => 'The latest official updates.',
+    ),
+    array(
+      'name' => 'Band discussion',
+      'weight' => 1,
+    ),
+    array(
+      'name' => 'Off Topic',
+      'description' => 'Off-topic discussions for fans. Introduce yourselves here!',
+      'weight' => 2,
+    ),
+    array(
+      'name' => 'Tour talk',
+      'description' => 'Here\'s where posts about tour dates should be posted.',
+      'parent' => 'Band discussion',
+    ),
+    array(
+      'name' => 'East coast',
+      'parent' => 'Tour talk',
+    ),
+    array(
+      'name' => 'Midwest',
+      'parent' => 'Tour talk',
+    ),
+    array(
+      'name' => 'West coast',
+      'parent' => 'Tour talk',
+    ),
+    array(
+      'name' => 'Europe',
+      'weight' => 1,
+      'parent' => 'Tour talk',
+    ),
+  );
+
+  // This bit is really weird. drupal_execute() cannot be used in batch
+  // operations (it should apparently, but doesn't). So we unset the current
+  // batch and then restore it after the task is done.
+  $previous_batch = batch_get();
+  $batch = &batch_get();
+  $batch = array();
+
+  // Use drupal_execute() to setup each forum.
+  foreach ($forums as $forum) {
+    $values = $forum;
+    if (isset($values['parent'])) {
+      $parent_tid = db_result(db_query("SELECT tid FROM {term_data} WHERE name='%s' AND vid=%d", $values['parent'], _nodeforum_get_vid()));
+      if ($parent_tid) {
+        $values['parent'] = array('0' => $parent_tid);
+      }
+      else {
+        unset($values['parent']);
+      }
+    }
+    $form_state = array(
+      'values' => $values,
+    );
+    drupal_execute('nodeforum_form_nodeforum', $form_state);
+  }
+
+  // Restore the batch state;
+  $batch = $previous_batch;
+}

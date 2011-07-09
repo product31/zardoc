@@ -1,0 +1,93 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * file_description
+ */
+
+/**
+ * Implementation of hook_schema().
+ */
+function broserver_schema() {
+  $schema['broserver'] = array(
+    'description' => 'Table to store BRO instance configurations.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'description' => 'Indentifier for this BRO instance.',
+      ),
+      'description' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Description of the BRO, for admin use only.',
+      ),
+      'domain' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The chat domain',
+      ),
+      'ad1' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Ad code for the smaller ad.',
+      ),
+      'ad2' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Ad code for the larger ad.',
+      ),
+      'media' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Embed code for the media widget.',
+      ),
+      'countdown' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Timestamp for the event to countdown to.',
+      ),
+      'artist_logo_fid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'File ID for the artist logo.',
+      ),
+      'auth' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Boolean to signal whether or not to user authenticated chat.',
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+  return $schema;
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function broserver_install() {
+  drupal_install_schema('broserver');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function broserver_uninstall() {
+  drupal_uninstall_schema('broserver');
+}

@@ -1,0 +1,7 @@
+<?php
+// $Id: drush_mm.module,v 1.7 2009/03/22 17:26:40 clemenstolboom Exp $
+
+/**
+ * @file
+ *   The drush Module Manager
+ */

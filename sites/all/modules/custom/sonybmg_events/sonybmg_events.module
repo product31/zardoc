@@ -1,0 +1,231 @@
+<?php
+//$Id$
+
+include_once('sonybmg_events.features.inc');
+
+/**
+ * Implementation of hook_menu()
+ */
+function sonybmg_events_menu() {
+  $items = array();
+
+  $items['node/%node/attendees'] = array(
+    'title callback' => 'sonybmg_events_attendee_page_title_callback',
+    'title arguments' => array(1),
+    'page callback' => 'sonybmg_events_attendees_page',
+    'page arguments' => array('sonybmg_events_attendees_load',1),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_init().
+ */
+function sonybmg_events_init() {
+  module_load_include('inc', 'sonybmg_events', 'sonybmg_events.crud');
+}
+
+/**
+ * Menu title callback
+ */
+function sonybmg_events_attendee_page_title_callback($node) {
+  return t('@title Attendees', array('@title' => $node->title));
+}
+
+
+/**
+ * Implementation of hook_sony_metatags_alter().
+ */
+function sonybmg_events_sony_metatags_alter(&$meta_tags, $object_type = NULL, $object = NULL) {
+  if ($object_type == 'node' && $object->type == 'date') {
+    $meta_tags['og:type'] = array('property' => 'og:type', 'content' => 'activity');
+    $meta_tags['og:title'] = array('property' => 'og:title', 'content' => check_plain($object->title));
+    $meta_tags['og:url'] = array('property' => 'og:url', 'content' => url('node/'. $object->nid, array('absolute' => TRUE)));
+    $meta_tags['og:description'] = array('property' => 'og:description', 'content' => check_plain($object->field_venue[0]['value']) . ', ' . check_plain($object->field_location[0]['value']));
+  }
+}
+
+/**
+ * Menu callback for node/%/attendees.
+ */
+function sonybmg_events_attendees_page($loader = NULL, $node = NULL) {
+  $return = '';
+  if (!is_null($node) && !is_null($loader)) {
+    $attendees = $loader($node);
+    
+    foreach ($attendees as $idx => $attendee) {
+      $user = user_load($attendee);
+      $return .= theme('sonybmg_events_attendee_user_display', $user);
+    }
+    
+    $return = theme('sonybmg_events_attendee_users_wrapper', $return);
+  }
+  
+ return $return;
+}
+
+
+/**
+* Implementation of hook_block().
+*/
+function sonybmg_events_block($op = 'list', $delta = 0) {
+  // listing of blocks, such as on the admin/block page
+  if ($op == "list") {
+     $block[0]["info"] = t('Event Attendees');
+      return $block;
+  }// end - if $op is list
+  else if ($op == 'view' && user_access('access content')) {
+    $block_content = '';
+    switch ($delta) {
+      case 0 : // Event Attendees
+        if (arg(0) == 'node' && is_numeric(arg(1))) {
+          $node = node_load(arg(1));
+          if ($node->type === 'date') {
+            $block_content = sonybmg_events_attendees_block($node);
+            $block['subject'] = t("Attendees");
+            $block['content'] = $block_content;
+            $block['cache'] = BLOCK_CACHE_PER_PAGE;
+          }
+        }
+        break;
+
+    }// end - switch
+    
+    if ($block_content === '') {
+      return;
+    }
+    return $block;
+  }
+} 
+
+
+/**
+ * Block delta 0 callback.
+ */
+function sonybmg_events_attendees_block($node = NULL) {
+  $return = '';
+  if (!is_null($node)) {
+    $attendees = sonybmg_events_attendees_load($node);
+    
+    foreach ($attendees as $idx => $attendee) {
+      $user = user_load($attendee);
+      $return .= theme('sonybmg_events_attendee_user_display_block', $user);
+    }// end - foreach
+    
+    $return = theme('sonybmg_events_attendee_users_wrapper_block', $return);
+  }// end if node
+  
+ return $return;
+}
+
+
+/**
+ * Implementation of hook_nodeapi().
+ */
+function sonybmg_events_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  switch ($op) {
+    case 'load':
+      // Add the number of attendees to the node object
+      if ($node->type == 'date') {
+        module_load_include('inc', 'sonybmg_events', 'sonybmg_events.crud');
+        $node->attendee_count = sonybmg_events_attendees_count($node->nid);
+      }
+      break;
+    case 'view':
+      // replacement for custom_breadcrumbs
+      if($a4 && ($node->type == 'date')) { // $a4 is $page for the view operation
+        $breadcrumb = array();
+        $breadcrumb[] = l(t('Home'), NULL);
+        $breadcrumb[] = l(t('Events'), 'events');
+        drupal_set_breadcrumb($breadcrumb);
+        
+        /*
+        $pager_location = variable_get('sonybmg_photo_gallery_pager_location', 'top');
+        if($pager_location != 'none') {
+          $node->content['photos_pager'] = array(
+            '#value' => sonybmg_photo_gallery_pager($node->nid, variable_get('sonybmg_photo_gallery_pager_count', 5)),
+            '#weight' => ($pager_location == 'top' ? -10 : 10),
+          );
+        }
+        */
+      }
+    break;
+  }
+}
+
+
+/**
+ * Implementation of hook_link().
+ */
+function sonybmg_events_link($type, $object = NULL, $teaser = FALSE) {
+  $links = array();
+  if ($type == 'node' && $object->type == 'date' && $teaser) {
+    $links['events_attendees'] = array(
+      'title' => t('!count Attendees', array('!count' => $object->attendee_count)),
+      'href' => "node/$object->nid/attendees",
+    );
+  }
+  return $links;
+}
+
+/**
+ * Implementation of hook_link_alter().
+ */
+function sonybmg_events_link_alter(&$links, $node) {
+  if ($node->type == 'date') {
+    // Move the comment link to the end, hide altogether if date has not yet occurred
+    if (isset($links['comment_add'])) {
+      $comment_link = $links['comment_add'];
+      //unset($links['comment_add']);
+      /*
+      if ($node->field_date[0]['value'] < time()) {
+        $links['comment_add'] = $comment_link;
+      }
+      */
+    }
+    // Move the Add me link to the end, hide altogether if after the date
+    /*
+    $vbid = variable_get('events_signup_views_bookmark', 2);
+    if (isset($links["links_bookmark_$vbid"])) {
+      $comment_link = $links["links_bookmark_$vbid"];
+      unset($links["links_bookmark_$vbid"]);
+      if ($node->field_date[0]['value'] > time()) {
+        $links["links_bookmark_$vbid"] = $comment_link;
+      }
+    }
+    */
+  }
+}
+
+
+/**
+ * Implementation of hook_theme().
+ */
+function sonybmg_events_theme($existing, $type, $theme, $path) {
+  return array(
+    'sonybmg_events_attendee_user_display' => array(
+      'file'      => 'sonybmg_events.theme.inc',
+      'arguments' => array('user' => NULL)
+    ),
+    'sonybmg_events_attendee_users_wrapper' => array(
+      'file'      => 'sonybmg_events.theme.inc',
+      'arguments' => array('html' => '')
+    ),
+    'sonybmg_events_attendee_user_display_block' => array(
+      'file'      => 'sonybmg_events.theme.inc',
+      'arguments' => array('user' => NULL)
+    ),
+    'sonybmg_events_attendee_users_wrapper_block' => array(
+      'file'      => 'sonybmg_events.theme.inc',
+      'arguments' => array('html' => '')
+    ),
+    'sonybmg_events_signup' => array(
+      'file'      => 'sonybmg_events.theme.inc',
+      'arguments' => array('nid' => NULL)
+    ),
+  );
+}
+

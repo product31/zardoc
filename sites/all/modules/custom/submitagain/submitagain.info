@@ -1,0 +1,9 @@
+; $Id$
+name = Submit Again
+description = "Adds an extra button to selected node types 'Submit and make another'"
+core = 6.x
+
+l10n server = translate.gdb-dev.com
+project = "sony_video"
+version = "6.x-2.x"
+

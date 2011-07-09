@@ -1,0 +1,195 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * file_description
+ */
+
+function sony_global_enable() {
+  module_load_include('inc', 'sony_global', 'sony_global.languages');
+  sony_global_update_languages();
+
+  module_load_include('inc', 'sony_global', 'sony_global.admin');
+  _sony_global_admin_reset_to_defaults();
+
+}
+
+function sony_global_install() {
+  // just some pseudo code for setting up our global stuff
+  // - add translator role
+  // - set node type settings for specified types
+  //   - Multilingual support: Enabled, with translation
+  //   - Extended language support: Extended
+  // - set up standard languages
+
+  sony_global_configure_translator_role();
+
+  sony_global_configure_geoip_language();
+}
+
+function sony_global_configure_translator_role() {
+  include_once(drupal_get_path('module', 'install_profile_api') .'/core/user.inc');
+
+  $rid = install_add_role('translator');
+
+  $perms = array(
+    // admin_theme module
+    'access admin theme',
+
+    // locale module
+    'translate interface',
+
+    // node module (node type permissions added below
+    'access content',
+
+    // search module
+    'search content',
+    'use advanced search',
+
+    // simplemenu module
+    'view simplemenu',
+
+    // sonybmg module
+    'sonybmg raised memory limit',
+
+    // system module
+    'access administration pages',
+
+    // translation module
+    'translate content',
+
+    // nodeforum module
+    'create forum topics',
+    'edit own forum topics',
+
+    // upload module
+    'upload files',
+    'view uploaded files',
+  );
+
+  foreach (node_get_types() as $type) {
+    $name = check_plain($type->type);
+    $perms[] = 'create '. $name .' content';
+    $perms[] = 'delete own '. $name .' content';
+    $perms[] = 'edit own '. $name .' content';
+    // no delete any *, or edit any * perms for this user
+  }
+
+  install_add_permissions($rid, $perms);
+}
+
+function sony_global_update_6001() {
+  $ret = array();
+
+  // make sure geoip_language is installed
+  if (!module_exists('geoip_language')) {
+    drupal_install_modules(array('geoip_language'));
+    $ret[] = array('success' => TRUE, 'query' => t('Installed GeoIP Language module'));
+  }
+
+  $ret = array_merge($ret, sony_global_configure_geoip_language());
+
+  return $ret;
+}
+
+/**
+ * Helper function to configure GeoIP Language settings and mappings.
+ * @return
+ *   Array suitable for use as a return value for hook_update_N().
+ */
+function sony_global_configure_geoip_language() {
+  $ret = array();
+
+  // set the language negotiation to use GeoIP Language
+  variable_set('language_negotiation', GEOIP_LANGUAGE_NEGOTIATION_PATH);
+
+  // install geoip-language mappings for existing languages
+  $installed_languages = language_list();
+  module_load_include('inc', 'sony_global', 'sony_global.languages');
+  $mappings = geoip_language_mappings();
+  foreach ($installed_languages as $language) {
+    $custom_language = sony_global_known_languages($language->language);
+    if (isset($custom_language['geoip'])) {
+      foreach ($custom_language['geoip'] as $country) {
+        if (!isset($mappings[$country])) {
+          geoip_language_mapping_create($country, $language->language);
+          $ret[] = array('success' => TRUE, 'query' => t('Installed GeoIP Language mapping for %country -> %langcode', array('%country' => $country, '%langcode' => $language->language)));
+        }
+      }
+    }
+  }
+
+  return $ret;
+}
+
+/**
+ * Implementation of hook_update_N().
+ * nl-DK should really be da-DK.
+ */
+function sony_global_update_6002() {
+  $ret = array();
+
+  $languages = language_list('language', TRUE);
+
+  // Do nothing if nl-DK was never configured.
+  if (!isset($languages['nl-DK'])) {
+    return $ret;
+  }
+
+  $ret[] = update_sql("UPDATE {languages} SET language = 'da-DK' WHERE language = 'nl-DK'");
+  $ret[] = update_sql("UPDATE {url_alias} SET language = 'da-DK' WHERE language = 'nl-DK'");
+  //$ret[] = update_sql("UPDATE {term_data} SET language = 'da-DK' WHERE language = 'nl-DK'");
+  $ret[] = update_sql("UPDATE {node} SET language = 'da-DK' WHERE language = 'nl-DK'");
+  $ret[] = update_sql("UPDATE {locales_target} SET language = 'da-DK' WHERE language = 'nl-DK'");
+  $ret[] = update_sql("UPDATE {i18n_variable} SET language = 'da-DK' WHERE language = 'nl-DK'");
+  $ret[] = update_sql("UPDATE {i18n_blocks} SET language = 'da-DK' WHERE language = 'nl-DK'");
+  $ret[] = update_sql("UPDATE {i18n_access} SET perm = REPLACE(perm, 'nl-DK', 'da-DK') WHERE perm LIKE '%nl-DK%'");
+  $ret[] = update_sql("UPDATE {geoip_language} SET language = 'da-DK' WHERE language = 'nl-DK'");
+  $ret[] = update_sql("UPDATE {date_format_locale} SET language = 'da-DK' WHERE language = 'nl-DK'");
+  $ret[] = update_sql("UPDATE {menu_links} SET options = REPLACE(options, 'nl-DK', 'da-DK') WHERE options LIKE '%nl-DK'");
+
+  // Import correct translations.
+  include_once 'includes/locale.inc';
+  $file = new stdClass();
+  $file->filepath = drupal_get_path('module', 'sony_global') .'/translations/core.da.po';
+  _locale_import_read_po('db-store', $file, LOCALE_IMPORT_OVERWRITE, 'da-DK', 'default');
+
+  // Clear locale cache.
+  locale_inc_callback('_locale_invalidate_js');
+  cache_clear_all('locale:', 'cache', TRUE);
+
+  return $ret;
+}
+
+/**
+ * German (de-CH) is now the primary language for Switzerland rather than
+ * English (en-CH). GeoIP for CH now goes to de-CH, and de-CH gets the shortened
+ * ch prefix.  en-CH now gets the longer ch-en prefix.
+ */
+function sony_global_update_6003() {
+  $ret = array();
+
+  // Change prefix for en-CH from ch -> ch-en
+  $ret[] = update_sql('UPDATE {languages} SET prefix = "ch-en" WHERE language = "en-CH"');
+  // Change prefix for de-CH from ch-de -> ch
+  $ret[] = update_sql('UPDATE {languages} SET prefix = "ch" WHERE language = "de-CH"');
+
+  // Now add the CH geoip mapping for de-CH
+  $mappings = geoip_language_mappings();
+  if (!isset($mappings['CH'])) {
+    geoip_language_mapping_create('CH', 'de-CH');
+    $ret[] = array(
+      'success' => TRUE,
+      'query' => t('Installed GeoIP Language mapping for %country -> %langcode', array('%country' => 'CH', '%langcode' => 'de-CH')),
+    );
+  }
+  else {
+    $ret[] = array(
+      'success' => FALSE,
+      'query' => t('Could not install GeoIP Language mapping for Switzerland because one is already defined.'),
+    );
+  }
+
+  return $ret;
+}

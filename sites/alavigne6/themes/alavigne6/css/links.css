@@ -1,0 +1,113 @@
+/* Dropdown links list
+========================================*/
+.links-dropdown-list {
+  position: relative;
+}
+
+.links-dropdown-list h3 {
+  cursor: pointer;
+  padding-left: 14px;
+  font-weight: bold;
+}
+
+.view-alavigne6-music .view-content .links-dropdown-list h3 {
+  padding-left: 19px;
+}
+
+.links-dropdown-list ul,
+.links-dropdown-list ul li {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.links-dropdown-list ul {
+  margin: 0;
+  padding: 0;
+  max-height: 240px;
+  overflow: auto;
+}
+.js .links-dropdown-list ul {
+  background: #c9bda4;
+  display: none;
+  position: absolute;
+  left: 0;
+  padding: 5px;
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: bold;
+  z-index: 7; 
+  top: 30px;;
+  padding: 3px 0;
+  text-align: left;
+
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
+  border-radius: 2px;
+}
+
+.js #sidebar-right .links-dropdown-list ul { 
+  /*left:-55px;*/
+}
+
+.js #footer-right .links-dropdown-list ul {
+  background:#CAC7B7;
+}
+
+.links-dropdown-list ul li {
+  list-style: none;
+  padding: 0 4px;
+  white-space: nowrap;
+  line-height: 18px;
+}
+
+.links-dropdown-list ul li a {
+  display: block;
+}
+
+.js .links-dropdown-list ul li span,
+#container .m2-product-button a {
+  font-weight: bold;
+  padding: 0 3px;
+}
+
+.m2-js-mini-cart a.m2-checkout:link,
+#container .m2-product-button-wrapper a.m2-add,
+#container .links-dropdown-list ul li span.m2-product-button a,
+.m2-product-button-wrapper a.m2-add,
+.links-dropdown-list ul li span.m2-product-button a {
+  margin-right: 0;
+  display: inline;
+  text-decoration: none;
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
+  border-radius: 2px;
+  background: #5b6043;
+  padding: 3px 5px;
+  color:black;
+  float:none;
+}
+
+.m2-js-mini-cart a.m2-checkout:hover,
+#container .m2-product-button-wrapper a.m2-add:hover,
+#container .links-dropdown-list ul li span.m2-product-button a:hover,
+.m2-product-button-wrapper a.m2-add:hover,
+.links-dropdown-list ul li span.m2-product-button a:hover {
+  background: #000000;
+  color:#C9BDA4;
+}
+
+
+#container #tracks .m2-product-button-wrapper a.m2-add:hover {
+  background: #C9BDA4;
+  color:#000000;
+}
+
+
+
+
+#container .m2-product-button-wrapper a.m2-add {
+  font-weight: bold;
+  color: #000;
+  text-transform: uppercase;
+}

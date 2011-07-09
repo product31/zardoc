@@ -1,0 +1,13 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Test suite for the sony_global module
+ *
+ * TODO: The following situations should be tested:
+ * - IP detection for a non-enabled language should not redirect to that country
+ *
+ */
+
+

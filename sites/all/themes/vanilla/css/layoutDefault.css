@@ -1,0 +1,271 @@
+/*[fmt]1A40-2A0B-3*/
+/*
+/ use this sheet to alter the layout of the major blocks
+*/
+html {
+}
+
+/*
+// set all the major areas to have an explicit default value
+// this allows us to position EVERYTHING in the page absolutely relative to each other!
+*/
+body, #page, #page-inner, #ad-top, #header-wrapper, #header, #left-header, #right-header, #flash-header, #navigation, #breadcrumb, #trb, #search-box, #login-bar, #container-wrapper, #container, #sidebar-left, #sidebar-right, #main, #squeeze, #footer-wrapper, #footer, #left-footer, #right-footer, #ad-bottom, #sony-bar {
+    display:  block;
+    position:  relative;
+    height:  auto;
+    width:  auto;
+    margin:  0;
+    padding:  0;
+}
+
+/*now that we have a good idea that everything is relative, we can override*/
+body {
+/*this center's everything on the page ... no margin's needed!*/
+    text-align:  center;
+}
+
+body.simplemenu-enabled {
+    top:  -20px;
+}
+
+#page {
+/*set width to auto to make it a flexible layout
+this top value compensates for the myplay player*/
+    top:  50px;
+    width:  950px;
+/*this bottom margin value compensates for the myplay player*/
+    margin:  0 auto 50px;
+}
+
+#page-inner {
+    padding-left:  10px;
+    padding-right:  10px;
+}
+
+#ad-top {
+}
+
+#header-wrapper {
+}
+
+#header {
+}
+
+#navigation-wrapper {
+}
+
+#navigation {
+    padding:  15px 0;
+}
+
+#breadcrumb {
+}
+
+/*
+/ use to adjust primary links :center, right or left
+*/
+#primary ul {
+    position:  static;
+/*change this value below*/
+    text-align:  center;
+}
+
+#primary li {
+    display:  inline;
+    font-size:  100%;
+/*adjust the value below to spread it out*/
+    margin-right:  10px;
+    float:  none;
+}
+
+#primary a {
+    display:  inline;
+    float:  none;
+}
+
+#trb {
+}
+
+#search-box {
+    float:  right;
+}
+
+#login-bar {
+}
+
+#container-wrapper {
+}
+
+#container {
+}
+
+/*
+// side bar layouts
+*/
+#sidebar-left {
+}
+
+#sidebar-right {
+}
+
+#left-header, #sidebar-left, #left-footer {
+    float:  left;
+/*width:30%;*/
+    width:  300px;
+}
+
+#right-header, #sidebar-right, #right-footer {
+    float:  right;
+/*width:30%;*/
+    width:  300px;
+}
+
+/*
+// node content
+// main is the "wrapper" for squeeze; which holds all the node content
+*/
+#main {
+    width:  100%;
+    margin-bottom:  10px;
+}
+
+#squeeze {
+    width:  100%;
+    padding-bottom:  20px;
+}
+
+/*
+// footer layouts
+*/
+#footer-wrapper {
+}
+
+#footer {
+}
+
+#ad-bottom {
+}
+
+#sony-bar {
+/*snaps the sony-bar to the top of the page*/
+    position:  absolute;
+    width:  100%;
+}
+
+/*
+// panels layout : homepage
+*/
+.panel-pane-content {
+    position:  static;
+}
+
+/*the first row, where Flash and the ad lives*/
+#homepage div.panel-row-1 div.panel-col-1, div.panel-row-1 div.panel-col-1 {
+    display:  block;
+    position:  relative;
+    height:  225px;
+    width:  550px;
+    float:  left;
+    top:  0;
+    left:  0px;
+}
+
+/*this is the side bar ad*/
+#homepage div.panel-row-1 div.panel-col-2, div.panel-row-1 div.panel-col-2 {
+    display:  block;
+    position:  relative;
+    float:  right;
+    height:  280px;
+    top:  10px;
+    right:  20px;
+}
+
+/*the second row, there the content lives*/
+#homepage div.panel-row-2 {
+}
+
+#homepage div.panel-row-2 .panel-col-1 {
+    display:  block;
+    position:  relative;
+    float:  left;
+    top:  20px;
+    width:  320px !important;
+}
+
+#homepage div.panel-row-2 div.panel-col-2 {
+    display:  block;
+    position:  relative;
+    float:  right;
+    top:  20px;
+    width:  580px;
+}
+
+/*for admin*/
+body.section-admin div.panel-flexible div.panel-row-1 div.panel-col-1 {
+    width:  550px !important;
+    height:  auto !important;
+}
+
+body.section-admin div.panel-flexible div.panel-row-1 div.panel-col-2 {
+    top:  0 !important;
+    height:  auto !important;
+}
+
+body.section-admin div.panel-flexible div.panel-row-2 div.panel-col-1, body.section-admin div.panel-flexible div.panel-row-2 div.panel-col-2 {
+    width:  450px !important;
+    height:  auto !important;
+}
+
+/*----------------------------------------------------------------------------*/
+body.sidebar-right #main {
+    width:  629px;
+}
+
+div.content {
+    margin-top:  10px;
+    margin-bottom:  30px;
+}
+
+#flash-header, body.section-admin #main {
+    margin:  0 auto;
+    width:  60%;
+}
+
+/*
+/ adjustments to style.css
+*/
+#ad-bottom .block-sonybmg_discography {
+    width:  auto;
+}
+
+/*element fixes*/
+.view-front-photos .item-list ul li {
+    list-style-type:  none;
+    float:  left;
+}
+
+.view-footer {
+    clear:  both;
+    text-align:  right;
+}
+
+table {
+    width:  100%;
+}
+
+/*questions*/
+a.gallery-thumb {
+    background-color:  #AAAAAA;
+    float:  left;
+    width:  40px;
+    height:  40px;
+}
+
+a.gallery-thumb img {
+    border:  none;
+}
+
+#homeflash {
+    background-color:  #FF66FF;
+}
+

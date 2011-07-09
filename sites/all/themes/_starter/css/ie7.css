@@ -1,0 +1,9 @@
+/* service links fixes */
+
+div.service_links ul {
+  width: 300px;
+}
+
+div.service_links ul li {
+  width: 100px;
+}

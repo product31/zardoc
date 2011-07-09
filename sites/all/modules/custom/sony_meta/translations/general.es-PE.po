@@ -1,0 +1,21 @@
+# Peru translation of sony_meta (all releases)
+# Copyright (c) 2010 by the Peru translation team
+# Generated from files:
+#  sony_meta/sony_meta.admin.inc: n/a
+#  sony_meta/sony_meta.pages.inc: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sony_meta (all releases)\n"
+"POT-Creation-Date: 2010-04-12 13:06-0500\n"
+"PO-Revision-Date: 2010-03-30 13:37-0500\n"
+"Language-Team: Peru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: sony_meta.admin.inc:16,19,30; sony_meta.pages.inc:96
+msgid "Delete"
+msgstr "Eliminar"
+

@@ -1,0 +1,28 @@
+<?php
+// $Id: ut_userpoints.module,v 1.1.2.1 2010/02/02 11:20:15 agileware Exp $
+
+/**
+ * @file
+ * Allows user titles to be based on a users userpoints.
+ */
+
+/**
+ * Implementation of hook_user_titles().
+ */
+function ut_userpoints_user_titles($op, $uid = NULL) {
+  switch ($op) {
+    case 'register':
+      return 'ut_userpoints';
+    case 'name':
+      return t('User points');
+    case 'description':
+      return t('Different points values are assigned to user actions');
+    case 'units':
+      return t('Points');
+    case 'url':
+      return 'admin/help/userpoints';
+    case 'get':
+      return userpoints_get_current_points($uid);
+  }
+}
+

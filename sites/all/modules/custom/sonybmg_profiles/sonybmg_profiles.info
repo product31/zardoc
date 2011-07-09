@@ -1,0 +1,21 @@
+; $Id$
+name = Sony BMG User Profiles
+description = User profile stuff.
+dependencies[] = friendlist_ui
+dependencies[] = friendlist_api
+dependencies[] = friendlist_views
+dependencies[] = profile
+dependencies[] = profile_privacy
+dependencies[] = views
+dependencies[] = path
+dependencies[] = token
+dependencies[] = pathauto
+dependencies[] = menu
+dependencies[] = imageapi
+dependencies[] = imagecache
+package = Sony BMG
+core = 6.x
+
+l10n server = translate.gdb-dev.com
+project = "sonybmg_profiles"
+version = "6.x-2.x"

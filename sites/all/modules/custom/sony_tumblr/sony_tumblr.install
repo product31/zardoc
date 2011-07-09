@@ -1,0 +1,78 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * file_description
+ */
+
+/**
+ * Implementation of hook_install().
+ */
+function sony_tumblr_install() {
+  _sony_tumblr_create_node_type();
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function sony_tumblr_uninstall() {
+}
+
+function _sony_tumblr_create_node_type() {
+  // Create an additional node type.
+  $feed_node_type = array(
+    'type' => 'tumblr_feed',
+    'name' => t('Tumblr Feed'),
+    'module' => 'node',
+    'description' => t('Items from these Tumblr feeds will be turned into nodes.'),
+    'custom' => TRUE,
+    'modified' => TRUE,
+    'locked' => TRUE,
+  );
+
+  $feed_node_type = (object)_node_type_set_defaults($feed_node_type);
+  node_type_save($feed_node_type);
+  // Default to not promoted.
+  variable_set('node_options_tumblr_feed', array('status'));
+
+  // Add FeedAPI settings.
+  $settings = array(
+    'enabled' => 1,
+    'refresh_on_create' => 0,
+    'update_existing' => 1,
+    'skip' => 0,
+    'items_delete' => 0,
+    'parsers' => array(
+      'tumblr' => array(
+        'enabled' => 1,
+        'weight' => 0,
+        'private' => 0,
+        'email' => '',
+        'password' => '',
+      ),
+      'parser_common_syndication' => array(
+        'enabled' => 0,
+        'weight' => 0,
+      ),
+    ),
+    'processors' => array(
+      'feedapi_node' => array(
+        'enabled' => 1,
+        'weight' => 0,
+        'content_type' => 'blog',
+        'input_format' => '4',
+        'node_date' => 'feed',
+        'promote' => 0,
+        'x_dedupe' => 0,
+      ),
+      'feedapi_inherit' => array(
+        'enabled' => 0,
+      ),
+    ),
+  );
+  variable_set('feedapi_settings_tumblr_feed', $settings);
+
+  // Allow all tags coming in. Filtering will be handled on output.
+  variable_set('feedapi_allow_html_all', 1);
+}

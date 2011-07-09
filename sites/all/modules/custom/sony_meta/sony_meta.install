@@ -1,0 +1,159 @@
+<?php
+
+/**
+ * Install the initial schema.
+ */
+
+/**
+* Implementation of hook_install().
+*/
+function sony_meta_install() {
+  // Create tables.
+  drupal_install_schema('sony_meta');
+  $modules = array('system');
+  install_include($modules);
+  sony_meta_set_permissions();
+}
+
+/**
+ * Implementation of hook_enable()
+ */
+function sony_meta_enable() {
+  $modules = array('system');
+  install_include($modules);
+  _block_rehash();
+  install_set_block('sony_meta', 1, variable_get('theme_default', '_starter'), 'footer', 0);
+}
+
+/**
+* Implementation of hook_uninstall().
+*/
+function sony_meta_uninstall() {
+  // Drop my tables.
+  drupal_uninstall_schema('sony_meta');
+}
+
+/**
+* Implementation of hook_schema().
+*/
+function sony_meta_schema() {
+  $schema['sony_meta'] = array(
+  'description' => t('Stores Meta Tag content and customized html title'),
+  'fields' => array(
+      'mid' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+        'description' => t('Meta ID'),
+      ),
+      'pid' => array(
+        'type' => 'int',
+        'not null' => FALSE,
+        'default' => NULL,
+        'unsigned' => TRUE,
+        'description' => t('Path ID in url_alias table'),
+      ),
+      'keywords' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'default' => '',
+        'description' => t('Meta keywords'),
+      ),
+      'description' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'default' => '',
+        'description' => t('Meta description'),
+      ),
+      'path' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'default' => '',
+        'description' => t('Path for Meta Information'),
+      ),
+      'language' => array(
+        'type' => 'varchar',
+        'length' => 10,
+        'not null' => FALSE,
+        'default' => '',
+        'description' => t('Language for Meta Information'),
+      ),
+      'title' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => FALSE,
+        'default' => '',
+        'description' => t('Custom HTML title'),
+      ),
+      'ogtoggle' => array(
+        'type' => 'int',
+        'not null' => FALSE,
+        'default' => NULL,
+        'unsigned' => TRUE,
+        'description' => t('ogtoggle checkbox boolean value'),
+      ),
+      'ogimage' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'default' => '',
+        'description' => t('Facebook image'),
+      ),
+      'ogtitle' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+        'default' => '',
+        'description' => t('Facebook title'),
+      ),
+      'ogdescription' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+        'default' => '',
+        'description' => t('Facebook description'),
+      ),
+    ),
+    'primary key' => array('mid'),
+  );
+
+  return $schema;
+}
+
+function sony_meta_update_6100() {
+  $ret = array();
+  db_change_field($ret, 'sony_meta', 'keywords', 'keywords', array('type' => 'text', 'not null' => FALSE));
+  db_change_field($ret, 'sony_meta', 'description', 'description', array('type' => 'text', 'not null' => FALSE));
+  db_change_field($ret, 'sony_meta', 'path', 'path', array('type' => 'varchar', 'length' => 255, 'not null' => TRUE));
+  return $ret;
+}
+
+/**
+ * Set default permissions.
+ */
+function sony_meta_set_permissions() {
+  $admin_rid = variable_get('multisite_administrator_rid', FALSE);
+  $moderator_rid = variable_get('multisite_moderator_rid', FALSE);
+  $artist_rid = variable_get('multisite_artist_rid', FALSE);
+  $permissions = array(
+    'add meta',
+  );
+  if ($admin_rid) { install_add_permissions($admin_rid, $permissions); }
+  else { drupal_set_message(t('Could not enable admin permissions for Sony Meta. Please set permissions manually')); }
+  if ($moderator_rid) { install_add_permissions($moderator_rid, $permissions); }
+  else { drupal_set_message(t('Could not enable moderator permissions for Sony Meta. Please set permissions manually')); }
+  if ($artist_rid) { install_add_permissions($artist_rid, $permissions); }
+  else { drupal_set_message(t('Could not enable artist permissions for Sony Meta. Please set permissions manually')); }
+}
+
+/**
+ * Create sony_header_item displayitem schema.
+ * Indicates whether or not an item should be displayed.
+ */
+function sony_meta_update_6101() {
+  $ret = array();
+  db_add_field($ret, 'sony_meta', 'ogtoggle', array('type' => 'int', 'not null' => FALSE, 'default' => NULL, 'unsigned' => TRUE, 'description' => t('Path ID in url_alias table')));
+  db_add_field($ret, 'sony_meta', 'ogimage', array('type' => 'varchar', 'length' => 255, 'not null' => TRUE));
+  db_add_field($ret, 'sony_meta', 'ogdescription', array('type' => 'text', 'description' => 'Facebook Description.', 'not null' => TRUE, 'default' => ''));
+  db_add_field($ret, 'sony_meta', 'ogtitle', array('type' => 'text', 'description' => 'Facebook Title.', 'not null' => TRUE, 'default' => ''));
+  return $ret;
+}

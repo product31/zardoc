@@ -1,0 +1,7 @@
+; $Id: eparser_brightcove.info,v 1.1 2009/09/01 18:10:26 andrewlevine Exp $
+name = Brightcove Eparser
+description = Standard Video features for Artist sites
+package = FeedAPI Add On
+core = 6.x
+dependencies[] = feedapi_eparser
+dependencies[] = media_brightcove

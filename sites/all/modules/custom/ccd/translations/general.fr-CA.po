@@ -1,0 +1,27 @@
+# Canada (French) translation of ccd (all releases)
+# Copyright (c) 2010 by the Canada (French) translation team
+# Generated from files:
+#  ccd/ccd.admin.inc: n/a
+#  ccd/ccd.pages.inc: n/a
+#  ccd/ccd.module: n/a
+#  ccd/ccd.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ccd (all releases)\n"
+"POT-Creation-Date: 2010-04-05 14:28-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Canada (French)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n>1);\n"
+
+#: ccd.admin.inc:81; ccd.pages.inc:75
+msgid "Unauthorized redemption"
+msgstr ""
+
+#: ccd.module:61,144,149,168; ccd.info:0
+msgid "ConnectedCD"
+msgstr ""
+

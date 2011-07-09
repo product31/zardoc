@@ -1,0 +1,4 @@
+; $Id: switchtheme.info,v 1.4 2007/07/05 20:00:21 karens Exp $
+name = Switchtheme
+description = Adds a block to allow users to switch between enabled themes.
+core = 6.x

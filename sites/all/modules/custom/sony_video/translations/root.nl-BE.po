@@ -1,0 +1,62 @@
+# Belgium translation of sony_video (all releases)
+# Copyright (c) 2010 by the Belgium translation team
+# Generated from files:
+#  sony_video/sony_video.info: n/a
+#  sony_video/sony_video.pages.inc: n/a
+#  sony_video/sony_video.module: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sony_video (all releases)\n"
+"POT-Creation-Date: 2010-04-05 13:08-0500\n"
+"PO-Revision-Date: 2010-03-30 09:48-0500\n"
+"Language-Team: Belgium\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: sony_video.info:0
+msgid "Sony BMG"
+msgstr ""
+
+#: sony_video.pages.inc:38
+msgid "Save"
+msgstr "Bewaren"
+
+#: sony_video.pages.inc:8
+msgid "Brightcove3 Playlist ID"
+msgstr ""
+
+#: sony_video.pages.inc:9
+msgid "The Playlist ID that you want to use to import videos to this site."
+msgstr ""
+
+#: sony_video.pages.inc:19
+msgid "Video import feed: !link"
+msgstr ""
+
+#: sony_video.pages.inc:22
+msgid "Update video import feed"
+msgstr ""
+
+#: sony_video.pages.inc:22
+msgid "Create video import feed"
+msgstr ""
+
+#: sony_video.pages.inc:80
+msgid "Video import feed created."
+msgstr ""
+
+#: sony_video.module:18
+msgid "Setup Video Import"
+msgstr ""
+
+#: sony_video.info:0
+msgid "Sony Video Functionality"
+msgstr ""
+
+#: sony_video.info:0
+msgid "Standard Video features for Artist sites"
+msgstr ""
+

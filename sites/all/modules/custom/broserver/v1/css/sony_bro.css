@@ -1,0 +1,270 @@
+#bro-overlay {
+  height: 100%;
+  width: 100%;
+  position: fixed;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+  background: #000;
+  z-index: 999;
+}
+* html #bro-overlay {
+  position: absolute;
+  bottom: auto;
+  right: auto;
+  height: expression((document.documentElement.clientHeight || document.body.clientHeight) + 'px');
+  top: expression((void(___=document.documentElement.scrollTop+document.documentElement.clientHeight) || 0) +(document.documentElement.scrollTop || document.body.scrollTop) + 'px');
+  width: expression((document.documentElement && document.documentElement.clientWidth || document.body && document.body.clientWidth) + 'px');
+  left: expression((void(___=document.documentElement.scrollLeft) || 0) + (document.documentElement.scrollLeft || document.body.scrollLeft) + 'px');
+}
+#bro-wrapper {
+  width: 100%;
+  z-index: 9999;
+  position: fixed;
+  bottom: 0px;
+  left: 0;
+}
+* html {
+  background: url(nonexistentimageforIE6) fixed;
+}
+* html #bro-wrapper {
+  position: absolute;
+  bottom: auto;
+  top: expression((void(___=document.documentElement.scrollTop+document.documentElement.clientHeight) || 0) +(document.documentElement.scrollTop || document.body.scrollTop) +(document.documentElement.clientHeight || document.body.clientHeight) + 'px');
+  width: expression((document.documentElement && document.documentElement.clientWidth || document.body && document.body.clientWidth) + 'px');
+  left: expression((void(___=document.documentElement.scrollLeft) || 0) + (document.documentElement.scrollLeft || document.body.scrollLeft) + 'px');
+  z-index: 990001 !important;
+}
+
+#bro-wrapper img {
+  border: 0;
+  display: block;
+}
+#bro-main {
+  background: transparent url(../img/silver/bg.png) no-repeat 0 0;
+  max-height: 572px;
+  width: 962px;
+  position: absolute;
+  bottom: 0px;
+  left: 50%;
+  margin-left: -480px;
+  font-family: arial, sans-serif;
+}
+
+.bro-exposed {
+  height: 60px;
+  width: 100%;
+}
+.bro-artist-logo {
+  position: absolute;
+  top: 11px;
+  left: 1px;
+  height: 45px;
+  width: 425px;
+}
+.bro-countdown {
+  position: absolute;
+  top: 11px;
+  left: 426px;
+  height: 45px;
+  width: 175px;
+}
+.bro-online-users {
+  width: 103px;
+}
+.bro-sponsor-1 {
+  position: absolute;
+  height: 50px;
+  width: 300px;
+  top: 6px;
+  right: 50px;
+  text-align: right;
+}
+.bro-toggle {
+  position: absolute;
+  height: 17px;
+  width: 36px;
+  top: 11px;
+  right: 9px;
+}
+.bro-toggle-link {
+  background: url(../img/silver/toggle.png) no-repeat 0 -17px;
+  display: block;
+  height: 17px;
+  width: 36px;
+  text-align: left;
+  text-indent: -9999px;
+}
+.expanded .bro-toggle-link {
+  background-position: 0 0;
+}
+
+
+.bro-content {
+  display: none;
+  height: 510px;
+  position: relative;
+}
+.bro-media {
+  visibility: hidden;
+  height: 475px;
+  width: 475px;
+  padding-top: 6px;
+  overflow: hidden;
+}
+.bro-media iframe {
+  height: 475px;
+  width: 475px;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+.bro-social {
+  height: 54px;
+  width: 468px;
+  position: absolute;
+  left: 485px;
+  top: 6px;
+}
+.bro-social a.facebook-large {
+  position: absolute;
+  top: 11px;
+  left: 7px;
+  height: 43px;
+  width: 217px;
+  text-indent: -9999px;
+  text-align: left;
+  background: url(../img/silver/fb-large.png) no-repeat 0 0;
+}
+.bro-social ul.links,
+.bro-social ul.links li {
+  list-style: none;
+  margin: 0px;
+  padding: 0px;
+}
+.bro-social .social-title{
+  color: #333;
+  font-size: 9px;
+  line-height: 1;
+  margin-left: 283px;
+  margin-top: 11px;
+  margin-bottom: 11px;
+  text-transform: uppercase;
+}
+.bro-social ul.links {
+  margin-left: 283px;
+}
+.bro-social ul.links li {
+  float: left;
+  height: 16px;
+  width: 16px;
+  margin-right: 8px;
+  text-indent: -9999px;
+}
+.bro-social ul.links li a {
+  display: block;
+}
+.bro-social li.facebook { background: url(../img/silver/fb-small.png) no-repeat 0 0; }
+.bro-social li.twitter { background: url(../img/silver/twitter.png) no-repeat 0 0; }
+.bro-social li.myspace { background: url(../img/silver/myspace.png) no-repeat 0 0; }
+.bro-social li.delicious { background: url(../img/silver/delicious.png) no-repeat 0 0; }
+.bro-social li.digg { background: url(../img/silver/digg.png) no-repeat 0 0; }
+
+.bro-sponsor-2 {
+  width: 468px;
+  height: 60px;
+  border: solid 1px #333;
+  position: absolute;
+  top: 443px;
+  left: 484px;
+}
+.bro-chat {
+  visibility: hidden;
+  height: 357px;
+  width: 462px;
+  position: absolute;
+  top: 71px;
+  left: 488px;
+}
+.bro-chat iframe {
+  border: none;
+  width: 462px;
+  height: 357px;
+  overflow: hidden;
+}
+
+.bro-online-users {
+  text-align: center;
+}
+.bro-online-users .user-count {
+  background: url(../img/user-count.png) no-repeat 0 0;
+  color: #ccff00; 
+  font-size: 17px;
+  font-weight: bold;
+  line-height: 27px;
+  height: 27px;
+  width: 86px;
+  margin: 10px auto 5px;
+}
+.bro-online-users .description {
+  color: #999;
+  font-size: 10px;
+  font-style: italic;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.bro-countdown .countdown {
+  background: url(../img/silver/countdown.png) no-repeat 0 0;
+  height: 33px;
+  width: 175px;
+  margin: 0 auto 5px;
+  position: relative;
+  font-family: arial, sans-serif;
+}
+
+.bro-countdown .countdown span {
+  display: block;
+  position: absolute;
+  width: 24px;
+  height: 33px;
+  font-size: 30px;
+  line-height: 33px;
+  top: 0px;
+  text-align: center;
+  color: #fff;
+  font-weight: bold;
+}
+.bro-countdown .countdown span.d1 { left: 0px; }
+.bro-countdown .countdown span.d2 { left: 25px; }
+.bro-countdown .countdown span.h1 { left: 63px; }
+.bro-countdown .countdown span.h2 { left: 88px; }
+.bro-countdown .countdown span.m1 { left: 126px; }
+.bro-countdown .countdown span.m2 { left: 151px; }
+
+.bro-countdown .description {
+  color: #666;
+  font-size: 9px;
+  font-style: italic;
+  line-height: 1;
+  text-transform: uppercase;
+  width: 175px;
+  margin: 0 auto;
+  height: 10px;
+  position: relative;
+}
+.bro-countdown .description span {
+  display: block;
+  position: absolute;
+  height: 10px;
+  width: 49px;
+  top: 0px;
+  text-align: center;
+}
+.bro-countdown .description span.days { left: 0px; }
+.bro-countdown .description span.hours { left: 63px; }
+.bro-countdown .description span.minutes { left: 126px; }
+
+

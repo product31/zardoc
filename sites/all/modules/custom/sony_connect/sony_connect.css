@@ -1,0 +1,184 @@
+div.ctools-modal-content .modal-title {
+  display: none;
+}
+
+#sony-connect-registration {
+  padding: 0 40px 20px 40px;
+}
+
+#sony-connect-registration div.picture {
+  float: right;
+  margin-left: 20px;
+}
+
+#sony-connect-registration p {
+  font-size: 18px;
+  font-weight: normal;
+}
+
+#sony-connect-registration h2{
+  font-size: 24px;
+  font-weight: normal;
+  margin-bottom: 0;
+}
+
+#sony-connect-registration .form-item label {
+  font-size: 16px;
+  font-weight: normal;
+  text-align: left;
+  width: 100px;
+}
+#sony-connect-registration .form-item label.option {
+  margin-left: 120px;
+  font-size: 12px;
+  width: auto;
+}
+
+#sony-connect-registration .form-text,
+#sony-connect-registration .form-select,
+#sony-connect-registration #edit-submit-profile,
+#sony-connect-registration .form-item .description {
+  margin-left: 120px;
+}
+
+#sony-connect-registration .edit-submit-profile {
+  margin-left: 10px;
+}
+
+#sony-connect-registration .form-submit,
+#sony-connect-registration .button {
+  font-size: 16px;
+  -moz-border-radius: 5px 5px 5px 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#sony-connect-registration .form-required {
+  display: none;
+}
+
+#sony-connect-registration .form-item .description {
+  width: 250px;
+}
+
+/* Registration only
+========================================*/
+#sony-connect-user-register-form #edit-coppa-dob-wrapper select {
+  display: inline;
+  margin-left: 10px;
+}
+
+#sony-connect-user-register-form #edit-coppa-dob-wrapper .container-inline {
+  margin-left: 110px;
+}
+
+#sony-connect-user-register-form #edit-legal-accept-wrapper {
+  margin-top: 10px;
+}
+
+#sony-connect-user-register-form #edit-name-wrapper {
+  margin-top: 10px;
+}
+#sony-connect-user-register-form #edit-name-wrapper label{
+  display: block;
+  float: none;
+  width: auto;
+}
+
+/* Login only
+========================================*/
+#sony-connect-user-login-form #edit-name-wrapper {
+  margin-top: 30px;
+}
+
+#sony-connect-user-login-form #edit-pass-wrapper .description {
+  text-align: right;
+}
+
+/* Success only
+========================================*/
+#sony-connect-success {
+
+}
+
+/* Disconnect form
+========================================*/
+#sony-connect-disconnect-confirm {
+}
+
+/* Checkboxes
+========================================*/
+.jquery-checkbox       {display: inline; font-size: 24px; line-height: 24px; cursor: pointer; cursor: hand;}
+.jquery-checkbox .mark {display: inline;}
+
+.jquery-checkbox img {vertical-align: middle; width: 24px; height: 24px;}
+.jquery-checkbox img{background: transparent url(checkbox.png) no-repeat;}
+
+.jquery-checkbox img{
+	background-position: 0px 0px;
+}
+.jquery-checkbox-hover img{
+	background-position: 0px -24px;
+}
+.jquery-checkbox-checked img{
+	background-position: 0px -48px;
+}
+.jquery-checkbox-checked .jquery-checkbox-hover img {
+	background-position: 0px -72px;
+}
+
+.jquery-checkbox-disabled img{
+	background-position: 0px -96px;
+}
+.jquery-checkbox-checked .jquery-checkbox-disabled img{
+	background-position: 0px -120px;
+}
+
+#sony-connect-activity-preferences-form  {
+  text-align: center;
+}
+#sony-connect-activity-preferences-form .modal-title {
+  display: block;
+  text-align: center;
+}
+#sony-connect-activity-preferences-form #network-preferences {
+  text-align: center;
+}
+#sony-connect-activity-preferences-form #network-preferences .form-item,
+#sony-connect-activity-preferences-form #network-preferences label {
+  display: inline;
+  margin: 0;
+}
+#sony-connect-activity-preferences-form #edit-submit {
+  border-radius: 0px;
+  -moz-border-radius: 0px;
+  -webkit-border-radius: 0px;
+  padding: 0 10px;
+  margin: 10px 0;
+  font-size: 18px;
+  height: 30px;
+  line-height: 30px;
+}
+#sony-connect-activity-preferences-form #edit-remember-wrapper label {
+  margin: 0;
+  text-align: center;
+  width: auto;
+}
+#sony-connect-activity-preferences-form #edit-networks-facebook-wrapper {
+  background: url(plugins/networks/facebook/icons/label.png) no-repeat 0 0;
+  padding-top: 17px;
+  padding-left: 104px;
+  padding-right: 10px;
+  line-height: 30px;
+}
+#sony-connect-activity-preferences-form #edit-networks-twitter-wrapper {
+  background: url(plugins/networks/twitter/icons/label.png) no-repeat 0 0;
+  padding-top: 17px;
+  padding-left: 99px;
+  padding-right: 10px;
+  line-height: 30px;
+}
+#sony-connect-activity-preferences-form #edit-networks-facebook-wrapper input,
+#sony-connect-activity-preferences-form #edit-networks-twitter-wrapper input {
+  vertical-align: top;
+}

@@ -1,0 +1,27 @@
+# Belgium (French) translation of sony_video (all releases)
+# Copyright (c) 2010 by the Belgium (French) translation team
+# Generated from file: sony_video/plugins/FeedapiEparserTypeSonyVideo.class.php: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sony_video (all releases)\n"
+"POT-Creation-Date: 2010-04-05 14:02-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Belgium (French)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n>1);\n"
+
+#: plugins/FeedapiEparserTypeSonyVideo.class.php:36,69
+msgid "FeedAPI Eparser"
+msgstr ""
+
+#: plugins/FeedapiEparserTypeSonyVideo.class.php:36
+msgid "Download failed for !feed. No Playlist ID specified !setup_link"
+msgstr ""
+
+#: plugins/FeedapiEparserTypeSonyVideo.class.php:69
+msgid "Could not find PD path for Sony video feed !feed."
+msgstr ""
+

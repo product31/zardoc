@@ -1,0 +1,25 @@
+ul.links li.share_link {
+  outline: none;
+  border: 1px #666 solid;
+  position: relative;
+}
+
+div.service_links ul {
+  position: absolute;
+  background: white;
+  border: 1px solid black;
+  bottom: 20px;
+  display: block;
+  width: auto;
+  right: -10px;  
+}
+div.service_links ul li {
+  clear: left;
+  float: left;
+}
+div.service_links ul {
+  list-style: none;
+  margin: 0;
+  padding: 5px;
+
+}

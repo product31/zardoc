@@ -1,0 +1,74 @@
+<?php
+//$Id:
+
+/**
+ * Implementation of hook_menu
+ */
+function fb_likebox_menu(){
+  $items = array();
+
+  $items['admin/sony/connect/likebox'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'likebox',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('fb_likebox_settings_form'),
+    'file' => 'fb_likebox.admin.inc',
+    'access callback' => 'user_access',
+    'access arguments' => array('administer site configuration'),
+  );  
+  
+  return $items;
+}
+
+/**
+ * Implementation of hook_block
+ */
+function fb_likebox_block($op = 'list', $delta = 0, $edit = array()){
+  switch ($op) {
+    case 'list' :
+      $blocks['likebox'] = array(
+          'info' => t('fb like box'), 
+          'admin' => TRUE 
+      );
+      
+      return $blocks;
+    case 'view' :
+      switch ($delta) {
+        case 'likebox' :
+          return array(
+              'subject' => t(''), 
+              'content' => theme('fb_likebox_block_likebox_view') 
+          );
+      }
+      break;
+  }
+}
+
+/**
+ * Implementation of hook_theme
+ */
+function fb_likebox_theme() {
+  return array(
+    'fb_likebox_block_likebox_view' => array(),
+  );
+}
+
+
+function theme_fb_likebox_block_likebox_view(){
+  $attrs = array(
+      'profile_id' => variable_get('fb_likebox_pageid', ''), 
+      'width' => variable_get('fb_likebox_width', 292), 
+      'connections' => variable_get('fb_likebox_connections', 10),
+      'stream' => variable_get('fb_likebox_stream', 1) ? "true" : "false",
+      'header' => variable_get('fb_likebox_header', 1) ? "true" : "false",
+  );
+  
+  if ($width = variable_get('fb_likebox_height', '')){
+    $attrs['height'] = $width;
+  }
+  
+  $attrs = drupal_attributes($attrs);
+  
+  return '<fb:like-box ' . $attrs . '></fb:like-box>';
+
+}

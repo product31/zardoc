@@ -1,0 +1,651 @@
+<?php
+// $Id: wordfilter.module,v 1.7.2.9.2.21 2010/05/12 06:18:55 jaydub Exp $
+
+/**
+ * @file
+ * Replaces words inside posts with filtered versions.
+ */
+
+/**
+ * Implementation of hook_help().
+ *
+ * @param $section
+ *   string file path
+ *
+ * @return
+ *   string
+ */
+function wordfilter_help($page = 'admin/help#wordfilter', $arg) {
+  switch ($page) {
+    case 'admin/modules#description':
+      return t('Replaces words inside posts with filtered versions.');
+    case 'admin/help#wordfilter':
+      return t('<p>The wordfilter module allows you to filter words or phrases in site content and replace the filtered words or phrases with specified replacement words or phrases. The text body of node and comments are filtered and optionally the title of nodes and subject of comments are filtered. The filters are applied on content viewing so the original text of your content is not altered.</p>');
+    case 'admin/settings/wordfilter':
+      return t('In order for filtering to work on the body text of a node or comment, you must activate the wordfilter filter for the input formats you wish to enable filtering for. Check your filter settings at <a href="@filter">Input Formats</a>.', array('@filter' => url('admin/settings/filters')));
+  }
+}
+
+/**
+ * Implementation of hook_perm().
+ *
+ * @return
+ *   array of permissions
+ */
+function wordfilter_perm() {
+  return array('administer words filtered');
+}
+
+/**
+ * Implementation of hook_menu().
+ *
+ * @param $may_cache
+ *   boolean indicating whether cacheable menu items should be returned
+ *
+ * @return
+ *   array of menu information
+ */
+function wordfilter_menu() {
+  $items = array();
+
+  $items['admin/settings/wordfilter'] = array(
+    'title' => 'Word filter',
+    'description' => 'Replaces words or phrases inside posts with filtered versions.',
+    'page callback' => 'wordfilter_admin_list',
+    'access callback' => 'user_access',
+    'access arguments' => array('administer words filtered'),
+  );
+
+  $items['admin/settings/wordfilter/list'] = array(
+    'title' => 'List',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'access callback' => 'user_access',
+    'access arguments' => array('administer words filtered'),
+    'weight' => -10,
+  );
+
+  $items['admin/settings/wordfilter/add'] = array(
+    'title' => 'Add',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wordfilter_admin_add_form'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer words filtered'),
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  $items['admin/settings/wordfilter/test'] = array(
+    'title' => 'Test',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wordfilter_admin_test_filter_form'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer words filtered'),
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  $items['admin/settings/wordfilter/edit/%'] = array(
+    'title' => 'Edit',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wordfilter_admin_edit_form', 4),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer words filtered'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['admin/settings/wordfilter/delete/%'] = array(
+    'title' => 'Delete',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wordfilter_admin_form_delete_confirm', 4),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer words filtered'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_settings().
+ *
+ * @return
+ *   array of form elements
+ */
+function wordfilter_settings_form() {
+  $form = array();
+
+  $form['general_options'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('General options'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+  );
+  $form['general_options']['wordfilter_node_title'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable word filtering on node titles'),
+    '#description' => t('If checked, node titles will be filtered on node load but the original node title will not be changed.'),
+    '#default_value' => variable_get('wordfilter_node_title', TRUE),
+    '#return_value' => TRUE,
+  );
+  $form['general_options']['wordfilter_comment_title'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable word filtering on comment titles'),
+    '#description' => t('If checked, comment titles will be filtered on comment load but the original comment title will not be changed.'),
+    '#default_value' => variable_get('wordfilter_comment_title', TRUE),
+    '#return_value' => TRUE,
+  );
+  $form['general_options']['wordfilter_use_utf8_flag'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use Perl UTF8 Regular Expression Modifier'),
+    '#description' => t('Enabling this option adds the PCRE_UTF8 flag to the PHP Perl-Compatible Regular Expression used for filtering. <strong>WARNING</strong>: The PHP manual says: &ldquo;<em><u>Matching characters by Unicode property is not fast, because PCRE has to search a structure that contains data for over fifteen thousand characters.</u></em>&rdquo; If you suffer poor performance consider disabling this option.'),
+    '#default_value' => variable_get('wordfilter_use_utf8_flag', FALSE),
+    '#return_value' => TRUE,
+  );
+  $form['general_options']['wordfilter_default_replacement'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Default word replacement'),
+    '#description' => t('Enter the default replacement text here. If you do not enter replacement text for an individual filtered word, the replacement text entered here will be used as the replacement text.'),
+    '#default_value' => variable_get('wordfilter_default_replacement', '[filtered word]'),
+    '#required' => TRUE,
+  );
+
+  return system_settings_form($form);
+}
+
+/**
+ * Delete a word from the word filter list delete
+ * confirmation callback
+ */
+function wordfilter_admin_form_delete_confirm($form, $word_id) {
+  $form = array();
+  $form['word_id'] = array(
+    '#type' => 'value',
+    '#value' => $word_id,
+  );
+  return confirm_form($form, t('Are you sure you want to delete this word or phrase from the word filtering list?'), 'admin/settings/wordfilter');
+}
+
+/**
+ * Delete a word from the word filter list
+ */
+function wordfilter_admin_form_delete_confirm_submit($form, &$form_state) {
+  if ($form_state['values']['confirm']) {
+    db_query('DELETE FROM {wordfilter} WHERE id = %d', $form_state['values']['word_id']);
+    drupal_set_message(t('The word was removed from the word filter list'));
+    $form_state['redirect'] = 'admin/settings/wordfilter';
+    cache_clear_all('*', 'cache_filter', TRUE);
+  }
+}
+
+/**
+ * Implementation of hook_nodeapi().
+ *
+ * @param &$node
+ *   editable node object
+ *
+ * @param $op
+ *   string of what process we're at
+ *
+ * @param $teaser
+ *   boolean if showing teaser
+ *
+ * @param $page
+ *   boolean if on full view page of a node
+ *
+ */
+function wordfilter_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
+  switch ($op) {
+    case 'insert':
+    case 'update':
+    case 'load':
+      if (variable_get('wordfilter_node_title', TRUE)) {
+        $filters = filter_list_format($node->format);
+        if (isset($filters['wordfilter/0'])) {
+          $node->title = wordfilter_filter_process($node->title);
+        }
+      }
+      break;
+    case 'search result':
+      /**
+       * Core comments module adds comment title and body to
+       * search index for node when 'update index' operation
+       * is invoked in hook_nodeapi. The comment subject
+       * and body are not able to be filtered prior to inserting
+       * into the search index for the node. So instead we
+       * have to filter the node body on 'search result' operation
+       * of hook_nodeapi.
+       */
+      if (variable_get('wordfilter_comment_title', TRUE)) {
+        $filters = filter_list_format($node->format);
+        if (isset($filters['wordfilter/0'])) {
+          $node->body = wordfilter_filter_process($node->body);
+        }
+      }
+      break;
+  }
+}
+
+/**
+ * Implementation of hook_comment().
+ *
+ * @param &$comment
+ *   editable comment array/object or comment form
+ *
+ * @param $op
+ *   string for operation type
+ */
+function wordfilter_comment(&$comment, $op) {
+  switch ($op) {
+    case 'insert':
+    case 'update':
+    case 'publish':
+      if (variable_get('wordfilter_comment_title', TRUE)) {
+        $comment = (array)$comment;
+        $node = node_load($comment['nid']);
+        $filters = filter_list_format($node->format);
+        if (isset($filters['wordfilter/0'])) {
+          $comment['subject'] = wordfilter_filter_process($comment['subject']);
+        }
+      }
+      break;
+    case 'view':
+      if (variable_get('wordfilter_comment_title', TRUE)) {
+        $node = node_load($comment->nid);
+        $filters = filter_list_format($node->format);
+        if (isset($filters['wordfilter/0'])) {
+          $comment->subject = wordfilter_filter_process($comment->subject);
+        }
+      }
+      break;
+  }
+}
+
+/**
+ * Implementation of hook_block().
+ *
+ * @param $op
+ *   string for view type
+ *
+ * @param $delta
+ *   int
+ *
+ * @return
+ *   array of block information
+ */
+function wordfilter_block($op = 'list', $delta = 0) {
+  if ($op == 'list') {
+    $blocks[0]['info'] = t('Filtered word lists on submission pages');
+    return $blocks;
+  }
+  elseif ($op == 'view') {
+    switch ($delta) {
+      case 0:
+        $block['subject'] = t('Filtered words');
+        $block['content'] = $GLOBALS['display_wordfilter_block'] ? _wordfilter_table() : '';
+        return $block;
+    }
+  }
+}
+
+/**
+ * Displays a list of words that will be filtered as an HTML table.
+ */
+function _wordfilter_table() {
+  $content .= '<div align="center">';
+  $content .= '<table border="0" cellspacing="1" cellpadding="0">';
+  $list = _wordfilter_list();
+  foreach ($list as $filtered_word) {
+    $alt = implode(' &nbsp; ', explode(' ', check_plain($filtered_word->words)));
+    $content .= '<tr><td align="left">'. check_plain($filtered_word->replacement) .'</td><td align="right">&nbsp;'. $alt .'</td></tr>';
+  }
+  $content .= '</table></div>';
+  return $content;
+}
+
+/**
+ * Implementation of hook_filter_tips().
+ */
+function wordfilter_filter_tips($delta, $format, $long = FALSE) {
+  if ($long) {
+    return t('If you include a word in your post that\'s filtered (usually foul language), it will be replaced by the filtered version of the word.') .'<br />';
+  }
+  else {
+    $GLOBALS['display_wordfilter_block'] = TRUE;
+    return t('Filtered words will be replaced with the filtered version of the word.');
+  }
+}
+
+/**
+ * Implementation of hook_filter().
+ */
+function wordfilter_filter($op, $delta = 0, $format = -1, $text = '') {
+  switch ($op) {
+    case 'list':
+      return array(0 => t('Word filter'));
+    case 'description':
+      return wordfilter_help('admin/modules#description', array());
+    case 'settings':
+      $form['word_filter'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Word filter'),
+        '#description' => t('You can define a global list of words or phrases to be filtered on the <a href="!url">wordfilter settings page</a>.', array('!url' => url('admin/settings/wordfilter'))),
+      );
+      return $form;
+    case 'process':
+      return wordfilter_filter_process($text);
+    default:
+      return $text;
+  }
+}
+
+/**
+ * hook_filter process operation callback.
+ */
+function wordfilter_filter_process($text) {
+  $text = ' '. $text .' ';
+  $list = _wordfilter_list();
+  $utf8 = variable_get('wordfilter_use_utf8_flag', FALSE);
+  foreach ($list as $word) {
+    // Prevent mysterious empty value from blowing away the node title.
+    if (!empty($word->words)) {
+      $replacement = ($word->replacement) ? $word->replacement : variable_get('wordfilter_default_replacement', '[filtered word]');
+
+      if ($word->standalone) {
+        $pattern = '/(\W)'. preg_quote($word->words, '/') .'(\W)/i';
+      }
+      else {
+        $pattern = '/'. preg_quote($word->words, '/') .'/i';
+      }
+      if ($utf8) {
+        $pattern .= 'u';
+      }
+
+      $split_text = preg_split('/(<[^>]*>)/i', drupal_substr($text, 1, -1), -1, PREG_SPLIT_DELIM_CAPTURE);
+      $split_text = array_values(array_filter($split_text));
+      if (count($split_text) > 1) {
+        $new_string = '';
+        foreach ($split_text as $part) {
+          if (!preg_match('/^</', $part)) {
+            $new_string .= preg_replace($pattern, "\${1}". $replacement ."\${2}", $part);
+          }
+          else {
+            $new_string .= $part;
+          }
+        }
+        $text = ' '. $new_string .' ';
+      }
+      else {
+        $text = preg_replace($pattern, "\${1}". $replacement ."\${2}", $text);
+      }
+    }
+  }
+  $text = drupal_substr($text, 1, -1);
+
+  return $text;
+}
+
+/**
+ * Query to get the list of words to filter in the
+ * filter processing stage. Does not use a pager.
+ */
+function _wordfilter_list($refresh = 0) {
+  static $list = NULL;
+  if (is_null($list) || $refresh) {
+    $result = db_query('SELECT * FROM {wordfilter} ORDER BY words DESC');
+    $list = array();
+    while ($a = db_fetch_object($result)) {
+      $list[] = $a;
+    }
+  }
+  return $list;
+}
+
+/**
+ * Query to get the list of words to filter. Has a
+ * pager for managing long lists
+ */
+function _wordfilter_admin_list($header) {
+  $sql = 'SELECT * FROM {wordfilter}';
+  $result = pager_query($sql . tablesort_sql($header), 10);
+  $list = array();
+  while ($a = db_fetch_object($result)) {
+    $list[] = $a;
+  }
+  return $list;
+}
+
+/**
+ * Wordfilter admin settings page callback.
+ */
+function wordfilter_admin_list() {
+  $header = array(
+    array('data' => t('Word to filter'), 'field' => 'words', 'sort' => 'asc'),
+    array('data' => t('Replacement text'), 'field' => 'replacement'),
+    array('data' => t('Standalone'), 'field' => 'standalone'),
+    array('data' => t('Operations'), 'colspan' => 2)
+  );
+  $rows = array();
+  $list = _wordfilter_admin_list($header);
+  foreach ($list as $word) {
+    $rows[] = array(
+      check_plain($word->words),
+      ($word->replacement) ? check_plain($word->replacement) : check_plain(variable_get('wordfilter_default_replacement', '[filtered word]')),
+      ($word->standalone) ? t('Yes') : t('No'),
+      l(t('Edit word'), 'admin/settings/wordfilter/edit/'. $word->id),
+      l(t('Delete word'), 'admin/settings/wordfilter/delete/'. $word->id),
+    );
+  }
+  $output .= drupal_get_form('wordfilter_settings_form');
+  $output .= theme('table', $header, $rows);
+  $output .= theme('pager');
+
+  return $output;
+}
+
+/**
+ * Edit word filter form.
+ */
+function wordfilter_admin_edit_form($form, $word_id = NULL) {
+  if (!isset($word_id) || !is_numeric($word_id)) {
+    drupal_set_message(t('The wordfilter ID of the word or phrase you are trying to edit is missing or is not a number.'), 'error');
+    drupal_goto('admin/settings/wordfilter');
+  }
+  $result = db_query('SELECT * FROM {wordfilter} WHERE id = %d', $word_id);
+  $word = db_fetch_object($result);
+
+  $form = array();
+  $form['id'] = array(
+    '#type' => 'hidden',
+    '#value' => $word->id,
+  );
+
+  $form['words'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Word or phrase to filter'),
+    '#default_value' => $word->words,
+    '#description' => t('Enter the word or phrase you want to filter.'),
+    '#size' => 50,
+    '#maxlength' => 255,
+    '#required' => TRUE,
+  );
+  $form['replacement'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Replacement text'),
+    '#description' => t('Enter the filtered version of the word or phrase to replace the original word or phrase.'),
+    '#default_value' => ($word->replacement) ? $word->replacement : variable_get('wordfilter_default_replacement', '[filtered word]'),
+    '#size' => 50,
+    '#maxlength' => 255,
+  );
+  $form['standalone'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Stand-alone'),
+    '#default_value' => $word->standalone,
+    '#description' => t('When checked, the word or phrase will only be filtered when found as a separate word or phrase (i.e. prefixed and suffixed by spaces or "whitespace"). A period one character after a word or phrase will exclude the words or phrases from replacement in stand-alone mode. This is useful for preventing accidental word or phrase filtering with short or common words or phrases.'),
+  );
+
+  $form['Save word filter'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save word filter'),
+  );
+  $form['cancel'] = array(
+    '#type' => 'submit',
+    '#value' => t('Cancel'),
+  );
+
+  return $form;
+}
+
+/**
+ * Edit word filter form submit handler.
+ */
+function wordfilter_admin_edit_form_submit($form, &$form_state) {
+  $row = new stdClass;
+  $row->id = $form_state['values']['id'];
+  $row->words = $form_state['values']['words'];
+  $row->replacement = $form_state['values']['replacement'];
+  $row->language = $form_state['values']['language'];
+  $row->standalone = $form_state['values']['standalone'];
+  drupal_write_record('wordfilter', $row, 'id');
+  watchdog('wordfilter', 'Updated filter for: %word', array('%word' => $row->words));
+  drupal_set_message(t('Updated filter for: %word', array('%word' => $row->words)));
+  $form_state['redirect'] = 'admin/settings/wordfilter';
+  cache_clear_all('*', 'cache_filter', TRUE);
+}
+
+/**
+ * Add word filter form.
+ */
+function wordfilter_admin_add_form() {
+  $form = array();
+
+  $form['help'] = array(
+    '#type' => 'markup',
+    '#value' => t("<p>Enter a word or phrase you want to filter followed by '|' and the replacement word or phrase. You can enter multiple word and replacement word pairs by hitting return and adding more word pairs. Any word or phrases that do not have a replacement word or phrase will use the default replacement word below.</p>"),
+  );
+
+  $form['words'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Words'),
+    '#description' => t("Enter a word or phrase you want to filter followed by '|' and the replacement word or phrase if any."),
+    '#required' => true
+  );
+  $form['replacement'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Replacement'),
+    '#default_value' => variable_get('wordfilter_default_replacement', '[filtered word]'),
+    '#size' => 50,
+    '#maxlength' => 255,
+    '#description' => t('Enter the filtered version of the word to replace the original words with. If no replacement word or phrase is specified for a word or phrase in the list above, the word or phrase entered here will be used as the replacement for that word or phrase.')
+  );
+  $form['standalone'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Stand-alone'),
+    '#description' => t('When checked, the word or phrase will only be filtered when found as a separate word or phrase (i.e. prefixed and suffixed by spaces or "whitespace"). A period one character after a word or phrase will exclude the words from replacement in stand-alone mode. This is useful for preventing accidental word or phrase filtering with short or common words and phrases.')
+  );
+
+  $form['Save word filter'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save word filter')
+  );
+  $form['cancel'] = array(
+    '#type' => 'submit',
+    '#value' => t('Cancel')
+  );
+
+  return $form;
+}
+
+/**
+ * Add word filter form submit handler.
+ */
+function wordfilter_admin_add_form_submit($form, &$form_state) {
+  $pairs = explode("\n", $form_state['values']['words']);
+  $pairs = array_map('trim', $pairs);
+  $pairs = array_filter($pairs, 'strlen');
+  foreach ($pairs as $pair) {
+    $row = new stdClass;
+    $row->standalone = $form_state['values']['standalone'];
+    list($row->words, $row->replacement, $row->language) = explode('|', $pair);
+    if (!$row->replacement) {
+      $row->replacement = $form_state['values']['replacement'];
+    }
+    if (!$row->language) {
+      $row->language = $form_state['values']['language'];
+    }
+    drupal_write_record('wordfilter', $row);
+    watchdog('wordfilter', 'Added filter for: %word', array('%word' => $row->words));
+    drupal_set_message(t('Added filter for: %word', array('%word' => $row->words)));
+  }
+  $form_state['redirect'] = 'admin/settings/wordfilter';
+  cache_clear_all('*', 'cache_filter', TRUE);
+}
+
+/**
+ * Test word filter form.
+ */
+function wordfilter_admin_test_filter_form($form_state) {
+  $form = array();
+  $form['#redirect'] = FALSE;
+
+  $form['test_word'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Word to test'),
+    '#description' => t('Enter a word or phrase that you want to test your wordfilters on'),
+    '#size' => 50,
+    '#maxlength' => 255,
+    '#required' => TRUE,
+  );
+
+  if ($form_state['values']['test_word']) {
+    $form['text_result'] = array(
+      '#type' => 'markup',
+      '#value' => _wordfilter_test_filter($form_state['values']['test_word']),
+      '#prefix' => '<div class="wordfilter-test-filter">',
+      '#suffix' => '</div>',
+    );
+  }
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Test word filters'),
+  );
+
+  return $form;
+}
+
+/**
+ * Test word filter form submit handler.
+ */
+function wordfilter_admin_test_filter_form_submit($form, &$form_state) {
+  $form_state['rebuild'] = TRUE;
+}
+
+/**
+ * Test word filter page callback.
+ */
+function _wordfilter_test_filter($word) {
+  $filtered_word = wordfilter_filter_process($word);
+  if ($word == $filtered_word) {
+    return t("Your test word '%word' did not match any filters", array('%word' => $word));
+  }
+  else {
+    return t("Your test word '%word' was filtered to '%filtered_word'", array('%word' => $word, '%filtered_word' => $filtered_word));
+  }
+}
+
+/**
+ * Preprocess variables to format forum topic titles
+ * from the Forum module.
+ */
+function wordfilter_preprocess_forum_topic_list(&$variables) {
+  // Only process if the option to filter titles has been enabled.
+  if (variable_get('wordfilter_node_title', TRUE)) {
+    foreach ($variables['topics'] as $i => $topic) {
+      // Fetch the format of the forum topic node.
+      $format = db_result(db_query('SELECT nr.format FROM {node} n INNER JOIN {node_revisions} nr ON n.vid = nr.vid WHERE n.nid = %d', $topic->nid));
+      $filters = filter_list_format($format);
+      // Only filter if the forum topic node's format includes the wordfilter filter.
+      if (isset($filters['wordfilter/0'])) {
+        $variables['topics'][$i]->title = wordfilter_filter_process($topic->title);
+      }
+    }
+  }
+}

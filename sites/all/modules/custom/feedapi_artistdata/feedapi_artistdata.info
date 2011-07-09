@@ -1,0 +1,10 @@
+; $Id$
+name = Artist Data Feed Parser
+description = FeedAPI parser for ArtistData.com event feeds
+core = 6.x
+dependencies[] = feedapi
+
+l10n server = translate.gdb-dev.com
+project = "feedapi_artistdata"
+version = "6.x-2.x"
+

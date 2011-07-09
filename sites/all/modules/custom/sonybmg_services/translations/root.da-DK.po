@@ -1,0 +1,92 @@
+# Denmark translation of sonybmg_services (all releases)
+# Copyright (c) 2010 by the Denmark translation team
+# Generated from files:
+#  sonybmg_services/sonybmg_services.info: n/a
+#  sonybmg_services/sonybmg_services.module: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sonybmg_services (all releases)\n"
+"POT-Creation-Date: 2010-04-05 16:12-0500\n"
+"PO-Revision-Date: 2010-03-30 11:33-0500\n"
+"Language-Team: Denmark\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: sonybmg_services.info:0
+msgid "Sony BMG"
+msgstr ""
+
+#: sonybmg_services.module:96
+msgid "Further instructions have been sent to your e-mail address."
+msgstr "Yderligere instruktioner er sendt til din e-mail-adresse."
+
+#: sonybmg_services.module:153,152
+msgid "Detected malicious attempt to alter protected user fields."
+msgstr "Opdaget forsøg på at ændre beskyttede felter."
+
+#: sonybmg_services.module:168
+msgid "Error saving user account."
+msgstr "Fejl ved opdatering af brugerkonto."
+
+#: sonybmg_services.module:173
+msgid "edit"
+msgstr "rediger"
+
+#: sonybmg_services.module:182
+msgid "Registration successful. You are now logged in."
+msgstr "Registrering lykkedes. Du er nu logget ind."
+
+#: sonybmg_services.module:184
+msgid "Registration successful."
+msgstr ""
+
+#: sonybmg_services.module:191
+msgid ""
+"Password and further instructions have been e-mailed to the new user "
+"<a href=\"@url\">%name</a>."
+msgstr ""
+"Adgangskode og yderligere instruktioner er blevet sendt til den nye "
+"bruger <a href=\"@url\">%name</a>."
+
+#: sonybmg_services.module:194
+msgid ""
+"Your password and further instructions have been sent to your e-mail "
+"address."
+msgstr ""
+"Din adgangskode og yderligere forklaring er blevet sendt til din "
+"e-mail-adresse."
+
+#: sonybmg_services.module:200
+msgid ""
+"Thank you for applying for an account. Your account is currently "
+"pending approval by the site administrator.<br />In the meantime, a "
+"welcome message with further instructions has been sent to your e-mail "
+"address."
+msgstr ""
+"Tak for din ansøgning om en konto. Din konto afventer godkendelse af "
+"en administrator.<br />I mellemtiden er din adgangskode og yderligere "
+"instruktioner blevet sendt til din e-mail-adresse."
+
+#: sonybmg_services.module:152
+msgid "security"
+msgstr "sikkerhed"
+
+#: sonybmg_services.module:173
+msgid "user"
+msgstr "bruger"
+
+#: sonybmg_services.module:173
+msgid "New user: %name (%email)."
+msgstr "Ny bruger: %name (%email)."
+
+#: sonybmg_services.info:0
+msgid "Sony BMG Services"
+msgstr ""
+
+#: sonybmg_services.info:0
+msgid "Exposes some Sony specific services."
+msgstr ""
+

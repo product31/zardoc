@@ -1,0 +1,34 @@
+Index: feedapi_node/feedapi_node.module
+===================================================================
+RCS file: /cvs/drupal-contrib/contributions/modules/feedapi/feedapi_node/Attic/feedapi_node.module,v
+retrieving revision 1.1.2.18.2.22
+diff -u -p -r1.1.2.18.2.22 feedapi_node.module
+--- feedapi_node/feedapi_node.module	30 Dec 2008 10:23:06 -0000	1.1.2.18.2.22
++++ feedapi_node/feedapi_node.module	30 Mar 2009 21:59:06 -0000
+@@ -157,6 +157,18 @@ function feedapi_node_feedapi_settings_f
+         '#options' => $ct_options,
+         '#description' => t('Choose the node type for feed item nodes created by this feed.'),
+       );
++      $format_options = array();
++      $formats = filter_formats();
++      foreach ($formats as $format) {
++        $format_options[$format->format] = $format->name;
++      }
++      $form['input_format'] = array(
++        '#type' => 'select',
++        '#title' => t('Input format for feed items'),
++        '#default_value' => FILTER_FORMAT_DEFAULT,
++        '#options' => $format_options,
++        '#description' => t('Choose the input format for feed item nodes created by this feed.'),
++      );
+       $form['node_date'] = array(
+         '#type' => 'radios',
+         '#title' => t('Created date of item nodes'),
+@@ -322,6 +334,7 @@ function _feedapi_node_save($feed_item, 
+   $feed_node = node_load($feed_nid);
+   $node->title = $feed_item->title;
+   $node->body = $feed_item->description;
++  $node->format = isset($settings['input_format']) ? $settings['input_format'] : FILTER_FORMAT_DEFAULT;
+   $node->teaser = node_teaser($feed_item->description);
+   // Stick feed item on node so that add on modules can act on it.
+   // A feed item can come in from more than one feed.

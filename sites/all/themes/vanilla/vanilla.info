@@ -1,0 +1,40 @@
+name = Vanilla
+description = Vanilla site theme.
+core = 6.x
+engine = phptemplate
+base theme = _multisite
+
+; Add any new stylesheets as necessary.
+stylesheets[all][] = css/sections.css
+stylesheets[all][] = css/style.css
+;stylesheets[all][] = css/wireframes.css
+stylesheets[all][] = css/layoutDefault.css
+
+; Add any JavaScript files.
+;scripts[] = js/utilities.js
+
+; Add sIFR by uncommenting these lines. Read sifr/how_to_add_sifr.txt for more info.
+; Clear the cache (admin/settings/cache) after every change!
+;sifr[nav][sFlashSrc] = sifr/stencil.swf
+;sifr[nav][sSelector] = #primary li
+;sifr[nav][sLinkColor] = #0066CC
+;sifr[nav][sHoverColor] = #000000
+;sifr[nav][sBgColor] = #FFFFFF
+
+; Define regions that are available in page.tpl.php.
+regions[page_top] = page top
+regions[ad_top] = ad top
+regions[left_header] = left header
+regions[flash_header] = flash header
+regions[right_header] = right header
+regions[flash_nav] = flash navigation
+regions[content_top] = content top
+regions[content_header] = content header
+regions[left] = left sidebar
+regions[right] = right sidebar
+regions[content_bottom] = content bottom
+regions[listen] = listen link
+regions[ad_bottom] = ad bottom
+regions[left_footer] = left footer
+regions[footer] = footer
+regions[right_footer] = right footer

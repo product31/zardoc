@@ -1,0 +1,10 @@
+; $Id$
+name = M2 Search
+description = Provides a UI for searching the M2 document database.
+package = Sony M2
+core = 6.x
+dependencies[] = m2
+
+l10n server = translate.gdb-dev.com
+project = "m2_search"
+version = "6.x-2.x"

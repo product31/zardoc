@@ -1,0 +1,126 @@
+<?php
+// $Id: userpoints_rules.module,v 1.1.2.2 2009/01/30 16:11:16 kbahey Exp $
+
+/**
+ * @file
+ * Some rules integration for the user points module
+ */
+
+/**
+ * Rules hook implementation.
+ */
+function userpoints_rules_action_info() {
+  return array(
+    'userpoints_action_grant_points' => array(
+      'label' => t('Grant !points to a user', userpoints_translation()),
+      'arguments' => array(
+         'user' => array('type' => 'user', 'label' => t('User'))
+        ),
+      'module' => 'Userpoints',
+      'eval input' => array('points'),
+    ),
+  );
+}
+
+function userpoints_rules_condition_info() {
+  return array(
+    'userpoints_condition_total_points_greaterequalthan' => array(
+      'label' => t('User Total !points are >= than', userpoints_translation()),
+      'arguments' => array(
+        'user' => array('type' => 'user', 'label' => t('User'))
+      ),
+      'module' => 'Userpoints',
+      'eval input' => array('points'),
+    ),
+    'userpoints_condition_total_points_lessthan' => array(
+      'label' => t('User Total !points < than', userpoints_translation()),
+      'arguments' => array(
+        'user' => array('type' => 'user', 'label' => t('User'))
+      ),
+      'module' => 'Userpoints',
+      'eval input' => array('points'),
+    ),
+
+  );
+}
+
+function userpoints_rules_event_info() {
+  return array(
+    'userpoints_event_points_awarded' => array(
+       'label' => t('User was awarded !points', userpoints_translation()),
+       'arguments' => array(
+         'user' => array('type' => 'user', 'label' => t('Current User')),
+         'points' => array('type' => 'points', 'label' => t('Points Awarded'))
+        ),
+       'module' => 'Userpoints',
+    ),
+  );
+}
+
+/**
+ * Rules Action - grant points to a user
+ */
+function userpoints_action_grant_points($account, $settings) {
+    userpoints_userpointsapi(array('uid' => $account->uid, 'points' => $settings['points']));
+}
+
+/**
+ * Rules Action form configuration - allow number of points to be set by the rule
+ */
+function userpoints_action_grant_points_form($settings = array(), &$form) {
+  $form['settings']['points'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Number of points'),
+    '#default_value' => isset($settings['points']) ? $settings['points'] : '',
+    '#description' => t('The number of !points to award', userpoints_translation())
+  );
+}
+
+/**
+ * Rules Events - hook_userpoints in userpoints_userpointsapi ($params)
+ */
+function userpoints_rules_userpoints($op, $params='') {
+  switch ($op) {
+  case 'points after':
+    rules_invoke_event('userpoints_event_points_awarded', $params['uid'], $params['points']);
+    break;
+  }
+}
+
+/**
+ * Rules Condition - Compare with the default category points from a user
+ */
+function userpoints_condition_total_points_greaterequalthan($account, $settings) {
+  return (userpoints_get_current_points($account->uid, 'all') >= $settings['points']);
+}
+
+/**
+ * Rules Condition form configuration - allow set the number of points to compare
+ */
+function userpoints_condition_total_points_greaterequalthan_form($settings = array(), &$form) {
+  $form['settings']['points'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Number of points to compare'),
+    '#default_value' => isset($settings['points']) ? $settings['points'] : '',
+    '#description' => t('The number of !points to compare if >=', userpoints_translation())
+  );
+}
+
+/**
+ * Rules Condition - Compare with the default category points from a user
+ */
+function userpoints_condition_total_points_lessthan($account, $settings) {
+  return (userpoints_get_current_points($account->uid, 'all') < $settings['points']);
+}
+
+/**
+ * Rules Condition form configuration - allow set the number of points to compare
+ */
+function userpoints_condition_total_points_lessthan_form($settings = array(), &$form) {
+  $form['settings']['points'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Number of points to compare'),
+    '#default_value' => isset($settings['points']) ? $settings['points'] : '',
+    '#description' => t('The number of !points to compare if <', userpoints_translation())
+  );
+}

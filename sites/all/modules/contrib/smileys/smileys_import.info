@@ -1,0 +1,12 @@
+; $Id: smileys_import.info,v 1.2.2.3 2010/03/29 17:04:18 Gurpartap Exp $
+name = Smileys Import
+description = "Import phpBB or Adium smiley packages."
+dependencies[] = smileys
+package = Smileys
+core = 6.x
+; Information added by drupal.org packaging script on 2010-04-07
+version = "6.x-1.0"
+core = "6.x"
+project = "smileys"
+datestamp = "1270664107"
+

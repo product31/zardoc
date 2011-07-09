@@ -1,0 +1,66 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Install file for gigya user module
+ */
+
+/**
+ * Implementation of hook_schema().
+ */
+function gigya_schema() {
+  $schema['gigya'] = array(
+    'description' => t('gigya per-user settings.'),
+    'fields' => array(
+      'uid' => array(
+        'description' => t('Primary key: user ID'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'gigya_uid' => array(
+        'description' => t('Gigya User ID'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'loginProvider' => array(
+        'description' => t('Service representing gigya id'),
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('uid'),
+  );
+  return $schema;
+}
+
+function gigya_install() {
+  drupal_install_schema('gigya');
+}
+
+function gigya_uninstall() {
+  drupal_uninstall_schema('gigya');
+  $key = variable_get('gigya_APIKey', '');
+  $secret = variable_get('gigya_SecretKey', '');
+
+  $variables = db_query("SELECT name FROM {variable} WHERE name LIKE 'gigya%%'");
+  while ($variable = db_fetch_object($variables)) {
+    variable_del($variable->name);
+  }
+  //clear the actions out
+  $aidres = db_query("SELECT aid FROM {actions} WHERE callback LIKE 'gigya%%'");
+  while($aids = db_fetch_array($aidres)) {
+    actions_delete($aids['aid']);
+  }
+  //$actions = db_query("DELETE from {actions} AS act, {actions_aid} AS a, {trigger_assignments} AS trigger WHERE callback LIKE 'gigya%%' and act.aid = a.aid and trigger.aid = a.aid");
+
+  //keep the API key and secret. makes reinstalling the module much less annoying.
+  variable_set('gigya_APIKey', $key);
+  variable_set('gigya_SecretKey', $secret);
+}

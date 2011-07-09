@@ -1,0 +1,34 @@
+PLATFORM CHANGELOG
+==================
+2010-08-18:
+- Undoing the accidental renaming of the 'events' view to 'sonybmg_events'.
+- Adding the hoverintent JS library.
+- The sony_register.install file now contains update 6003 that removes all instances of "Province of China" from Taiwan in the country select on the registration page.
+- Dropping broken code from sonybmg_dev that tried to display the user and revision of the svn checkout.
+- Updating M2 JS code to address DTCS-4228.
+
+2010-08-17:
+- Added settings form to the takers_bro.
+
+2010-08-16:
+- Adding the jQuery jPlayer library.
+- Better messaging to M2 JS for unpriced items.
+- Fixing bad calls to drupal_add_js() in sonybmg and sony_connect.
+
+2010-08-11:
+- Updating viewscarousel to 6.x-1.0-rc1. Should address DTCS-5303.
+- Updating Pressflow to 6.19.
+
+2010-07-29:
+.htacess file
+Commented out the following lines:
+
+  RewriteCond %{HTTP_HOST} !^www\.davidarchuleta\.com$
+  RewriteCond %{HTTP_HOST} !^www\.acdc\.com$
+  RewriteCond %{HTTP_HOST} !^www\.ozzy\.com$
+  RewriteCond %{HTTP_HOST} !^ozzy6\.d6-dev\.gdb-dev\.com$
+  RewriteCond %{REQUEST_URI} ^/$
+  RewriteRule .* - [S=4]
+
+There is no reason to skip boost on the front page for all non global sites with the new configuration. 
+

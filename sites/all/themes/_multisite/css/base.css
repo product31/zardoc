@@ -1,0 +1,148 @@
+@CHARSET "UTF-8";
+
+/**
+ * Very basic common styling across all sites. Code in this file should
+ * rarely, if ever need to be overriden by a sub-theme.
+ */
+pre, code {
+  font: 115% monospace;
+}
+
+tr, td {
+  padding: .25em;
+}
+
+td.icon {
+  text-align: center;
+}
+
+a {
+  outline: none;
+}
+
+table tr.odd, table tr.even, table td {
+  background: transparent;
+}
+
+#simplemenu {
+  position: absolute;
+  top: 0;
+}
+
+body.simplemenu-enabled #page {
+  margin-top: 20px;
+}
+
+
+/* Form elements */
+.container-inline-date div {
+  display: inline;
+}
+
+.views-tabset,
+.views-tabset strong {
+  color: #000;
+}
+
+.views-tabset a:link {
+  color: #06C;
+}
+
+/* Alerts, Status, Help Messages  */
+.messages {
+  padding: 1em;
+  border: 1px solid #ddd;
+  background: #eee;
+  margin: 10px 0;
+}
+
+.messages a:link, .messages a:visited, .messages a:hover, .messages a:active {
+  color: #06C;
+}
+
+div.messages {
+  padding: 1em;
+}
+
+/* Administration styles */
+.admin-panel {
+  margin: 0;
+  padding: 0;
+}
+
+.admin-panel .body {
+  background-color: #eee;
+  border: 1px solid #ddd;
+}
+
+.admin-panel .body dl, .admin-panel .body p {
+  padding: 10px;
+}
+
+.admin-panel h3 {
+  margin: 0;
+  padding: 5px;
+  font-family: verdana;
+  font-size: 122%;
+  border-width: 0px 2px 2px 2px;
+}
+
+.admin-panel a, .admin-panel a:link, .admin-panel a:visited, .admin-panel a:hover, .admin-panel a:active,
+.update a, .update a:link, .update a:visited, .update a:hover, .update a:active {
+    color: #06C;
+}
+
+/* Scalable Text jQuery
+========================================*/
+html.js .scalable-text {
+  visibility: hidden;
+}
+
+/* Inline form labels
+========================================*/
+label.inline-label-processed {
+  color: #999;
+  padding: 3px 5px;
+}
+
+#profile .profile {
+    width: auto;
+}
+
+/*
+Freewheel hidden swf - removing the 1px by 1px div from the flow of the page
+------------------------------------------------------------------------- */
+#HeadlessAdManager{
+  position:absolute;
+  left:0;
+  bottom:0;
+}
+
+/* Prevents tumblr images from taking over entire page
+====================================================*/
+img.tumblr-photo {
+  width: 85%;
+  margin: 0 auto;
+}
+
+#trust-e {
+	margin-top: 10px;
+	text-align: center;
+	display: block;
+}
+
+/* Removes the pesky border and background on thickbox
+====================================================*/
+
+#TB_window {
+  background-color: transparent;
+  border: 0 solid #000000;
+  margin: 0; 
+  padding: 0;
+}
+
+#TB_iframeContent .popups-processed {
+  background: none no-repeat scroll center top transparent !important;
+  margin: 0; 
+  padding: 0;
+}

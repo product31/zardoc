@@ -1,0 +1,13 @@
+Index: tabbed_block.module
+===================================================================
+--- tabbed_block.module	(revision 14450)
++++ tabbed_block.module	(working copy)
+@@ -296,7 +296,7 @@
+     $block->subject = $temp['title'];
+   }
+ 
+-  $result = db_query("SELECT pages, visibility FROM {blocks} WHERE theme = '%s' AND module = '%s' AND delta = %d", $theme, $block->module, $block->delta);
++  $result = db_query("SELECT pages, visibility FROM {blocks} WHERE theme = '%s' AND module = '%s' AND delta = '%s'", $theme, $block->module, $block->delta);
+ 
+   $block = (object)array_merge((array)$block, (array)db_fetch_object($result));
+   if ($block->pages) {

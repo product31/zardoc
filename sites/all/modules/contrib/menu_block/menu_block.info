@@ -1,0 +1,7 @@
+; $Id: menu_block.info,v 1.6 2008/08/05 03:45:10 johnalbin Exp $
+
+name = "Menu Block"
+description = "Provides configurable blocks of menu items."
+
+core = 6.x
+dependencies[] = menu

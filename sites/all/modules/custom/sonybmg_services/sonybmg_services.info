@@ -1,0 +1,9 @@
+name = Sony BMG Services
+description = Exposes some Sony specific services.
+package = Sony BMG
+core = 6.x
+dependencies[] = services
+
+l10n server = translate.gdb-dev.com
+project = "sonybmg_services"
+version = "6.x-2.x"

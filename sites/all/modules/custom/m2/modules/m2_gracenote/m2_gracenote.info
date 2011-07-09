@@ -1,0 +1,12 @@
+; $Id$
+name = M2 Gracenote formatter
+description = Provides Gracenote formatting for M2 lyrics fields.
+package = Sony M2
+core = 6.x
+dependencies[] = content
+dependencies[] = m2
+dependencies[] = geoip
+
+l10n server = translate.gdb-dev.com
+project = "m2_gracenote"
+version = "6.x-2.x"

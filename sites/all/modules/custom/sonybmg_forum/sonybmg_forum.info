@@ -1,0 +1,10 @@
+; $Id$
+name = Forum Section
+description = Implements the site forum. Disabling this module will turn off the site forum.
+dependencies[] = nodeforum
+package = Sony BMG Site Features
+core = 6.x
+
+l10n server = translate.gdb-dev.com
+project = "sonybmg_forum"
+version = "6.x-2.x"

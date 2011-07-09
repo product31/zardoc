@@ -1,0 +1,28 @@
+<?php
+/**
+ * @file sonybmg_views_shuffle.module
+ * @author Scott Nelson of This by Them <scott@thisbythem.com>
+ */
+function sonybmg_views_shuffle_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'sonybmg_views_shuffle'),
+  );
+}
+
+function template_preprocess_sonybmg_views_shuffle_list(&$vars) {
+  drupal_add_js(drupal_get_path('module', 'sonybmg_views_shuffle') . '/jquery.easing.js', 'module');
+  drupal_add_js(drupal_get_path('module', 'sonybmg_views_shuffle') . '/shuffler.js', 'module');
+
+  // Pass information to our behaviour about how to attach the shuffler.
+  $view = &$vars['view'];
+  $vars['shuffle_id'] = $id = views_css_safe('view-id-' . $view->name . '-' . $view->current_display);
+
+  // TODO maybe use the options in $vars['options'] to provide more options?
+  $options = new stdClass;
+  $options->prev = '#' . $id . '-nav a.prev';
+  $options->next = '#' . $id . '-nav a.next';
+  drupal_add_js(array('views_shuffle' => array($id => $options)), 'setting');
+
+  template_preprocess_views_view_unformatted($vars);
+}

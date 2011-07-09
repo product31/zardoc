@@ -1,0 +1,10 @@
+; $Id$
+name = "Embedded Media Field Audio Player"
+description = "A generic embeded field provider that uses the WordPress Audio Player plugin flash to embed media."
+core = 6.x
+dependencies[] = emaudio
+
+l10n server = translate.gdb-dev.com
+project = "emaudio_audio_player"
+version = "6.x-2.x"
+

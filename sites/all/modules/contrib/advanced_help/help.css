@@ -1,0 +1,33 @@
+/* $Id: help.css,v 1.5 2008/05/30 18:55:44 merlinofchaos Exp $ */
+
+.advanced-help-topic code, .advanced-help-topic pre {
+  border: 1px solid #444;
+  background: #f1f1f1;
+  margin: 1em;
+  padding: .2em;
+  display: block;
+}
+
+.help-left {
+  float: left;
+}
+
+.help-right {
+  float: right;
+}
+
+.help-box {
+  margin: .5em;
+}
+
+.help-navigation {
+  border-top: 1px dotted #ccc;
+}
+
+.help-previous {
+  float: left;
+}
+
+.help-next {
+  float: right;
+}

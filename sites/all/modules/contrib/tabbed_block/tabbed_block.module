@@ -1,0 +1,745 @@
+<?php
+
+// $Id: tabbed_block.module,v 1.10.2.1 2008/07/01 11:03:08 joetsuihk Exp $
+
+/**
+ * author:joe tsui
+ * email:joetsuihk@gmail.com
+ * homepage/blog: http://www.joetsuihk.com
+ * bugs reporting: http://www.joetsuihk.com/project/tabbed_block
+ * GPL license
+ */
+
+
+/**
+ * @file
+ * 
+ * As this module have to compatable with IE, with an image button
+ * couple of structure change is made
+ *
+ * one the the most special is about the hook_submit()
+ * this function will not do anything unless $form_values['exists'] is set to
+ * which means, hook_submit do not process anything, as ['exists'] is build by tabbed_block_admin_settings(), if validation is true
+ *
+ * it is only called by tabbed_block_admin_setting(), as a normal function call.
+ *
+ *
+ */
+
+/**
+ * data structure:
+ * a single tabbed block(tabbed_block_settings0)
+ Array
+ (
+ [0] => comment-0
+ [1] => blog-0
+ [order] => module_name-delta
+ )
+ * list of all tabbed blocks(tabbed_block_list)
+ Array
+ (
+ [0] => 0
+ [1] => 1
+ [index] => name
+ )
+ *
+ */
+
+
+/**
+ * hook_block()
+ *  @param $op: list or view or Add block
+ * 	@param $delta: delta
+ *
+ * 	@return $block
+ * 		$block['subject']: subject of the block
+ * 		$block['content']: content of the block
+ */
+function tabbed_block_block( $op="list" , $module_delta=0 ) {
+
+  static $core_sent;
+  $path = drupal_get_path('module', 'tabbed_block');
+  
+  drupal_add_js( $path ."/tabbed_block.js" );
+
+  if ( $op == "list" ) {
+
+    $list = variable_get( 'tabbed_block_list', NULL );
+    if ( $list ) {
+      foreach ( $list as $block_key => $block_name ) {
+        //TODO: change the display name
+        $blocks[$block_key]['info'] = t("Tabbed Block") . $block_key;
+      }
+      return $blocks;
+    }
+
+
+  }
+  elseif ( $op == "view" ) {
+    //css for this block module
+    drupal_add_css($path .'/tabbed_block.css');
+
+    //get current settings
+    $settings = variable_get( 'tabbed_block_settings'. $module_delta , NULL);
+
+    //if there is settings:
+    if ( $settings ) {
+      //currently do not use subject for this block, may override in config of block inside drupal
+      //TODO: enable name suuply in tabbed_block_list(v1.0+)
+      $block['subject'] = "";
+
+      //counter
+      $i = 0;
+      $tab_subject = "<ul>";
+      $tab_content = "";
+      
+      //add this block setting to js
+      drupal_add_js( array( 'tabbed_block' => array( $module_delta => array( 'effects' => $settings['settings']['effects'], 'ajax' => $settings['settings']['ajax'] ) ) ), 'setting');
+      
+      foreach ( $settings['block_list'] as $conf ) {
+
+        list( $name , $delta, $delta2) = explode( "-" , $conf );
+
+        if ( !empty($delta2) ) {
+          $delta = $delta ."-". $delta2;
+        }
+
+        //use this function to get the block content,
+        //instead of hard code
+        //example: array( 'module' => 'comment'    , 'delta' => '0' , 'override_title' => 0 , 'override_title_text' => '' ),
+        $temp = tabbed_block_output_content_block( array( 'module' => $name , 'delta' => $delta , 'override_title' => 0 , 'override_title_text' => '' ) );
+
+        //tab headers
+        //catch potential empty block, redirect user to overide title
+        if ( $temp->subject ) {
+          $tab_subject .= "<li><a href='#' id='fragment". $module_delta ."-". $i ."'>". $temp->subject ."</a></li>";
+          //tabe content
+          if ( $temp->content ) {
+            $tab_content .= "<div id='content-fragment". $module_delta ."-". $i ."'>". $temp->content ."</div>";
+          }
+          else{
+            $tab_content .= "<div id='content-fragment". $module_delta ."-". $i ."'>Nothing here.</div>";
+          }
+        }
+        else{
+          $tab_subject .= "<li><a href='#' id='fragment". $module_delta ."-". $i ."'>Error! click here!</a></li>";
+          $tab_content .= "<div id='content-fragment". $module_delta ."-". $i ."'>". l("Please config the tab title here." , "admin/build/block/configure/". $name ."/". $delta) ."</div>";
+        }
+
+        $i++;
+      }
+      $tab_subject .= "</ul>";
+
+    }
+    elseif ( !variable_get( 'tabbed_block_list' , NULL) ) {
+      $block['subject'] = "Tabbed Block Block";
+      $tab_subject = '';
+      $tab_content = 'No tabbed Block exists. <a href="'. base_path() .'admin/settings/tabbed_block/add">Add</a>';
+    }
+    else{
+      //if settings exists
+      $block['subject'] = "Tabbed Block Block";
+      $tab_subject = '';
+      $tab_content = l("Configure this block" , 'admin/settings/tabbed_block/edit/'. $module_delta);
+    }
+
+    //tab wrapper needed for tab
+    $block['content'] = "<div class='tabbed-block'>";
+    $block['content'] .= $tab_subject . $tab_content;
+    $block['content'] .= "</div>";
+    return $block;
+
+  }
+}
+
+/**
+ * Menu callback. Output a block content only
+ * for ajax use only
+ *
+ */
+function tabbed_block_js() {
+  //require the block html
+  $block = tabbed_block_block( "view" , substr( $_POST['id'] , -1 , 1 ) );
+  print drupal_to_js(array('status' => TRUE, 'content' => $block['content'] ));
+  exit();
+}
+
+/**
+ * display a list of tabbed block
+ * from menu: admin/settings/tabbed_block/list
+ *
+ */
+function tabbed_block_list() {
+  $output = '';
+  $header = array( 'Name' , 'Operation' );
+
+  $list = variable_get( 'tabbed_block_list' , NULL );
+
+  if ( $list ) {
+    foreach ( $list as $block_key => $block_name ) {
+      $rows[] = array(
+        'tabbed_block'. $block_key ,
+      l("edit", "admin/settings/tabbed_block/edit/". $block_key) ." ". l("delete", "admin/settings/tabbed_block/delete/". $block_key) );
+    }
+    $output .= '<p>You may add new block in the above '. l('Add tab', 'admin/settings/tabbed_block/add') .'.</p>';
+
+    $output .= '<p>Remember to place the tabbed block to target regions in '. l('block setting page', 'admin/build/block') .'.</p>';
+
+    $output .= theme('table', $header, $rows);
+  }
+  else{
+    $output = 'No Tabbed block configured<br />Press '. l('here', 'admin/settings/tabbed_block/add') .' to add a new tabbed block.';
+  }
+
+  return $output;
+}
+
+/**
+ * hook_menu()
+ *	register both ajax request path and settings menu path
+ *
+ */
+function tabbed_block_menu() {
+  $items = array();
+
+  //register PHP handler for ajax request
+  $items['tabbed_block/menu'] = array(
+    'title' => t('Tabbed Block'),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'page callback' => 'tabbed_block_js',
+  );
+
+  //settings list
+  $items['admin/settings/tabbed_block'] = array(
+    'title' => t('Tabbed Block settings'),
+    'access arguments' => array('administer blocks'),
+    'page callback' => 'tabbed_block_list',
+    'description' => 'Config the tabbed block',
+  );
+  $items['admin/settings/tabbed_block/list'] = array(
+    'title' => t('List'),
+    'access arguments' => array('administer blocks'),
+    'page callback' => 'tabbed_block_list',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -7,
+  );
+  $items['admin/settings/tabbed_block/add'] = array(
+    'title' => t('Add'),
+    'access arguments' => array('administer blocks'),
+    'page callback' => 'tabbed_block_add',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 0,
+  );
+
+
+  $delta = arg(4);
+
+  $items['admin/settings/tabbed_block/edit/%'] = array(
+    'title' => t('Edit'),
+    'access arguments' => array('administer blocks'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('tabbed_block_admin_settings'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['admin/settings/tabbed_block/delete/%'] = array(
+    'title' => t('Are you sure you want to delete Tabbed block ') . $delta ."?",
+    'access arguments' => array('administer blocks'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('tabbed_block_delete', 4),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+
+}
+
+/**
+ * hook_help()
+ *
+ */
+function tabbed_block_help($path) {
+  switch ($path) {
+    case 'admin/modules#tabbed_block':
+    case 'admin/help#tabbed_block':
+      return '<p>A module with tabs blocks</p>';
+      break;
+  }
+}
+
+/**
+ * in response to find the block html
+ *
+ * @param[module]:module name
+ * @param[delta]
+ * @param[override_title]
+ * @param['override_title_text']
+ *
+ * @return $block array
+ */
+function tabbed_block_output_content_block($conf) {
+  global $theme;
+
+  $block = (object) module_invoke($conf['module'], 'block', 'view', $conf['delta']);
+
+  $block->module = $conf['module'];
+  $block->delta = $conf['delta'];
+
+  $temp = db_fetch_array(db_query("SELECT title FROM {blocks} WHERE theme = '". $theme ."' AND module = '". $conf['module'] ."' AND delta ='". $conf['delta'] ."'" ) );
+  if ( $temp['title'] ) {
+    $block->subject = $temp['title'];
+  }
+
+  if ( !$block->subject ) {
+    $temp = block_box_get( $conf['delta'] );
+    $block->subject = $temp['title'];
+  }
+
+  $result = db_query("SELECT pages, visibility FROM {blocks} WHERE theme = '%s' AND module = '%s' AND delta = '%s'", $theme, $block->module, $block->delta);
+
+  $block = (object)array_merge((array)$block, (array)db_fetch_object($result));
+  if ($block->pages) {
+    if ($block->visibility < 2) {
+      $path = drupal_get_path_alias($_GET['q']);
+      $regexp = '/^('. preg_replace(array('/(\r\n?|\n)/', '/\\\\\*/', '/(^|\|)\\\\<front\\\\>($|\|)/'), array('|', '.*', '\1'. preg_quote(variable_get('site_frontpage', 'node'), '/') .'\2'), preg_quote($block->pages, '/')) .')$/';
+      $page_match = !($block->visibility xor preg_match($regexp, $path));
+    }
+    else {
+      $page_match = drupal_eval($block->pages);
+    }
+  }
+  else {
+    $page_match = TRUE;
+  }
+  if ($page_match) {
+    $output = $block;
+  }
+  return $output;
+}
+
+/**
+ * function for add tabbed block
+ *
+ */
+function tabbed_block_add( ) {
+  $list = variable_get( 'tabbed_block_list' , NULL );
+  if ( $list ) {
+    ksort( $list );
+    $max_key = $list[count($list)];
+    $list[] = $max_key+1 ;
+  }
+  else{
+    $list[] = 0;
+  }
+  variable_set( 'tabbed_block_list' , $list );
+
+  drupal_set_message( 'Tabbed Block added successfully. You may configure the block below.' );
+
+  drupal_goto( 'admin/settings/tabbed_block' );
+}
+
+/**
+ * Menu callback: confirm delete block
+ */
+function tabbed_block_delete( $form_state ) {
+
+
+  $form['id'] = array('#type' => 'hidden', '#value' => arg(4));
+
+  $form['warning'] = array(
+    '#value' => t('Please remove this block from sidebars before delete it') ."<br />",
+    '#prefix' => '<p class="tabbed_block_error">',
+    '#subfix' => '</p>',
+  );
+
+  $form['help'] = array(
+    '#value' => t('This action cannot be undone.') ."<br />",
+    '#prefix' => '<p>',
+    '#subfix' => '</p>',
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Delete'),
+  );
+
+  $form['cancel'] = array(
+    '#value' => "<a href='../'>". t('Cancel') ."</a>",
+  );
+
+  return $form;
+}
+
+function tabbed_block_delete_submit( $form, &$form_state ) {
+  $list = variable_get( 'tabbed_block_list' , NULL );
+  unset($list[arg(4)]);
+  variable_set( 'tabbed_block_list' , $list );
+  variable_del( 'tabbed_block_settings'. $form_state['values']['id'] );
+  $form_state['redirect'] = 'admin/settings/tabbed_block';
+  drupal_set_message(t('The block had been deleted.'));
+
+}
+
+
+/**
+ * core function to config wht is inside the tabbed block.
+ * the function will not do anything to DB until save is pressed
+ * so there is hidden fields to save the current settings until 'save'
+ *
+ * callback from tabbed_block_menu
+ *
+ * use non-drupal process flow.
+ *
+ * @return $form
+ */
+function tabbed_block_admin_settings( $form_states ) {
+
+  //get args passed in, to find the delta of this editing block
+  $module_delta = arg(4);
+
+  $form['exists'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Existing blocks'),
+    '#collapsible' => true,
+    '#weight' => -5,
+    '#tree' => TRUE,
+  );
+
+
+  $form['help'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Help'),
+    '#collapsible' => false,
+    '#weight' => -7,
+  );
+  $form['help']['text'] = array(
+    '#value' => 
+  t("Use the add buttom below to add block, in order<br />Or use the trash bin buttom to delete blocks."),
+  );
+
+  $form['add'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Add block to list'),
+    '#collapsible' => true,
+    '#weight' => -5,
+  );
+
+  //generate the select list of all blocks from all modules
+  foreach (module_list() as $module) {
+    $module_blocks = module_invoke($module, 'block', 'list');
+    // do not display blocks that is from tabbed_block, which means, do not support recursive blocks
+    if ($module_blocks && $module != 'tabbed_block') {
+      $array = array();
+      foreach ($module_blocks as $delta => $block) {
+        // strip_tags used because it goes through check_plain and that just looks bad.
+        
+        $array["$module-$delta"] = strip_tags($block['info']);
+      }
+      $options[$module] = $array;
+    }
+  }
+  
+  $form['add']['block'] = array(
+    '#type' => 'select',
+    '#options' => $options,
+    '#title' => t('Please select a block that you want to add'),
+    '#width' => 30,
+  );
+
+  $form['add']['submit'] = array(
+    '#type' => 'button',
+    '#value' => t('Add block'),
+  );
+  
+  //get settings from variable
+  $temp = variable_get('tabbed_block_settings'. $module_delta, NULL);
+  $settings = $temp['settings'];
+  if ( !$settings['effects'] ) {
+    $settings['effects'] = 'fadeIn()';
+  }
+
+  $form['settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Settings'),
+    '#collapsible' => true,
+    '#weight' => -4,
+  );
+  
+  $form['settings']['effects'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Effects'),
+    '#default_value' => $settings['effects'],
+  	//'#value' => $settings['effects'],
+  	'#required' => TRUE,
+    '#max-length' => 20,
+  	'#size' => 20,
+  	'#description' => t('Please enter the name of the effect, with (). For example, fadeIn()'),
+  );
+  
+  $form['settings']['ajax'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable ajax?'),
+    '#default_value' => $settings['ajax'],
+  );
+  
+  $form['delta'] = array(
+    '#type' => 'hidden',
+    '#value' => $module_delta,
+  );
+
+  $form['save']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+
+  $form['#multistep'] = TRUE;
+  $form['#redirect'] = FALSE;
+
+  return $form;
+}
+
+function tabbed_block_form_alter(&$form, &$form_state, $form_id) {
+
+  if ( $form_id == 'tabbed_block_admin_settings' ) {
+
+    //if this is from a submit
+    if ( $form_state['post']['exists'] ) {
+
+      for ( $i=0 ; $i < count($form_state['post']['exists']) ; $i++ ) {
+        $block_list[] = $form_state['post']['exists'][$i]['hidden'];
+      
+        if ( $form_state['post']['exists'][$i]['up'] ) {
+          $op = 'up';
+          $key = $i;
+        }
+        elseif ($form_state['post']['exists'][$i]['down']) {
+          $op = 'down';
+          $key = $i;
+        }
+        elseif ($form_state['post']['exists'][$i]['delete']) {
+          $op = 'delete';
+          $key = $i;
+        }
+      }
+    }
+    else{
+      //get current setting from DB
+      $module_delta = arg(4);
+      if ( $temp = variable_get('tabbed_block_settings'. $module_delta, NULL) ) {
+        $block_list = $temp['block_list'];
+      }
+    }
+     
+    //process add block buttom
+    if ( $form_state['post']['op'] == t('Add block') ) {
+
+      //insert the selected block into settings
+      $block_list[] = $form_state['post']['block'];
+
+      drupal_set_message("Added successfully. <br/>Note that <b>this configuration will not be saved until you press the save buttom</b>");
+
+    }
+    elseif ( $form_state['post']['op'] == t('Delete all block') ) {
+       
+      $block_list = array();
+       
+       drupal_set_message("All Blocks deleted successfully. <br/>Note that <b>this configuration will not be saved until you press the save buttom</b>");
+       
+    }
+    elseif ($op == 'delete') {
+
+       array_splice( $block_list , $key , 1 );
+    
+       drupal_set_message("Deleted successfully. <br/>Note that <b>this configuration will not be saved until you press the save buttom</b>");
+    
+    }
+    elseif ( $op == "up" ) {
+    
+       //find the block need to move
+       $move_block = array_slice( $block_list , $key , 1 );
+    
+       //delete the moved block from array
+       array_splice( $block_list , $key , 1 );
+    
+       //a self defined function to perform re-index and insertion of $move_block
+       $block_list = array_move( $block_list , $move_block[0] , $key-1 );
+    
+       drupal_set_message("Move up successfully. <br/>Note that <b>this configuration will not be saved until you press the save buttom</b>");
+    
+    }
+    elseif ( $op == "down" ) {
+    
+       //find the block need to move
+       $move_block = array_slice( $block_list , $key , 1 );
+    
+       //delete the moved block from array
+       array_splice( $block_list , $key , 1 );
+    
+       //a self defined function to perform re-index and insertion of $move_block
+       $block_list = array_move( $block_list , $move_block[0] , $key+1 );
+    
+       drupal_set_message("Move down successfully. <br/>Note that <b>this configuration will not be saved until you press the save buttom</b>");
+   
+    }
+    
+    //generate an exists block list, with their names, position, and operation buttoms
+
+    if ( $block_list ) {
+      //init count of blocks
+
+      $max_i = count( $block_list )-1;
+      //generate form for each $block_list
+      for ( $i = 0 ; $i < count($block_list) ; $i++ ) {
+        $block = $block_list[$i];
+
+        list( $name , $delta ) = explode( "-" , $block , 2 );
+
+
+        $blocks_name = module_invoke( $name, 'block', 'list');
+        $module_path = base_path() . drupal_get_path('module', 'tabbed_block');
+        
+         //delete buttom
+        $form['exists'][$i]['delete'] = array(
+          '#type' => 'image_button',
+          '#src' => drupal_get_path('module', 'tabbed_block') .'/user-trash.png',
+          '#value' => 'delete#'. $i, // original value of button text
+          '#executes_submit_callback' => FALSE,
+          '#prefix' => '<div>',
+        );
+        
+        //move up buttom
+        if ( $i != 0 ) {
+          $form['exists'][$i]['up'] = array(
+            '#type' => 'image_button',
+            '#src' => drupal_get_path('module', 'tabbed_block') .'/go-up.png',
+            '#value' => 'up#'. $i, // original value of button text
+            '#executes_submit_callback' => FALSE,
+          );
+        }
+        else{
+          $form['exists'][$i]['up'] = array(
+            '#value' => '<span style="margin-right:18px;">&nbsp;</span>',
+          );
+        }
+        //move down buttom
+        if ( $i != $max_i ) {
+          $form['exists'][$i]['down'] = array(
+            '#type' => 'image_button',
+            '#src' => drupal_get_path('module', 'tabbed_block') .'/go-down.png',
+            '#value' => 'down#'. $i, // original value of button text
+            '#executes_submit_callback' => FALSE,
+          );
+        }
+        else{
+          $form['exists'][$i]['down'] = array(
+            '#value' => '<span style="margin-right:18px;">&nbsp;</span>',
+          );
+        }
+
+        //name of blocks for display
+        $form['exists'][$i]['name'] = array(
+          '#prefix' => '<span>',
+          '#value' => $blocks_name[$delta]['info'],
+          '#suffix' => '</span></div>',
+        );
+        
+        //hidden field for records position on operations other than save
+        $form['exists'][$i]['hidden'] = array(
+          '#type' => 'hidden',
+          '#value' => $block,
+        );
+
+
+      }
+
+      $form['delete_all'] = array(
+        '#type' => 'button',
+        '#value' => t('Delete all block'),
+      );
+
+    }
+    else{
+      //message for no block configured
+      $form['exists']['message'] = array(
+        '#type' => 'markup',
+        '#value' => "There is no block added currently",
+      );
+    }
+  }
+}
+
+/**
+ * validate
+ * it is used to prevent double process of thr form, if op is not save
+ *
+ */
+function tabbed_block_admin_settings_validate( $form, &$form_state ) {
+
+}
+/**
+ * submit
+ * this function will not do anything unless $form_values['exists'] is set to
+ * which means, hook_submit do not process anything, as ['exists'] is build by tabbed_block_admin_settings(), if validation is true
+ *
+ * it is only called by tabbed_block_admin_setting(), as a normal function call.
+ */
+function tabbed_block_admin_settings_submit( $form, &$form_state ) {
+  //process submit
+
+  /*
+  print "<pre>";
+  print_r($form_state);
+  print "</pre>";
+  exit();
+  */
+  
+  $variable = 'tabbed_block_settings'. arg(4);
+  
+  $settings = array( 'effects' => $form_state['values']['effects'], 'ajax' => $form_state['values']['ajax'] );
+  
+  //init exists blocks from POST instead of database settings
+  if ( $form_state['values']['exists'] ) {
+    for ( $i=0 ; $i < count($form_state['values']['exists']) ; $i++ ) {
+      $block_list[] = $form_state['values']['exists'][$i]['hidden'];
+    }
+    if ($form_state['values']['op'] == t('Save') ) {
+      variable_set( $variable , array( 'settings' => $settings, 'block_list' => $block_list ) );
+      drupal_set_message( "Blocks saved sucessfully." );
+    }
+  }
+  else{
+    //nothing here. delete all blocks will arrive true here.
+    variable_del( $variable );
+    drupal_set_message( "All Blocks deleted sucessfully." );
+  }
+
+  $form_state['redirect'] = 'admin/settings/tabbed_block';
+}
+
+/**
+ * define a function that move values to a specific index inside array
+ *
+ * @param $in_array: the array that need to be inserted
+ * @param $insert: the insert element
+ * @param $new_key: the position of the insert element
+ *
+ * @return $array: the sortted array
+ */
+function array_move( $in_array , $insert , $new_key ) {
+
+  $new_array = array();
+  reset( $in_array );
+
+  //as there is one more element have to insert, so $i<= count
+  for ( $i = 0 ; $i <= count( $in_array ) ; $i++ ) {
+    if ( $i == $new_key ) {
+      $new_array[] = $insert;
+    }
+    else{
+      $new_array[] = current( $in_array );
+      next( $in_array );
+    }
+  }
+  return $new_array;
+}

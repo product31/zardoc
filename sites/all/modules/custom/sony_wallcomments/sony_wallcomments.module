@@ -1,0 +1,104 @@
+<?php
+
+
+/**
+ * Implementation of hook_menu_alter()
+ *
+ * Alter the node view page to come to us instead. Don't do this if
+ * another module has already done so, or if delegator module is enabled.
+ */
+function sony_wallcomments_menu_alter(&$items) {
+  // Override the node view handler for our purpose.
+  if ($items['node/%node']['page callback'] == 'nodecomment_node_view' || $items['node/%node']['page callback'] ==  'node_page_view') {
+    $items['node/%node']['page callback'] = 'sony_wallcomments_node_view';
+  }
+}
+
+/**
+ * Menu callback; view a single node.
+ */
+function sony_wallcomments_node_view($node, $cid = NULL) {
+  drupal_set_title(check_plain($node->title));
+
+  $output = node_view($node, FALSE, TRUE);
+  if (!empty($node->comment)) {
+    $output .= comment_render($node, $cid);
+  }
+  else if (!empty($node->node_comment)) {
+    $output .= sony_wallcomments_render($node, $cid);
+  }
+
+  // Update the history table, stating that this user viewed this node.
+  node_tag_new($node->nid);
+
+  return $output;
+}
+
+/**
+ * Ask Delegator to use our version of the node page view instead of
+ * Drupal's when falling back.
+ */
+function sony_wallcomments_delegator_override($type) {
+  // Continue to support the older delegator module by passing thru
+  // to the newer function:
+  return sony_wallcomments_page_manager_override($type);
+}
+
+/**
+ * Ask Page Manager to use our version of the node page view instead of
+ * Drupal's when falling back.
+ */
+function sony_wallcomments_page_manager_override($type) {
+
+  if ($type == 'node_view') {
+    return 'sony_wallcomments_node_view';
+  }
+}
+
+/**
+ * Node comment's version of comment_render, to render all comments on a node.
+ */
+function sony_wallcomments_render($node, $cid = 0) {
+  global $user;
+
+  $output = '';
+
+  if (user_access('access comments')) {
+    // Pre-process variables.
+    $nid = $node->nid;
+    if (empty($nid)) {
+      $nid = 0;
+    }
+
+    // If enabled, show new comment form.
+    $comment_type = nodecomment_get_comment_type($node->type);
+    if (user_access("create $comment_type content") && node_comment_mode($nid) == COMMENT_NODE_READ_WRITE && (variable_get('comment_form_location_'. $node->type, COMMENT_FORM_SEPARATE_PAGE) == COMMENT_FORM_BELOW)) {
+      // There is likely a cleaner way to do this, but for now it will have to do. -- JE
+      $friendly_name = node_get_types('name', $comment_type);
+      $output = nodecomment_form_box($node, t('Post new !type', array('!type' => $friendly_name)));
+    }
+    
+    // Render nothing if there are no comments to render.
+    if (!empty($node->comment_count)) {
+      if ($cid && is_numeric($cid)) {
+        // Single comment view.
+        if ($comment = node_load($cid)) {
+          $output .= theme('node', $comment, TRUE, TRUE);
+        }
+      }
+      else {
+        $view_name = variable_get('node_comment_view_'. $node->type, 'nodecomments');
+        if ($view_name) {
+          $output .= views_embed_view($view_name, 'nodecomment_comments_1', $nid);
+        }
+      }
+    }
+
+    if ($output) {
+      $output = theme('comment_wrapper', $output, $node);
+    }
+  }
+
+  return $output;
+}
+

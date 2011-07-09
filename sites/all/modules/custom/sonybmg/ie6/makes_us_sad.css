@@ -1,0 +1,90 @@
+
+body #modalBackdrop {
+  background: #000 !important;
+  filter:alpha(opacity=90) !important;
+}
+
+body #modalContent {
+  top: 25% !important;
+}
+
+.ieBoxWrapper {
+  position: absolute;
+  margin: 10% 0 0 -200px;
+  width: 480px;
+  left: 50%;
+  padding: 25px;
+  background: #fff;
+  font-family: arial;
+  color: #8a8989;
+  font-size: 13px;
+}
+
+.ieBoxClose {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  padding-right: 20px;
+  background: url(ieBoxImages.jpg) no-repeat right -55px;
+}
+
+.ieBoxTitle{
+  font-size: 11px;
+  text-transform: uppercase;
+  text-align: center;
+  background: url(ieBoxImages.jpg) no-repeat 90px 0;
+  height: 50px;
+  margin-top: 20px;
+}
+
+.ieBoxTitle span {
+  display: none;
+}
+
+.ieBoxClose, 
+.ieBoxWrapper a {
+  color: #8a8989;
+  text-transform: lowercase;
+  cursor: pointer;
+}
+
+.ieBoxMessage {
+  font-size: 16px;
+  margin-top: 16px;
+  color: #666;
+  padding: 10px 0 8px 0;
+  border-bottom: 1px solid #ddd;
+  border-top: 1px solid #ddd;
+}
+
+.ieBoxBrowserOptions {
+  margin: 7px 0 10px 0;
+}
+
+.ieBoxClose {
+  height: 20px;
+}
+
+ul.ieBoxBrowsers {
+  margin: 0 0 0 60px;
+  padding: 0;
+}
+
+ul.ieBoxBrowsers li {
+  list-style: none;
+  margin: 0;
+  float: left;
+}
+
+ul.ieBoxBrowsers li a {
+  background: url(ieBoxImages.jpg) no-repeat 18px -70px;
+  display: block;
+  padding-top: 53px;
+  width: 90px;
+  font-size: 12px;
+  text-align: center;
+}
+
+ul.ieBoxBrowsers li a.chrome  {background-position: -66px -70px;}
+ul.ieBoxBrowsers li a.firefox {background-position: -148px -70px;}
+ul.ieBoxBrowsers li a.safari  {background-position: -235px -70px;}

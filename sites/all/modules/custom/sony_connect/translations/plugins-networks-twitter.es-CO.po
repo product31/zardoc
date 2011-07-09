@@ -1,0 +1,27 @@
+# Colombia translation of sony_connect (all releases)
+# Copyright (c) 2010 by the Colombia translation team
+# Generated from file: sony_connect/plugins/networks/twitter/twitter.inc: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sony_connect (all releases)\n"
+"POT-Creation-Date: 2010-04-05 15:43-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Colombia\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: plugins/networks/twitter/twitter.inc:14
+msgid "Twitter"
+msgstr ""
+
+#: plugins/networks/twitter/twitter.inc:35
+msgid "Consumer key"
+msgstr ""
+
+#: plugins/networks/twitter/twitter.inc:41
+msgid "Consumer secret"
+msgstr ""
+

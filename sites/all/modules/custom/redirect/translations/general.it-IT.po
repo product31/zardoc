@@ -1,0 +1,21 @@
+# Italy translation of redirect (all releases)
+# Copyright (c) 2010 by the Italy translation team
+# Generated from files:
+#  redirect/redirect.module: n/a
+#  redirect/redirect.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: redirect (all releases)\n"
+"POT-Creation-Date: 2010-04-08 16:53-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Italy\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: redirect.module:15; redirect.info:0
+msgid "Redirect"
+msgstr ""
+

@@ -1,0 +1,79 @@
+.block-country_code .co-label,
+.block-locale .co-label {
+  float: left;
+}
+
+.block-country_code ul,
+.block-locale ul {
+  list-style-type: none;
+  margin: 7px 0 0 5px;
+  padding: 0 0 0 0;
+  float: left;
+}
+
+.block-country_code ul li,
+.block-locale ul li {
+  list-style-type: none;
+  margin: 0 10px 0 0;
+  padding: 0 0 0 0;
+  float: left;
+}
+
+.block-country_code ul li a,
+.block-locale ul li a {
+  float: left;
+  padding: 1px; /* hover state gets a border.  this keeps it from jumping */
+}
+.block-country_code ul li a img,
+.block-locale ul li a img {
+  float: left;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}  
+
+.block-country_code ul li a:hover,
+.block-country_code ul li a.active,
+.block-locale ul li a:hover,
+.block-locale ul li a.active {
+  border: #000000 solid 1px;
+  padding: 0px;
+}
+
+.block-country_code ul li.xx { /* hiding this until it works right */
+  display: none;
+}
+
+.sony-global-flyout h2 {
+  display: none;
+}
+.sony-global-flyout .content {
+  background: #eee;
+  float: left;
+}
+.sony-global-flyout .slider {
+  float: left;
+  position: relative;
+  padding-left: 10px;
+}
+/* padding width and height should be added without the .slider in the selector */
+.sony-global-flyout ul {
+  padding: 10px 0;
+}
+.sony-global-flyout .slider ul {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  margin: 0px;
+}
+.sony-global-flyout a.arrow,
+.sony-global-flyout span.current {
+  float: left;
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
+  padding: 10px;
+}
+.sony-global-flyout span.current {
+  background: #ccc;
+}

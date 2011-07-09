@@ -1,0 +1,4 @@
+<cross-domain-policy>
+	<allow-access-from domain="i43.tower.com" />
+	<allow-access-from domain="tower.com" />
+</cross-domain-policy>

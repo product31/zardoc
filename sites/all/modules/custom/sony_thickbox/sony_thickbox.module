@@ -1,0 +1,175 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * file_description
+ */
+
+
+function sony_thickbox_add_js($data) {
+  $path = drupal_get_path('module', 'sony_thickbox');
+  drupal_add_js($path .'/thickbox/thickbox.js');
+  drupal_add_css($path .'/thickbox/thickbox.css');
+  drupal_add_js($path .'/sony_thickbox.js');
+  drupal_add_js($path .'/jquery.cookie.js');
+
+  $settings = array(
+    'sonyThickbox' => array(
+      'pathToImage' => base_path() . $path .'/thickbox/loadingAnimation.gif',
+    ),
+  );
+
+  $settings['sonyThickbox']['blocks'][$data->delta] = array(
+    'auto' => $data->auto,
+    'cookie' => $data->cookie,
+  );
+  drupal_add_js($settings, 'setting');
+}
+
+function sony_thickbox_menu() {
+  $items['admin/build/block/sony_thickbox'] = array(
+    'title' => 'Add Thickbox Block',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 10,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_thickbox_add'),
+    'access arguments' => array('administer blocks'),
+  );
+
+  return $items;
+}
+
+function sony_thickbox_add(&$form_state, $data = array()) {
+  if ($data['delta']) {
+    $form['delta'] = array('#type' => 'value', '#value' => $data['delta']);
+  }
+
+  $form['path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Path'),
+    '#description' => t('Either a Drupal path or absolute path of the page to show in the thickbox.'),
+    '#required' => TRUE,
+    '#default_value' => $data['path'] ? $data['path'] : '',
+  );
+
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Link text'),
+    '#description' => t('The text to display in the link, for users without javascript.'),
+    '#required' => TRUE,
+    '#default_value' => $data['title'] ? $data['title'] : '',
+  );
+
+  $form['width'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Width'),
+    '#size' => 5,
+    '#required' => TRUE,
+    '#default_value' => $data['width'] ? $data['width'] : '',
+  );
+
+  $form['height'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Height'),
+    '#size' => 5,
+    '#required' => TRUE,
+    '#default_value' => $data['height'] ? $data['height'] : '',
+  );
+
+  $form['auto'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Automatic'),
+    '#description' => t('Should the thickbox open on page load? This will also hide the link.'),
+    '#default_value' => $data['auto'] ? $data['auto'] : '',
+  );
+
+  $form['cookie'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Cookie check'),
+    '#description' => t('Should a cookie be set to only display the popup the first time for a given user. Only used if automatic is specified.'),
+    '#default_value' => $data['cookie'] ? $data['cookie'] : '',
+  );
+
+  $form['modal'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Modal Window'),
+    '#description' => t('Setting this removes the top title bar from the thickbox, and the thickbox will only close from javascript inside the iframe that calls <em>self.parent.tb_remove();</em>.'),
+    '#default_value' => $data['modal'] ? $data['modal'] : '',
+  );
+
+  $form['submit'] = array('#type' => 'submit', '#value' => t('Save thickbox'), '#weight' => 10);
+
+  return $form;
+}
+
+function sony_thickbox_add_submit($form, &$form_state) {
+  $data = sony_thickbox_save($form_state['values']);
+
+  _block_rehash();
+
+  $form_state['redirect'] = 'admin/build/block/configure/sony_thickbox/'. $data['delta'];
+
+  return;
+}
+
+function sony_thickbox_save($data) {
+  if ($data['delta']) {
+    drupal_write_record('sony_thickbox', $data, 'delta');
+  }
+  else {
+    drupal_write_record('sony_thickbox', $data);
+  }
+  dsm($data);
+
+  return $data;
+}
+
+function sony_thickbox_block($op, $delta = 0, $edit = array()) {
+  switch ($op) {
+    case 'list':
+      $blocks = array();
+
+      $result = db_query('SELECT * FROM {sony_thickbox}');
+      while ($row = db_fetch_array($result)) {
+        $blocks[$row['delta']] = array(
+          'info' => t('Thickbox: %name', array('%name' => $row['title'])),
+          'cache' => BLOCK_CACHE_GLOBAL,
+          'region' => 'footer',
+        );
+      }
+      return $blocks;
+
+    case 'configure':
+      $form_state = array();
+      $thickbox = db_fetch_array(db_query('SELECT * FROM {sony_thickbox} WHERE delta = %d', $delta));
+
+      $form['thickbox'] = sony_thickbox_add($form_state, $thickbox);
+      unset($form['thickbox']['submit']);
+      $form['thickbox']['#tree'] = 1;
+
+      return $form;
+
+    case 'save':
+      sony_thickbox_save($edit['thickbox']);
+      break;
+
+    case 'view':
+      $thickbox = db_fetch_object(db_query('SELECT * FROM {sony_thickbox} WHERE delta = %d', $delta));
+      $options = array(
+        'attributes' => array(
+          'class' => 'thickbox',
+          'title' => $thickbox->title,
+        ),
+        'query' => 'TB_iframe=true&height='. $thickbox->height .'&width='. $thickbox->width,
+      );
+      if ($thickbox->modal) {
+        $options['query'] .= '&modal=true';
+      }
+
+      $block['content'] = l($thickbox->title, $thickbox->path, $options);
+      sony_thickbox_add_js($thickbox);
+
+      return $block;
+  }
+}

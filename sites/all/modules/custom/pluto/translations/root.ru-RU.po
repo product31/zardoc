@@ -1,0 +1,439 @@
+# Russia translation of pluto (all releases)
+# Copyright (c) 2010 by the Russia translation team
+# Generated from files:
+#  pluto/pluto.admin.achievement.inc: n/a
+#  pluto/pluto.info: n/a
+#  pluto/pluto.module: n/a
+#  pluto/pluto_badge_popup_view.tpl.php: n/a
+#  pluto/pluto.admin.reward.inc: n/a
+#  pluto/pluto.views.inc: n/a
+#  pluto/pluto.install: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: pluto (all releases)\n"
+"POT-Creation-Date: 2010-04-12 14:03-0500\n"
+"PO-Revision-Date: 2010-03-30 14:05-0500\n"
+"Language-Team: Russia\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=((((n%10)==1)&&((n%100)!=11))?(0):(((((n%10)>=2)&&((n%10)<=4))&&(((n%100)<10)||((n%100)>=20)))?(1):2));\n"
+
+#: pluto.admin.achievement.inc:47
+msgid "Save changes"
+msgstr ""
+
+#: pluto.info:0
+msgid "Sony BMG"
+msgstr ""
+
+#: pluto.module:138
+msgid "Edit"
+msgstr "Правка"
+
+#: pluto.admin.achievement.inc:74
+msgid "Operations"
+msgstr "Действия"
+
+#: pluto.module:125,133,175
+msgid "View"
+msgstr "Просмотреть"
+
+#: pluto.module:366,368,374,380
+msgid "Userpoints"
+msgstr ""
+
+#: pluto.module:47,68,96
+msgid "Overview"
+msgstr "Обзор"
+
+#: pluto.admin.achievement.inc:206,256
+msgid "Weight"
+msgstr "Вес"
+
+#: pluto.module:52
+msgid "Settings"
+msgstr "Настройки"
+
+#: pluto.module:156
+msgid "Dev load"
+msgstr ""
+
+#: pluto.module:274,283
+msgid "Yes"
+msgstr "Да"
+
+#: pluto.module:274,283
+msgid "No"
+msgstr "Нет"
+
+#: pluto.admin.achievement.inc:74
+msgid "Image"
+msgstr ""
+
+#: pluto_badge_popup_view.tpl.php:9
+msgid "Get Your Own Rank!"
+msgstr ""
+
+#: pluto_badge_popup_view.tpl.php:14
+msgid ""
+"Join now or Log in and start meeting new friends and earning points "
+"you can use for special prizes."
+msgstr ""
+
+#: pluto_badge_popup_view.tpl.php:18
+msgid ""
+"<a href=\"!url\">Learn more</a> about earning points you can use for "
+"special prizes."
+msgstr ""
+
+#: pluto.admin.achievement.inc:57
+msgid "There are no achievements. "
+msgstr ""
+
+#: pluto.admin.achievement.inc:57
+msgid "Add the first achievement"
+msgstr ""
+
+#: pluto.admin.achievement.inc:74
+msgid "Achievement"
+msgstr ""
+
+#: pluto.admin.achievement.inc:128
+msgid "Achievement Tasks"
+msgstr ""
+
+#: pluto.admin.achievement.inc:145,206
+msgid "Method"
+msgstr ""
+
+#: pluto.admin.achievement.inc:146
+msgid ""
+"Choose from the list of tasks that users can gain an achievement with. "
+"Further details are in the Method Descriptions section below."
+msgstr ""
+
+#: pluto.admin.achievement.inc:148
+msgid "-- Select a task --"
+msgstr ""
+
+#: pluto.admin.achievement.inc:152,206
+msgid "Value"
+msgstr "Значение"
+
+#: pluto.admin.achievement.inc:153
+msgid ""
+"A value associated with the above task - e.g. the number of userpoints "
+"to be achieved. Further details are in the Method Descriptions section "
+"below."
+msgstr ""
+
+#: pluto.admin.achievement.inc:159
+msgid "Task Weight"
+msgstr ""
+
+#: pluto.admin.achievement.inc:165,217
+msgid "Add task"
+msgstr ""
+
+#: pluto.admin.achievement.inc:169
+msgid "Remove this task."
+msgstr ""
+
+#: pluto.admin.achievement.inc:169
+msgid "Remove"
+msgstr "Удалить"
+
+#: pluto.admin.achievement.inc:179
+msgid "Method Descriptions"
+msgstr ""
+
+#: pluto.admin.achievement.inc:257
+msgid "Achievements with the lowest weight are considered to be the best"
+msgstr ""
+
+#: pluto.admin.achievement.inc:264
+msgid "Badge settings"
+msgstr ""
+
+#: pluto.admin.achievement.inc:275
+msgid "Small Image"
+msgstr ""
+
+#: pluto.admin.achievement.inc:276
+msgid "Uploading an image will overwrite any previously uploaded badge."
+msgstr ""
+
+#: pluto.admin.achievement.inc:286
+msgid "Placeholder Image"
+msgstr ""
+
+#: pluto.admin.achievement.inc:287
+msgid ""
+"This is not usually used. It shows in a users profile when they have "
+"not achieved this badge. Uploading an image will overwrite any "
+"previously uploaded placeholder."
+msgstr ""
+
+#: pluto.admin.achievement.inc:297
+msgid "Large Image"
+msgstr ""
+
+#: pluto.admin.achievement.inc:298
+msgid ""
+"This image shows in the popup when the small badge is clicked. "
+"Uploading an image will overwrite any previously uploaded placeholder."
+msgstr ""
+
+#: pluto.admin.achievement.inc:305
+msgid "Select the rewards to associate with this achievement."
+msgstr ""
+
+#: pluto.admin.achievement.inc:320
+msgid "No rewards available."
+msgstr ""
+
+#: pluto.admin.achievement.inc:365
+msgid ""
+"Failed to upload the picture image; the %directory directory doesn't "
+"exist or is not writable."
+msgstr ""
+"Ошибка при загрузке изображения; "
+"каталог \"%directory\" не существует, либо не "
+"доступен для записи."
+
+#: pluto.admin.achievement.inc:403
+msgid ""
+"Failed to upload the large image; the %directory directory doesn't "
+"exist or is not writable."
+msgstr ""
+
+#: pluto.admin.achievement.inc:453
+msgid "Are you sure you want to delete the task %method from %name"
+msgstr ""
+
+#: pluto.admin.reward.inc:26
+msgid "No rewards defined.  !create one now."
+msgstr ""
+
+#: pluto.views.inc:27
+msgid "The user's badges, if any."
+msgstr ""
+
+#: pluto.views.inc:37
+msgid "Rank Badge"
+msgstr ""
+
+#: pluto.views.inc:38
+msgid "The user's 'rank' badge."
+msgstr ""
+
+#: pluto.views.inc:48
+msgid "Badge (without rank badge)"
+msgstr ""
+
+#: pluto.views.inc:49
+msgid ""
+"The user's badges, without the rank badge (use in conjunction with the "
+"Rank Badge field)."
+msgstr ""
+
+#: pluto.views.inc:71
+msgid "Total !Points"
+msgstr ""
+
+#: pluto.views.inc:72
+msgid "The total userpoints for a user"
+msgstr ""
+
+#: pluto.views.inc:78
+msgid "Monthly !Points Total"
+msgstr ""
+
+#: pluto.views.inc:79
+msgid "The total userpoints for a month"
+msgstr ""
+
+#: pluto.module:191
+msgid "Pluto Block"
+msgstr ""
+
+#: pluto.module:205,88
+msgid "Achievements"
+msgstr ""
+
+#: pluto.module:243
+msgid "Maximum badge dimensions (pixels)"
+msgstr ""
+
+#: pluto.module:248
+msgid "Maximum file size for the badge (kb)"
+msgstr ""
+
+#: pluto.module:253
+msgid "Directory for badge files"
+msgstr ""
+
+#: pluto.module:257
+msgid "Edit the membership benefits page"
+msgstr ""
+
+#: pluto.module:266
+msgid "Messages"
+msgstr ""
+
+#: pluto.module:271
+msgid "Display Pluto messages when !points are earned or lost"
+msgstr ""
+
+#: pluto.module:272
+msgid ""
+"The userpoints module outputs confusing messages because it totals the "
+"points by category, rather than giving an actual total. It is "
+"recommended that you use the Pluto modules messages instead. Set the "
+"first option below to yes, and the second option to no."
+msgstr ""
+
+#: pluto.module:275
+msgid "Typically this should be YES"
+msgstr ""
+
+#: pluto.module:281
+msgid "Display Userpoints message when !points are earned or lost"
+msgstr ""
+
+#: pluto.module:284
+msgid "Typically this should be NO"
+msgstr ""
+
+#: pluto.module:295
+msgid "Badges branding"
+msgstr ""
+
+#: pluto.module:299
+msgid "Word to use in the interface for the upper case plural word !Badges"
+msgstr ""
+
+#: pluto.module:307
+msgid "Word to use in the interface for the lower case plural word !badges"
+msgstr ""
+
+#: pluto.module:315
+msgid "Word to use in the interface for the upper case singular word !Badge"
+msgstr ""
+
+#: pluto.module:323
+msgid "Word to use in the interface for the lower case singular word !badge"
+msgstr ""
+
+#: pluto.module:335
+msgid "Class branding"
+msgstr ""
+
+#: pluto.module:339
+msgid "Words to use as the title for My Class/Rank/Bird/etc"
+msgstr ""
+
+#: pluto.module:360,362
+msgid "User"
+msgstr "Пользователь"
+
+#: pluto.module:361
+msgid "Specify a comma-separated list of user ids."
+msgstr ""
+
+#: pluto.module:367
+msgid "Specify the minimum number of acquired userpoints."
+msgstr ""
+
+#: pluto.module:372
+msgid "Userpoints Rank"
+msgstr ""
+
+#: pluto.module:373
+msgid "Specify the minimum rank based on userpoints."
+msgstr ""
+
+#: pluto.module:378
+msgid "Userpoints Range"
+msgstr ""
+
+#: pluto.module:379
+msgid ""
+"Specify the min and max userpoints in the format min:max - e.g. 0:100 "
+"to give a user an achievement when they have between 0 and 100 points."
+msgstr ""
+
+#: pluto.module:397
+msgid "Specify the number of times a user must complete this activity."
+msgstr ""
+
+#: pluto.module:545
+msgid "Best Badge"
+msgstr ""
+
+#: pluto.module:656
+msgid "What is this? Find out more!"
+msgstr ""
+
+#: pluto.module:783
+msgid "Node access"
+msgstr ""
+
+#: pluto.module:784
+msgid "Create a reward that gives a user access to a node."
+msgstr ""
+
+#: pluto.module:792
+msgid "Node id"
+msgstr ""
+
+#: pluto.module:793
+msgid "The id of the node being used as a reward."
+msgstr ""
+
+#: pluto.module:825
+msgid "This node is being used as a !reward"
+msgstr ""
+
+#: pluto.module:12
+msgid "administer pluto"
+msgstr ""
+
+#: pluto.module:61
+msgid "Manage the rewards that are available to users."
+msgstr ""
+
+#: pluto.module:73,80
+msgid "New reward"
+msgstr ""
+
+#: pluto.module:89
+msgid "Manage the achievement settings."
+msgstr ""
+
+#: pluto.module:101
+msgid "New achievement"
+msgstr ""
+
+#: pluto.module:109
+msgid "Edit reward"
+msgstr ""
+
+#: pluto.module:117
+msgid "Delete reward"
+msgstr ""
+
+#: pluto.install:74,147
+msgid "Monthly points total"
+msgstr ""
+
+#: pluto.install:79,152
+msgid "Total points"
+msgstr ""
+
+#: pluto.info:0
+msgid "User rewards system for Sony Artist Sites"
+msgstr ""
+

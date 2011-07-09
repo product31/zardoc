@@ -1,0 +1,127 @@
+
+#banner {
+  background-color:#000000;
+}
+
+#site-name {
+  background-image:url(../images/avril_logo.gif);
+}
+
+#sidebar-right .block {
+  background-image:url(../images/dividers/horizontal-divider-sidebar.gif);
+
+}
+
+.user-activity h2.title,
+.view-alavigne6-userposts .userpost-row {
+  background-image:url(../images/dividers/horizontal-divider-main.gif);
+}
+
+
+.view-alavigne6-news-videos-photos .views-row {
+  background-image:none;
+}
+
+#container {
+  background-image:url(../images/dividers/page-divider.gif);
+}
+
+#container-wrapper {
+  background-image:url(../images/content_border_bottom.gif);
+}
+
+#navigation {
+  background-image:url(../images/menu_border_top.gif);
+}
+
+
+/* Main menu fixes */
+
+#navigation li.expanded>ul { 
+  left: 0px;
+}
+
+#navigation .menu-name-primary-links li.expanded ul li {
+  width:100px;
+}
+
+#navigation .menu-name-primary-links li.expanded ul li a {
+  background:#222222;
+}
+
+/* END Main menu fixes */
+
+/* Pager fix */
+#container ul.pager li.pager-current {
+   display:inline;
+   margin-right:4px;
+}
+
+/* Footer links fix */
+.footer-info .footer-links li {
+  float:left;
+}
+
+.view-alavigne6-events tr.even td, 
+.view-alavigne6-events tr.odd td {
+  border-bottom:1px solid #0f0f0f;
+}
+
+.view-alavigne6-events tr.even.tid-14 td,
+.view-alavigne6-events tr.odd.tid-14 td {
+  background-color:#1a1a1a;
+  border-bottom:1px solid #000000;
+}
+
+.section-forum tr.even td, 
+.section-forum tr.odd td {
+  border-bottom:1px solid #0f0f0f;
+}
+
+
+.official_photo,
+.photo,
+.video,
+.news {
+  position:relative;
+}
+
+.datebox {
+  top:0px;
+}
+
+.view-alavigne6-news-videos-photos .pic {
+  float:none;
+  position:absolute;
+  top:0px;
+  left:0px;
+  height:150px;
+  clear:both;
+}
+
+.photo,
+.official_photo,
+.video {
+  height:150px;
+}
+
+
+/* Layout fixes */
+
+
+
+#banner {
+
+}
+
+#footer-wrapper {
+  height:400px;
+}
+
+#footer-right {
+  height:400px;
+}
+
+#block-nodeblock-84 {
+  height:200px;
+}

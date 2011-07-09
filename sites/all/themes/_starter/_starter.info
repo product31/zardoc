@@ -1,0 +1,35 @@
+name = Multisite Starter Theme
+description = The starter theme that is duplicated for all new multisites.
+core = 6.x
+engine = phptemplate
+base theme = _multisite
+
+; Add any new stylesheets as necessary.
+stylesheets[all][] = css/sections.css
+stylesheets[all][] = css/style.css
+
+; Add any JavaScript files.
+;scripts[] = js/utilities.js
+
+; Add sIFR by uncommenting these lines. Read sifr/how_to_add_sifr.txt for more info.
+; Clear the cache (admin/settings/cache) after every change!
+;sifr[blocks][sFlashSrc] = sifr/stencil.swf
+;sifr[blocks][sSelector] = h2.block-title
+;sifr[blocks][sColor] = #333333
+;sifr[blocks][sLinkColor] = #0066CC
+;sifr[blocks][sHoverColor] = #000000
+;sifr[blocks][sBgColor] = #FFFFFF
+; Enable wmode only if you must have transparency - loads faster without this
+;sifr[blocks][sWmode] = transparent
+
+
+; Define regions that are available in page.tpl.php.
+regions[right] = sidebar
+regions[page_top] = page top
+regions[ad_top] = ad top
+regions[ad_bottom] = ad bottom
+regions[ad_forum] = ad forum side
+regions[content_header] = content header
+regions[content_top] = content top
+regions[content_bottom] = content bottom
+regions[footer] = footer

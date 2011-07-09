@@ -1,0 +1,382 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Smileys 6.x-1.0-alpha5\n"
+"POT-Creation-Date: 2009-03-13 20:14+0400\n"
+"PO-Revision-Date: 2009-03-13 20:14+0400\n"
+"Last-Translator: overall <overall@mail.ru>\n"
+"Language-Team: overall <overall@mail.ru>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=((((n%10)==1)&&((n%100)!=11))?(0):(((((n%10)>=2)&&((n%10)<=4))&&(((n%100)<10)||((n%100)>=20)))?(1):2));\n"
+"X-Poedit-Language: Russian\n"
+"X-Poedit-Country: RUSSIAN FEDERATION\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: smileys.module:11
+msgid "You can edit the Smileys that are recognized in your content."
+msgstr "Вы можете редактировать смайлы, которые были выделены в вашем содержимом."
+
+#: smileys.module:27
+msgid "If you include a textual smiley in your post (see chart below), it will be replaced by a graphical smiley."
+msgstr "Если вы вставите текстовый смайл в ваше сообщение (см. диаграмму ниже), он будет заменен на графический смайл."
+
+#: smileys.module:31
+msgid "<a href=\"!smileys_help\">Textual smileys</a> will be replaced with graphical ones."
+msgstr "<a href=\"!smileys_help\">Текстовые смайлы</a> будут заменены на графические."
+
+#: smileys.module:52
+msgid "Smileys on submission pages"
+msgstr "Смайлы на дочерних страницах."
+
+#: smileys.module:58;97;205;291
+#: smileys.info:0;0
+#: smileys_import.info:0
+msgid "Smileys"
+msgstr "Смайлы"
+
+#: smileys.module:193;449
+msgid "Smiley"
+msgstr "Смайл"
+
+#: smileys.module:193;449;591
+msgid "Acronyms"
+msgstr "Сокращения"
+
+#: smileys.module:228;232
+msgid "Smileys filter"
+msgstr "Фильтр смайлов"
+
+#: smileys.module:230
+#: smileys.info:0
+msgid "Replaces smileys inside posts with images."
+msgstr "Заменяет текстовые смайлы в сообщениях на графические"
+
+#: smileys.module:232
+msgid "You can define a global list of smileys on the !page."
+msgstr "Вы можете определить глобальный список смайлов на !page."
+
+#: smileys.module:232
+msgid "smileys settings page"
+msgstr "страница настройки смайлов"
+
+#: smileys.module:292
+msgid "Manage Smileys and toggle select box behavior for nodes and comments."
+msgstr "Управление смайлами и включение/выключение функционирования панели выбора смайлов для материалов и комментариев."
+
+#: smileys.module:298
+msgid "List"
+msgstr "Список"
+
+#: smileys.module:305
+msgid "Add"
+msgstr "Добавить"
+
+#: smileys.module:312
+msgid "Settings"
+msgstr "Настройки"
+
+#: smileys.module:313
+msgid "Smileys configuration."
+msgstr "Конфигурация смайлов."
+
+#: smileys.module:322
+msgid "Edit Smiley"
+msgstr "Изменить смайл"
+
+#: smileys.module:330
+msgid "Delete Smiley"
+msgstr "Удалить смайл"
+
+#: smileys.module:368
+msgid "Smileys select-box settings"
+msgstr "Настройки панели вставки смайлов"
+
+#: smileys.module:372
+msgid "Enable smileys select box for:"
+msgstr "Включить панель вставки смайлов:"
+
+#: smileys.module:376
+msgid "Nodes"
+msgstr "Материалы"
+
+#: smileys.module:381
+msgid "Comments"
+msgstr "Комментарии"
+
+#: smileys.module:386
+msgid "On the following node types"
+msgstr "Для следующих типов материалов"
+
+#: smileys.module:387
+msgid "Select the node types you want to enable Smileys select-box for."
+msgstr "Выберите типы материалов для которых вы хотите включить панель выбора смайлов"
+
+#: smileys.module:393
+msgid "Expand select-box fieldset by default"
+msgstr "По умолчанию открывать панель выбора смайлов"
+
+#: smileys.module:399
+msgid "Smileys dialog window settings"
+msgstr "Настройки диалогового окна смайлов"
+
+#: smileys.module:403
+msgid "Enable Smileys dialog window"
+msgstr "Включить диалоговое окно смайлов"
+
+#: smileys.module:404
+msgid "Adds a <em>[more...]</em> link to the end of smileys in select box, which when clicked, opens an inline widget to insert smileys. The widget is an inline popup like approach, allowing ease of usability."
+msgstr "Добавлять ссылку <em>[еще...]</em> после смайлов в панели выбора, по нажатию на которую, открывается встроенный виджет вставки смайлов. Виджет реализован как встроенная всплывающая панель для простоты использования."
+
+#: smileys.module:409
+msgid "Enable Titles in dialog window"
+msgstr "Включить заголовки в диалоговом окне"
+
+#: smileys.module:410
+msgid "Groups smileys under their package name."
+msgstr "Группировать смайлы по имени пакета"
+
+#: smileys.module:416
+msgid "Make the popup dialog draggable"
+msgstr "Сделать всплывающую далоговую панель перетаскиваемой"
+
+#: smileys.module:421
+msgid "Make the popup dialog resizable"
+msgstr "Сделать всплывающую далоговую панель изменяемой в размерах"
+
+#: smileys.module:426
+msgid "Dialog height (in pixels)"
+msgstr "Высота диалоговой панели (в пикселах)"
+
+#: smileys.module:427
+msgid "Enter a value between 200 and 650. Enter <em>0</em> for automatic height (recommended)."
+msgstr "Введите значение между 200 и 650. Введите <em>0</em> для автоматического подбора высоты (рекомендуется)."
+
+#: smileys.module:434
+msgid "Dialog width (in pixels)"
+msgstr "Ширина диалоговой панели (в пикселах)"
+
+#: smileys.module:435
+msgid "Enter a value between 200 and 650."
+msgstr "Введите значение между 200 и 650."
+
+#: smileys.module:449;598
+msgid "Visibility"
+msgstr "Видимость"
+
+#: smileys.module:449;593
+msgid "Description"
+msgstr "Описание"
+
+#: smileys.module:449;594
+msgid "Category"
+msgstr "Катерогия"
+
+#: smileys.module:449;596
+msgid "Weight"
+msgstr "Вес"
+
+#: smileys.module:473
+msgid "No smileys in this category"
+msgstr "Нет смайлов в категории"
+
+#: smileys.module:496
+msgid "Edit"
+msgstr "Изменить"
+
+#: smileys.module:496
+msgid "Edit this smiley"
+msgstr "Изменить этот смайл"
+
+#: smileys.module:497;601
+msgid "Delete"
+msgstr "Удалить"
+
+#: smileys.module:497
+msgid "Delete this smiley"
+msgstr "Удалить этот смайл"
+
+#: smileys.module:526
+msgid "No smileys found. You may !add, or !import."
+msgstr "Смайлы не найдены. Вы можете !add или !import."
+
+#: smileys.module:526
+msgid "add a custom smileys"
+msgstr "Добавить дополнительные смайлы"
+
+#: smileys.module:526
+msgid "import smiley packages"
+msgstr "Импортировать набор смайлов"
+
+#: smileys.module:529
+msgid "No smileys found. You may !add, or install smileys_import module & import smiley packages."
+msgstr "Смайлы не найдены. Вы можете !add или установить модуль smileys_import и произвести импорт пакетов смайлов."
+
+#: smileys.module:529
+msgid "add custom smileys"
+msgstr "Добавить дополнительные смайлы"
+
+#: smileys.module:535
+msgid "Visibility Legend"
+msgstr "Легенда видимости"
+
+#: smileys.module:536;598
+msgid "Visible on select box + popup"
+msgstr "Отображать на панели выбора + на всплывающей диалоговой панели"
+
+#: smileys.module:537;598
+msgid "Visible on only on popup i.e. \"More Smileys\""
+msgstr "Отображать только на всплывающей диалоговой панели, т.е. \"Еще смайлы\""
+
+#: smileys.module:538;598
+msgid "Invisible (but not disabled)"
+msgstr "Невидимы (но не отключены)"
+
+#: smileys.module:591
+msgid "Enter a list of shorthands for the smiley you wish to add, separated by spaces. e.g. ':) ;) :smile:'"
+msgstr "Введимте список сокращений для смайла который хотите добавить, разделенный пробелами, например ':) ;) :smile:'"
+
+#: smileys.module:592
+msgid "Image Path"
+msgstr "Путь к картинке"
+
+#: smileys.module:592
+msgid "Enter the relative of the smiley-image relative to the root of your Drupal site. e.g. 'images/smileys/happy.png'."
+msgstr "Введите относительный путь картинки смайла относительно корня вашего Drupal сайта, например 'images/smileys/happy.png'."
+
+#: smileys.module:593
+msgid "A short description of the emotion depicted to be used as tooltip for the image. e.g. 'Laughing out loud'."
+msgstr "Короткое описание смайла, отображаемое как всплывающая подсказка к картинке, например 'Ржу ни магу'."
+
+#: smileys.module:595
+msgid "Enter new category here"
+msgstr "Введите новую категорию здесь"
+
+#: smileys.module:597
+msgid "Stand-alone"
+msgstr "Отдельностоящий"
+
+#: smileys.module:597
+msgid "When checked, the smiley will only be inserted when an acronym is found as a separate word. This is useful for preventing accidental smileys with short acronyms."
+msgstr "Если отмечено, данный смайл будет отображен только тогда, когда сокращение является отдельным словом. Используется для предотвращения случайных смайлов с короткими сокращениями."
+
+#: smileys.module:598
+msgid "When checked, the smiley will be shown on the <em>Smiley Select Box</em> in node and comment forms. Unchecked Smileys will be usable only in \"<em>more...</em>\" pop-up widget."
+msgstr "Если отмечено, смайл будет отображен на <em>Панели выбора смайлов</em> для форм материалов и комментариев. Неотмеченные смайлы будут доступны только во всплывающем виджете \"<em>еще...</em>\"."
+
+#: smileys.module:599
+msgid "Save"
+msgstr "Сохранить"
+
+#: smileys.module:616
+msgid "Updated smiley: %smiley"
+msgstr "Обновленный смайл: %smiley"
+
+#: smileys.module:620
+msgid "Added smiley: %smiley"
+msgstr "Добавленный смайл: %smiley"
+
+#: smileys.module:632
+msgid "Please enter an acronym for your smiley."
+msgstr "Пожалуйста, введите сокращение для вашего смайла."
+
+#: smileys.module:636
+msgid "Please enter the URL of the smiley image."
+msgstr "Пожалуйста, введите URL картинки смайла."
+
+#: smileys.module:651
+msgid "Deleted smiley: %smiley"
+msgstr "Удаленный смайл: %smiley"
+
+#: smileys.module:19
+msgid "administer smileys"
+msgstr "управление смайлами"
+
+#: smileys.module:19
+msgid "use smiley select box"
+msgstr "использовать панель выбора смайлов"
+
+#: smileys.module:0
+msgid "smileys"
+msgstr "смайлы"
+
+#: smileys_import.module:10
+msgid "To import new Smileys, download smiley packs for !phpBB or !Adium and extract them in <em>packs</em> folder under the smileys module's folder."
+msgstr "Для импорта новых смайлов скачайте наборы смайлов для !phpBB или !Adium и распакуйте их в папку <em>packs</em> внутри папки модуля Smileys."
+
+#: smileys_import.module:21
+msgid "Import"
+msgstr "Импорт"
+
+#: smileys_import.module:29;110
+msgid "Export"
+msgstr "Экспорт"
+
+#: smileys_import.module:55;103
+msgid "Smiley Packs"
+msgstr "Наборы смайлов"
+
+#: smileys_import.module:55;103
+msgid "Operations"
+msgstr "Операции"
+
+#: smileys_import.module:60
+msgid "Uninstall"
+msgstr "Удалить"
+
+#: smileys_import.module:60
+msgid "Install"
+msgstr "Установить"
+
+#: smileys_import.module:68
+msgid "No smiley packs found."
+msgstr "Наборы смайлов не найдены."
+
+#: smileys_import.module:82;192;216
+msgid "Cannot find smiley package %pack."
+msgstr "Не могу найти набор смайлов %pack."
+
+#: smileys_import.module:93
+msgid "Please copy and paste the following text into a file at:<br /><strong>%package</strong><br /><em>with each smiley image in the same folder.</em>"
+msgstr "Пожалуйста, скопируйте и вставьте следующий текст в файл около:<br /><strong>%package</strong><br /><em>с каждой картинкой смайлов в одной папке.</em>"
+
+#: smileys_import.module:116
+msgid "No smiley packs to export."
+msgstr "Нет наборов смайлов для экспорта."
+
+#: smileys_import.module:238
+msgid "Smiley package %pack uninstalled."
+msgstr "Набор смайлов %pack удален."
+
+#: smileys_import.module:260
+msgid "Smiley package %pack installed."
+msgstr "Набор смайлов %pack установлен."
+
+#: smileys_import.module:0
+msgid "smileys_import"
+msgstr "smileys_import"
+
+#: smileys_import.info:0
+msgid "Smileys Import"
+msgstr "Импорт смайлов"
+
+#: smileys_import.info:0
+msgid "Import Smiley packages."
+msgstr "Импорт набора смайлов"
+
+#: scripts/smileys.js:0
+msgid "more..."
+msgstr "еще..."
+
+#: scripts/admin/smileys-admin.js:0
+msgid "Saving..."
+msgstr "Сохранение..."
+
+#: scripts/admin/smileys-admin.js:0
+msgid "Saved..."
+msgstr "Сохранено..."
+
+#: scripts/admin/smileys-admin.js:0
+msgid "An error occurred while requesting the server. Be sure that you have proper permission(s), and the server is responding properly."
+msgstr "Произошла ошибка во время попытки доступа к серверу. Проверте, что у вас имеются необходимые разрешения и сервер работает корректно."
+

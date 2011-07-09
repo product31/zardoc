@@ -1,0 +1,281 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * jQuery form validation add-on for the Drupal Forms API.
+ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function validate_menu() {
+  $items = array();
+  $items['validate'] = array(
+    'title' => 'jQuery Validation Test',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('validate_test_form'),
+    'access arguments' => array('access devel information'),
+    'file' => 'validate.pages.inc',
+  );
+
+  $items['validate/username'] = array(
+    'type' => MENU_CALLBACK,
+    'access callback' => TRUE,
+    'page callback' => 'validate_unique_username',
+  );
+  $items['validate/email'] = array(
+    'type' => MENU_CALLBACK,
+    'access callback' => TRUE,
+    'page callback' => 'validate_unique_email',
+  );
+  $items['validate/remote/%'] = array(
+    'type' => MENU_CALLBACK,
+    'access callback' => TRUE,
+    'page callback' => 'validate_remote_callback',
+    'page arguments' => array(2),
+  );
+  return $items;
+}
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function validate_form_alter(&$form, $form_state) {
+  _validate_form_attach_element_validate($form);
+
+  // Add js in #after_build since we need the ID's and they are not populated yet.
+  $form['#after_build'][] = 'validate_form_attach_js';
+}
+
+/**
+ * Recursively search for form elements that need #element_validate.
+ */
+function _validate_form_attach_element_validate(&$form) {
+  foreach (element_children($form) as $key) {
+    _validate_form_attach_element_validate($form[$key]);
+  }
+  if (!empty($form['#validation_rules']) && is_array($form['#validation_rules'])) {
+    $form['#element_validate'][] = '_validate_form_element_validate';
+  }
+}
+
+/**
+ * #after_build callback.
+ * Attach the jquery validation rules to the form and load necessary scripts.
+ */
+function validate_form_attach_js($form, &$form_state) {
+  $data = _validate_form_attach_js($form);
+  if (!empty($data)) {
+    $path = drupal_get_path('module', 'validate');
+    // @TODO remove after we've got jquery_ui established on our platform.
+    if (module_exists('jquery_ui')) {
+      jquery_ui_add('ui.core');
+    }
+    else {
+      drupal_add_js($path .'/ui.core.js');
+    }
+    drupal_add_js($path .'/ui.validate.js');
+    drupal_add_js(array('validate' => $data), 'setting');
+  }
+
+  return $form;
+}
+
+/**
+ * Recursive function for traversing FAPI array, looking for jquery validation
+ * rules.
+ */
+function _validate_form_attach_js($form) {
+  $data = array();
+
+  foreach (element_children($form) as $key) {
+    $data += _validate_form_attach_js($form[$key]);
+  }
+
+  if (!empty($form['#validation_rules']) && is_array($form['#validation_rules'])) {
+    $id = '#' . $form['#id'];
+    $data[$id] = array();
+    foreach ($form['#validation_rules'] as $rule => $param) {
+      $rule_def = validate_get_rules($rule);
+      if ($rule_def && $rule_def['js']) {
+        $data[$id][$rule_def['js']] = $param;
+      }
+    }
+  }
+
+  return $data;
+}
+
+/**
+ * #element_validate callback. Will validate against all #validation_rules
+ * attached to the element.
+ */
+function _validate_form_element_validate($element, &$form_state) {
+  foreach ($element['#validation_rules'] as $rule_name => $param) {
+    $rule = validate_get_rules($rule_name);
+    if (function_exists($rule['php'])) {
+      $result = $rule['php']($element['#value'], $param);
+      if (is_bool($result)) {
+        $result = array('valid' => $result);
+      }
+      if (!$result['message']) {
+        $result['message'] = $rule['message'];
+      }
+      if (!$result['valid']) {
+        form_error($element, t($result['message'], array('%param' => $param, '%value' => $element['#value'])));
+      }
+    }
+  }
+}
+
+/**
+ * Menu callback for validate/remote/%
+ * Delegate for the function associated with each validation rule.
+ */
+function validate_remote_callback($rule_name) {
+  $rule = validate_get_rules($rule_name);
+  $result = array();
+  if ($rule && $rule['php']) {
+    $result = call_user_func($rule['php'], $_GET['value']);
+  }
+  else {
+    $result['valid'] = FALSE;
+    $result['message'] = t('%rule does not exists', array('%rule' => $rule_name));
+  }
+
+  drupal_json($result);
+}
+
+/**
+ * Fetch a list of all available validation rules. Returns a single rule if the
+ * parameter is given, otherwise returns the entire list.
+ */
+function validate_get_rules($rule = NULL) {
+  static $rules;
+
+  if (!isset($rules)) {
+    $rules = module_invoke_all('validation_rules');
+  }
+
+  if (isset($rule)) {
+    return $rules[$rule];
+  }
+
+  return $rules;
+}
+
+/**
+ * Implementation of hook_validation_rules().
+ */
+function validate_validation_rules() {
+  return array(
+    'minlength' => array(
+      'php' => 'validate_minlength',
+      'js' => 'minlength',
+      'message' => 'The value must be longer than %param characters.',
+    ),
+    'minLengthWithCharacterCount' => array(
+      'php' => 'validate_minlength',
+      'js' => 'minLengthWithCharacterCount',
+      'message' => 'The value must be longer than %param characters.',
+    ),
+    'maxlength' => array(
+      'php' => 'validate_maxlength',
+      'js' => 'maxlength',
+      'message' => 'The value must be shorter than %param characters.',
+    ),
+    'uniqueUsername' => array(
+      'php' => 'validate_unique_username',
+      'js' => 'uniqueUsername',
+      'message' => 'Invalid username.',
+    ),
+    'uniqueEmail' => array(
+      'php' => 'validate_unique_email',
+      'js' => 'uniqueEmail',
+      'message' => 'Invalid email address.',
+    ),
+  );
+}
+
+/**
+ * Validation rules -----------------------------------------------------------
+ * The following functions are validation rule callbacks.  They are called from
+ * #element_validate, and in the case of javascript remote rules, they are also
+ * called in the ajax callback.  The expected return value for each of these is
+ * either a single boolean value, or an associative array with the following
+ * items:
+ *   - 'valid': a boolean value to indicate whether validation passed.
+ *   - 'message' (optional): a message indicating the validation error.
+ *
+ * The message item of the array can contain 2 tokens, %param and %value, which
+ * will be replaced with the rule parameter and the element value, respectively.
+ */
+
+/**
+ * Validation rule: Unique and valid username.  Suitable for registration.
+ */
+function validate_unique_username($value) {
+  $error = user_validate_name($value);
+  if (!$error) {
+    if (db_result(db_query("SELECT COUNT(*) FROM {users} WHERE LOWER(name) = LOWER('%s')", $value)) > 0) {
+      $error = t('The name %name is already taken.', array('%name' => $value));
+    }
+    elseif (drupal_is_denied('user', $value)) {
+      $error = t('The name %name has been denied access.', array('%name' => $value));
+    }
+  };
+
+  $result = array(
+    'valid' => !$error,
+    'message' => $error,
+  );
+  return $result;
+}
+
+/**
+ * Validation rule: Unique and valid email address.  Suitable for registration.
+ */
+function validate_unique_email($value) {
+  $error = user_validate_mail($value);
+  if (!$error) {
+    if (db_result(db_query("SELECT COUNT(*) FROM {users} WHERE LOWER(mail) = LOWER('%s')", $value)) > 0) {
+      $error = t('The e-mail address %email is already registered. <a href="@password">Have you forgotten your password?</a>', array('%email' => $value, '@password' => url('user/password')));
+    }
+    elseif (drupal_is_denied('mail', $value)) {
+      $error = t('The e-mail address %email has been denied access.', array('%email' => $value));
+    }
+  };
+
+  $result = array(
+    'valid' => !$error,
+    'message' => $error,
+  );
+  return $result;
+}
+
+/**
+ * Validation rule: Minimum string length
+ */
+function validate_minlength($value, $param) {
+  return (strlen($value) >= $param);
+}
+
+/**
+ * Validation rule: Maximum string length
+ */
+function validate_maxlength($value, $param) {
+  return (strlen($value) <= $param);
+}
+
+/**
+ *
+ */
+function validate_form_user_register_alter(&$form, $form_state) {
+  $form['account']['name']['#validation_rules'] = array(
+    'uniqueUsername' => TRUE,
+  );
+  $form['account']['mail']['#validation_rules'] = array(
+    'uniqueEmail' => TRUE,
+  );
+}

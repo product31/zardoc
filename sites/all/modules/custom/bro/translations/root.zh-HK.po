@@ -1,0 +1,44 @@
+# Hong Kong translation of bro (all releases)
+# Copyright (c) 2010 by the Hong Kong translation team
+# Generated from files:
+#  bro/bro.module: n/a
+#  bro/bro.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: bro (all releases)\n"
+"POT-Creation-Date: 2010-04-08 14:55-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Hong Kong\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: bro.module:77
+msgid "BRO"
+msgstr ""
+
+#: bro.module:91
+msgid "Chat domain"
+msgstr ""
+
+#: bro.module:97
+msgid "Chat config"
+msgstr ""
+
+#: bro.module:103
+msgid "Secret key"
+msgstr ""
+
+#: bro.module:7
+msgid "participate in bro chat"
+msgstr ""
+
+#: bro.info:0
+msgid "BRO Integration"
+msgstr ""
+
+#: bro.info:0
+msgid "Integration for the BRO multimedia ad unit."
+msgstr ""
+

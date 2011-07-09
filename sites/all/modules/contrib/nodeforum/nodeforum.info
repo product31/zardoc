@@ -1,0 +1,5 @@
+name = Node Forum
+description = Enables threaded discussions about general topics with the nodecomment module.
+core = 6.x
+dependencies[] = taxonomy
+dependencies[] = nodecomment

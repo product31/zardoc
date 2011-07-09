@@ -1,0 +1,39 @@
+/* Conversations
+========================================*/
+ul.tumblr-conversation, ul.tumblr-conversation li {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+ul.tumblr-conversation {
+  border-left: solid 5px #bbb;
+  padding-left: 1px;
+}
+ul.tumblr-conversation li {
+  background-color: #f4f4f4;
+  background-image: none;
+  color: #444;
+  margin-bottom: 1px;
+  padding: 4px 10px;
+}
+ul.tumblr-conversation li.even {
+  background-color: #e8e8e8;
+}
+ul.tumblr-conversation li span {
+  font-weight: bold;
+}
+ul.tumblr-conversation li span.user-0 { color: #c00; }
+ul.tumblr-conversation li span.user-1 { color: #00c; }
+ul.tumblr-conversation li span.user-2 { color: #0c0; }
+
+/* Quotes
+========================================*/
+blockquote.tumblr-quote {
+  background: #f4f4f4;
+  padding: 1em;
+  margin: 1em;
+  font-size: 120%;
+}
+blockquote.tumblr-quote .tumblr-quote-source {
+  text-align: right;
+}

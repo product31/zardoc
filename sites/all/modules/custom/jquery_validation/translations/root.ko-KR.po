@@ -1,0 +1,89 @@
+# Korea translation of jquery_validation (all releases)
+# Copyright (c) 2010 by the Korea translation team
+# Generated from files:
+#  jquery_validation/jquery_validation.pages.inc: n/a
+#  jquery_validation/jquery_validation.module: n/a
+#  jquery_validation/jquery_validation.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: jquery_validation (all releases)\n"
+"POT-Creation-Date: 2010-04-12 10:57-0500\n"
+"PO-Revision-Date: 2010-03-25 21:12-0500\n"
+"Language-Team: Korea\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: jquery_validation.pages.inc:12
+msgid "Name"
+msgstr "이름"
+
+#: jquery_validation.pages.inc:20
+msgid ""
+"This field is required and also requires a minimum length of 2 "
+"characters."
+msgstr ""
+
+#: jquery_validation.pages.inc:23
+msgid "Email address"
+msgstr ""
+
+#: jquery_validation.pages.inc:31
+msgid "This field is required and must validate as an email address."
+msgstr ""
+
+#: jquery_validation.pages.inc:34
+msgid "URL"
+msgstr "URL"
+
+#: jquery_validation.pages.inc:40
+msgid "This field is not required, but if given must validate as an URL."
+msgstr ""
+
+#: jquery_validation.pages.inc:43
+msgid "Favorite number"
+msgstr ""
+
+#: jquery_validation.pages.inc:49
+msgid "This field is not required, but if given must validate as a number."
+msgstr ""
+
+#: jquery_validation.pages.inc:52
+msgid "Submit"
+msgstr "완료"
+
+#: jquery_validation.module:83
+msgid "The name %name is already taken."
+msgstr "%name은 이미 존재하는 아이디입니다."
+
+#: jquery_validation.module:86
+msgid "The name %name has been denied access."
+msgstr "%name은 접근 거부된 아이디입니다."
+
+#: jquery_validation.module:102
+msgid ""
+"The e-mail address %email is already registered. <a "
+"href=\"@password\">Have you forgotten your password?</a>"
+msgstr ""
+"메일 주소 %email 는 이미 등록되어 있습니다. <br /><a "
+"href=\"@password\">패스워드를 잃어버렸습니까?  "
+"재발행을 원하시는 경우에는 여기를 클릭해 주세요. "
+"</a>"
+
+#: jquery_validation.module:105
+msgid "The e-mail address %email has been denied access."
+msgstr "%email은 접근 거부된 이메일 주소입니다."
+
+#: jquery_validation.module:15
+msgid "jQuery Validation Test"
+msgstr ""
+
+#: jquery_validation.info:0
+msgid "jQuery Validation"
+msgstr ""
+
+#: jquery_validation.info:0
+msgid "jQuery form validation add-on for the Drupal Forms API."
+msgstr ""
+

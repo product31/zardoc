@@ -1,0 +1,16 @@
+<?php
+/**
+ * @file
+ * Install and update related functions.
+ */
+
+
+/**
+ * Make sure jquery_ui is enabled.
+ */
+function validate_update_6001() {
+  $ret = array();
+  module_enable(array('jquery_ui', 'jquery_update'));
+  return $ret;
+}
+

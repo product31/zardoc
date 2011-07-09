@@ -1,0 +1,22 @@
+# Turkey translation of sonybmg (all releases)
+# Copyright (c) 2010 by the Turkey translation team
+# Generated from file: sonybmg/popup/popup.js: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sonybmg (all releases)\n"
+"POT-Creation-Date: 2010-04-12 15:45-0500\n"
+"PO-Revision-Date: 2010-03-26 09:30-0500\n"
+"Language-Team: Turkey\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: popup/popup.js:0
+msgid "Continue"
+msgstr "Devam et"
+
+#: popup/popup.js:0
+msgid "Close"
+msgstr ""
+

@@ -1,0 +1,9 @@
+name = Userpoints Throttle
+description = Admins can limit the number of userpoints earned in a particular time period
+package = Userpoints
+dependencies[] = userpoints
+core = 6.x
+
+l10n server = translate.gdb-dev.com
+project = "userpoints_throttle"
+version = "6.x-2.x"

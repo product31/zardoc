@@ -1,0 +1,171 @@
+# Portugal translation of sony_connect (all releases)
+# Copyright (c) 2010 by the Portugal translation team
+# Generated from files:
+#  sony_connect/includes/pages.inc: n/a
+#  sony_connect/includes/admin.inc: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sony_connect (all releases)\n"
+"POT-Creation-Date: 2010-04-12 13:43-0500\n"
+"PO-Revision-Date: 2010-03-30 13:53-0500\n"
+"Language-Team: Portugal\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: includes/pages.inc:373
+msgid "Username"
+msgstr "Nome de utilizador"
+
+#: includes/pages.inc:121
+msgid "Operations"
+msgstr "Operações"
+
+#: includes/admin.inc:83
+msgid "Enabled"
+msgstr "Activo"
+
+#: includes/pages.inc:189
+msgid "This action cannot be undone."
+msgstr "Esta acção não pode ser desfeita."
+
+#: includes/pages.inc:191
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: includes/pages.inc:647
+msgid "Continue"
+msgstr "Continuar"
+
+#: includes/admin.inc:43
+msgid "Replacement tokens"
+msgstr ""
+
+#: includes/pages.inc:60
+msgid "Connected"
+msgstr ""
+
+#: includes/pages.inc:113,190
+msgid "Disconnect"
+msgstr ""
+
+#: includes/pages.inc:116
+msgid "Connect now"
+msgstr ""
+
+#: includes/pages.inc:121
+msgid "Network"
+msgstr ""
+
+#: includes/pages.inc:171,187
+msgid "Disconnect your %network account?"
+msgstr ""
+
+#: includes/pages.inc:233
+msgid "Return to page"
+msgstr ""
+
+#: includes/pages.inc:234
+msgid "Continue to profile"
+msgstr ""
+
+#: includes/pages.inc:263,268
+msgid "Registration almost complete... just one more step!"
+msgstr ""
+
+#: includes/pages.inc:264
+msgid "Already have an account on this site?"
+msgstr ""
+
+#: includes/pages.inc:269
+msgid "Don't have an account on this site?"
+msgstr ""
+
+#: includes/pages.inc:273
+msgid "Registration successful!"
+msgstr ""
+
+#: includes/pages.inc:274
+msgid ""
+"Your %network account has been connected. Logging in, please be "
+"patient."
+msgstr ""
+
+#: includes/pages.inc:278
+msgid "Logging in, please be patient."
+msgstr ""
+
+#: includes/pages.inc:301
+msgid "Please pick a username"
+msgstr ""
+
+#: includes/pages.inc:329
+msgid "Yes, I want to receive the latest news & updates"
+msgstr ""
+
+#: includes/pages.inc:336
+msgid "Email"
+msgstr ""
+
+#: includes/pages.inc:343
+msgid "Finish"
+msgstr ""
+
+#: includes/pages.inc:379
+msgid "Password"
+msgstr "Senha"
+
+#: includes/pages.inc:381
+msgid "Forgot password?"
+msgstr ""
+
+#: includes/pages.inc:386
+msgid "Sign in"
+msgstr ""
+
+#: includes/pages.inc:392
+msgid "Sign in & Complete your profile"
+msgstr ""
+
+#: includes/pages.inc:477
+msgid "Save my preferences"
+msgstr ""
+
+#: includes/pages.inc:519
+msgid "Your sharing preferences have been saved."
+msgstr ""
+
+#: includes/pages.inc:530
+msgid "Share with my networks"
+msgstr ""
+
+#: includes/pages.inc:542
+msgid "Connect"
+msgstr ""
+
+#: includes/pages.inc:583
+msgid "Share this with:"
+msgstr ""
+
+#: includes/pages.inc:614
+msgid "For %plural_title, share with"
+msgstr ""
+
+#: includes/pages.inc:652
+msgid "Remember this choice & don't show this message again."
+msgstr ""
+
+#: includes/pages.inc:656
+msgid ""
+"Set your <a href=\"!sharing-url\" target=\"_blank\">sharing "
+"preferences</a> in your profile."
+msgstr ""
+
+#: includes/pages.inc:690
+msgid ""
+"Your sharing preferences have been saved.  You can change them at any "
+"time in your <a href=\"!profile_link\">profile</a>."
+msgstr ""
+

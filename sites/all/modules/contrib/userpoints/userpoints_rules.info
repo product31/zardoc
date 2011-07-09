@@ -1,0 +1,7 @@
+; $Id
+name = Userpoints rules integration
+description = Provides integration of Userpoints with rules
+dependencies[] = userpoints 
+dependencies[] = rules
+package = Userpoints
+core = 6.x

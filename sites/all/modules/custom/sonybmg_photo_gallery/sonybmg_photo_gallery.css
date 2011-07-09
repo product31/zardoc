@@ -1,0 +1,16 @@
+ul.photos-pager, ul.photos-pager li {
+  float: left;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* just while we're using garland as a default theme */
+.photos-pager-icons ul.photos-pager li {
+  background-image: none;
+}
+
+#photos-pager-previous, #photos-pager-next {
+  float: left;
+  height: 22px;
+  line-height: 22px;
+}

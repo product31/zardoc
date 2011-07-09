@@ -1,0 +1,232 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * A simple implementation to make the Sony BMG Fan content type start with some default text.
+ * Also does the count of total fans and fans online
+ */
+
+define('SONYBMG_FANS_ONLINE',                     'sonybmg_fans_online');
+define('SONYBMG_FANS_TOTAL',                      'sonybmg_fans_total');
+
+
+/**
+ * Implementation of hook_menu()
+ */
+
+function sonybmg_fans_menu() {
+  $items = array();
+
+  $items['admin/user/count'] = array(
+    'title' => 'User Counts',
+    'description' => 'Online users and total users.',
+    'page callback' => 'sonybmg_fans_page',
+    'access arguments' => array('administer users'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function sonybmg_fans_form_alter(&$form, $form_state, $form_id) {
+  if ($form_id == 'fan_node_form') {
+    $form['body_field']['body']['#default_value'] = $form['body_field']['body']['#default_value'] ?
+      $form['body_field']['body']['#default_value'] : t("I'm a fan (and you should be too) because...");
+  }
+}
+
+/**
+ * Implementation of hook_views_api().
+ */
+function sonybmg_fans_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'sonybmg_fans'),
+  );
+}
+
+/**
+ * Implementation of hook_init()
+ *
+ * This will redirect a user trying to directly view a fan node to the fan's page, which should be taken
+ * over by the node, a la bio for Drupal 5.
+ */
+function sonybmg_fans_init() {
+  // Are we trying to view (and only) view a fan node in full-page view?
+  if (arg(0) == 'node' && is_numeric(arg(1)) && !arg(2)) {
+    // Let's not take our poor user to 403-land.
+    if (user_access('access user profiles')) {
+      $fan_node = menu_get_object('node', 1);
+      if($fan_node->type == 'fan') {
+        drupal_goto(drupal_get_path_alias('user/'. $fan_node->uid));
+      }
+    }
+  }
+}
+
+/**
+ * Implementation of hook_block()
+ *
+ * Provides a default block to show featured Why I'm a Fan nodes based off the nodequeue created at site installation.
+ */
+function sonybmg_fans_block($op = 'list', $delta = 0) {
+  // Here's the important bit: if this nodequeue id (qid) didn't get set in install, there will be no blocks.
+  if (variable_get('sonybmg_fans_qid', 0) > 0) {
+    if ($op == 'list') {
+      $blocks[0] = array(
+        'info' => t('Why I\'m A Fan'),
+      );
+      // BLOCK_CACHE_PER_ROLE will be assumed for block 0.
+
+      return $blocks;
+    }
+    elseif ($op == 'view') {
+      switch ($delta) {
+        case 0:
+          $block = array(
+            'subject' => t('Why I\'m A Fan'),
+            'content' => theme('sonybmg_fans_block', variable_get('sonybmg_fans_qid', 0)),
+          );
+          break;
+      }
+      return $block;
+    }
+  }
+}
+
+/**
+ * Implementation of hook_user()
+ */
+function sonybmg_fans_user($op, &$edit, &$account, $category = NULL) {
+  if (empty($account->uid)) {
+    return;
+  }
+
+  switch ($op) {
+    case 'view':
+      // Add bio to main user profile page, if option is enabled and bio is accessible.
+      $nid = sonybmg_fans_node_for_user($account->uid);
+      if ($nid && node_access('view', $node = node_load($nid))) {
+        $account->content['fan'] = array(
+          '#value' => node_view($node, FALSE, TRUE, FALSE),
+          '#type' => 'markup',
+        );
+        return $bio;
+      }
+      break;
+
+    case 'delete':
+      $nid = sonybmg_fans_node_for_user($account->uid);
+      if ($nid) {
+        node_delete($nid);
+      }
+      break;
+  }
+}
+
+/**
+ * Load the 'fan' node id associated with a user.
+ *
+ * @param integer $uid
+ *   the uid of the user to look up.
+ * @param boolean $reset
+ *   if set to true it will clear the static cache.
+ * @return
+ *   the fan node id or FALSE.
+ */
+function sonybmg_fans_node_for_user($uid = NULL, $reset = NULL) {
+  // Load the current user if no user is set.
+  if (!is_numeric($uid)) {
+    global $user;
+    $uid = $user->uid;
+  }
+  // Add static caching for getting the fan nodes (1 per user);
+  static $cache = array();
+
+  // If $reset is true, then blow out the ENTIRE cache, to follow the drupal model.
+  if($reset === TRUE) {
+    $cache = array();
+  }
+
+  // If not cached, get the fan nid.
+  if (!isset($cache[$uid]) || $reset === TRUE) {
+    // Should only return one nid.
+    $nid = db_result(db_query("SELECT nid FROM {node} WHERE uid = %d AND type = '%s'", $uid, 'fan'));
+    //nid should be set to false if nothing found.
+    $cache[$uid] = $nid;
+  }
+
+  return $cache[$uid];
+}
+
+function theme_sonybmg_fans_block($qid) {
+  $content = nodequeue_nodes($qid);
+  return $content;
+}
+
+/*
+* function to get the number of online fans
+* cached by default, with nothing explicitely udpating cache - will update whenever cache is cleared
+* @param bool $cached set to false to get a live count rather than cached - only for use in the admin theme
+* @return int
+*/
+
+function sonybmg_fans_online($cached = TRUE) {
+  // look up cached data if appropriate
+  if ($cached) {
+    $cache = cache_get(SONYBMG_FANS_ONLINE, 'cache');
+    // return cached value if OK
+    if (!empty($cache->data)) {
+      return $cache->data;
+    }
+  }
+  // else redo query
+  // updated to use users table instead of sessions so that we could still get counts with sesssions in memcache.
+  $online = db_result(db_query('SELECT COUNT(uid) AS count FROM {users} WHERE access >= %d',time() - variable_get('user_block_seconds_online', 3600)));
+  // add to cache if appropriate
+  if ($cached) {
+    cache_set(SONYBMG_FANS_ONLINE, $online, 'cache', CACHE_TEMPORARY);
+  }
+  // return the count
+  return $online;
+}
+
+/*
+* function to get the total number of fans
+* cached by default, with nothing explicitely udpating cache - will update whenever cache is cleared
+*/
+
+function sonybmg_fans_total($cached = TRUE) {
+  // look up cached data if appropriate
+  if ($cached) {
+    $cache = cache_get(SONYBMG_FANS_TOTAL, 'cache');
+    // return cached value if OK
+    if (!empty($cache->data)) {
+      return $cache->data;
+    }
+  }
+  // else redo query
+  $total = db_result(db_query('SELECT COUNT(uid) FROM {users} WHERE status <> 0'));
+  // add to cache if appropriate
+  if ($cached) {
+    cache_set(SONYBMG_FANS_TOTAL, $total, 'cache', CACHE_TEMPORARY);
+  }
+  // return the count
+  return $total;
+}
+
+/*
+* page callback
+* creates a page with a count of online fans and total fans
+*/
+function sonybmg_fans_page() {
+  $output = array();
+  $output[] = t('Fans online: @count in the last @time minutes', array('@count' => sonybmg_fans_online(FALSE), '@time' => (variable_get('user_block_seconds_online', 3600) / 60)));
+  $output[] = t('Total Fans: @count', array('@count' => sonybmg_fans_total(FALSE)));
+  return theme('item_list', $output);
+}

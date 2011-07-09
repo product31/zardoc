@@ -1,0 +1,44 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * file_description
+ */
+ 
+/**
+ * Implementation of hook_schema().
+ */
+function bpgrid_schema() {
+  $schema['bpgrid'] = array(
+    'fields' => array(
+      'theme' => array(
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'data' => array(
+        'type' => 'blob',
+        'not null' => FALSE,
+        'size' => 'big',
+      ),
+    ),
+  );
+  
+  return $schema;
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function bpgrid_install() {
+  drupal_install_schema('bpgrid');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function bpgrid_uninstall() {
+  drupal_uninstall_schema('bpgrid');
+}

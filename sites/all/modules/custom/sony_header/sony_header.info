@@ -1,0 +1,11 @@
+; $Id$
+name = Sony Flash Header
+description = Provides tools for integrating the D2C Dynamic flash header.
+package = Sony Music
+dependencies[] = ctools
+core = 6.x
+php = 5.0
+
+l10n server = translate.gdb-dev.com
+project = "sony_header"
+version = "6.x-2.x"

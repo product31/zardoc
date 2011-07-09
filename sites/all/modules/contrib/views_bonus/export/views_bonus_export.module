@@ -1,0 +1,139 @@
+<?php
+// $Id: views_bonus_export.module,v 1.2 2008/10/28 02:18:32 neclimdul Exp $
+/**
+ * @file
+ * Provides the ability to export to specific 
+ */
+
+/**
+ * Implementation of hook_perm().
+ */
+function views_bonus_export_perm() {
+  return array('export views');
+}
+
+/**
+ * Implementation of hook_views_api().
+ */
+function views_bonus_export_views_api() {
+  return array(
+    'api' => 2,
+  );
+}
+
+/**
+ * Preprocess csv output template.
+ */
+function template_preprocess_views_bonus_export_csv(&$vars) {
+  $view     = $vars['view'];
+  $filename = strtr(
+    $vars['options']['filename'],
+    array('%view' => check_plain($view->name))
+  );
+  drupal_set_header('Content-Type: text/x-comma-separated-values');
+  if ($filename) {
+    drupal_set_header('Content-Disposition: attachment; filename="'. $filename .'"');
+  }
+
+  foreach ($vars['rows'] as $count => $row) {
+    $item_row = array();
+    foreach ($row as $field => $content) {
+      $item_row[] = $content;
+    }
+    $items[] = $item_row;
+  }
+  $vars['items'] = $items;
+
+  // TODO Replace items with themed_rows.
+  _views_bonus_export_shared_preprocess($vars);
+
+  if ($vars['options']['quote']) {
+    $vars['seperator'] = '","';
+  }
+  else {
+    $vars['seperator'] = ',';
+  }
+}
+
+/**
+ * Preprocess doc output template.
+ */
+function template_preprocess_views_bonus_export_doc(&$vars) {
+  $view     = $vars['view'];
+  $filename = strtr(
+    $vars['options']['filename'],
+    array('%view' => check_plain($view->name))
+  );
+
+  drupal_set_header('Content-Type: application/msword');
+  if ($filename) {
+    drupal_set_header('Content-Disposition: attachment; filename="'. $filename .'"');
+  }
+
+  _views_bonus_export_shared_preprocess($vars);
+}
+
+/**
+ * Preprocess txt output template.
+ */
+function template_preprocess_views_bonus_export_txt(&$vars) {
+  $view     = $vars['view'];
+  $filename = strtr(
+    $vars['options']['filename'],
+    array('%view' => check_plain($view->name))
+  );
+
+  drupal_set_header('Content-Type: text/plain');
+  if ($filename) {
+    drupal_set_header('Content-Disposition: attachment; filename="'. $filename .'"');
+  }
+
+  _views_bonus_export_shared_preprocess($vars);
+}
+
+/**
+ * Preprocess xml output template.
+ */
+function template_preprocess_views_bonus_export_xml(&$vars) {
+  $view     = $vars['view'];
+  $filename = strtr(
+    $vars['options']['filename'],
+    array('%view' => check_plain($view->name))
+  );
+
+  drupal_set_header('Content-Type: text/xml');
+  if ($filename) {
+    drupal_set_header('Content-Disposition: attachment; filename="'. $filename .'"');    
+  }
+
+  _views_bonus_export_shared_preprocess($vars);
+}
+
+/**
+ * Shared helper function for export preprocess functions.
+ */
+function _views_bonus_export_shared_preprocess(&$vars) {
+  $view     = $vars['view'];
+  $fields   = &$view->field;
+
+  $rows = $vars['rows'];
+
+  $vars['header'] = array();
+  foreach ($fields as $key => $field) {
+    if (empty($field->options['exclude'])) {
+      $vars['header'][$key] = check_plain($field->label());
+    }
+  }
+
+  $vars['themed_rows'] = array();
+  foreach ($rows as $num => $row) {
+    $items = array();
+
+    foreach ($fields as $key => $field) {
+      if (empty($field->options['exclude'])) {
+        $items[$key] = $field->theme($row);
+      }
+    }
+    $vars['themed_rows'][$num] = $items;
+  }
+}

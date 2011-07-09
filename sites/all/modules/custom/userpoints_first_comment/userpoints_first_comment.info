@@ -1,0 +1,9 @@
+name = Userpoints First Comment
+description = Allows users to earn points for posting the first comment
+package = Userpoints
+dependencies[] = userpoints
+core = 6.x
+
+l10n server = translate.gdb-dev.com
+project = "userpoints_first_comment"
+version = "6.x-2.x"

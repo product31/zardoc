@@ -1,0 +1,109 @@
+﻿/*
+/ This style sheet can be used to assist you in the intial layout of the theme
+*/
+
+/*
+/ We use named colors because they ad a little bit of wackiness to our life
+*/
+
+html {
+  border: 1px solid   DimGray;
+}
+
+body {
+  border: 1px solid  DarkGray;
+}
+
+
+#page {
+  border: 1px solid   SteelBlue;
+}
+
+#page-inner {
+  border: 1px  dashed   CadetBlue;
+}
+
+#header-wrapper {
+ border: 1px solid   FireBrick;
+}
+
+#header {
+   border: 1px  dashed  Crimson;
+}
+
+#right-header {
+  border: 1px  dashed  #FA8072;
+}
+
+
+#trb {
+   border: 1px  dashed   LightSeaGreen;
+}
+
+#search-box {
+   border: 1px  dashed   Tomato;
+}
+
+#login-bar {
+   border: 1px  dashed  MediumVioletRed;
+}
+#container-wrapper {
+  border: 1px solid   CornflowerBlue;
+}
+
+#container
+{
+   border: 1px  dashed   SkyBlue;
+}
+/*
+// side bar layouts
+*/
+#sidebar-left {
+   border: 1px  dashed  BlanchedAlmond;
+}
+
+#sidebar-right {
+  border: 1px  dashed   Bisque;
+}
+
+/*
+// node content
+// main is the "wrapper" for squeeze; which holds all the node content ... and who came up with the name "OliveDrab" ????
+*/
+#main {
+  border: 1px solid   OliveDrab;
+}
+
+#squeeze {
+    border: 1px  dashed  YellowGreen;
+}
+
+/*
+// footer layouts
+*/
+
+#footer-wrapper {
+   border: 1px solid  Peru;
+}
+
+
+#footer {
+    border: 1px  dashed  GoldenRod;
+}
+
+#sony-bar {
+
+
+}
+
+/*
+// panels layout : homepage
+*/
+
+.panel-col-1 {
+    border: 1px dotted  Gainsboro;
+}
+
+.panel-col-2 {
+    border: 1px dotted Gainsboro;
+}

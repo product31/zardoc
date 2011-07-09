@@ -1,0 +1,75 @@
+<?php
+// $Id:$
+
+/**
+ * Implementation of hook_install().
+ */
+function sonybmg_offensive_install() {
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function sonybmg_offensive_uninstall() {
+  // Delete the "offensive" flag.
+  $flag = flag_get_flag('offensive');
+  $flag->delete();
+}
+
+/**
+ * Implementation of hook_enable().
+ */
+function sonybmg_offensive_enable() {
+  // Called from hook_enable() to make sure that the default flag is picked up.
+  sonybmg_offensive_create_actions();
+}
+
+/**
+ * Implementation of hook_disable().
+ */
+function sonybmg_offensive_disable() {
+  // TODO: Disable the offensive flag somehow?
+  foreach (flag_actions_get_actions('offensive', TRUE) as $action) {
+    flag_actions_delete_action($action->aid);
+  }
+}
+
+/**
+ * Create ACTIONS for the offensive flag. The flag itself is in
+ * the module's sonybmg_offensive_flag_default_flags() function.
+ */
+function sonybmg_offensive_create_actions() {
+  // Disable the default view created by flag.module.
+  $views_status = variable_get('views_defaults', array());
+  $views_status['flag_offensive'] = TRUE;
+  variable_set('views_defaults', $views_status);
+
+  // Pull in the Flag Action module to ensure its API exists.
+  module_load_include('module', 'flag_actions');
+
+  $actions = flag_actions_get_actions('offensive', TRUE);
+  if (count($actions) < 2) {
+    // Reset flag caches to ensure that our new flag is available.
+    flag_get_flags(NULL, NULL, NULL, TRUE);
+    $flag = flag_get_flag('offensive');
+
+
+    // Create the unpublish action.
+    flag_actions_insert_action($flag->fid, 'flag', 10, 'node_unpublish_action', array());
+
+    // Create the email action.
+    flag_actions_insert_action($flag->fid, 'flag', 10, 'token_actions_send_email_action', array(
+      'recipient' => 'jonathan.mcquade@sonybmg.com',
+      'subject'   => 'Offensive content unpublished',
+      'message'   => 'Users of [site-name] have flagged offensive content that has been unpublished. Please visit [site-url]admin/content/offensive to take further action.',
+    ));
+  }
+}
+
+/**
+ * Implementation of hook_update_N().
+ */
+function sonybmg_offensive_update_6001() {
+  sonybmg_offensive_create_actions();
+  return array();
+}

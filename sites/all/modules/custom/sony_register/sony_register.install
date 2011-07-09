@@ -1,0 +1,163 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Install file for sony_register.module
+ */
+
+/**
+ * Implementation of hook_enable().
+ */
+function sony_register_enable() {
+  variable_set('legal_display', '3');
+  variable_set('sony_legal_enable', TRUE);
+  variable_set('user_email_verification', 0);
+  variable_set('popups_skin', 'Sony Music');
+  $custom_mail_body = st("!username,\n\nThank you for registering at !site.
+    \nYou may now log in to !uri using the following username and password:
+    \nusername: !username\npassword: !password\n\n\n--  !site team");
+  variable_set('user_mail_register_no_approval_required_body', $custom_mail_body);
+
+  $count_conditions = db_result(db_query("SELECT count(*) FROM {legal_conditions}"));
+  if ( $count_conditions == 0 ){
+    // this is to take care of legal's requirement of having an entry in the table legal_conditions and all the
+    //weirdness it requires -- THIS NEEDS TO BE REVISITED
+    $default_tc = "Paste your terms & conditions here";
+    $extras= array('extras-1' =>"", 'extras-2'=> "", 'extras-3'=> "", 'extras-4' => "" , 'extras-5' => "");
+    $addEntry = array('conditions' => $default_tc, 'date' => time(),  'extras' => serialize($extras), 'changes' => '');
+    drupal_write_record('legal_conditions', $addEntry);
+  //  db_query("INSERT INTO {legal_conditions} (tc_id, conditions, date, extras, changes) VALUES (NULL, '%s', %d, NULL,NULL)", $default_tc, time());
+  }
+}
+
+/**
+ * Implementation of hook_disable().
+ */
+function sony_register_disable() {
+  variable_del('sony_legal_enable');
+  variable_del('sony_legal_link');
+}
+
+/**
+ * Set registration without approval e-mail body.
+ */
+function sony_register_set_no_approval_email() {
+  $default_mail_body = "!username,
+
+    Thank you for registering at !site. You may now log in to !login_uri using the following username and password:
+
+    username: !username
+    password: !password
+
+    You may also log in by clicking on this link or copying and pasting it in your browser:
+
+    !login_url
+
+    This is a one-time login, so it can be used only once.
+
+    After logging in, you will be redirected to !edit_uri so you can change your password.
+
+
+    --  !site team";
+  $current_mail_body = variable_get('user_mail_register_no_approval_required_body', $default_mail_body);
+  // Remove spaces to make comparison easier
+  $current = preg_replace('/\s+/','',$default_mail_body);
+  $default = preg_replace('/\s+/','',$current_mail_body);
+  $custom_mail_body = st("!username,\n\nThank you for registering at !site.
+    \nYou may now log in to !uri using the following username and password:
+    \nusername: !username\npassword: !password\n\n\n--  !site team");
+  // Only replace default email text. If the current text is different, leave it.
+  if (strcmp($current, $default) == 0) {
+   variable_set('user_mail_register_no_approval_required_body', $custom_mail_body);
+  }
+
+}
+
+/**
+ * Implementation of hook_update_N().
+ */
+function sony_register_update_6001 (){
+  variable_set('legal_display', '3');
+  variable_set('sony_legal_enable', TRUE);
+  $count_conditions = db_result(db_query("SELECT count(*) FROM {legal_conditions}"));
+  if ( $count_conditions == 0 ){
+    $default_tc = "Paste your terms & conditions here";
+    $addEntry = array('conditions' => $default_tc, 'date' => time());
+    drupal_write_record('legal_conditions', $addEntry);
+  }
+  return array();
+}
+
+/**
+ * Implementation of hook_update_N().
+ */
+function sony_register_update_6002() {
+  return _sony_register_enable_popup_registration();
+}
+
+function _sony_register_enable_popup_registration() {
+  $ret = array();
+
+  $modules = array();
+  $modules[] = 'validate';
+  if (!module_exists('tiers')) {
+    $modules[] = 'popups';
+  }
+  // Enable popups.module and validate.module
+  drupal_install_modules($modules);
+  $ret[] = array('success' => TRUE, 'query' => 'Enabled ' . implode(', ', $modules) . ' modules.');
+
+  if (in_array('popups', $modules)) {
+    // Set popups theme to sony music
+    variable_set('popups_skin', 'Sony Music');
+    $ret[] = array('success' => TRUE, 'query' => 'Set popups skin to "Sony Music".');
+  }
+  // create zip code profile field if it doesn't exist
+  $zip_field = array(
+    'category' => 'Personal information',
+    'title' => 'Zip Code',
+    'name' => 'profile_zip_code',
+    'type' => 'textfield',
+    'visibility' => PROFILE_PRIVATE,
+    'register' => 1,
+    'weight' => 0,
+  );
+  $fid = db_result(db_query('SELECT fid FROM {profile_fields} WHERE name = "profile_zip_code"'));
+  if ($fid) {
+    $zip_field['fid'] = $fid;
+  }
+  drupal_write_record('profile_fields', $zip_field, ($fid ? array('fid') : NULL));
+  $ret[] = array('success' => isset($zip_field['fid']), 'query' => 'Zip code profile field enabled.');
+
+  // loop through profile fields.  only zip, country, newsletter visible on reg form
+  $fields = array('profile_zip_code', 'profile_country', 'profile_newsletter');
+  $ret[] = update_sql('UPDATE {profile_fields} SET register = 0 WHERE name NOT IN ("'. join('","', $fields) .'")');
+  $ret[] = update_sql('UPDATE {profile_fields} SET register = 1 WHERE name IN ("'. join('","', $fields) .'")');
+
+  // disable email verification
+  variable_set('user_email_verification', 0);
+  $ret[] = array('success' => TRUE, 'query' => 'Email verification disabled.');
+
+  return $ret;
+}
+
+/**
+ * Implementation of hook_update_N().
+ */
+function sony_register_update_6003 (){
+  $ret = array();
+
+  $ret[] = update_sql('UPDATE profile_fields SET options = REPLACE(options, "Taiwan: Province of China", "Taiwan") WHERE name = "profile_country"');
+  $ret[] = update_sql('UPDATE profile_values SET value = "Taiwan" WHERE value = "Taiwan: Province of China"');
+
+  return $ret;
+}
+
+/**
+ * Implementation of hook_update_N().
+ */
+function sony_register_update_6004 () {
+  sony_register_set_no_approval_email();
+  return array();
+}

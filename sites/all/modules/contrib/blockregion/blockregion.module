@@ -1,0 +1,207 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Enables the configuration of blocks for all themes at once.
+ */
+
+/**
+ * Implementation of hook_help ().
+ */
+function blockregion_help ($section) {
+  switch ($section) {
+    case 'admin/modules#description':
+      return t ('Enable the configuration of blocks for all themes at once.');
+  }
+}
+
+/**
+ * Implementation of hook_form_alter ().
+ *
+ * Add checkboxes for "apply to all themes", change submit handler.
+ */
+function blockregion_form_alter (&$form, $form_state, $form_id) {
+  if ($form_id == 'block_admin_display_form') {
+		// Add fieldset at the bottom of the page, right over buttons
+    array_unshift ($form, 
+      array ( 
+				'all_themes' => array (
+				  '#type' => 'fieldset',
+				  '#title' => t ('Block settings sharing options'),
+				  'basic' => array (
+				    '#type' => 'checkbox',
+				    '#title' => t ('Apply all settings except "Region" to all themes\' blocks'),
+				    '#default_value' => FALSE,
+				  ),
+				  'regions' => array (
+				    '#type' => 'checkbox',
+				    '#title' => t ('Apply "Region" to all themes matching that region names are similar to this theme ones'),
+				    '#default_value' => FALSE,
+				  ),
+			  )
+			)
+		);
+	
+		$form['#submit'][] = 'blockregion_admin_display_submit';
+  }
+}
+
+/**
+ * Get a list of available regions names from a specified theme. The name are the low level ones, so
+ * the result differs from the one returned by system_region_list ()
+ *
+ * @param $theme_key
+ *   The name of a theme.
+ * @return
+ *   An array of system name of the regions in the form $region['name'] = 'description'.
+ */
+function blockregion_region_list ($theme_key) {
+  static $list = array ();
+
+  if (!array_key_exists ($theme_key, $list)) {
+    $info = unserialize (db_result (db_query ("SELECT info FROM {system} WHERE type = 'theme' AND name = '%s'", $theme_key)));
+    $list[$theme_key] = array_keys ($info['regions']);
+  }
+
+  return $list[$theme_key];
+}
+
+/**
+ * (Private) Perform best match between an string and a collection of strings.
+ * 
+ * @param $haystack
+ *   Collection of strings where to search.
+ * @param $needle
+ *   String to be searched.
+ * @return
+ *   Index of the best matching element of the $haystack.
+ */
+function _blockregion_levenshtein_match ($haystack, $needle) {
+	$shortest = 255;
+	$needle = strtolower (str_replace (" ", "", $needle));
+	for ($i = 0; $i < count ($haystack); $i++) {
+		$element = strtolower (str_replace (" ", "", $haystack[$i]));
+		$lev = levenshtein ($needle, $element, 3, 3, 1);
+		if ($lev == 0) {
+		  $closest = $i;
+		  $shortest = 0;
+		  break;
+		}
+		if ($lev <= $shortest || $shortest < 0) {
+			$closest  = $i;
+			$shortest = $lev;
+		}
+	}
+
+	return $closest;
+}
+
+/**
+ * Assign status, weight and throttle of a collection of blocks to other themes blocks
+ * @param $blocks
+ * 	 The blocks to share
+ * @param $themes
+ * 	 The themes where to share block settings.
+ * */
+function blockregion_basic_sharing ($blocks, $themes) {
+	foreach ($blocks as $block) {
+		// Get block settings from db		
+		$block = db_fetch_array (db_query ("SELECT * FROM {blocks} WHERE module = '%s' AND delta = '%s' AND theme = '%s'", $block['module'], $block['delta'], $block['theme']));
+		
+		// Update with the submitted changes
+		$block['status'] = ($block['region'] != BLOCK_REGION_NONE && $block['region'] != "");
+	  $block['region'] = $block['status'] ? $block['region'] : '';
+	  $block['throttle'] = isset ($block['throttle']) ? $block['throttle'] : 0;
+
+    foreach ($themes as $theme) {
+    	$exists = isset($block['bid']);
+    	if ($exists) {
+	 	 		db_query ("UPDATE {blocks} SET status = %d, weight = %d, custom = %d, throttle = %d, visibility = %d, pages = '%s', title = '%s' WHERE module = '%s' AND delta = '%s' AND theme = '%s'", 
+									$block['status'], $block['weight'], $block['custom'], $block['throttle'], $block['visibility'], $block['pages'], $block['title'], $block['module'], $block['delta'], $theme);
+    	} else {
+    		db_query ("INSERT INTO {blocks} (status, weight, custom, throttle, visibility, pages, title, cache, module, delta, theme ) 
+									VALUES (%d, %d, %d, %d, %d, '%s', '%s', %d, '%s', %d, '%s')", 
+									$block['status'], $block['weight'], $block['custom'], $block['throttle'], $block['visibility'], $block['pages'], $block['title'], $block['cache'], $block['module'], $block['delta'], $theme);
+			}
+	  }
+	}
+}
+
+/**
+ * Assign the region of a collection of blocks to other themes blocks
+ * @param $blocks
+ * 	 The blocks to share
+ * @param $themes
+ * 	 The themes where to share block settings
+ */
+function blockregion_region_sharing ($blocks, $themes) {
+	foreach ($blocks as $block) {
+		foreach ($themes as $theme) {
+	    if ($theme == $block['theme']) {
+	    	// Get region from current theme
+	    	$match_region = ($block['region'] == BLOCK_REGION_NONE ? "" : $block['region']);
+	    } else if ($block['region'] == BLOCK_REGION_NONE) {
+	    	// Inactive block remains inactive
+				$match_region = BLOCK_REGION_NONE;
+			} else {
+				// Match this theme region name with other theme region names
+				$other_regions = blockregion_region_list ($theme);
+				$match_index = _blockregion_levenshtein_match ($other_regions, $block['region']);
+				$match_region = $other_regions[$match_index];
+	    }
+
+			$status = $match_region != BLOCK_REGION_NONE && $match_region != "";
+			$exists = db_result (db_query ("SELECT count(*) FROM {blocks} WHERE module = '%s' AND delta = '%s' AND theme = '%s'", $block['module'], $block['delta'], $theme));
+			if ($exists) {
+				db_query ("UPDATE {blocks} SET status = '%d', region = '%s' WHERE module = '%s' AND delta = '%s' AND theme = '%s'", $status, $match_region, $block['module'], $block['delta'], $theme);
+			} else {
+				db_query ("INSERT INTO {blocks} (status, region, module, delta, theme) VALUES ('%d', '%s', '%s', '%s', '%s')", $status, $match_region, $block['module'], $block['delta'], $theme);
+			}
+		}
+	}
+}
+
+/**
+ * Custom submit handler.
+ */
+function blockregion_admin_display_submit ($form_id, $form) {
+  $do_regions = $form['values'][0]['all_themes']['regions'];
+  $do_basic = $form['values'][0]['all_themes']['basic'];
+
+  $blocks = array ();
+  // Avoid submitted form data which is not inherent to blocks
+  foreach ($form['values'] as $block) {
+  	if (is_array ($block) && isset ($block['theme'])) {
+  	  	$blocks[] = $block;
+  	}
+  }
+
+	$themes = array ();
+	// Select enabled themes only
+	foreach (list_themes () as $theme => $theme_object) {
+		if ($theme_object->status) {
+			$themes[] = $theme;
+		}
+	}
+
+	// Perform basic settings sharing
+  if ($do_basic) {
+ 		blockregion_basic_sharing ($blocks, $themes);
+	}
+	// Perform region settings sharing
+  if ($do_regions) {
+ 		blockregion_region_sharing ($blocks, $themes);
+	}
+
+  if ($do_basic || $do_regions) {
+  	$themes_string = implode (', ', $themes);		
+		if ($do_basic) {
+			drupal_set_message (t ('Block settings have been shared with the following themes: %themes_string.', array ("%themes_string" => $themes_string)));
+		}
+	  if ($do_regions) {
+	  	drupal_set_message (t ('Regions settings have been shared with the following themes: %themes_string.', array ("%themes_string" => $themes_string)));
+		}
+  }
+  cache_clear_all ();
+}

@@ -1,0 +1,10 @@
+; $Id$
+name = M2 API Development module
+description = Module with pages for testing M2 interactivity.
+package = Sony M2
+core = 6.x
+dependencies[] = m2api
+
+l10n server = translate.gdb-dev.com
+project = "m2_devel"
+version = "6.x-2.x"

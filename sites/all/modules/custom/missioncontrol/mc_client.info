@@ -1,0 +1,5 @@
+name = MissonControl Client
+description = MissionControl Client
+core = 6.x
+package = MissionControl
+dependencies[] = xmlrpc_hmac

@@ -1,0 +1,33 @@
+# Czech Republic translation of modr8_taxonomy (all releases)
+# Copyright (c) 2010 by the Czech Republic translation team
+# Generated from files:
+#  modr8_taxonomy/modr8_taxonomy.module: n/a
+#  modr8_taxonomy/modr8_taxonomy.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: modr8_taxonomy (all releases)\n"
+"POT-Creation-Date: 2010-04-05 15:53-0500\n"
+"PO-Revision-Date: 2010-03-26 09:03-0500\n"
+"Language-Team: Czech Republic\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=((((n%10)==1)&&((n%100)!=11))?(0):(((((n%10)>=2)&&((n%10)<=4))&&(((n%100)<10)||((n%100)>=20)))?(1):2));\n"
+
+#: modr8_taxonomy.module:40
+msgid "Operations"
+msgstr "Operace"
+
+#: modr8_taxonomy.module:41
+msgid "Content"
+msgstr "Obsah"
+
+#: modr8_taxonomy.info:0
+msgid "Modr8 Taxonomy"
+msgstr ""
+
+#: modr8_taxonomy.info:0
+msgid "Alter assigned taxonomies from modr8 screen"
+msgstr ""
+

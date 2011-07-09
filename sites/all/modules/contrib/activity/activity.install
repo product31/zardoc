@@ -1,0 +1,136 @@
+<?php
+// $Id: activity.install,v 1.1.2.1.2.6.2.3 2009/01/01 19:37:44 jaydub Exp $
+
+/**
+ * @file
+ * Install file for activity module.
+ */
+
+/**
+ * Implementation of hook_schema().
+ */
+function activity_schema() {
+  $schema['activity'] = array(
+    'description' => t('The {activity} table stores activity data'),
+    'fields' => array(
+      'aid' => array(
+        'type' => 'serial',
+      ),
+      'uid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'module' => array(
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'type' => array(
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'operation' => array(
+        'type' => 'varchar',
+        'length' => 25,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'created' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'data' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('aid'),
+    'indexes' => array(
+      'module' => array('module'),
+      'created' => array('created'),
+    ),
+  );
+  $schema['activity_targets'] = array(
+    'description' => t('The {activity_targets} table stores activity target data'),
+    'fields' => array(
+      'aid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'target_uid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'target_role' => array(
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('aid', 'target_uid'),
+    'indexes' => array(
+      'target_uid_target_role' => array('target_uid', 'target_role'),
+      'target_role' => array('target_role'),
+    ),
+  );
+  return $schema;
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function activity_install() {
+  drupal_install_schema('activity');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function activity_uninstall() {
+  drupal_uninstall_schema('activity');
+  variable_del('activity_page_pager');
+  variable_del('activity_purge');
+  variable_del('activity_time_limit');
+  variable_del('activity_user_optout');
+  variable_del('activity_user_profile_records');
+  db_query("DELETE FROM {variable} WHERE name LIKE 'activity_block_%'");
+}
+
+/**
+ * In converting to Drupal 6 we should drop the use of
+ * the sequences table and instead use auto incrementing columns
+ */
+function activity_update_6000() {
+  $ret = array();
+  db_drop_primary_key($ret, 'activity');
+  db_change_field($ret, 'activity', 'aid', 'aid_old', array('type' => 'int', 'not null' => TRUE));
+  db_add_field($ret, 'activity', 'aid', array('type' => 'serial', 'not null' => TRUE), array('primary key' => array('aid')));
+  update_sql('UPDATE {activity} SET aid = aid_old');
+  db_drop_field($ret, 'activity', 'aid_old');
+  return $ret;
+}
+
+/**
+ * A column for the user ID is being added back to make certain things
+ * easier to do going forward
+ */
+function activity_update_6100() {
+  $ret = array();
+  if (!db_column_exists('activity', 'uid')) {
+    db_add_field($ret, 'activity', 'uid', array('type' => 'int', 'not null' => TRUE, 'default' => 0));
+    $activities = db_query('SELECT aid, module, data FROM {activity}');
+    while ($activity = db_fetch_object($activities)) {
+      $aid = $activity->aid;
+      $data = unserialize($activity->data);
+      $uid = ($activity->module == 'user_relationshipsactivity' ? $data['requester-id'] : $data['author-uid']);
+      db_query('UPDATE {activity} SET uid = %d WHERE aid = %d', $uid, $aid);
+    }
+  }
+
+  return $ret;
+}

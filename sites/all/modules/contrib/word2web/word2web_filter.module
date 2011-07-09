@@ -1,0 +1,59 @@
+<?php
+// $Id$
+/**
+ * @file
+ * Filter Microsoft Word tags.
+ */
+
+/**
+ * Implementation of hook_filter().
+ */
+function word2web_filter_filter($op, $delta = 0, $format = -1, $text = '') {
+  //
+  switch ($op) {
+    case 'list':
+      return array(0 => t('MS Word Cleanup'));
+
+    case 'description':
+      return t('Removes pesky Word tags added from "HTML" code pasted from MS Word.');
+
+    case 'no cache':
+      return false;
+
+    case 'settings':
+      return _word2web_filter_settings($format);
+
+    case 'process':
+      // Include our helper file.
+      module_load_include('inc', 'word2web');
+      return _word2web_filter($text, variable_get("word2web_strip_images_$format", FALSE));
+
+    default:
+      return $text;
+  }
+}
+
+/**
+ * Setting form for word2web MS Word cleanup filter.
+ *
+ * @param $format
+ * The filter format name.
+ * @return
+ * FormAPI array.
+ */
+function _word2web_filter_settings($format) {
+  $form['word2web_filter'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('MS Word Cleanup'),
+    '#collapsible' => TRUE,
+  );
+
+  $form['word2web_filter']["word2web_strip_images_$format"] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Strip Word image tags.'),
+    '#default_value' => variable_get("word2web_strip_images_$format", FALSE),
+    '#description' => t('If enabled, Microsoft Word image tags will be striped. Otherwise they will be converted to html image tags.<br /> Note: The filter will not make sure these images exist.'),
+  );
+
+  return $form;
+}

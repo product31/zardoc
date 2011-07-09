@@ -1,0 +1,187 @@
+<?php
+// $Id: alias.module,v 1.1 2008/11/24 22:45:31 rz Exp $
+
+/**
+ * @file
+ * Create URL aliases for external URLs.
+ */
+ 
+/**
+ * Implementation of hook_menu().
+ */
+function alias_menu() {
+  $items['admin/build/path/alias'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'External Aliases',
+    'page callback' => 'alias_admin_overview',
+    'access arguments' => array('administer url aliases'),
+  );
+  $items['admin/build/path/alias/list'] = array(
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'title' => 'List',
+    'access arguments' => array('administer url aliases'),
+    'weight' => -1,
+  );
+  $items['admin/build/path/alias/add'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Add',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('alias_admin_edit_form'),
+    'access arguments' => array('administer url aliases'),
+  );
+  $items['admin/build/path/alias/edit/%alias'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Edit',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('alias_admin_edit_form', 5),
+    'access arguments' => array('administer url aliases'),
+  );
+  $items['admin/build/path/alias/delete/%alias'] = array(
+    'type' => MENU_CALLBACK,
+    'title' => 'Delete',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('alias_admin_delete_form', 5),
+    'access arguments' => array('administer url aliases'),
+  );
+  
+  $result = db_query('SELECT * FROM {alias}');
+  while($row = db_fetch_object($result)) {
+    $items[$row->path] = array(
+      'type' => MENU_CALLBACK,
+      'access callback' => TRUE,
+      'page callback' => 'drupal_goto',
+      'page arguments' => array($row->url, NULL, NULL, $row->code),
+    );
+  }
+  
+  return $items;
+}
+
+/**
+ * Menu object load callback
+ */
+function alias_load($id) {  
+  return db_fetch_object(db_query('SELECT * FROM {alias} WHERE id = %d', $id));
+}
+
+/**
+ * Listing of existing path aliass
+ */
+function alias_admin_overview() {
+  $rows = array();
+  
+  $result = db_query('SELECT * FROM {alias}');
+  while($row = db_fetch_object($result)) {
+    $ops = array(
+      l('Edit', 'admin/build/path/alias/edit/'. $row->id, array('query' => drupal_get_destination())),
+      l('Delete', 'admin/build/path/alias/delete/'. $row->id, array('query' => drupal_get_destination())),
+    );
+     
+    $rows[] = array(
+      l($row->path, $row->path),
+      check_plain($row->url),
+      check_plain($row->code),
+      join(' | ', $ops),
+    );  
+  }
+  
+  $header = array(
+    t('Drupal path'), 
+    t('Redirect URL'), 
+    t('Response code'), 
+    t('Operations'),
+  );
+  
+  return theme('table', $header, $rows);
+}
+
+/**
+ * Add/Edit form
+ */
+function alias_admin_edit_form(&$form_state, $alias = NULL) {
+  $form['id'] = array(
+    '#type' => 'value',
+    '#value' => $alias->id ? $alias->id : NULL,
+  );
+  
+  $form['path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Drupal path'),
+    '#default_value' => $alias->path ? $alias->path : '',
+  );
+  
+  $form['url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Redirect URL'),
+    '#default_value' => $alias->url ? $alias->url : '',
+  );
+  
+  $form['code'] = array(
+    '#type' => 'select',
+    '#title' => 'HTTP response code',
+    '#default_value' => $alias->code ? $alias->code : 302,
+    '#options' => array(
+      301 => t('301: Moved Permanently'),
+      302 => t('302: Found'),
+      303 => t('303: See Other'),
+      304 => t('304: Not Modified'),
+      305 => t('305: Use Proxy'),
+      307 => t('307: Temporary Redirect'),
+    ),
+  );
+  
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+    '#weight' => 10,
+  );
+  
+  return $form;
+}
+
+/**
+ * Add/Edit form submit
+ */
+function alias_admin_edit_form_submit($form, &$form_state) {
+  $alias = (object)$form_state['values'];
+
+  if($alias->id) {
+    drupal_write_record('alias', $alias, 'id');
+  }
+  else {
+    drupal_write_record('alias', $alias);
+  }
+  
+  menu_rebuild();
+  
+  $form_state['redirect'] = 'admin/build/path/alias';
+}
+
+/**
+ * Delete form
+ */
+function alias_admin_delete_form(&$form_state, $alias) {
+  $form['id'] = array(
+    '#type' => 'value',
+    '#value' => $alias->id,
+  );
+  
+  return confirm_form($form,
+    t('Are you sure you want delete this alias?'),
+    isset($_GET['destination']) ? $_GET['destination'] : 'admin/build/path/alias',
+    t('%path redirects to %url.  This action cannot be undone.', array('%path' => $alias->path, '%url' => $alias->url)),
+    t('Delete'),
+    t('Cancel')
+  );
+}
+
+/**
+ * Delete form submit
+ */
+function alias_admin_delete_form_submit($form, &$form_state) {
+  db_query('DELETE FROM {alias} WHERE id = %d', $form_state['values']['id']);
+  
+  menu_rebuild();
+  
+  $form_state['redirect'] = 'admin/build/path/alias';
+}

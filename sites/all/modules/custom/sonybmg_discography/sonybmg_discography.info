@@ -1,0 +1,40 @@
+; $Id$
+name = Discography Section
+description = Implements an artist discography. Disabling this module will hide the Discography section. Uninstall to remove entirely.
+dependencies[] = php
+dependencies[] = views
+dependencies[] = content
+dependencies[] = content_copy
+dependencies[] = nodecomment
+dependencies[] = sonybmg
+dependencies[] = text
+dependencies[] = number
+dependencies[] = optionwidgets
+dependencies[] = nodereference
+dependencies[] = userreference
+dependencies[] = date
+dependencies[] = date_api
+dependencies[] = date_timezone
+dependencies[] = votingapi
+dependencies[] = fivestar
+dependencies[] = filefield
+dependencies[] = imagefield
+dependencies[] = path
+dependencies[] = token
+dependencies[] = pathauto
+dependencies[] = menu
+dependencies[] = imagecache
+dependencies[] = imageapi
+dependencies[] = imageapi_gd
+dependencies[] = link
+dependencies[] = m2
+dependencies[] = m2_gracenote
+package = Sony BMG Site Features
+core = 6.x
+
+
+rename = discography
+
+l10n server = translate.gdb-dev.com
+project = "sonybmg_discography"
+version = "6.x-2.x"

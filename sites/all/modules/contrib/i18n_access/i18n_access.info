@@ -1,0 +1,8 @@
+; $Id: i18n_access.info,v 1.2 2009/02/02 16:50:16 rz Exp $
+name = Translation Access
+description = Control access to creating content in different languages.
+package = Multilanguage
+core = 6.x
+
+dependencies[] = locale
+dependencies[] = translation

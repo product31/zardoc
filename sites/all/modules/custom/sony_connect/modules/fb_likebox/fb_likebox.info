@@ -1,0 +1,8 @@
+;$Id: 
+name = FB like box
+description = Facebook like box
+dependencies[] = fb_like
+package = "Connect"
+core = 6.x
+
+

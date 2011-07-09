@@ -1,0 +1,210 @@
+<?php
+// $Id$
+/**
+ * @file
+ * Install stuff for sony panel carousel.
+ */
+/**
+ * Implementation of hook_install().
+ */
+function sony_queuedcarousel_install() {
+  drupal_install_schema('sony_queuedcarousel');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function sony_queuedcarousel_uninstall() {
+  // Drop database schema.
+  drupal_uninstall_schema('sony_queuedcarousel');
+}
+
+/**
+ * Implementation of hook_schema().
+ */
+function sony_queuedcarousel_schema() {
+
+  $schema['sony_queuedcarousel'] = array(
+    'description' => '...',
+    'fields' => array(
+      'queue_id' => array(
+        'type' => 'serial',
+        'description' => 'The primary identifier for the carousel.',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'title' => array(
+        'type' => 'varchar',
+        'description' => 'Descriptive title or page title.',
+        'not null' => TRUE,
+        'default' => '',
+        'length' => '255',
+      ),
+      'name' => array(
+        'type' => 'varchar',
+        'description' => 'Administration name.',
+        'not null' => TRUE,
+        'default' => '',
+        'length' => '255',
+      ),
+      'conf' => array(
+        'type' => 'text',
+        'size' => 'big',
+        'description' => 'Serialized configuration of the handler, if needed.',
+        'not null' => TRUE,
+        'serialize' => TRUE,
+        'object default' => array(),
+      ),
+    ),
+    'primary key' => array('queue_id'),
+  );
+
+  $schema['panels_queuedcarousel'] = array(
+    'description' => 'Queue of panels',
+    'fields' => array(
+      'pid' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'no export' => TRUE,
+      ),
+      'queue_id' => array(
+        'type' => 'int',
+        'description' => 'The primary identifier for the carousel.',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'weight' => array(
+        'type' => 'int',
+        'description' => 'The primary identifier for the carousel.',
+        'not null' => TRUE,
+      ),
+      'name' => array(
+        'type' => 'varchar',
+        'length' => '255',
+      ),
+      'category' => array(
+        'type' => 'varchar',
+        'length' => '64',
+      ),
+      'did' => array(
+        'type' => 'int',
+        'no export' => TRUE,
+      ),
+      'title' => array(
+        'type' => 'varchar',
+        'length' => '128',
+      ),
+      'requiredcontexts' => array(
+        'type' => 'text',
+        'size' => 'big',
+        'serialize' => TRUE,
+        'object default' => array(),
+      ),
+      'contexts' => array(
+        'type' => 'text',
+        'size' => 'big',
+        'serialize' => TRUE,
+        'object default' => array(),
+      ),
+      'relationships' => array(
+        'type' => 'text',
+        'size' => 'big',
+        'serialize' => TRUE,
+        'object default' => array(),
+      ),
+      'conf' => array(
+        'type' => 'text',
+        'size' => 'big',
+        'description' => 'Serialized configuration of the handler, if needed.',
+        'not null' => TRUE,
+        'serialize' => TRUE,
+        'object default' => array(),
+      ),
+    ),
+    'primary key' => array('pid'),
+    'unique keys' => array(
+      'name' => array('name'),
+      'queue' => array('pid', 'queue_id', 'weight'),
+    ),
+  );
+
+  return $schema;
+}
+
+/**
+ * Convert weight to a signed integer.
+ */
+function sony_queuedcarousel_update_6001() {
+
+  $ret = array();
+
+  db_change_field($ret, 'panels_queuedcarousel', 'weight', 'weight', array(
+    'type' => 'int',
+    'description' => 'The primary identifier for the carousel.',
+    'not null' => TRUE,
+  ));
+
+  return $ret;
+}
+
+/**
+ * Convert add a conf field for css information storage and possibly more.
+ */
+function sony_queuedcarousel_update_6002() {
+
+  $ret = array();
+
+  db_add_field($ret, 'panels_queuedcarousel', 'conf', array(
+    'type' => 'text',
+    'size' => 'big',
+    'description' => 'Serialized configuration of the handler, if needed.',
+    'not null' => TRUE,
+    'serialize' => TRUE,
+    'object default' => array(),
+  ));
+
+  return $ret;
+}
+
+/**
+ * Add a conf field for delay and other carousel options.
+ */
+function sony_queuedcarousel_update_6003() {
+
+  $ret = array();
+
+  db_add_field($ret, 'sony_queuedcarousel', 'conf', array(
+    'type' => 'text',
+    'size' => 'big',
+    'description' => 'Serialized configuration of the handler, if needed.',
+    'not null' => TRUE,
+    'serialize' => TRUE,
+    'object default' => array(),
+  ));
+
+  return $ret;
+}
+
+/**
+ * Add a name field so carousels have more sane CSS ID creation.
+ */
+function sony_queuedcarousel_update_6004() {
+
+  $ret = array();
+
+  db_add_field($ret, 'sony_queuedcarousel', 'name', array(
+    'type' => 'varchar',
+    'description' => 'Administration name.',
+    'not null' => TRUE,
+    'default' => '',
+    'length' => '255',
+  ));
+
+  // Create default names because they're required now.
+  $result = db_query("SELECT title, queue_id FROM {sony_queuedcarousel}");
+  while ($queue = db_fetch_object($result)) {
+    $ret[] = update_sql("UPDATE {sony_queuedcarousel} SET name = '" . drupal_strtolower(str_replace(' ', '_', $queue->title)) . "' WHERE queue_id = " . $queue->queue_id);
+  }
+
+  return $ret;
+}

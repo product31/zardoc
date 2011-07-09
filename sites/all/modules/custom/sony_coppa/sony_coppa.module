@@ -1,0 +1,442 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * COPPA Compliance module for Sony.
+ *
+ * This modules exposes 2 new form element types.  The first is a U13 hidden
+ * field, which will get a 'true' value based on an external javascript call to
+ * the centralized Sony COPPA server.  The second is a date of birth field that
+ * validates to be over 13 years old, and if not reports to the centralized
+ * server that the user is under age.
+ *
+ * There is a form_alter being done to add these fields to the known forms that
+ * need these.  Forms can add these fields manually as well.
+ */
+
+// The url for U13 redirection
+define('SONY_COPPA_U13_URL', 'http://ccc.sonymusic.com/checker/U13');
+
+// The drupal path for the sorry page.
+define('SONY_COPPA_SORRY_PAGE', 'messages/sorry');
+
+// The following constancts are used for the sony_coppa_audience variable
+// General Audience
+define('SONY_COPPA_GENERAL_AUDIENCE', 0);
+// REAC, Reasonably Attractive to Children
+define('SONY_COPPA_ATTRACTIVE_TO_CHILDREN', 1);
+// Directed towards children
+define('SONY_COPPA_DIRECTED_TO_CHILDREN', 2);
+
+
+/**
+ * Implementation of hook_menu().
+ */
+function sony_coppa_menu() {
+  $items[SONY_COPPA_SORRY_PAGE] = array(
+    'title' => 'Sorry',
+    'page callback' => 'sony_coppa_ineligible_page',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['admin/settings/sony_coppa'] = array(
+    'title' => 'COPPA Settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_coppa_settings'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'sony_coppa.admin.inc',
+  );
+
+  $items['admin/settings/sony_coppa/settings'] = array(
+    'title' => 'Settings',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -1,
+  );
+
+  $items['admin/settings/sony_coppa/registration'] = array(
+    'title' => 'Registration',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_coppa_settings_registration'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'sony_coppa.admin.inc',
+  );
+
+  $items['coppa/test'] = array(
+    'title' => 'COPPA Test Form',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_coppa_test_form'),
+    'access arguments' => array('access devel information'),
+    'type' => MENU_SUGGESTED_ITEM,
+  );
+
+  $items['user/info'] = array(
+    'title' => 'User information',
+    'page callback' => 'sony_coppa_print_info',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'sony_coppa.registration.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Utility function for getting the audience variable
+ */
+function sony_coppa_audience() {
+  $audience = variable_get('sony_coppa_audience', NULL);
+  // If it's not set provide a default that will require DOB checks and inform
+  // admins.
+  if (is_null($audience)) {
+    $audience = SONY_COPPA_ATTRACTIVE_TO_CHILDREN;
+    if (user_access('administer site configuration')) {
+      drupal_set_message(t('The <a href="!url">COPPA Audience settings</a> have not been configured.',
+        array('!url' => url('admin/settings/sony_coppa', array('query' => drupal_get_destination())))), 'error', FALSE);
+    }
+  }
+
+  return $audience;
+}
+
+/**
+ * Implementation of hook_elements().
+ */
+function sony_coppa_elements() {
+  $types['coppa_u13'] = array(
+    '#input' => TRUE,
+    '#process' => array('sony_coppa_expand_u13'),
+  );
+  $types['coppa_dob'] = array(
+    '#input' => TRUE,
+    '#process' => array('sony_coppa_expand_dob'),
+  );
+
+  return $types;
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function sony_coppa_theme() {
+  return array(
+    'coppa_u13' => array('element' => NULL),
+    'coppa_dob' => array('element' => NULL),
+  );
+}
+
+/**
+ * #preprocess callback for coppa_dob fields.
+ * Yanked from expand_date().
+ *
+ * Spec requirements:
+ * - Pull-downs for month, day and year of birth
+ * - All 3 fields must be required and cannot have a default value
+ * - Year options should be between current year and 100 years ago, in reverse chronological order
+ */
+function sony_coppa_expand_dob($element) {
+  // Per spec, no default value may be set.
+  if (empty($element['#value'])) {
+    $element['#value'] = array('day' => 0, 'month' => 0, 'year' => 0);
+  }
+
+  $element['#tree'] = TRUE;
+  $element['#required'] = TRUE;
+
+  // Allow the caller to add validators but put ours in front.
+  if (empty($element['#element_validate'])) {
+    $element['#element_validate'] = array();
+  }
+  array_unshift($element['#element_validate'], 'date_validate', 'sony_coppa_dob_validate');
+
+  $element['month'] = array(
+    '#type' => 'select',
+    '#value' => $element['#value']['month'],
+    '#attributes' => $element['#attributes'],
+    '#options' => array(0 => t('--')) + drupal_map_assoc(range(1, 12), 'map_month'),
+    '#required' => TRUE,
+  );
+
+  $element['day'] = array(
+    '#type' => 'select',
+    '#value' => $element['#value']['day'],
+    '#attributes' => $element['#attributes'],
+    '#options' => array(0 => t('--')) + drupal_map_assoc(range(1, 31)),
+    '#required' => TRUE,
+  );
+
+  $year = (int)date('Y');
+  $element['year'] = array(
+    '#type' => 'select',
+    '#value' => $element['#value']['year'],
+    '#attributes' => $element['#attributes'],
+    '#options' => array(0 => t('--')) + drupal_map_assoc(array_reverse(range($year - 100, $year))),
+    '#required' => TRUE,
+  );
+
+  $element['U13'] = array('#type' => 'coppa_u13');
+
+  return $element;
+}
+
+/**
+ * Theme callback for coppa_dob form elements.  Delegate to theme_date().
+ */
+function theme_coppa_dob($element) {
+  return theme('date', $element);
+}
+
+/**
+ * #element_validate callback for all coppa_dob fields
+ */
+function sony_coppa_dob_validate($element, &$form_state) {
+  // dob timestamp
+  $dob = gmmktime(0, 0, 0, $element['month']['#value'], $element['day']['#value'], $element['year']['#value']);
+
+  // cutoff timestamp for today minus 13 years
+  list($m, $d, $y) = explode('-', gmdate('m-d-Y'));
+  $cutoff = gmmktime(0, 0, 0, $m, $d, $y - 13);
+
+  // only do this validation if there are no other errors on this date field
+  if (!form_get_error($element)) {
+    if ($dob > $cutoff) {
+      // normally we would form_error() here, but the spec requires that no
+      // notification is given to the user
+      $ajax = isset($form_state['ajax']) ? $form_state['ajax'] : FALSE;
+      sony_coppa_invalid('Birth date provided is under 13', $ajax);
+    }
+  }
+}
+
+/**
+ * #preprocess callback for coppa_u13 fields.
+ *
+ * Spec requirements:
+ * - Hidden field with the name U13
+ * - Add the external js file
+ * - Add onsubmit handler to form
+ */
+function sony_coppa_expand_u13($element) {
+  // Per spec, default value should be empty
+  if (empty($element['#value'])) {
+    $element['#value'] = '';
+  }
+  $element['#name'] = 'U13';
+
+  // Allow the caller to add validators but put ours in front.
+  if (empty($element['#element_validate'])) {
+    $element['#element_validate'] = array();
+  }
+  array_unshift($element['#element_validate'], 'sony_coppa_u13_validate');
+
+  drupal_add_js(drupal_get_path('module', 'sony_coppa') .'/sony_coppa.js');
+
+  return $element;
+}
+
+/**
+ * Theme callback for coppa_u13 form elements.  Delegate to theme_hidden().
+ */
+function theme_coppa_u13($element) {
+  return theme('hidden', $element);
+}
+
+/**
+ * #element_validate callback for all coppa_dob fields
+ */
+function sony_coppa_u13_validate($element, &$form_state) {
+  $ajax = isset($form_state['ajax']) ? $form_state['ajax'] : FALSE;
+  if (!empty($_COOKIE['U13'])) {
+    sony_coppa_invalid('Local U13 cookie is present', $ajax);
+  }
+  elseif ($element['#value'] || $element['#post']['U13']) {
+    sony_coppa_invalid('U13 field set by central server.', $ajax);
+  }
+}
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function sony_coppa_form_alter(&$form, $form_state, $form_id) {
+  if (user_access('administer users')) {
+    return;
+  }
+
+  $audience = sony_coppa_audience();
+  $protected_forms = array(
+    'user_register',
+  );
+
+  if (in_array($form_id, $protected_forms)) {
+    if ($audience != SONY_COPPA_GENERAL_AUDIENCE) {
+      // Ask for a birthday (also performs a cookie check) on REAC and directed
+      // sites.
+      $form = sony_coppa_dob_form($form);
+    }
+    else {
+      // Cookie check on the rest of the sites.
+      $form = sony_coppa_u13_form($form);
+    }
+  }
+
+  // Don't let the kids set their username or email address.
+  if ($form_id == 'user_profile_form' && $audience == SONY_COPPA_DIRECTED_TO_CHILDREN) {
+    $form['account']['name']['#access'] = FALSE;
+    $form['account']['mail']['#access'] = FALSE;
+  }
+}
+
+/**
+ * Modify a form to make use of the coppa dob field
+ *
+ * @param $form
+ *   A standard Drupal form array
+ * @return
+ *   The modified form array
+ */
+function sony_coppa_dob_form($form, $field_name = 'coppa_dob') {
+  $form[$field_name] = array('#type' => 'coppa_dob', '#title' => t('Date of birth'));
+
+  $onsubmit = 'SONYMUSIC_COPPA_13.updateForm(this);';
+  if (isset($form['#attributes']['onsubmit'])) {
+    $form['#attributes']['onsubmit'] = $onsubmit . $form['#attributes']['onsubmit'];
+  }
+  else {
+    $form['#attributes']['onsubmit'] = $onsubmit;
+  }
+
+  return $form;
+}
+
+/**
+ * Modify a form to make use of the coppa u13 field
+ *
+ * @param $form
+ *   A standard Drupal form array
+ * @return
+ *   The modified form array
+ */
+function sony_coppa_u13_form($form, $field_name = 'coppa_u13') {
+  $form[$field_name] = array('#type' => 'coppa_u13');
+
+  $onsubmit = 'SONYMUSIC_COPPA_13.updateForm(this);';
+  if (isset($form['#attributes']['onsubmit'])) {
+    $form['#attributes']['onsubmit'] = $onsubmit . $form['#attributes']['onsubmit'];
+  }
+  else {
+    $form['#attributes']['onsubmit'] = $onsubmit;
+  }
+
+  return $form;
+}
+
+/**
+ * FAPI callback
+ */
+function sony_coppa_test_form() {
+  $form['dob'] = array(
+    '#type' => 'coppa_dob',
+    '#title' => t('Date of birth'),
+    '#debug' => TRUE,
+  );
+
+  $form[] = array('#type' => 'submit', '#value' => t('Submit test'));
+
+  return $form;
+}
+
+/**
+ * FAPI submit handler
+ */
+function sony_coppa_test_form_submit($form, &$form_state) {
+  drupal_set_message('U13 validation passed.');
+  $form_state['redirect'] = $_GET['q'];
+}
+
+/**
+ * Action to take once a U13 has been detected.
+ * - Log the time, date and reason.  Make sure no PII is logged
+ * - Set the local U13 cookie
+ * - Redirect to either the Sorry Page
+ *
+ * @param $message
+ *   The message describing the result of the U13 detection
+ */
+function sony_coppa_invalid($message, $ajax = FALSE) {
+  watchdog('sony_coppa', 'U13 detected: '. $message);
+
+  // set U13 cookie, expires in 30 days, if not already present
+  if (!isset($_COOKIES['U13'])) {
+    setcookie('U13', '1', time() + 60 * 60 * 24 * 30, '/');
+  }
+
+  // Destination will clobber our drupal_goto, so we must unset 'em before
+  unset($_REQUEST['destination']);
+  unset($_REQUEST['edit']['destination']);
+
+  if ($ajax) {
+    $commands = array();
+    $commands[] = sonybmg_ajax_command_redirect(SONY_COPPA_SORRY_PAGE . '/first');
+    ctools_ajax_render($commands);
+  }
+  else {
+    drupal_goto(SONY_COPPA_SORRY_PAGE . '/first');
+  }
+  exit();
+}
+
+/**
+ * Implementation of hook_user().
+ */
+function sony_coppa_user($op, &$edit, &$account, $category = NULL) {
+  if ($op == 'insert') {
+    $edit['coppa_dob'] = NULL;
+    $edit['coppa_u13'] = NULL;
+  }
+}
+
+/**
+ * Menu callback for Sorry Page.
+ * Verbiage comes straight from legal.  Don't change it unless told to.
+ */
+function sony_coppa_ineligible_page() {
+  // notify the central U13 server which will set the central U13
+  // cookie and then redirect back to our sorry page.
+  $url = SONY_COPPA_U13_URL .'?siteID='. variable_get('sony_coppa_site_id', NULL);
+  if (arg(2) == 'first') {
+  // We should probably do something nicer when we can get back to this
+    return
+    '<script type="text/javascript">
+        location.href = "' . $url . '";
+     </script>';
+  }
+  else {
+    $output = '<iframe style="width:0px; height:0px; border: 0px" src="'. $url .'"></iframe>';
+
+    $output .= t('<p>Thank you for your interest in registering.  As we are committed
+      to protecting your privacy, we are unable to accept your registration.
+      However, we invite you to continue browsing the site without registering.</p>');
+    return $output;
+  }
+}
+
+/**
+ * Implementation of hook_menu_alter().
+ */
+function sony_coppa_menu_alter(&$callbacks) {
+  if (sony_coppa_audience() == SONY_COPPA_DIRECTED_TO_CHILDREN) {
+    // Replace the user registration form
+    $callbacks['user/register']['page arguments'] = array('sony_coppa_user_register');
+    $callbacks['user/register']['file'] = 'sony_coppa.registration.inc';
+    $callbacks['user/register']['file path'] = drupal_get_path('module', 'sony_coppa');
+
+    // Replace the password form
+    $callbacks['user/password']['page arguments'] = array('sony_coppa_user_pass');
+    $callbacks['user/password']['file'] = 'sony_coppa.registration.inc';
+    $callbacks['user/password']['file path'] = drupal_get_path('module', 'sony_coppa');
+  }
+}
+

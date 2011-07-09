@@ -1,0 +1,64 @@
+<?php
+// $Id$
+
+/**
+ * Implementation of hook_menu().
+ */
+function sonybmg_upgrade_menu() {
+  $items = array();
+  
+  $items['admin/reports/sonybmg_upgrade'] = array(
+    'title' => 'Upgrade',
+    'access arguments' => array('administer site configuration'),
+    'page callback' => 'sonybmg_upgrade_report',
+  );
+  
+  return $items;
+}
+
+function sonybmg_upgrade_report() {
+  // Needed for the REQUIREMENT_ constants.
+  include_once './includes/install.inc';
+  include_once drupal_get_path('module', 'sonybmg_upgrade') .'/sonybmg_upgrade.install';
+
+  // Display the list of modules that couldn't be enabled.
+  $d5_contrib = variable_get('sonybmg_upgrade_drupal5_contrib_modules', array());
+  $replaced = _sonybmg_upgrade_modules_replaced();
+  $deprecated = _sonybmg_upgrade_modules_deprecated();
+  $enabled = module_list();
+
+  foreach($d5_contrib as $module => $schame) {
+    // If in the upgrade list and upgraded module is enabled.
+    if ($replaced[$module] && $enabled[$replaced[$module]]) {
+      $rows[] = array(
+        'severity' => REQUIREMENT_OK,
+        'title' => $module,
+        'value' => t('%old was replaced by %new', array('%old' => $module, '%new' => $replaced[$module])),
+      );
+    }
+    elseif (in_array($module, $deprecated)) {
+      $rows[] = array(
+        'severity' => REQUIREMENT_OK,
+        'title' => $module,
+        'value' => t('%module is deprecated', array('%module' => $module)),
+      );
+    }
+    elseif ($enabled[$module]) {
+      $rows[] = array(
+        'severity' => REQUIREMENT_OK,
+        'title' => $module,
+        'value' => t('%module was re-installed', array('%module' => $module)),
+      );
+    }
+    else {
+      $rows[] = array(
+        'severity' => REQUIREMENT_WARNING,
+        'title' => $module,
+        'value' => t('%module was not installed, most likely because it is missing', array('%module' => $module)),
+      );
+    }
+  }
+  
+  return theme('status_report', $rows);
+}
+

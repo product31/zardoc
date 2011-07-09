@@ -1,0 +1,5 @@
+; $Id: userpoints_service.info,v 1.1 2008/04/02 23:41:08 kbahey Exp $
+name = Userpoints Service
+description = Exposes userpoints functionality via XML-RPC
+package = Userpoints
+dependencies = userpoints services

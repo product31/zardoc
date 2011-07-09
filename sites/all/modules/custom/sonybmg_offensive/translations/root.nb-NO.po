@@ -1,0 +1,39 @@
+# Norway translation of sonybmg_offensive (all releases)
+# Copyright (c) 2010 by the Norway translation team
+# Generated from files:
+#  sonybmg_offensive/sonybmg_offensive.info: n/a
+#  sonybmg_offensive/sonybmg_offensive.module: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sonybmg_offensive (all releases)\n"
+"POT-Creation-Date: 2010-04-12 12:48-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Norway\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: sonybmg_offensive.info:0
+msgid "Sony BMG"
+msgstr ""
+
+#: sonybmg_offensive.module:10
+msgid "Restore content"
+msgstr ""
+
+#: sonybmg_offensive.module:15
+msgid "Unpublish content"
+msgstr ""
+
+#: sonybmg_offensive.info:0
+msgid "Sony BMG Offensive"
+msgstr ""
+
+#: sonybmg_offensive.info:0
+msgid ""
+"The ability to flag content as offensive, remove it from the site, and "
+"review all offensive content in one place."
+msgstr ""
+

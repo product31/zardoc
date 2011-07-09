@@ -1,0 +1,8 @@
+; $Id
+name = Socialize
+description = "Allows sites to utilize the Gigya Socialize API for authentication and social network updates."
+package = Social Networking
+dependencies[] = popups
+core = 6.x
+php = 5.2
+version = "6.x-1.1"

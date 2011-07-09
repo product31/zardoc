@@ -1,0 +1,33 @@
+# Czech Republic translation of sonybmg_extras (all releases)
+# Copyright (c) 2010 by the Czech Republic translation team
+# Generated from files:
+#  sonybmg_extras/sonybmg_extras.info: n/a
+#  sonybmg_extras/sonybmg_extras.module: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sonybmg_extras (all releases)\n"
+"POT-Creation-Date: 2010-04-05 15:59-0500\n"
+"PO-Revision-Date: 2010-03-30 11:21-0500\n"
+"Language-Team: Czech Republic\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=((((n%10)==1)&&((n%100)!=11))?(0):(((((n%10)>=2)&&((n%10)<=4))&&(((n%100)<10)||((n%100)>=20)))?(1):2));\n"
+
+#: sonybmg_extras.info:0
+msgid "Sony BMG"
+msgstr ""
+
+#: sonybmg_extras.module:14
+msgid "Extras"
+msgstr "Extra"
+
+#: sonybmg_extras.info:0
+msgid "Sony BMG Extras"
+msgstr ""
+
+#: sonybmg_extras.info:0
+msgid "Buddy icons and wallpapers for the Extras page."
+msgstr ""
+

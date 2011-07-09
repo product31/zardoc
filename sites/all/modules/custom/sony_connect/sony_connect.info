@@ -1,0 +1,21 @@
+name = Sony Connect
+description = Connect to social networks.
+core = 6.x
+dependencies[] = ctools
+package = "Connect"
+
+messages[node][blog] = 'posted a new blog post to [site-name]. [node-link-tinyurl]'
+
+messages[comment][album] = 'just reviewed "[title]" on [site-name]! [node-link-tinyurl]'
+messages[comment][blog] = 'commented on "[title]" on [site-name]! [node-link-tinyurl]'
+messages[comment][date] = 'commented on the "[title]" event on [site-name]! [node-link-tinyurl]'
+messages[comment][news] = 'commented on "[title]" on [site-name]! [node-link-tinyurl]'
+messages[comment][official_photo] = 'commented on a photo on [site-name]!  [node-link-tinyurl]'
+messages[comment][photo] = 'commented on a photo on [site-name]!  [node-link-tinyurl]'
+messages[comment][track] = 'just reviewed "[title]" on [site-name]! [node-link-tinyurl]'
+
+messages[flag][signup] = 'is seeing [site-artist-name] in [field_location-raw] on [field_date-month] [field_date-d], [field_date-yyyy]! Find out more at [site-name]. [node-link-tinyurl]'
+
+l10n server = translate.gdb-dev.com
+project = "sony_connect"
+version = "6.x-2.x"

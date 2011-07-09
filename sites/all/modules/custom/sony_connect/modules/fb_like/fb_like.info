@@ -1,0 +1,9 @@
+;$Id: 
+name = FB like button
+description = Facebook like button
+dependencies[] = sony_connect
+core = 6.x
+
+package = Connect
+
+

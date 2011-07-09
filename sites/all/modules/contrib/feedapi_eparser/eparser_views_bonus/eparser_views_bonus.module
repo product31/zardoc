@@ -1,0 +1,83 @@
+<?php
+/**
+ * @file
+ * Views bonus feed parser.
+ *
+ * In the module directory you mostly just need to implement any of the
+ * ctools definition hooks that you need to define your plugins. Below
+ * are examples of hooks defining a type plugin and a namespace plugin.
+ *
+ * Alternatively you can implement hook_ctools_plugin_directory() and
+ * define plugins as defined by the ctools docs.
+ * http://views2.logrus.com/help/ctools/plugins
+ */
+
+/**
+ * Implementation of hook_eparse_type_plugins().
+ */
+function eparser_views_bonus_eparse_type_plugins() {
+  $base_path = drupal_get_path('module', 'eparser_views_bonus') . '/plugins';
+
+  return array(
+    // The key to this hash element is the machine name of the plugin.
+    'views_bonus_xml' => array(
+      // Description provides extra information about the plugin. Not currently implemented in the UI.
+      'name' => 'Views Bonus XML',
+      // Description provides extra information about the plugin. Not currently implemented in the UI.
+      'description' => 'Parse data from an Views Bonus XML Feed.',
+      // The handler entry defines information about the handler class.
+      // It can be a string of an array. If its a string it much be the
+      // class name. It is useful to define it as an array however so
+      // ctools can include any files needed by parent classes.
+      'handler' => array(
+        // Class name.
+        'class' => 'FeedapiEparserTypeViewsBonus',
+        // Parent class identifier. You should generally provide 'xml'
+        // or 'base' here unless you're sure you don't need it.
+        'parent' => 'xml',
+        // This entry is commonly not needed. When not provided, ctools
+        // assumes ${classname}.inc using the class attribute above.
+        // 'file' => 'foo.inc',
+      ),
+      // Default namespaces are useful when you need to force a
+      // namespace plugin to run for you type plugin. The RSS 2.0 and
+      // Atom type and namespace plugin is a good example of this. We
+      // use it here as an example.
+      'default namespaces' => array('views_bonus_xml'),
+      // Path information for your plugin. This path is used for finding
+      // the file containing your class.
+      'path' => $base_path,
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_eparse_namespace_plugins().
+ */
+function eparser_views_bonus_eparse_namespace_plugins() {
+  $base_path = drupal_get_path('module', 'eparser_views_bonus') . '/plugins';
+
+  return array(
+    // The key to this hash element is the machine name of the plugin.
+    'views_bonus_xml' => array(
+      // Description provides extra information about the plugin. Not currently implemented in the UI.
+      'name' => 'Views Bonus XML',
+      // Description provides extra information about the plugin. Not currently implemented in the UI.
+      'description' => 'Parse node fields from a views bonus XML feed.',
+      // Url is not currently used but should link to reference information for the namespace.
+      'url' => 'http://www.drupal.org/project/views_bonus',
+      'handler' => array(
+        // Class name.
+        'class' => 'FeedapiEparserNamespaceViewsBonus',
+        // Parent class identifier. This should generally be 'base'.
+        'parent' => 'base',
+        // This entry is commonly not needed. When not provided, ctools
+        // assumes ${classname}.inc using the class attribute above.
+        // 'file' => 'foo.inc',
+      ),
+      // Path information for your plugin. This path is used for finding
+      // the file containing your class.
+      'path' => $base_path,
+    ),
+  );
+}

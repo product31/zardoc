@@ -1,0 +1,4 @@
+; $Id: modr8.info,v 1.2 2008/03/03 02:59:20 pwolanin Exp $
+name = Modr8
+description = Easy, dedicated moderation of content
+core = 6.x

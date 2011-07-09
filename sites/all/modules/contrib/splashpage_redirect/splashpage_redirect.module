@@ -1,0 +1,58 @@
+<?php
+// $Id: splashpage_redirect.module,v 1.1.2.4 2010/02/11 23:01:10 andrewlevine Exp $
+
+define('SPLASHPAGE_REDIRECT_URL_MAX_LENGTH', 2048);
+
+/**
+ * Implementation of hook_init().
+ */
+function splashpage_redirect_init() {
+  global $user;
+  $src_path = variable_get('splashpage_redirect_splashpage_src_path', '');
+  $dst_url = url(variable_get('splashpage_redirect_splashpage_dst_url', ''), array('absolute' => TRUE));
+  if (!empty($src_path) && valid_url($dst_url) && ($_GET['q'] == $src_path || drupal_get_normal_path($_GET['q']) == $src_path || ($src_path == '<front>' && drupal_is_front_page()))) {
+    $views = 'off';
+    if ($user->uid) {
+      $views = variable_get('splashpage_redirect_authenticated_views', 'off');
+      if (!isset($_GET['noredirect'])) {
+        // Redirect without depending on JS if we can
+        // # of views of the splash page
+        $cookie_views = isset($_COOKIE["splashPageRedirect-$src_path"]) ? $_COOKIE["splashPageRedirect-$src_path"] : FALSE;
+        // Do we have a request to permanently skip the splash page?
+        $cookie_skip = isset($_COOKIE["splashPageRedirect-skip-$src_path"]) ? $_COOKIE["splashPageRedirect-skip-$src_path"] : FALSE;
+        if ($cookie_skip || ($cookie_views !== FALSE && $views != 'off' && $cookie_views > $views)) {
+          drupal_goto($dst_url);
+        }
+      }
+    }
+    else {
+      $views = variable_get('splashpage_redirect_anonymous_views', 'off');
+    }
+    if ($views != 'off') {
+      drupal_add_js(array('splashPageRedirect' => array('url' => $dst_url, 'cookieName' => urlencode('splashPageRedirect-' . $src_path),'cookieSkipName' => urlencode('splashPageRedirect-skip-' . $src_path), 'views' => $views)), 'setting');
+      // We have the JS in a separate file to keep the code clean, but we need
+      // it inline so it will run after the Settings array is availablebut
+      // before DOM load
+      $inline_js = file_get_contents(drupal_get_path('module', 'splashpage_redirect') . '/splashpage_redirect.js');
+      drupal_add_js($inline_js, 'inline');
+    }
+  }
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function splashpage_redirect_menu() {
+  $items = array();
+  $items['admin/settings/splashpage_redirect'] = array(
+    'title' => 'Splash Page Redirect',
+    'description' => 'Manage Splash Page Redirect Settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('splashpage_redirect_admin_settings'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'splashpage_redirect.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
+  return $items;
+}

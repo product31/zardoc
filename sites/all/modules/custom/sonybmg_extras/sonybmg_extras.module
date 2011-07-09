@@ -1,0 +1,27 @@
+<?php
+/**
+ * Module includes.
+ */
+module_load_include('inc', 'sonybmg_extras', 'sonybmg_extras_views');
+
+/**
+ * Implementation of hook_menu().
+ */
+function sonybmg_extras_menu() {
+  $items = array();
+
+  $items['extras'] = array(
+    'title' => 'Extras',
+    'page callback' => 'sonybmg_extras_main_page',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * This page is empty, since we're using blocks.
+ */
+function sonybmg_extras_main_page() {
+  return '';
+}

@@ -1,0 +1,43 @@
+# Norway translation of submitagain (all releases)
+# Copyright (c) 2010 by the Norway translation team
+# Generated from files:
+#  submitagain/submitagain.module: n/a
+#  submitagain/submitagain.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: submitagain (all releases)\n"
+"POT-Creation-Date: 2010-04-12 12:49-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Norway\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: submitagain.module:16,37,43
+msgid "Submit and create another"
+msgstr ""
+
+#: submitagain.module:28
+msgid "Submit Again?"
+msgstr ""
+
+#: submitagain.module:30
+msgid ""
+"Enable this checkbox if you want to provide a \"Submit and create "
+"another\" button for your users."
+msgstr ""
+
+#: submitagain.module:50
+msgid "You may visit your post at !link"
+msgstr ""
+
+#: submitagain.info:0
+msgid "Submit Again"
+msgstr ""
+
+#: submitagain.info:0
+msgid "Adds an extra button to selected node types 'Submit and make another'"
+msgstr ""
+

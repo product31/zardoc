@@ -1,0 +1,5 @@
+; $Id: uicarousel.info,v 1.1 2009/09/30 20:47:02 neclimdul Exp $
+name = jQuery UI Carousel
+description = Provides the jQuery UI plug-in to other Drupal modules.
+dependencies[] = jquery_ui
+core = 6.x

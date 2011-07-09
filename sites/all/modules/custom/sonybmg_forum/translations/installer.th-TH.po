@@ -1,0 +1,25 @@
+# Thailand translation of sonybmg_forum (all releases)
+# Copyright (c) 2010 by the Thailand translation team
+# Generated from file: sonybmg_forum/sonybmg_forum.install: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sonybmg_forum (all releases)\n"
+"POT-Creation-Date: 2010-04-12 15:36-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Thailand\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: sonybmg_forum.install:93
+msgid ""
+"Sony BMG Forum was not able to initialize it's settings because "
+"Install Profile API module is not available. Install this module and "
+"enable Sony BMG Forum again."
+msgstr ""
+
+#: sonybmg_forum.install:72
+msgid "Forums"
+msgstr ""
+

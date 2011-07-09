@@ -1,0 +1,692 @@
+<?php
+// $Id: highslide.module,v 1.12 2010/08/24 13:16:59 q0rban Exp $
+
+/**
+ * @file
+ * Adds Highslide JS Support.
+ *
+ * This module is for Drupal 6.x only.
+ *
+ * Module by: Sprocket, http://www.sprocketcreative.com
+ */
+
+/**
+ * Implementation of hook_help().
+ */
+function highslide_help($path, $arg) {
+  switch ($path) {
+    case 'admin/modules#description':
+      return t('Enables Highslide for Drupal');
+  }
+}
+
+/**
+ * Implementation of hook_enable().
+ */
+function highslide_enable() {
+  if (!_highslide_js_path()) {
+    $path = drupal_get_path('module', 'highslide') .'/highslide';
+    drupal_set_message(t('You must download the highslide JS and copy it to !path.', array('!path' => $path)), 'warning');
+  }
+}
+
+/**
+ * Implementation of hook_requirements().
+ */
+function highslide_requirements($phase) {
+  $requirements = array();
+
+  // Check to see if Highslide JS is installed.
+  if ($phase == 'runtime') {
+    $path = _highslide_js_path();
+    $severity = $path ? REQUIREMENT_OK : REQUIREMENT_ERROR;
+
+    $requirements['highslide_js'] = array(
+      'title' => t('Highslide JS'),
+      'value' => $path ? $path : t('Not found'),
+      'severity' => $severity,
+    );
+
+    if ($severity != REQUIREMENT_OK) {
+      $requirements['highslide_js']['description'] = t('The Highslide JS file was not found.  Please review the INSTALL.txt file included with the Highslide module for installation instructions.');
+    }
+  }
+
+  return $requirements;
+}
+
+/**
+ * Helper function to get the path for the Highslide JS file.
+ *
+ * @return
+ *  the path to the file, or FALSE if no file is found.
+ */
+function _highslide_js_path() {
+  $path = drupal_get_path('module', 'highslide') .'/highslide';
+  // An array of possible highslide files, in order of preference.
+  $files = array('highslide-full.min.js', 'highslide-full.js', 'highslide-full.packed.js');
+
+  foreach($files as $file) {
+    if (file_exists("$path/$file")) {
+      return "$path/$file";
+    }
+  }
+  return FALSE;
+}
+
+/**
+ * Implementation of hook_perm().
+ */
+function highslide_perm() {
+  return array('administer highslide');
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function highslide_menu() {
+  $items = array();
+
+  $items['admin/settings/highslide'] = array(
+    'title' => 'Highslide',
+    'description' => 'Allows the user to configure the highslide settings',
+    'file' => 'highslide.admin.inc',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('highslide_options_form'),
+    'access arguments' => array('administer highslide'),
+  );
+  $items['admin/settings/highslide/settings'] = array(
+    'title' => 'Settings',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+
+  $items['highslide-ajax/user/login'] = array(
+    'title' => 'Login',
+    'page callback' => 'highslide_ajax',
+    'access callback' => 'user_is_anonymous',
+    'options' => array('attributes' => array('class' => 'highslide-ajax-link')),
+  );
+
+  $items['highslide-ajax'] = array(
+    'page callback' => 'highslide_ajax',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  if (module_exists('imagefield') && module_exists('imagecache')) {
+    $items['admin/settings/highslide/formatters'] = array(
+      'title' => 'Imagecache/CCK',
+      'description' => 'Integrate Highslide with Imagecache and CCK by adding new display formats.',
+      'file' => 'highslide.admin.inc',
+      'page callback' => 'highslide_formatter_list',
+      'access arguments' => array('administer highslide'),
+      'type' => MENU_LOCAL_TASK,
+    );
+    $items['admin/settings/highslide/formatters/list'] = array(
+      'title' => 'List',
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+      'weight' => -10,
+    );
+
+    $items['admin/settings/highslide/formatters/add'] = array(
+      'title' => 'Add new formatter',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('highslide_formatter_form'),
+      'file' => 'highslide.admin.inc',
+      'access arguments' => array('administer highslide'),
+      'type' => MENU_LOCAL_TASK,
+    );
+
+    $items['admin/settings/highslide/formatters/%highslide_formatter'] = array(
+      'title' => 'Edit formatter',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('highslide_formatter_form', 'edit', 4),
+      'file' => 'highslide.admin.inc',
+      'access arguments' => array('administer highslide'),
+      'type' => MENU_CALLBACK,
+    );
+
+    $items['admin/settings/highslide/formatters/%highslide_formatter/delete'] = array(
+      'title' => 'Delete formatter',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('highslide_formatter_delete_form', 4),
+      'file' => 'highslide.admin.inc',
+      'access arguments' => array('administer highslide'),
+      'type' => MENU_CALLBACK,
+    );
+  }
+
+  return $items;
+}
+
+/**
+ * Menu callback that prints another menu callback to screen.
+ */
+function highslide_ajax() {
+  // Get the path, minus the highslide-ajax/
+  $q = substr($_GET['q'], 15);
+
+  // Set the active item to the path $q.
+  menu_set_active_item($q);
+
+  // Add the css to the output.
+  drupal_add_css();
+  $output = drupal_get_css();
+
+  // Add the js to the output.
+  drupal_add_js();
+  $output .= drupal_get_js();
+
+  // Finally, add the content.
+  $output .= menu_execute_active_handler();
+
+  print $output;
+}
+
+/**
+ * Theme function to print a highslide ajax link.
+ */
+function theme_highslide_ajax($text, $path, $options = array()) {
+  $class = $attributes['attributes']['class'] ? ' highslide-ajax-link' : 'highslide-ajax-link';
+  $options['attributes']['class'] .= $class;
+  return l($text, 'highslide-ajax/'. $path, $options);
+}
+
+/**
+ * Menu wildcard loader
+ */
+function highslide_formatter_load($name) {
+  $formatters = highslide_formatters();
+  return $formatters[$name];
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function highslide_theme() {
+  $theme = array(
+    // highslide imagefield formatter theme functions.
+    'highslide' => array(
+      'arguments' => array(
+        'thumb' => NULL,
+        'full' => NULL,
+        'alt' => NULL,
+        'title' => NULL,
+        'caption' => array(),
+        'attributes' => array(),
+      ),
+    ),
+    'highslide_ajax' => array(
+      'arguments' => array(
+        'text' => NULL,
+        'path' => NULL,
+        'options' => NULL,
+      ),
+    ),
+    'highslide_inline' => array(
+      'arguments' => array(
+        'thumb' => NULL,
+        'content' => NULL,
+        'alt' => NULL,
+        'title' => NULL,
+        'attributes' => array(),
+      ),
+    ),
+    'highslide_inline_wrap' => array(
+      'arguments' => array(
+        'content' => NULL,
+        'id' => NULL,
+      ),
+    ),
+    'highslide_caption' => array(
+      'arguments' => array('caption' => array()),
+    ),
+  );
+
+  foreach (highslide_formatters() as $formatter) {
+    $theme['highslide_formatter_hs_'. $formatter['name']] = array(
+      'arguments' => array('element' => NULL),
+      'function' => 'theme_highslide_formatter',
+    );
+  }
+
+  return $theme;
+}
+
+/**
+ * Implementation of hook_init()
+ */
+function highslide_init() {
+  highslide_add_files();
+}
+
+/**
+ * Implementation of hook_footer().
+ */
+function highslide_footer($main = 0) {
+  return '<div id="closebutton" class="highslide-overlay closebutton" onclick="return hs.close(this)" title="Close"></div>';
+}
+
+/**
+ * Implementation of hook_field_formatter_info().
+ *
+ * Add certain highslide and imagecache formatters to CCK image fields if
+ * the imagefield.module and the imagecache.module exist.  Add additional
+ * formatters if emfield, emimage and/or emvideo modules exist.
+ */
+function highslide_field_formatter_info() {
+  $formatters = array();
+
+  if (module_exists('imagefield')) {
+    foreach (highslide_formatters() as $formatter) {
+      $formatters['hs_'. $formatter['name']] = array(
+        'label' => $formatter['label'] .' (Zooms)',
+        'field types' => array('filefield'),
+        'suitability callback' => 'imagefield_handles_file',
+        'description' => t('Displays imagecache resized images with Highslide Zooming.'),
+      );
+    }
+  }
+
+  return $formatters;
+}
+
+/**
+ * Theme function to process an imagefield element.
+ *
+ * @ingroup themeable
+ */
+function theme_highslide_formatter($element) {
+  // Inside a view $element may contain null data. In that case, just return an empty string.
+  return empty($element['#item']['fid']) ? '' : _highslide_formatter($element);
+}
+
+/**
+ * Formats the element for theme output.
+ */
+function _highslide_formatter($element) {
+  _highslide_element_prepare($element);
+
+  $item      = $element['#item'];
+  $formatter = $element['#formatter'];
+
+  // Load up the thumbnail and full size formatters
+  $thumb = _highslide_formatter_sized('thumb', $element);
+  $full  = _highslide_formatter_sized('full', $element);
+
+  // If no formatter or thumb, quit
+  if (!$formatter || empty($thumb) || empty($full)) {
+    return '<!-- highslide formatter not found -->';
+  }
+
+  // Get the caption and attributes.
+  $caption = _highslide_formatter_caption($element);
+  $attrib = array('class' => 'highslide_formatter_'. $formatter['name']);
+
+  return theme('highslide', $thumb, $full, NULL, NULL, $caption, $attrib);
+}
+
+/**
+ * Outputs a sized image or path for a specific element.
+ *
+ * @param $size
+ *   String, thumb or full.
+ * @param $element
+ *   Array, the element.
+ */
+function _highslide_formatter_sized($size, $element) {
+  $formatter = $element['#formatter'];
+  $element['#formatter'] = $formatter[$size]['formatter'];
+  $element['#theme'] = $formatter[$size]['theme'];
+
+  return theme($element['#theme'], $element);
+}
+
+/**
+ * Prepares the element array for processing in _highslide_formatter().
+ */
+function _highslide_element_prepare(&$element) {
+  $element['#formatter'] = highslide_formatter_by_name($element['#formatter']);
+
+  // Views does not load the file for us, while CCK display fields do.
+  if (empty($element['#item']['filepath'])) {
+    $element['#item'] = array_merge($element['#item'], field_file_load($element['#item']['fid']));
+  }
+
+  // Unserialize the data if need be.
+  if (is_string($element['#item']['data'])) {
+    $element['#item']['data'] = unserialize($element['#item']['data']);
+  }
+
+  // Set the filepath
+  $element['#item']['filepath'] = ($element['#item']['fid'] == 'upload') ? $element['#item']['preview'] : $element['#item']['filepath'];
+}
+
+/**
+ * Prepares the caption array for a CCK element.
+ *
+ * @param $element
+ *   Array, the element.
+ * @return
+ *   Array; contains the caption data if applicable.
+ */
+function _highslide_formatter_caption($element) {
+  $item      = $element['#item'];
+  $node      = $element['#node'];
+  $formatter = $element['#formatter'];
+
+  if (($formatter['caption'] != 'none') && $caption_content = _highslide_caption_content($formatter['caption_field'], $node, $item)) {
+    // Create the caption array
+    return array('content' => $caption_content, 'display' => $formatter['caption']);
+  }
+}
+
+/**
+ * Implementation of hook_insert_styles().
+ */
+function highslide_insert_styles() {
+  $insert_styles = array();
+
+  if (function_exists('imagecache_presets')) {
+    foreach (highslide_formatters() as $formatter) {
+      // Only image caption styles are supported since we don't have a node object 
+      // for other node fields.
+      $caption_options = array('default', 'image_title', 'image_alt');
+      if ($formatter['caption'] == 'none' || in_array($formatter['caption_field'], $caption_options)) {
+        $insert_styles['hs_'. $formatter['name']] = array(
+          'label' => $formatter['label'] .' (Zooms)',
+        );
+      }
+    }
+  }
+
+  return $insert_styles;
+}
+
+/**
+ * Implementation of hook_insert_content().
+ */
+function highslide_insert_content($item, $style, $widget) {
+  $element = array(
+    '#item' => $item,
+    '#widget' => $widget,
+    '#formatter' => $style['name'],
+  );
+
+  return _highslide_formatter($element);
+}
+
+/**
+ * Adds the css and js files and settings.
+ */
+function highslide_add_files() {
+  if ($js_path = _highslide_js_path()) {
+    // Add the css and js
+    $path = drupal_get_path('module', 'highslide');
+    $options = variable_get('highslide_options', highslide_default_options());
+
+    drupal_add_css($path .'/highslide/highslide.css');
+    // Add Highslide JS.
+    drupal_add_js($js_path);
+    // Add highslide.module's js.
+    drupal_add_js($path .'/highslide.js');
+    // Add the settings/options.
+    drupal_add_js(array('highslide' => array('options' => $options)), 'setting');
+  }
+}
+
+/**
+ * Highslide default settings array
+ */
+function highslide_default_options() {
+  return array(
+    'graphicsDir'        => base_path() . drupal_get_path('module', 'highslide') . '/highslide/graphics/',
+    'align'              => 'center',
+    'outlineType'        => 'drop-shadow',
+    'dimmingOpacity'     => .4,
+    'dimmingDuration'    => 140,
+/*  'zoomSpeedOut'       => 500,
+    'frameWidth'         => NULL,
+    'frameHeight'        => NULL,
+    'overlayShow'        => TRUE,
+    'selectors'          => '',*/
+  );
+}
+
+/**
+ * 
+ */
+function theme_highslide($thumb, $full, $alt = '', $title = '', $caption = array(), $attributes = array()) {
+  // If $thumb isn't an img tag, make it one.
+  if (!strpos($thumb, '<img') && is_file($thumb)) {
+    $thumb = _highslide_thumbnail($thumb, $alt, $title, $attributes);
+  }
+ 
+  // Create an imagecache url if we're not already using one.
+  if (!strpos($full, '/imagecache/')) {
+    $full = imagecache_create_url('highslide_full', $full);
+  }
+
+  // Add the Highslide class.
+  $attributes['class'] = empty($attributes['class']) ? 'highslide' : $attributes['class'] .' highslide'; 
+
+  $output = l($thumb, $full, array('attributes' => $attributes, 'html' => true));
+
+  $output .= theme('highslide_caption', $caption);
+
+  return $output;
+}
+
+/**
+ * 
+ */
+function theme_highslide_inline($thumb, $content, $alt = '', $title = '', $attributes = array()) {
+  // Create a unique id for this item.
+  static $id_num = 0;
+  $id = 'highslide_'. $id_num++;
+
+  // If $thumb isn't an img tag, make it one.
+  if (!strpos($thumb, '<img') && is_file($thumb)) {
+    $thumb = _highslide_thumbnail($thumb, $alt, $title, $attributes);
+  }
+
+  // Add the Highslide class.
+  $attributes['class'] = empty($attributes['class']) ? 'highslide' : $attributes['class'] .' highslide'; 
+
+  $output = l($thumb, NULL, array('attributes' => $attributes, 'html' => true, 'fragment' => $id));
+  $output .= theme('highslide_inline_wrap', $content, $id);
+
+  return $output;
+}
+
+/**
+ * Theme function to wrap inline content.
+ */
+function theme_highslide_inline_wrap($content = '', $id) {
+  if (!empty($content)) {
+    return "<div id=\"$id\" class=\"highslide_inline\">\n$content\n</div> <!-- /.highslide_inline -->\n";
+  }
+  return FALSE;
+}
+
+/**
+ * theme_highslide_caption function.
+ *
+ * @param array $caption. (default: array()
+ * @return void
+ */
+function theme_highslide_caption($caption = array()) {
+  $output = '';
+  $content = $caption['content'];
+  $display = $caption['display'];
+
+  if (!empty($content)) {
+    if ($display == 'thumb' || $display == 'both') {
+      $output = "<div class='highslide-visible-caption'>$content</div>\n";
+    }
+    if ($display == 'full' || $display == 'both') {
+      // We use a span here so that if Insert module is used, the line break filter 
+      // doesn't break our caption.
+      $output .= "<span class='highslide-caption'>$content</span>\n";
+    }
+  }
+
+  return $output;
+}
+
+/**
+ * _highslide_thumbnail function.
+ *
+ * @access private
+ * @param mixed $thumb
+ * @param mixed $alt
+ * @param mixed $title
+ * @param mixed $attributes
+ * @return void
+ */
+function _highslide_thumbnail($thumb, $alt, $title, $attributes) {
+  // If the path already has an imagecache preset, use theme_image() instead of theme_imagecache().
+  return strpos($thumb, '/imagecache/') ? theme('image', $thumb, $alt, $title, $attributes) : theme('imagecache', 'highslide_thumb', $thumb, $alt, $title, $attributes);
+}
+
+/**
+ * _highslide_count_image_id function.
+ * 
+ * @access private
+ * @param mixed $matches
+ * @return void
+ */
+function _highslide_count_image_id($matches) {
+  static $image_id;
+  if (empty($image_id)) {
+    $image_id = 0;
+  }
+  $image_id++;
+  $max_width = variable_get('highslide_width', 549);
+  return '<a href="#nolink" onclick="return false;" id="image'. $image_id .'" class="highslide-no-link"><img'. $matches[1] .' src="' .  $matches[2] .'" class="resizeimage" onload="resize_image(this, \''. $matches[2] .'\', '. $image_id .', '.  $max_width .');'. $matches[3] .' /></a>';
+}
+
+/**
+ * Helper function to assemble the caption content.
+ *
+ * @param $field
+ *   String name of the field from which to get the caption.
+ * @param $node
+ *   The node object.
+ * @param $item
+ *   The file array.
+ * @return
+ *   String caption.
+ */
+function _highslide_caption_content($field, $node, $item) {
+  switch ($field) {
+    case 'default':
+      return $item['data']['description'];
+    case 'image_title':
+      return $item['data']['title'];
+    case 'image_alt':
+      return $item['data']['alt'];
+    case 'title':
+    case 'body':
+      return $node->$field;
+    default:
+      if (($field_array = $node->$field) && is_array($field_array)) {
+        return $field_array[0]['value'];
+      }
+  }
+}
+
+/**
+ * Returns all formatters, or formatter of name $name if set.
+ *
+ * @param $name
+ * A name of a formatter
+ *
+ * @return array('name' => string, 'label' => string, 'full' => string, 'thumb' => string)
+ */
+function highslide_formatters() {
+  return variable_get('highslide_formatters', array(
+    'default' => array(
+      'name' => 'default',
+      'label' => t('Highslide Default'),
+      'thumb' => array(
+        'formatter' => 'highslide_thumb_default',
+        'theme' => 'imagecache_formatter_highslide_thumb_default',
+      ),
+      'full' => array(
+        'formatter' => 'highslide_full_path',
+        'theme' => 'imagecache_formatter_highslide_full_path',
+      ),
+      'caption' => 'full',
+      'caption_field' => 'default',
+    ),
+  ));
+}
+
+/**
+ * Load a highslide formatter by its CCK formatter name.
+ *
+ * @param $name
+ *   String, name of the CCK formatter.
+ * @return
+ *   Highslide formatter settings array.
+ */
+
+function highslide_formatter_by_name($name) {
+  static $formatters;
+
+  // Remove 'hs_' from the beginning of the formatter name.
+  $name = substr($name, 3);
+
+  if (is_null($formatters)) {
+    $formatters = highslide_formatters();
+  }
+
+  return $formatters[$name];
+}
+
+/**
+ * Implementation of hook_imagecache_default_presets().
+ */
+function highslide_imagecache_default_presets() {
+  $presets = array();
+
+  $presets['highslide_full'] = array (
+    'presetname' => 'highslide_full',
+    'actions' => 
+    array (
+      0 =>
+      array (
+        'weight' => '0',
+        'module' => 'imagecache',
+        'action' => 'imagecache_scale',
+        'data' => 
+        array (
+          'width' => '780',
+          'height' => '100%',
+          'upscale' => 0,
+        ),
+      ),
+    ),
+  );
+  $presets['highslide_thumb'] = array (
+    'presetname' => 'highslide_thumb',
+    'actions' => 
+    array (
+      0 => 
+      array (
+        'weight' => '0',
+        'module' => 'imagecache',
+        'action' => 'imagecache_scale',
+        'data' => 
+        array (
+          'width' => '150',
+          'height' => '100%',
+          'upscale' => 0,
+        ),
+      ),
+    ),
+  );
+  return $presets;
+}

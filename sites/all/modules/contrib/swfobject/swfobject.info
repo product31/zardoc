@@ -1,0 +1,4 @@
+; $Id$
+name = SWF Object
+description = Create Flash Movie blocks using swfobject.js.
+core = 6.x

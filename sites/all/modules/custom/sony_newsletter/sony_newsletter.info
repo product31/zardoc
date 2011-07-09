@@ -1,0 +1,10 @@
+; $Id$
+name = Sony Newsletter
+description = Unified newsletter handling for the Sony Platform
+package = Sony BMG
+core = 6.x
+dependencies[] = sony_coppa
+
+l10n server = translate.gdb-dev.com
+project = "sony_newsletter"
+version = "6.x-2.x"

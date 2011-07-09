@@ -1,0 +1,89 @@
+# China translation of sonybmg_services (all releases)
+# Copyright (c) 2010 by the China translation team
+# Generated from files:
+#  sonybmg_services/sonybmg_services.info: n/a
+#  sonybmg_services/sonybmg_services.module: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sonybmg_services (all releases)\n"
+"POT-Creation-Date: 2010-04-05 15:35-0500\n"
+"PO-Revision-Date: 2010-03-30 11:10-0500\n"
+"Language-Team: China\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: sonybmg_services.info:0
+msgid "Sony BMG"
+msgstr ""
+
+#: sonybmg_services.module:96
+msgid "Further instructions have been sent to your e-mail address."
+msgstr "进一步的说明已经传送到您的电子邮件信箱里。"
+
+#: sonybmg_services.module:153,152
+msgid "Detected malicious attempt to alter protected user fields."
+msgstr "检测对用户信息保护字段的恶意修改企图。"
+
+#: sonybmg_services.module:168
+msgid "Error saving user account."
+msgstr "保存用户帐户时发生错误。"
+
+#: sonybmg_services.module:173
+msgid "edit"
+msgstr "编辑"
+
+#: sonybmg_services.module:182
+msgid "Registration successful. You are now logged in."
+msgstr "注册成功。 您现在已经登录。"
+
+#: sonybmg_services.module:184
+msgid "Registration successful."
+msgstr ""
+
+#: sonybmg_services.module:191
+msgid ""
+"Password and further instructions have been e-mailed to the new user "
+"<a href=\"@url\">%name</a>."
+msgstr ""
+"密码和后续指导已经通过电子邮件发送给新用户 <a "
+"href=\"@url\">%name</a>"
+
+#: sonybmg_services.module:194
+msgid ""
+"Your password and further instructions have been sent to your e-mail "
+"address."
+msgstr "您的密码和后续指导将发送到您的电子邮件地址。"
+
+#: sonybmg_services.module:200
+msgid ""
+"Thank you for applying for an account. Your account is currently "
+"pending approval by the site administrator.<br />In the meantime, a "
+"welcome message with further instructions has been sent to your e-mail "
+"address."
+msgstr ""
+"感谢您的帐户申请。 "
+"您的帐户目前在等待管理员审核。 <br /> "
+"同时，一封包括详细指导的欢迎邮件已经发送到您的邮箱中。"
+
+#: sonybmg_services.module:152
+msgid "security"
+msgstr "安全"
+
+#: sonybmg_services.module:173
+msgid "user"
+msgstr "用户"
+
+#: sonybmg_services.module:173
+msgid "New user: %name (%email)."
+msgstr "新用户：%name(%email)。"
+
+#: sonybmg_services.info:0
+msgid "Sony BMG Services"
+msgstr ""
+
+#: sonybmg_services.info:0
+msgid "Exposes some Sony specific services."
+msgstr ""
+

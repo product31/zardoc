@@ -1,0 +1,331 @@
+<?php
+// $Id
+
+/**
+ * @file
+ * Provides functions to post to and read from Tumblr.com's APIs, and allows
+ * local caching of Tumblr data for queries. Views and Actions integration will
+ * be coming shortly.
+ */
+
+/**
+ * Checks permissions on a given Tumblr account.
+ *
+ * @param $username
+ *   The Tumblr username to check
+ * @param $email
+ *   The Tumblr user's email address
+ * @param $password
+ *   The Tumblr user's account password
+ * @param $action
+ *   The permission to check. Valid choices are 'authenticate', 'check-audio',
+ *   and 'check-video'.
+ * @return
+ *   A boolean indicating whether the email/password pair is valid, or whether
+ *   the account in question has available upload quota for media files.
+ */
+function tumblr_check($username, $email, $password, $action = 'authenticate') {
+  $data = array('action' => $action, 'email' => $email, 'password' => $password);
+  $response = drupal_http_request("http://$username.tumblr.com/api/write", array(), 'POST', _tumblr_array_to_post($data));
+  return ($response->code == '200');
+}
+
+/**
+ * Retrieves the latest posts from a user's Tumblr feed.
+ *
+ * @param $username
+ *   The Tumblr username whose posts should be retrieved.
+ * @param $options
+ *   A keyed array of option GET parameters for the request. 'type' will filter
+ *   retrieved posts by type, 'start' and 'num' allow paging through the user's
+ *   entire archive of posts. 'id' allows a single post to be retrieved.
+ * @return
+ *   A structured array containing information about the user's Tumblr feed, and
+ *   a 'posts' sub-array containing individual Tumblr posts.
+ */
+function tumblr_read($username, $options = array()) {
+  $response = drupal_http_request("http://$username.tumblr.com/api/read" . _tumblr_array_to_get($options));
+
+  if ($response->code == '200' || $response->redirect_code == '200') {
+    $xml = new SimpleXMLElement($response->data);
+    return _tumblr_xml_to_array($xml);
+  }
+  else {
+    return FALSE;
+  }
+}
+
+/**
+ * Submits a post to a Tumblr.com account.
+ *
+ * @param $email
+ *   The login email for the Tumblr account.
+ * @param $password
+ *   The login password for the Tumblr account.
+ * @param $post
+ *   A keyed array of the POST values to pass to Tumblr.com. See the Tumblr.com
+ *   API documentation (http://www.tumblr.com/api) for details on what types are
+ *   allowed, and what data is required for each type.
+ * @return
+ *   The HTTP response code from Tumblr.com.
+ */
+function tumblr_write($email, $password, $post) {
+  $post += array('generator' => 'http://www.drupal.org', 'type' => 'regular');
+  $data = _tumblr_array_to_post($post);
+  $response = drupal_http_request('http://www.tumblr.com/api/write', array(), 'POST', $data);
+  return $response->code;
+}
+
+/**
+ * Saves a single Tumblr post to the local database.
+ *
+ * @param $post
+ *   A structured array containing the values for a single Tumblr post.
+ */
+function tumblr_save($post) {
+  db_query('DELETE FROM {tumblr_post} WHERE id = %d', $post['id']);
+  drupal_write_record('tumblr_post', $post);
+}
+
+/**
+ * Builds a structured aray of Tumblr posts from a SimpleXML object.
+ *
+ * @param $xml
+ *   The SimpleXML object containing the raw data from a user's Tumblr feed.
+ * @return
+ *   A structured array containing information about the user's Tumblr feed, and
+ *   a 'posts' sub-array containing individual Tumblr posts.
+ */
+function _tumblr_xml_to_array($xml = NULL) {
+  $structure = array();
+  if (!empty($xml)) {
+    if (isset($xml->tumblelog)) {
+      $attributes = (array)$xml->tumblelog->attributes();
+      $structure = $attributes['@attributes'];
+      $attributes = (array)$xml->posts->attributes();
+      $structure = array_merge($structure, $attributes['@attributes']);
+
+      if (isset($xml->tumblelog->feeds)) {
+        foreach($xml->tumblelog->feeds->feed as $feed) {
+          $attributes = (array)$feed->attributes();
+          $structure['feeds'][$attributes['@attributes']['id']] = $attributes['@attributes'];
+        }
+      }
+
+      if (isset($xml->posts->post)) {
+        foreach($xml->posts->post as $post) {
+          $attributes = (array)$post->attributes();
+          $id = $attributes['@attributes']['id'];
+
+          $structure['posts'][$id]['id'] = $id;
+          $structure['posts'][$id]['type'] = $attributes['@attributes']['type'];
+          $structure['posts'][$id]['tumblr_name'] = $structure['name'];
+          $structure['posts'][$id]['timestamp'] = strtotime($attributes['@attributes']['date']);
+
+          foreach($post as $key => $value) {
+            if ($key == '@attributes' || !is_string($value)) continue;
+            $structure['posts'][$id][_tumblr_clean_key($key)] = $value;
+          }
+
+          // Special case multiple photos, since we only support one.
+          if ($type == 'photo' && is_array($post['photo-url'])) {
+            $post = (array)$post[0];
+            $structure['posts'][$id][_tumblr_clean_key('photo-url')] = $post['photo-url'];
+          }
+        }
+      }
+    }
+  }
+  return $structure;
+}
+
+/**
+ * Merges type-specific Tumblr post properties into unified namespace.
+ *
+ * This function's mapping isn't perfect: in particular, videos don't map well
+ * to the title/body paradigm: the HTML 'caption' would normally go in 'body',
+ * but we need that for the HTML of the Flash player, too.
+ */
+function _tumblr_clean_key($key = '') {
+  $pairs = array(
+    'regular-title' => 'title',
+    'regular-body' => 'body',
+
+    'link-text' => 'title',
+    'link-description' => 'body',
+    'link-url' => 'link',
+
+    'quote-text' => 'body',
+    'quote-source' => 'source',
+
+    'conversation-title' => 'title',
+    'conversation-text' => 'body',
+
+    'photo-caption' => 'body',
+    'photo-url' => 'link',
+
+    'video-title' => 'title',
+    'video-caption' => 'title',
+    'video-source' => 'link',
+    'video-player' => 'body',
+
+    'audio-caption' => 'title',
+    'audio-player' => 'body',
+  );
+  $search = array_keys($pairs);
+  $replace = array_values($pairs);
+  return str_replace($search, $replace, $key);
+}
+
+/**
+ * Formats a key/value collection as a set of GET parameters.
+ */
+function _tumblr_array_to_get($data = array()) {
+  $output = array();
+  foreach ($data as $key => $value) {
+    $output[] = urlencode($key) .'='. urlencode($value);
+  }
+  if (!empty($output)) {
+    return '?'. join('&', $output);
+  }
+}
+
+/**
+ * Formats a key/value collection as a set of POST values.
+ */
+function _tumblr_array_to_post($data = array()) {
+  $output = array();
+  foreach ($data as $key => $value) {
+    $output[] = urlencode($key) .'='. urlencode($value);
+  }
+  if (!empty($output)) {
+    return join("&", $output);
+  }
+}
+
+/**
+ * Retrieves the XML Tumblr feed.
+ *
+ * @param $url
+ *   Either a full url to the feed, like 'http://demo.tumblr.com/api/read' or a
+ *   Tumblr username, like 'demo'.
+ * @param $options
+ *   An array of key => value pairs to append to the URL.
+ * @return $xml
+ *   A populated SimpleXMLElement object if successful, or FALSE if not.
+ */
+function tumblr_fetch($url, $options = array()) {
+  if (!function_exists('simplexml_load_string')) {
+    return FALSE;
+  }
+
+  $private = ($options['email'] && $options['password']);
+
+  if ($private) {
+    $headers = array('content-type' => 'application/x-www-form-urlencoded');
+    $data = http_build_query($options);
+    $response = drupal_http_request($url, $headers, 'POST', $data);
+  }
+  else {
+    $parts = parse_url($url);
+    $url .= ((strpos($url, '?') === FALSE) ? '?' : '&') . http_build_query($options);
+    $response = drupal_http_request($url);
+  }
+
+  if ($response->code == '200' || $response->redirect_code == '200') {
+    $xml = new SimpleXMLElement($response->data);
+
+    // Some basic validation of the xml.
+    if ($xml->getName() == 'tumblr') {
+      return $xml;
+    }
+  }
+
+  return FALSE;
+}
+
+/**
+ * Implementation of hook_feedapi_feed().
+ */
+function tumblr_feedapi_feed($op) {
+
+  if ($op == 'type') {
+    return array('Tumblr feed');
+  }
+
+  $args = func_get_args();
+
+  module_load_include('inc', 'tumblr', 'tumblr');
+  $settings = array();
+  if ($args[1]->settings['parsers'] && $args[1]->settings['parsers']['tumblr']) {
+    $settings = $args[1]->settings['parsers']['tumblr'];
+  }
+  $tumblr = new Tumblr($args[1]->url, $settings['email'], $settings['password'], $settings['type']);
+
+  switch ($op) {
+    case 'compatible':
+      if ($tumblr->validate()) {
+        return array_shift(tumblr_feedapi_feed('type'));
+      }
+      return FALSE;
+
+    case 'parse':
+      module_load_include('inc', 'tumblr', 'tumblr.feedapi');
+      $parsed_feed = _tumblr_feedapi_parse($tumblr);
+      return $parsed_feed;
+  }
+}
+
+/**
+ * Implementation of hook_feedapi_settings_form().
+ */
+function tumblr_feedapi_settings_form($type) {
+  switch ($type) {
+    case 'parsers':
+      $form['private'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Private posts?'),
+        '#description' => t('Provide your Tumblr email address and password below in order to access private posts.'),
+        '#default_value' => 0,
+      );
+      $form['email'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Email address'),
+        '#default_value' => '',
+      );
+      $form['password'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Password'),
+        '#default_value' => '',
+      );
+      $form['type'] = array(
+        '#type' => 'select',
+        '#title' => t('Type of post'),
+        '#default_value' => t('All'),
+        '#options' => array(
+          '' => t('All'),
+          'text' => t('Text'),
+          'quote' => t('Quote'),
+          'photo' => t('Photo'),
+          'link' => t('Link'),
+          'chat' => t('Chat'),
+          'video' => t('Video'),
+          'audio' => t('Audio'),
+        ),
+      );
+      return $form;
+      break;
+  }
+}
+
+/**
+ * Implementation of hook_nodeapi().
+ */
+//TODO: implementation to save feedapi settings
+
+/**
+ * Implementation of hook_init().
+ */
+function tumblr_init() {
+  drupal_add_css(drupal_get_path('module', 'tumblr') .'/tumblr.css');
+}

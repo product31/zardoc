@@ -1,0 +1,10 @@
+name = Userpoints Service Links
+description = Allows users to earn points for clicking the share links from the service links module
+package = Userpoints
+dependencies[] = userpoints
+dependencies[] = service_links
+core = 6.x
+
+l10n server = translate.gdb-dev.com
+project = "userpoints_service_links"
+version = "6.x-2.x"

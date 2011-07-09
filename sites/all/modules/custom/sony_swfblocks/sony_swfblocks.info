@@ -1,0 +1,4 @@
+; $Id$
+name = Sony SWF Blocks
+description = Create Flash Movie blocks using swfobject.js.
+core = 6.x

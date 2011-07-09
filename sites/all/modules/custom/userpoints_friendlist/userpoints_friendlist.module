@@ -1,0 +1,76 @@
+<?php
+
+// @file
+// userpoints_contrib that integrates with the Friendlist module to award people a configurable number of userpoints for friending another user
+// created by tom_o_t aka Thomas Turnbull for Sony Music
+
+define('USERPOINTS_FRIENDLIST_FRIEND',                     'userpoints_friendlist_friend');
+define('USERPOINTS_FRIENDLIST_TID',                        'userpoints_friendlist_tid');
+
+/*
+* Implementation of hook_userpoints()
+* Creates points configuration form for awarding points for friending
+*/
+
+function userpoints_friendlist_userpoints($op, $params = array()) {
+  switch($op) {
+    case 'setting':
+      $group = 'friendlist';
+      $form[$group] = array(
+        '#type'        => 'fieldset',
+        '#collapsible' => TRUE,
+        '#collapsed'   => TRUE,
+        '#title'       => t('!Points for friending', userpoints_translation()),
+      );
+
+      $form[$group][USERPOINTS_FRIENDLIST_FRIEND] = array(
+        '#type'          => 'textfield',
+        '#title'         => t('!Points for friending', userpoints_translation()),
+        '#default_value' => variable_get(USERPOINTS_FRIENDLIST_FRIEND, 0),
+        '#size'          => 5,
+        '#maxlength'     => 5,
+      );
+
+      $form[$group][USERPOINTS_FRIENDLIST_TID] = array(
+        '#type'          => 'select',
+        '#title'         => t('Category'),
+        '#default_value' => variable_get(USERPOINTS_FRIENDLIST_TID, 0),
+        '#options'       => userpoints_get_categories(),
+        '#description'   => t('Friending will be assigned to this category. You can modify what categories are available by modifying the <a href="!url">Userpoints taxonomy</a>.', 
+          array('!url' => url('admin/content/taxonomy/'. variable_get(USERPOINTS_CATEGORY_DEFAULT_VID, '')))),
+      );
+      
+      return $form;
+  }
+}
+
+/*
+*   Implementation of hook_friendlist_relations()
+*   Awards the points for friending
+*/
+
+function userpoints_friendlist_friendlist_relations($op, $when, $requester, $requestee, $rtid, $message, $old_status, $new_status, $user_generated) {
+  
+  if ($op == 'add' && $when == 'post'){
+      // Award the points - implementation of hook_userpointsapi()
+      userpoints_userpointsapi(array(
+        'points' => variable_get(USERPOINTS_FRIENDLIST_FRIEND, 0),
+        'uid' => $requester,
+        'operation' => 'Adding a friend',
+        'entity_id' => $requester,
+        'entity_type' => 'user',
+        'tid'         => variable_get(USERPOINTS_FRIENDLIST_TID, 0),
+      ));
+  } elseif ($op == 'delete' && $when == 'post'){
+      // Deduct the points - implementation of hook_userpointsapi()
+      userpoints_userpointsapi(array(
+        'points' => -(variable_get(USERPOINTS_FRIENDLIST_FRIEND, 0)),
+        'uid' => $requester,
+        'operation' => 'deleting friend',
+        'entity_id' => $requester,
+        'entity_type' => 'user',
+        'tid'         => variable_get(USERPOINTS_FRIENDLIST_TID, 0),
+      ));
+  }
+  
+} 

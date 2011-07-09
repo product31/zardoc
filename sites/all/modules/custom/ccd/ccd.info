@@ -1,0 +1,9 @@
+; $Id$
+name = ConnectedCD
+description = Integration with the Sony ConnectedCD system.
+core = 6.x
+package = Sony BMG
+
+l10n server = translate.gdb-dev.com
+project = "ccd"
+version = "6.x-2.x"

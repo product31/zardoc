@@ -1,0 +1,11 @@
+; $Id$
+name = M2 JS Commerce Integration
+description = Adds Javascript commerce integration
+package = Sony M2
+core = 6.x
+dependencies[] = m2api
+dependencies[] = jquery_update
+
+l10n server = translate.gdb-dev.com
+project = "m2_js"
+version = "6.x-2.x"

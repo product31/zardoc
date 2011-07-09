@@ -1,0 +1,10 @@
+;$Id: 2010/08/20
+name = Tweet
+description = Tweet content from a website without having to leave the page
+core = 6.x
+
+dependencies[] = sony_connect
+
+package = Connect
+
+

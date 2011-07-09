@@ -1,0 +1,185 @@
+# Malaysia (Malay) translation of missioncontrol (all releases)
+# Copyright (c) 2010 by the Malaysia (Malay) translation team
+# Generated from files:
+#  missioncontrol/missioncontrol.module: n/a
+#  missioncontrol/mc_client.module: n/a
+#  missioncontrol/missioncontrol.install: n/a
+#  missioncontrol/mc_client.info: n/a
+#  missioncontrol/missioncontrol.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: missioncontrol (all releases)\n"
+"POT-Creation-Date: 2010-04-12 11:09-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Malaysia (Malay)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: missioncontrol.module:79,91
+msgid "Home"
+msgstr ""
+
+#: missioncontrol.module:45
+msgid "Edit"
+msgstr ""
+
+#: missioncontrol.module:99
+msgid "Title"
+msgstr ""
+
+#: missioncontrol.module:39
+msgid "View"
+msgstr ""
+
+#: missioncontrol.module:107
+msgid "URL"
+msgstr ""
+
+#: missioncontrol.module:152
+msgid "Submit"
+msgstr ""
+
+#: missioncontrol.module:20
+msgid "Overview"
+msgstr ""
+
+#: missioncontrol.module:188
+msgid "Your changes have been saved."
+msgstr ""
+
+#: mc_client.module:29
+msgid "Host URL"
+msgstr ""
+
+#: mc_client.module:30
+msgid ""
+"Full URL of the MissionControl host to use. Do not include the "
+"trailing slash.  Ex: http://www.example.com"
+msgstr ""
+
+#: mc_client.module:75
+msgid "Error @errno: %message"
+msgstr ""
+
+#: mc_client.module:74,86
+msgid "mc_client"
+msgstr ""
+
+#: mc_client.module:74
+msgid "Error @errno: %server - %message - %method - <pre>@data</pre>"
+msgstr ""
+
+#: mc_client.module:86
+msgid ""
+"No MissionControl servers could be reached or all servers returned an "
+"error."
+msgstr ""
+
+#: mc_client.module:15
+msgid "Configure this site as a MissionControl client."
+msgstr ""
+
+#: missioncontrol.module:125
+msgid "Image preview"
+msgstr ""
+
+#: missioncontrol.module:126
+msgid "Uploading an image will overwrite any previously uploaded image."
+msgstr ""
+
+#: missioncontrol.module:134
+msgid "Security keys"
+msgstr ""
+
+#: missioncontrol.module:148
+msgid "Regenerate keys"
+msgstr ""
+
+#: missioncontrol.module:214
+msgid ""
+"New keys have been generated. Make sure to update the client site with "
+"these new keys."
+msgstr ""
+
+#: missioncontrol.module:262
+msgid "Variables"
+msgstr ""
+
+#: missioncontrol.module:279
+msgid ""
+"Verify communication and authentication between the client and "
+"MissionControl."
+msgstr ""
+
+#: missioncontrol.module:285
+msgid "Set the value of a variable."
+msgstr ""
+
+#: missioncontrol.module:15
+msgid "MissionControl multisite manager."
+msgstr ""
+
+#: missioncontrol.module:25
+msgid "Add site"
+msgstr ""
+
+#: missioncontrol.module:54
+msgid "Dev load"
+msgstr ""
+
+#: missioncontrol.install:12
+msgid "Site information for MissionControl clients."
+msgstr ""
+
+#: missioncontrol.install:15,76
+msgid "Unique ID of the site."
+msgstr ""
+
+#: missioncontrol.install:21
+msgid "Human-readable title of the site."
+msgstr ""
+
+#: missioncontrol.install:28
+msgid "Public URL of the site."
+msgstr ""
+
+#: missioncontrol.install:35
+msgid "Filepath of the image preview for the site."
+msgstr ""
+
+#: missioncontrol.install:42
+msgid "Node ID of the associated project."
+msgstr ""
+
+#: missioncontrol.install:63
+msgid "Last timestamp used"
+msgstr ""
+
+#: missioncontrol.install:73
+msgid ""
+"Similar to the core variable table, this table maintains variables "
+"from other sites."
+msgstr ""
+
+#: missioncontrol.install:82
+msgid "The name of the variable."
+msgstr ""
+
+#: missioncontrol.install:88
+msgid "The value of the variable."
+msgstr ""
+
+#: mc_client.info:0
+msgid "MissonControl Client"
+msgstr ""
+
+#: missioncontrol.info:0
+msgid "MissonControl Server"
+msgstr ""
+
+#: missioncontrol.info:0
+msgid "MissionControl Server"
+msgstr ""
+

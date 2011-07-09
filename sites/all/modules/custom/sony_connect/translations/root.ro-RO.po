@@ -1,0 +1,169 @@
+# Romania translation of sony_connect (all releases)
+# Copyright (c) 2010 by the Romania translation team
+# Generated from files:
+#  sony_connect/sony_connect.module: n/a
+#  sony_connect/sony-connect-prompt.tpl.php: n/a
+#  sony_connect/sony_connect.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sony_connect (all releases)\n"
+"POT-Creation-Date: 2010-04-12 13:54-0500\n"
+"PO-Revision-Date: 2010-03-26 09:22-0500\n"
+"Language-Team: Romania\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: sony_connect.module:212
+msgid "Settings"
+msgstr "Setări"
+
+#: sony-connect-prompt.tpl.php:3
+msgid ""
+"If you already have an account on this site, <a "
+"href=\"/user/login\">click here</a>\n"
+"  to connect to that account.  Otherwise, <a "
+"href=\"/user/register\">click here</a>\n"
+"  to finish your registration."
+msgstr ""
+
+#: sony_connect.module:313
+msgid "Disconnect network"
+msgstr ""
+
+#: sony_connect.module:349
+msgid "go"
+msgstr ""
+
+#: sony_connect.module:354
+msgid "Sign In:"
+msgstr ""
+
+#: sony_connect.module:362
+msgid "Forgot your password?"
+msgstr ""
+
+#: sony_connect.module:368
+msgid ""
+"Don't have an account? <a href='@signup' title='Sign Up' "
+"class='popups'>Sign Up</a>."
+msgstr ""
+
+#: sony_connect.module:470
+msgid "Your %network account has been connected."
+msgstr ""
+
+#: sony_connect.module:486
+msgid "Your %network account has been disconnected."
+msgstr ""
+
+#: sony_connect.module:659
+msgid "The TinyURL link to the node page."
+msgstr ""
+
+#: sony_connect.module:662
+msgid "The artist name as entered when the site was provisioned."
+msgstr ""
+
+#: sony_connect.module:676
+msgid "When I create a forum topic"
+msgstr ""
+
+#: sony_connect.module:677
+msgid "When I post a new blog entry"
+msgstr ""
+
+#: sony_connect.module:680
+msgid "When I comment on a news entry"
+msgstr ""
+
+#: sony_connect.module:681
+msgid "When I reply to a forum topic"
+msgstr ""
+
+#: sony_connect.module:682,683
+msgid "When I comment on a photo"
+msgstr ""
+
+#: sony_connect.module:684
+msgid "When I comment on a blog entry"
+msgstr ""
+
+#: sony_connect.module:685,686
+msgid "When I review music"
+msgstr ""
+
+#: sony_connect.module:689
+msgid "When I'm attending an event"
+msgstr ""
+
+#: sony_connect.module:690
+msgid "When I add something to my favorites"
+msgstr ""
+
+#: sony_connect.module:697
+msgid "Node publishing"
+msgstr ""
+
+#: sony_connect.module:701
+msgid "Comment publishing"
+msgstr ""
+
+#: sony_connect.module:713
+msgid "When I post a @type"
+msgstr ""
+
+#: sony_connect.module:719
+msgid "When I comment on a @type"
+msgstr ""
+
+#: sony_connect.module:727
+msgid "Content flagging"
+msgstr ""
+
+#: sony_connect.module:734
+msgid "When I %flag"
+msgstr ""
+
+#: sony_connect.module:913
+msgid ""
+"<strong>Sign In</strong> !networks or <a class=\"ctools-use-modal\" "
+"title=\"Login\" href=\"@login_url\">Login</a> Not a member? <a "
+"class=\"ctools-use-modal\" title=\"Join\" "
+"href=\"@register_url\">Join</a>"
+msgstr ""
+
+#: sony_connect.module:426
+msgid "Social network connections for user %name deleted."
+msgstr ""
+
+#: sony_connect.module:480
+msgid "Disconnected %network account for %username."
+msgstr ""
+
+#: sony_connect.module:205
+msgid "Sony Connect"
+msgstr ""
+
+#: sony_connect.module:217
+msgid "Appearance"
+msgstr ""
+
+#: sony_connect.module:296
+msgid "Facebook & Twitter"
+msgstr ""
+
+#: sony_connect.module:307
+msgid "Sharing Preferences"
+msgstr ""
+
+#: sony_connect.info:0
+msgid "Sony Music Connect"
+msgstr ""
+
+#: sony_connect.info:0
+msgid "Connect to social networks."
+msgstr ""
+

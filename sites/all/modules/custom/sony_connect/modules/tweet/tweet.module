@@ -1,0 +1,382 @@
+<?php
+// $Id: 
+
+/**
+ * Implementation of hook_init()
+ */
+function tweet_init() {
+  // add twitter widget js on page load.
+  tweet_add_widget_js();
+  }
+
+/**
+ * Implementation of hook_help()
+ */
+function tweet_help($path, $arg) {
+  $output = NULL;
+  switch($path) {
+    case 'admin/help#tweet':
+      return t('This button allows your website to let people share content on Twitter without having to leave the page. Promote strategic Twitter accounts at the same time while driving traffic to your website.');
+  }
+}
+
+/**
+ * Implementation of hook_menu()
+ */ 
+function tweet_menu() {
+  $items = array();
+  $items['admin/sony/connect/tweet'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Tweet Button',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('tweet_admin_settings'),
+    'file' => 'tweet.admin.inc',
+    'access callback' => 'user_access',
+    'access arguments' => array('administer site configuration'),
+    //'weight' => 1,
+  );
+  
+  return $items;
+}
+
+/**
+ * Implementation of hook_content_extra_fields.
+ */
+function tweet_content_extra_fields($type_name){
+  if (tweet_type($type_name) && variable_get('tweet_node_location', 0)) {
+    $extras['tweet_widget'] = array(
+        'label' => t('Tweet button widget'),
+        'description' => t('The Twitter tweet button plugin widget'),
+        'weight' => - 10
+    );
+    return $extras;
+  }
+}
+
+/**
+ * Implementation of hook_theme()
+ */
+function tweet_theme() {
+  return array(
+    'tweet_display' => array(
+      'variables' => array('tokens' => NULL),
+    ),
+    'tweet_block_tweet_view' => array(),
+  );
+}
+
+/**
+ * Implementation of hook_nodeapi()
+ */
+function tweet_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+
+  switch ($op) {
+    case 'view' :
+      if (tweet_type($node->type) && variable_get('tweet_node_location', 0)) {
+        if ($a4 || variable_get('tweet_display_teasers', 1) && $a3) {
+    
+        $token_replacements = array(
+          '!title'        => $node->title,
+          '!author_name'  => $node->name,
+          '!node_type'    => $node->type,
+          '!node_url'     => url('node/'.$node->nid, array('absolute' => TRUE)),
+        );
+        $output = theme('tweet_display', $token_replacements);
+        $weight = (module_exists('content')) ? content_extra_field_weight($node->type, 'tweet_node_weight') : 11;
+
+        $node->content['tweet'] = array(
+         // '#tokens'   => $token_replacements,
+          '#weight'   => $weight,
+          '#value'    => $output,
+        );
+        }
+      }
+      break;
+  }
+}
+
+/**
+ * Add twitter widget to page head with static cache.
+ */
+function tweet_add_widget_js() {
+  static $js_added;
+    if (!isset($js_added)) {
+      drupal_set_html_head('<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>');
+      drupal_add_css(drupal_get_path('module', 'tweet').'/tweet.css');
+      $js_added = TRUE;
+    }
+  }
+/**
+ * Implementation of hook_block
+ */
+function tweet_block($op = 'list', $delta = 0, $edit = array()){
+  switch ($op) {
+    case 'list' :
+
+      $blocks['tweet'] = array(
+          'info' => t('Tweet Button'),
+          'cache' => BLOCK_NO_CACHE,
+          'visibility' => 0,
+          'pages' => 'admin/*'
+      );
+
+      return $blocks;
+      break;
+     case 'configure':
+      switch ($delta) {
+        case 'tweet' :
+          $form['tweet_block_button'] = array(
+            '#type' => 'select',
+            '#options' => array(
+              'vertical' => t('Vertical Count'),
+              'horizontal' => t('Horizontal Count'),
+              'none'   => t('No count'),
+            ),
+            '#default_value' => variable_get('tweet_block_button', 'vertical'),
+            '#id' => 'tweet-button',
+          );
+          $form['tweet_tweet_block_text'] = array(
+            '#type'          => 'textfield',
+            '#title'         => t('Tweet Text'),
+            '#default_value' => variable_get('tweet_tweet_block_text','Check out !title at !node_url.'),
+            '#description'   => t('This is the text that people will include in their Tweet when they share from your website. If left empty title will be used. ' .
+              'Available tokens are: !title, !author_name, !node_type, !node_url (NOTE: Twitter will generate short url for the node)'),
+          );
+          $form['tweet_tweet_block_url'] = array(
+            '#type'          => 'textfield',
+            '#title'         => t('URL'),
+            '#default_value' => variable_get('tweet_tweet_block_url',''),
+            '#description'   => t('Leave blank for using the URL of the node the button is on.'),
+          );
+          $form['tweet_block_account'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Twitter account to follow'),
+            '#description' => t('This user will be @mentioned in the suggested'),
+            '#default_value' => variable_get('tweet_block_account',''),
+            '#id' => 'tweet-account',
+          );
+          $form['tweet_rel_account_block_name'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Related Account'),
+            '#default_value' => variable_get('tweet_rel_account_block_name',''),
+          );
+          $form['tweet_rel_account_block_description'] = array(
+            '#type' => 'textfield',
+            '#title' => t('Related Account Description'),
+            '#default_value' => variable_get('tweet_rel_account_block_description',''),
+          );
+        return $form;
+      }
+      break;
+
+    case 'save':
+      if ($delta == 'like') {
+        variable_set('tweet_block_button', $edit['tweet_block_button']);
+        variable_set('tweet_tweet_block_text', $edit['tweet_tweet_block_text']);
+        variable_set('tweet_tweet_block_url', $edit['tweet_tweet_block_url']);
+        variable_set('tweet_block_account', $edit['tweet_block_account']);
+        variable_set('tweet_rel_account_block_name', $edit['tweet_rel_account_block_name']);
+        variable_set('tweet_rel_account_block_description', $edit['tweet_rel_account_block_description']);
+      }
+      break;
+
+    case 'view' :
+      switch ($delta) {
+        case 'tweet' :
+          $site_name = variable_get('site_name', '');
+          $artist_name = variable_get('artist_name', '');
+          $token_replacements = array(
+            '!title'        => $site_name,
+            '!author_name'  => $artist_name,
+            '!node_type'    => 'Homepage',
+            '!node_url'     => url('<front>', array('absolute' => TRUE)),
+          );
+          return array(
+
+           'subject' => t(''),
+           'content' =>  theme('tweet_block_display', $token_replacements),
+            );
+      }
+      break;
+    }
+  }
+
+function tweet_get_attributes($tokens = array()) {
+  global $language;
+
+  $languages = tweet_map_active_languages();
+
+  if (tweet_auto_language()) {
+    if (array_key_exists($language->language, $languages)) {
+      $tweet_language = $languages[$language->language];
+    }
+    else {
+      drupal_set_message("There is no mapping for the current language. Using the default locale.");
+    }
+  }
+  else {
+    $tweet_language = variable_get('tweet_language', 'en');
+  }
+  // If data-url is not set then use node url, in teaser mode we want to set this parameter 
+  // to fetch different counters for each node
+  $node_url    = isset($tokens['!node_url']) ? $tokens['!node_url']: '';
+  
+  $button_type = variable_get('tweet_button', 'vertical');
+  $tweet_text  = variable_get('tweet_tweet_text','');
+  $tweet_url   = variable_get('tweet_tweet_url','');
+  //$language    = variable_get('tweet_language','');
+  $account     = variable_get('tweet_account','');
+  $rel_account = variable_get('tweet_rel_account_name','');
+  $rel_desc    = variable_get('tweet_rel_account_description','');
+  
+  $attributes =  array(
+    'data-count'   => $button_type,
+    'data-via'     => $account,
+    'data-related' => "$rel_account:$rel_desc",
+    'data-text'    => strtr($tweet_text, $tokens),
+    'data-url'     => $tweet_url? $tweet_url: $node_url,
+    'data-lang'    => $tweet_language,
+  );
+
+  return $attributes;
+}
+
+function tweet_get_block_attributes($tokens = array()) {
+  global $language;
+
+  $languages = tweet_map_active_languages();
+
+  if (tweet_auto_language()) {
+    if (array_key_exists($language->language, $languages)) {
+      $tweet_language = $languages[$language->language];
+    }
+    else {
+      drupal_set_message("There is no mapping for the current language. Using the default locale.");
+    }
+  }
+  else {
+    $tweet_language = variable_get('tweet_language', 'en');
+  }
+  // If data-url is not set then use node url, in teaser mode we want to set this parameter
+  // to fetch different counters for each node
+  $node_url    = isset($tokens['!node_url']) ? $tokens['!node_url']: '';
+
+  $button_type = variable_get('tweet_block_button', 'vertical');
+  $tweet_text  = variable_get('tweet_tweet_block_text','');
+  $tweet_url   = variable_get('tweet_tweet_block_url','');
+  //$language    = variable_get('tweet_language','');
+  $account     = variable_get('tweet_block_account','');
+  $rel_account = variable_get('tweet_rel_account_block_name','');
+  $rel_desc    = variable_get('tweet_rel_account_block_description','');
+
+  $attributes =  array(
+    'data-count'   => $button_type,
+    'data-via'     => $account,
+    'data-related' => "$rel_account:$rel_desc",
+    'data-text'    => strtr($tweet_text, $tokens),
+    'data-url'     => $tweet_url? $tweet_url: $node_url,
+    'data-lang'    => $tweet_language,
+  );
+
+  return $attributes;
+}
+
+
+function theme_tweet_display($tokens = array()) {
+  $attributes = tweet_get_attributes($tokens);
+  
+  $link = '<div class="tweet"><a href="http://twitter.com/share" class="twitter-share-button" ' .
+    drupal_attributes($attributes). '>Tweet</a></div>';
+
+  return $link;
+}
+
+function theme_tweet_block_display($tokens = array()) {
+  $attributes = tweet_get_block_attributes($tokens);
+
+  $link = '<div class="tweet"><a href="http://twitter.com/share" class="twitter-share-button" ' .
+    drupal_attributes($attributes). '>Tweet</a></div>';
+
+  return $link;
+}
+
+/**
+ * Implementation of hook_link
+ */
+function tweet_link($type, $object, $teaser = FALSE){
+  
+  //only nodes are supported
+  if ('node' != $type){
+    return;
+  } // if no widget on teasers return
+  elseif ($teaser && !variable_get('tweet_display_teasers', 1)){
+    return;
+  }
+  
+  // widget is not to be displayed in the node links. return
+  if (variable_get('tweet_node_location', 0)){
+    return;
+  }
+  
+  // good to go
+  $links = array();
+  if ($type == 'node' && tweet_type($object -> type)) {
+    $token_replacements = array(
+      '!title'        => $object->title,
+      '!author_name'  => $object->name,
+      '!node_type'    => $object->type,
+      '!node_url'     => url('node/'.$object->nid, array('absolute' => TRUE)),
+    );
+    $links['tweet'] = array(
+      'title' => theme('tweet_display', $token_replacements),
+      'html' => TRUE,
+    );
+  }
+  
+  return $links;
+}
+
+/**
+ * helper function for testing wether $type
+ * is selected to be a tweet type
+ */
+function tweet_type($type){
+  $tweet_types = variable_get('tweet_node_types', array('article'));
+  return (isset($tweet_types[$type]) && $tweet_types[$type]) ? TRUE : FALSE;
+}
+
+/**
+ * helper function to return default token replacement
+ */
+function tweet_token_replacement($nid) {
+  $node = node_load($nid);
+  $token_replacements = array(
+    '!title'        => $node->title,
+    '!author_name'  => $node->name,
+    '!node_type'    => $node->type,
+    '!node_url'     => url('node/'.$node->nid, array('absolute' => TRUE)),
+  );
+  return $token_replacements;
+}
+
+function tweet_auto_language() {
+  return variable_get('tweet_locale_auto', 0);
+}
+
+function tweet_map_active_languages() {
+  $languages = language_list();
+  $mapped = array();
+  foreach ($languages as $key => $language) {
+    $mapped[$language->language] = variable_get('tweet_language_' . $language->language, '');
+  }
+  return $mapped;
+}
+
+/**
+ * Implementation of hook_views_api().
+ */
+function tweet_views_api() {
+  return array(
+    'api' => '2.0',
+  );
+}

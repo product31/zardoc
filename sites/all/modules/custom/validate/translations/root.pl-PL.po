@@ -1,0 +1,93 @@
+# Poland translation of validate (all releases)
+# Copyright (c) 2010 by the Poland translation team
+# Generated from files:
+#  validate/validate.pages.inc: n/a
+#  validate/validate.module: n/a
+#  validate/validate.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: validate (all releases)\n"
+"POT-Creation-Date: 2010-04-12 13:21-0500\n"
+"PO-Revision-Date: 2010-03-30 13:41-0500\n"
+"Language-Team: Poland\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=((n==1)?(0):(((((n%10)>=2)&&((n%10)<=4))&&(((n%100)<10)||((n%100)>=20)))?(1):2));\n"
+
+#: validate.pages.inc:12
+msgid "Name"
+msgstr "Nazwa"
+
+#: validate.pages.inc:21
+msgid ""
+"This field is required and also requires a minimum length of 2 "
+"characters."
+msgstr ""
+
+#: validate.pages.inc:24
+msgid "Email address"
+msgstr ""
+
+#: validate.pages.inc:32
+msgid "This field is required and must validate as an email address."
+msgstr ""
+
+#: validate.pages.inc:35
+msgid "URL"
+msgstr "Adres URL"
+
+#: validate.pages.inc:41
+msgid "This field is not required, but if given must validate as an URL."
+msgstr ""
+
+#: validate.pages.inc:44
+msgid "Favorite number"
+msgstr ""
+
+#: validate.pages.inc:50
+msgid "This field is not required, but if given must validate as a number."
+msgstr ""
+
+#: validate.pages.inc:53
+msgid "Submit"
+msgstr ""
+
+#: validate.module:216
+msgid "The name %name is already taken."
+msgstr "Nazwa użytkownika %name jest już zajęta."
+
+#: validate.module:219
+msgid "The name %name has been denied access."
+msgstr "Nazwa użytkownika %name jest niedozwolona i została odrzucona."
+
+#: validate.module:237
+msgid ""
+"The e-mail address %email is already registered. <a "
+"href=\"@password\">Have you forgotten your password?</a>"
+msgstr ""
+"Istnieje już konto użytkownika wykorzystujące adres e-mail %email. "
+"W przypadku zapomnienia hasła <a href=\"@password\">należy poprosić "
+"o nowe</a>."
+
+#: validate.module:240
+msgid "The e-mail address %email has been denied access."
+msgstr "Adres e-mail %email jest niedozwolony i został odrzucony."
+
+#: validate.module:15
+msgid "jQuery Validation Test"
+msgstr ""
+
+#: validate.module:138
+msgid "%rule does not exists"
+msgstr ""
+
+#: validate.info:0
+msgid "Validate"
+msgstr ""
+
+#: validate.info:0
+msgid "Combination client-side and server side validation routines."
+msgstr ""
+

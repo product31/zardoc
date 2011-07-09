@@ -1,0 +1,5 @@
+; $Id: menutrails.info,v 1.3.2.1 2009/01/23 17:31:49 sun Exp $
+name = Menu Trails
+description = "Dynamically assign 'trails' so that Drupal menus remain in active state when viewing individual nodes."
+dependencies[] = menu
+core = 6.x

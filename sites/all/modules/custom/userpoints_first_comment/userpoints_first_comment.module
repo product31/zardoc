@@ -1,0 +1,88 @@
+<?php
+
+define('USERPOINTS_FIRST_COMMENT',                     'userpoints_first_comment');
+define('USERPOINTS_FIRST_COMMENT_TID',                 'userpoints_first_comment_tid');
+
+/*
+* Implementation of hook_userpoints()
+* Creates points configuration form for awarding points for sharing
+*/
+
+function userpoints_first_comment_userpoints($op, $params = array()) {
+  switch($op) {
+    case 'setting':
+      $group = 'first_comment';
+      $form[$group] = array(
+        '#type'        => 'fieldset',
+        '#collapsible' => TRUE,
+        '#collapsed'   => TRUE,
+        '#title'       => t('!Points for being the first poster', userpoints_translation()),
+      );
+
+      $form[$group][USERPOINTS_FIRST_COMMENT] = array(
+        '#type'          => 'textfield',
+        '#title'         => t('!Points for being the first to post a comment/reply (first poster bonus)', userpoints_translation()),
+        '#default_value' => variable_get(USERPOINTS_FIRST_COMMENT, 0),
+        '#size'          => 5,
+        '#maxlength'     => 5,
+      );
+
+      $form[$group][USERPOINTS_FIRST_COMMENT_TID] = array(
+        '#type'          => 'select',
+        '#title'         => t('Category'),
+        '#default_value' => variable_get(USERPOINTS_FIRST_COMMENT_TID, 0),
+        '#options'       => userpoints_get_categories(),
+        '#description'   => t('First poster !points will be assigned to this category. You can modify what categories are available by modifying the <a href="!url">Userpoints taxonomy</a>.', 
+          array('!points' =>userpoints_translation(), '!url' => url('admin/content/taxonomy/'. variable_get(USERPOINTS_CATEGORY_DEFAULT_VID, '')))),
+      );
+      
+      return $form;
+  }
+}
+
+/*
+* Implementation of hook_nodeapi()
+* Integration with nodecomment module
+*/
+
+function userpoints_first_comment_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  if ($op == 'insert') {
+    // check if this is a nodecomment
+    if (isset($node->comment_target_nid)) {
+      // check if this is the FIRST comment - count should be 1 because insert happens before this function is called
+      $comment_count = db_result(db_query("SELECT comment_count FROM {node_comment_statistics} WHERE nid = %d", $node->comment_target_nid));
+      if ($comment_count == 1) {
+        // award points
+        userpoints_first_comment_award_points();
+      } 
+    } 
+  }
+}
+
+/*
+* Implementation of hook_comment()
+* Integration with comment module
+*/
+
+function userpoints_first_comment_comment(&$a1, $op) {
+  if ($op == 'insert') {
+    // award the points
+    // @TODO - Figure out how to get the $nid out of $a1 and pass to the function
+  }
+}
+
+/*
+* Award points for first poster bonus
+*/
+
+function userpoints_first_comment_award_points() {
+  global $user;
+  userpoints_userpointsapi(array(
+    'points' => variable_get(USERPOINTS_FIRST_COMMENT, 0),
+    'uid' => $user->uid,
+    'operation' => 'First poster bonus',
+    'entity_id' => $user->uid,
+    'entity_type' => 'user',
+    'tid'         => variable_get(USERPOINTS_FIRST_COMMENT_TID, 0),
+  ));
+}

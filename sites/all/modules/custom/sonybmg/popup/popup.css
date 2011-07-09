@@ -1,0 +1,227 @@
+#popups-overlay {
+  position: fixed;
+  background: #000;
+  opacity: 0.8 !important;
+}
+* html #popups-overlay {
+  position: absolute;
+}
+#popups-loading {
+  background: url(bg.png) repeat 0 0;
+  border: none;
+  border-radius: 10px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  width: 32px;
+  height: 32px;
+  padding: 32px;
+}
+.popups-box {
+  background: url(bg.png) repeat 0 0;
+  border: none;
+  border-radius: 10px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  padding: 0px 0px 15px;
+  overflow: visible;
+  width: 670px;
+  z-index: 9999;
+}
+.popups-title {
+  border-bottom: solid 1px #d8d8d4;
+  padding: 18px 0 10px 0;
+  margin: 0px 70px 0 12px;
+  height: 17px; /* total of 45px tall with padding */
+  /* background: url(sony_music.png) no-repeat left center; */
+}
+.popups-close {
+  text-indent: -9999px;
+  outline: 0;
+  background: url(close.png) no-repeat 0 0;
+  height: 37px;
+  width: 37px;
+  position: absolute;
+  top: 7px;
+  right: 12px;
+  cursor: pointer;
+}
+.popups-body .title,
+.popups-body div.messages {
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 1.1em;
+  margin: 1em 50px;
+}
+.popups-title .popups-close a {
+  color: red;  
+}
+.popups-body {
+  overflow: auto;
+  padding: 5px 12px 15px;
+  position: relative;
+}
+
+/* Content in the popup
+----------------------------------------*/
+.popups-box {
+  font: 12px arial, sans-serif;
+  color: #666666;
+}
+.popups-box label {
+  font-weight: bold; 
+}
+.popups-box .form-submit,
+.popups-box a.button {
+  background: transparent url(button.png) repeat-x 0 0;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-size: 24px;
+  height: 39px;
+  line-height: 39px;
+  padding: 0px 25px;
+  outline: 0;
+  
+  border-radius: 15px;
+  -moz-border-radius: 15px;
+  -webkit-border-radius: 15px;
+}
+.popups-box a.button,
+.popups-box a.button:hover {
+  text-decoration: none;
+  padding: 6px 25px;
+}
+
+/* Forms
+----------------------------------------*/
+.popups-box .form-item label {
+  width: 200px;
+  float: left;
+  text-align: right;
+  line-height: 35px;
+}
+.popups-box .form-item label.option {
+  float: none;
+  display: block;
+  margin-left: 220px;
+  line-height: 1.4;
+  text-align: left;
+  width: 250px;
+}
+.popups-box .form-text {
+  font-size: 16px;
+  font-weight: bold;
+  color: #666666;
+  
+  display: block;
+  margin-left: 220px;
+  width: 226px; /* 250 - margins - border */
+  border: solid 2px #ccc;
+  border-radius: 10px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  line-height: 1em;
+  padding: 8px 10px;
+  vertical-align: middle;
+  outline: 0px;
+}
+.popups-box .container-inline,
+.popups-box .form-item .description {
+  display: block;
+  margin-left: 220px;
+  width: 250px;
+}
+.popups-box select {
+  border: solid 2px #ccc;
+  padding: 10px 5px 10px 10px;
+  line-height: 15px;
+  vertical-align: middle;
+  color: #8a8a8a;
+}
+.popups-box .container-inline .form-text {
+  margin-left: 0;
+  width: auto;
+  display: inline;
+}
+
+.popups-box .form-item { clear: both; margin: 0 0 5px; position: relative; }
+.popups-box .form-item .form-item,
+.popups-box .container-inline .form-item { clear: none; height: auto; margin: 0px; }
+
+.popups-box .form-buttons,
+.popups-box #edit-submit {
+  margin: 10px 0 10px 220px;
+}
+.popups-box .form-buttons #edit-submit {
+  margin: 0;
+}
+
+/* jquery validation messages
+----------------------------------------*/
+.popups-box .form-item .validation-message,
+.popups-box .form-item span.password-strength,
+.popups-box .form-item span.password-confirm {
+  position: absolute;
+  top: 3px;
+  left: 485px;
+  width: 100px;
+  font: bold 10px arial, serif;
+  background: transparent;
+  border: 0px;
+  float: none;
+  margin: 0;
+  line-height: 1.3em;
+  text-align: left;
+}
+.popups-box .password-description { display: none !important; }
+.popups-box div.ok,
+.popups-box div.error { background: transparent; border: 0; padding: 0; }
+
+.popups-box div.ok .validation-message { color: #049c07;}
+.popups-box div.error .validation-message { color: #a40505; }
+.popups-box div.ok label,
+.popups-box div.error label { color: #666666; }
+
+.popups-box .error input {
+  background: #ffc0c0;
+  border-color: #a40505;
+  color: #a40505;
+}
+.popups-box .ok input {
+  background: #DDFFDD;
+  border-color: #049c07;
+  color: #049c07;
+}
+
+.popups-buttons {
+  float: left;
+  position: relative;
+  left: 50%;
+  text-align: left;
+}
+.popups-buttons ul {
+  list-style: none;
+  position: relative;
+  left: -50%;
+}
+.popups-buttons li {
+  float: left;
+  position: relative; /* make ie behave */
+  margin: 0 5px;
+}
+
+.popups-box .newsletter-checkboxes {
+  margin: 0;
+  padding: 0;  
+}
+
+.popups-box .newsletter-checkboxes label.option {
+  line-height: 34px;
+}
+
+/* Skinnable
+----------------------------------------*/
+.popups-title { background-image: url(sony_music.png); background-repeat: no-repeat; }
+.popups-close { background-image: url(close.png); }
+.popups-box .form-submit,
+.popups-box a.button { background-image: url(button.png); }

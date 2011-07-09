@@ -1,0 +1,11 @@
+; $Id: geoip.info,v 1.1 2009/02/20 17:47:21 rz Exp $
+name = GeoIP
+description = API for using the MaxMind GeoLite Country database
+core = 6.x
+
+; Information added by drupal.org packaging script on 2010-10-29
+version = "6.x-1.x-dev"
+core = "6.x"
+project = "geoip"
+datestamp = "1288311067"
+

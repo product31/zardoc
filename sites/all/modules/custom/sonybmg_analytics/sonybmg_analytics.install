@@ -1,0 +1,90 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * description
+ */
+
+/**
+ * Implementation of hook_update_N().
+ */
+function sonybmg_analytics_update_6000() {
+  $ret = array();
+
+  // Install the services and rest_server modules
+  drupal_install_modules(array('services', 'rest_server'));
+  $ret[] = array('query' => t('Installed services and rest_server modules.'), 'success' => TRUE);
+
+  $ret[] = _sonybmg_analytics_create_dashboard_key();
+  $ret[] = _sonybmg_analytics_set_permissions();
+
+  return $ret;
+}
+
+/**
+ * Implementation of hook_update_N().
+ */
+function sonybmg_analytics_update_6001() {
+  $ret = array();
+  // Make sure the key for sonybmg dashboard is the same on every server
+  $ret[] = update_sql("UPDATE {services_keys} SET kid='7d0c1d4d5d617e4b2f0d3edbd16c73ba' WHERE domain='dashboard.sonymusicd2c.com'");
+  return $ret;
+}
+
+/**
+ * Implementation of hook_enable().
+ */
+function sonybmg_analytics_enable() {
+  _sonybmg_analytics_create_dashboard_key();
+  _sonybmg_analytics_set_permissions();
+}
+
+/**
+ * Create the Dashboard API key.  Used by hook_enable and hook_update_6000.
+ */
+function _sonybmg_analytics_create_dashboard_key() {
+  $ret = array();
+
+  // Make sure services knows that we are using keys.
+  variable_set('services_use_key', TRUE);
+
+  // Create the Dashboard API key
+  $key = '7d0c1d4d5d617e4b2f0d3edbd16c73ba';
+  $title = 'Sony D2C Artist Dashboard';
+  $domain = 'dashboard.sonymusicd2c.com';
+  
+  db_query("UPDATE {services_keys} SET kid='%s' WHERE domain='%s'", $key, $domain);
+  if (db_affected_rows()) {
+    $ret = array('query' => t('Updated Sony D2C Artist Dashboard API Key: %key', array('%key' => $key)), 'success' => TRUE);
+  }
+  else {
+    @db_query("INSERT INTO {services_keys} (kid, title, domain) VALUES ('%s', '%s', '%s')", $key, $title, $domain);
+    $ret = array('query' => t('Created Sony D2C Artist Dashboard API Key: %key', array('%key' => $key)), 'success' => TRUE);
+  }
+  
+  return $ret;
+}
+
+/**
+ * Set permissions.  Used by hook_enable and hook_update_6000.
+ */
+function _sonybmg_analytics_set_permissions() {
+  // Ensure anon users can access services
+  $result = db_query('SELECT p.perm FROM {permission} p WHERE p.rid = %d', DRUPAL_ANONYMOUS_RID);
+  $existing_perms = array();
+  if ($row = db_fetch_object($result)) {
+    $existing_perms = explode(', ', $row->perm);
+  }
+  $existing_perms[] = 'access services';
+  $perms = array_unique($existing_perms);
+
+  // Update the permissions.
+  db_query('DELETE FROM {permission} WHERE rid = %d', DRUPAL_ANONYMOUS_RID);
+  db_query("INSERT INTO {permission} (rid, perm) VALUES (%d, '%s')", DRUPAL_ANONYMOUS_RID, implode(', ', $perms));
+
+  return array(
+    'query' => t('Set appropriate permissions of sonybmg_analytics module.'),
+    'success' => TRUE,
+  );
+}

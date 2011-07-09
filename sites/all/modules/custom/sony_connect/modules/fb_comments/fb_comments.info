@@ -1,0 +1,9 @@
+;$Id:
+name = FB comments
+description = Facebook comments
+dependencies[] = fb_like
+package = "Connect"
+core = 6.x
+
+
+

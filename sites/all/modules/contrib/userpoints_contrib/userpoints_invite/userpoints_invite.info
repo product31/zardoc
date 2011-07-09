@@ -1,0 +1,7 @@
+; $Id: userpoints_invite.info,v 1.7.2.1 2009/01/11 00:51:41 kbahey Exp $
+name = Userpoints Invite
+description = Users earn points when they invite other, and when others register.
+package = Userpoints
+dependencies[] = userpoints
+dependencies[] = invite
+core = 6.x

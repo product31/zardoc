@@ -1,0 +1,53 @@
+# Norwegian Bokmål translation of m2 (all releases)
+# Copyright (c) 2010 by the Norwegian Bokmål translation team
+# Generated from files:
+#  m2/plugins/music_album.inc: n/a
+#  m2/plugins/music_lyrics.inc: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: m2 (all releases)\n"
+"POT-Creation-Date: 2010-04-12 12:53-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Norwegian Bokmål\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: plugins/music_album.inc:9
+msgid "Album title"
+msgstr ""
+
+#: plugins/music_album.inc:10
+msgid "Year"
+msgstr ""
+
+#: plugins/music_album.inc:11
+msgid "Tag"
+msgstr ""
+
+#: plugins/music_lyrics.inc:9
+msgid "Artist name"
+msgstr ""
+
+#: plugins/music_lyrics.inc:10
+msgid "Track title"
+msgstr ""
+
+#: plugins/music_lyrics.inc:11
+msgid "Lyric content"
+msgstr ""
+
+#: plugins/music_lyrics.inc:12
+msgid "Artist name and Track title"
+msgstr ""
+
+#: plugins/music_lyrics.inc:24
+msgid "M2 Lyrics"
+msgstr ""
+
+#: plugins/music_lyrics.inc:25
+msgid "Store a reference to an M2/Gracenote lyrics document in the database."
+msgstr ""
+

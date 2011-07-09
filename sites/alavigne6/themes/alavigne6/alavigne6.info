@@ -1,0 +1,48 @@
+name = Avril Lavigne
+description = Avril Lavigne site theme.
+core = 6.x
+engine = phptemplate
+base theme = _multisite
+
+  ; remove core/contrib styles
+
+stylesheets[all][] = poll.css
+stylesheets[all][] = popups.css
+stylesheets[all][] = popup.css
+stylesheets[all][] = fivestar.css
+stylesheets[all][] = extlink.css
+stylesheets[all][] = date.css
+stylesheets[all][] = user.css
+stylesheets[all][] = css/tabs.css
+
+  ; add new styles
+stylesheets[all][] = css/reset.css
+stylesheets[all][] = css/links.css
+stylesheets[all][] = css/popup.css
+stylesheets[all][] = fonts/fonts.css
+stylesheets[all][] = css/highslide.css
+stylesheets[all][] = css/alavigne6.css
+
+; Add any JavaScript files.
+scripts[] = js/alavigne6.js
+
+; Define regions that are available in page.tpl.php.
+regions[right] = sidebar
+regions[page_top] = page top
+regions[ad_top] = ad top
+regions[ad_bottom] = ad bottom
+regions[ad_forum] = ad forum side
+regions[content_header] = content header
+regions[content_top] = content top
+regions[content_bottom] = content bottom
+regions[footer] = footer
+regions[footer_right] = footer right
+regions[admin] = admin region
+regions[navigation] = navigation
+regions[banner] = banner
+regions[top] = top
+regions[languages_newsletter_region] = languages and newsletter
+
+l10n server = translate.gdb-dev.com
+project = "alavigne6"
+version = "6.x-2.x"

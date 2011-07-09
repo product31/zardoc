@@ -1,0 +1,20 @@
+# Singapore (Malay) translation of sony_newsletter (all releases)
+# Copyright (c) 2010 by the Singapore (Malay) translation team
+# Generated from files:
+#  sony_newsletter/sony_newsletter.edit.inc: n/a
+#  sony_newsletter/sony_newsletter.module: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sony_newsletter (all releases)\n"
+"POT-Creation-Date: 2010-04-12 14:17-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Singapore (Malay)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: sony_newsletter.edit.inc:20; sony_newsletter.module:36
+msgid "Edit"
+msgstr ""
+

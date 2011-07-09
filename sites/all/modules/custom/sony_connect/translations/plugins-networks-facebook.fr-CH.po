@@ -1,0 +1,51 @@
+# Switzerland (French) translation of sony_connect (all releases)
+# Copyright (c) 2010 by the Switzerland (French) translation team
+# Generated from file: sony_connect/plugins/networks/facebook/facebook.inc: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sony_connect (all releases)\n"
+"POT-Creation-Date: 2010-04-12 14:47-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Switzerland (French)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n>1);\n"
+
+#: plugins/networks/facebook/facebook.inc:11
+msgid "Facebook"
+msgstr ""
+
+#: plugins/networks/facebook/facebook.inc:90
+msgid "Click the help icon to view detailed setup information."
+msgstr ""
+
+#: plugins/networks/facebook/facebook.inc:95
+msgid "Facebook API key"
+msgstr ""
+
+#: plugins/networks/facebook/facebook.inc:101
+msgid "Application secret"
+msgstr ""
+
+#: plugins/networks/facebook/facebook.inc:108
+msgid "App Info"
+msgstr ""
+
+#: plugins/networks/facebook/facebook.inc:118
+msgid "Active Users"
+msgstr ""
+
+#: plugins/networks/facebook/facebook.inc:119
+msgid "%num active users in the 30 day period ending %date"
+msgstr ""
+
+#: plugins/networks/facebook/facebook.inc:123
+msgid "No information available."
+msgstr ""
+
+#: plugins/networks/facebook/facebook.inc:223
+msgid "%code: Error publishing to Facebook."
+msgstr ""
+

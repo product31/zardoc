@@ -1,0 +1,62 @@
+<?php
+
+// $Id$
+
+/**
+ * @file
+ *   Globalnews install file.
+ */
+
+/**
+ * Implementation of hook_install().
+ */
+function globalnews_install() {
+  variable_set('language_content_type_news', 2);
+  // Use schema API to create database table.
+  drupal_install_schema('globalnews');
+  // Set module weight for it to run after core and i18n modules
+  db_query("UPDATE {system} SET weight = 20 WHERE name = 'globalnews' AND type = 'module'");
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function globalnews_uninstall() {
+  // Use schema API to delete database table.
+  drupal_uninstall_schema('globalnews');
+
+}
+
+/**
+ * Implementation of hook_schema().
+ */
+function globalnews_schema() {
+  $schema['globalnews'] = array(
+    'description' => 'Store news feed subscriptions per user',
+    'fields' => array(
+      'news_id' => array(
+        'type' => 'serial',
+        'description' => 'The primary identifier for globalnews.',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'region' => array(
+        'description' => 'The region to which the translator account is assigned.',
+        'type' => 'text',
+        'not null' => TRUE,
+        'default' => '',
+        'size' => 'normal',
+      ),
+
+      'langs' => array(
+        'description' => 'List of languages that the user has permission for.',
+        'type' => 'text',
+        'not null' => FALSE,
+        'size' => 'big',
+      ),
+    ),
+    'primary key' => array('news_id'),
+  );
+  return $schema;
+}
+

@@ -1,0 +1,183 @@
+// suckerfish dropdown
+
+sfHover = function() {
+	var sfEls = document.getElementById("navigation").getElementsByTagName("li");
+	for (var i=0; i<sfEls.length; i++) {
+		sfEls[i].onmouseover=function() {
+			this.className+=" sfhover";
+		}
+		sfEls[i].onmouseout=function() {
+			this.className=this.className.replace(new RegExp(" sfhover\\b"), "");
+		}
+	}
+}
+if (window.attachEvent) window.attachEvent("onload", sfHover);
+
+
+/**
+* hoverIntent r5 // 2007.03.27 // jQuery 1.1.2+
+* <http://cherne.net/brian/resources/jquery.hoverIntent.html>
+* 
+* @param  f  onMouseOver function || An object with configuration options
+* @param  g  onMouseOut function  || Nothing (use configuration options object)
+* @author    Brian Cherne <brian@cherne.net>
+*/
+(function($){$.fn.hoverIntent=function(f,g){var cfg={sensitivity:7,interval:100,timeout:0};cfg=$.extend(cfg,g?{over:f,out:g}:f);var cX,cY,pX,pY;var track=function(ev){cX=ev.pageX;cY=ev.pageY;};var compare=function(ev,ob){ob.hoverIntent_t=clearTimeout(ob.hoverIntent_t);if((Math.abs(pX-cX)+Math.abs(pY-cY))<cfg.sensitivity){$(ob).unbind("mousemove",track);ob.hoverIntent_s=1;return cfg.over.apply(ob,[ev]);}else{pX=cX;pY=cY;ob.hoverIntent_t=setTimeout(function(){compare(ev,ob);},cfg.interval);}};var delay=function(ev,ob){ob.hoverIntent_t=clearTimeout(ob.hoverIntent_t);ob.hoverIntent_s=0;return cfg.out.apply(ob,[ev]);};var handleHover=function(e){var p=(e.type=="mouseover"?e.fromElement:e.toElement)||e.relatedTarget;while(p&&p!=this){try{p=p.parentNode;}catch(e){p=this;}}if(p==this){return false;}var ev=jQuery.extend({},e);var ob=this;if(ob.hoverIntent_t){ob.hoverIntent_t=clearTimeout(ob.hoverIntent_t);}if(e.type=="mouseover"){pX=ev.pageX;pY=ev.pageY;$(ob).bind("mousemove",track);if(ob.hoverIntent_s!=1){ob.hoverIntent_t=setTimeout(function(){compare(ev,ob);},cfg.interval);}}else{$(ob).unbind("mousemove",track);if(ob.hoverIntent_s==1){ob.hoverIntent_t=setTimeout(function(){delay(ev,ob);},cfg.timeout);}}};return this.mouseover(handleHover).mouseout(handleHover);};})(jQuery);
+
+
+$(document).ready(function() {
+  //open in a new window
+  $('a.new-window').click(function(){
+    window.open(this.href);
+    return false;
+  });
+
+  // close messages
+  $('<a class="close" href="#">X</a>').appendTo('div.messages');
+  $("div.messages a.close").click(function() {  
+    $(this).parents("div.messages").fadeOut("slow");
+  });
+  
+  // login dropdown
+  $("#login .login-popup, #block-locale-0 ul").hide();
+  $("#login .login-popup").append('<span class="lips"></span>');
+  $("#login").hoverIntent(
+      function () {
+        $(".login-popup").fadeIn();
+        $(this).addClass("top-open");
+      }, 
+      function () {
+        $(".login-popup").fadeOut();
+        $(this).removeClass("top-open");
+      }
+  );
+  
+  // language dropdown
+  $("#block-locale-0").hoverIntent(
+      function () {
+        $("#block-locale-0 ul").fadeIn();
+        $(this).addClass("top-open");
+      }, 
+      function () {
+        $("#block-locale-0 ul").fadeOut();
+        $(this).removeClass("top-open");
+      }
+  );
+  
+  // cart dropdown
+  $(".m2-js-mini-cart").hoverIntent(
+      function () {
+        $(".m2-js-mini-cart #m2-cart").fadeIn();
+        $(this).addClass("top-open");
+      }, 
+      function () {
+        $(".m2-js-mini-cart #m2-cart").fadeOut();
+        $(this).removeClass("top-open");
+      }
+  );
+
+  // Player code
+  $('a.music-player').each(function(i, a) {
+    var $a = $(a);
+    if ($a.attr('href')) {
+      var markup = '<div id="player_container' + i + '" class="controls">';
+      markup += '  <div id="jquery_jplayer' + i + '" class="player"></div>';
+      markup += '  <a href="#" id="jplayer_play' + i + '" class="jp-play">play</a>';
+      markup += '  <a href="#" id="jplayer_pause' + i + '" class="jp-pause" style="display:none">pause</a>';
+      markup += '</div>';
+      
+      // Replace the a with the new markup.
+      $a.before(markup).remove();
+      
+      $('#jquery_jplayer' + i).jPlayer({
+        customCssIds: true,
+        swfPath: "/sites/all/libraries/jQuery.jPlayer.1.2.0",
+        ready: function () {
+          this.element.jPlayer("setFile", $a.attr('href'));
+        }
+      })
+      .jPlayer("cssId", "play", 'jplayer_play' + i)
+      .jPlayer("cssId", "pause", 'jplayer_pause' + i);
+      
+      // Clicking the play button sould stop all the other players. 
+      $('#jplayer_play' + i).click(function() { 
+        $('.player:not(#jquery_jplayer' + i + ')').jPlayer("stop");
+      });
+    }
+  });
+
+
+  // highslide
+  hs.transitions = ['expand', 'crossfade'];
+  hs.addSlideshow({
+    interval: 5000,
+    repeat: true,
+    useControls: true,
+    fixedControls: 'false',
+    overlayOptions: {
+    opacity: 1,
+    //position: 'top left',
+    hideOnMouseOut: false, 
+    width: '100%'
+    }
+  });
+
+});
+
+
+/**
+ * SlideToggle Admin Region
+ */
+Drupal.behaviors.adminToggle = function(context) {
+  $('.admin-trigger', context).click(function() {
+    $("#admin-content").slideToggle('fast');
+    $(this).toggleClass('admin-showing'); return false;
+  });
+};
+
+
+
+Drupal.behaviors.servicelinks = function(context){
+  Drupal.serviceLinks.replaceLinks(".links ul.links", context);
+};
+
+
+Drupal.serviceLinks.replaceLinks = function(selector, context) {
+  $(selector, context).each(function(i, nodeLinks){
+    nodeLinks = $(nodeLinks);
+    var services = nodeLinks.children("li[class^='service']");
+    if (services.size()) {
+
+      // Override the link behaviours
+      services.find("a:not(.yahoo-buzz)").click(function(){
+        window.open(this.href);
+        return false;
+      });
+      services.find("a.yahoo-buzz").each(function(){
+        $(this).click(serviceLinksBuzzClick);
+      });
+
+      // Construct the structure.
+      var newLink = $("<li class='share_link'></li>");
+      newLink.append($("<a class='share_handle' href=\"#\">" + Drupal.t('Share This') + "</a>")
+          .click(Drupal.serviceLinks.onShareClick));
+      newLink.append($("<div class='service_links' id='service_links_popup_" + i +"' style='display:none;'></div>")
+          .append($("<ul></ul>").append(services)));
+
+      // Append it to the node links list and update the classes.
+      nodeLinks.append(newLink);
+      nodeLinks.children("li.last").removeClass("last");
+      nodeLinks.children("li:last-child").addClass("last");
+    }
+  });
+};
+
+
+/**
+ * Fade in share buttons so that they don't first appear broken apart
+ */
+$(document).ready(function(){	
+	$('.share_handle').hide();
+	$('.share_handle').fadeIn(1000);
+});
+

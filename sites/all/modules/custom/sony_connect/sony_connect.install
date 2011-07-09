@@ -1,0 +1,98 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Install and update file for the Sony Connect module.
+ */
+
+/**
+ * Implementation of hook_enable().
+ */
+function sony_connect_enable() {
+  variable_set('sonybmg_use_modals', 1);
+}
+
+/**
+ * Implementation of hook_schema().
+ */
+function sony_connect_schema() {
+  $schema = array();
+
+  $schema['sony_connect'] = array(
+    'description' => 'Associates a local user with an external social network user.',
+    'fields' => array(
+      'uid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+        'description' => 'Foreign key from {users}.uid.',
+      ),
+      'nuid' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Network user ID. This is a varchar to make sure we can handle non-numeric IDs.',
+      ),
+      'network' => array(
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'The social network where this ID comes from.',
+      ),
+      'updated' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+        'default' => 0,
+      ),
+      'data' => array(
+        'description' => 'A collection of data to cache.',
+        'type' => 'blob',
+        'not null' => FALSE,
+        'serialize' => TRUE,
+      ),
+      'preferences' => array(
+        'description' => 'The users preferences for this network.',
+        'type' => 'blob',
+        'not null' => FALSE,
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('uid', 'nuid', 'network'),
+    'indexes' => array(
+      'network_nuid' => array('network', 'nuid'),
+      'uid' => array('uid'),
+    ),
+  );
+
+  $schema['cache_sony_connect'] = drupal_get_schema_unprocessed('system', 'cache');
+
+  return $schema;
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function sony_connect_install() {
+  drupal_install_schema('sony_connect');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function sony_connect_uninstall() {
+  drupal_uninstall_schema('sony_connect');
+}
+
+/**
+ * Implementation of hook_update_N().
+ * Add the preferences field to {sony_connect}.
+ */
+function sony_connect_update_6001() {
+  $ret = array();
+  db_add_column($ret, 'sony_connect', 'preferences', 'blob', array('not null' => FALSE, 'serialize' => TRUE));
+  return $ret;
+}

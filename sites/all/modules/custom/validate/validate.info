@@ -1,0 +1,8 @@
+; $Id$
+name = Validate
+description = Combination client-side and server side validation routines.
+core = 6.x
+
+l10n server = translate.gdb-dev.com
+project = "validate"
+version = "6.x-2.x"

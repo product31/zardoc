@@ -1,0 +1,8 @@
+; $Id$
+name = Redirect
+description = Redirect a Drupal path to an external URL
+core = 6.x
+
+l10n server = translate.gdb-dev.com
+project = "redirect"
+version = "6.x-2.x"

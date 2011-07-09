@@ -1,0 +1,9 @@
+; $Id$
+name = "Forward Services"
+description = "Add the support for Forward module which send the link through email."
+core = 6.x
+package = Sony Share
+dependencies[] = sony_share
+dependencies[] = forward
+
+

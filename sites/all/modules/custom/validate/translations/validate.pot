@@ -1,0 +1,90 @@
+# $Id$
+#
+# LANGUAGE translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  validate.pages.inc: n/a
+#  validate.module: n/a
+#  validate.info: n/a
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2010-03-01 15:55-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: validate.pages.inc:12
+msgid "Name"
+msgstr ""
+
+#: validate.pages.inc:21
+msgid "This field is required and also requires a minimum length of 2 characters."
+msgstr ""
+
+#: validate.pages.inc:24
+msgid "Email address"
+msgstr ""
+
+#: validate.pages.inc:32
+msgid "This field is required and must validate as an email address."
+msgstr ""
+
+#: validate.pages.inc:35
+msgid "URL"
+msgstr ""
+
+#: validate.pages.inc:41
+msgid "This field is not required, but if given must validate as an URL."
+msgstr ""
+
+#: validate.pages.inc:44
+msgid "Favorite number"
+msgstr ""
+
+#: validate.pages.inc:50
+msgid "This field is not required, but if given must validate as a number."
+msgstr ""
+
+#: validate.pages.inc:53
+msgid "Submit"
+msgstr ""
+
+#: validate.module:138
+msgid "%rule does not exists"
+msgstr ""
+
+#: validate.module:216
+msgid "The name %name is already taken."
+msgstr ""
+
+#: validate.module:219
+msgid "The name %name has been denied access."
+msgstr ""
+
+#: validate.module:237
+msgid "The e-mail address %email is already registered. <a href=\"@password\">Have you forgotten your password?</a>"
+msgstr ""
+
+#: validate.module:240
+msgid "The e-mail address %email has been denied access."
+msgstr ""
+
+#: validate.module:15
+msgid "jQuery Validation Test"
+msgstr ""
+
+#: validate.info:0
+msgid "Validate"
+msgstr ""
+
+#: validate.info:0
+msgid "Combination client-side and server side validation routines."
+msgstr ""
+

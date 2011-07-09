@@ -1,0 +1,8 @@
+; $Id$
+name = jQuery Validation
+description = jQuery form validation add-on for the Drupal Forms API.
+core = 6.x
+
+l10n server = translate.gdb-dev.com
+project = "jquery_validation"
+version = "6.x-2.x"

@@ -1,0 +1,34 @@
+/* $Id: drubb.css,v 1.8 2009/06/23 20:26:05 merlinofchaos Exp $ */
+
+.smileys-box .smileys span {
+  width:30px;
+  height:30px;
+}
+
+.smileys-box fieldset {
+  padding-top:0;
+  margin-top:0;
+  border:none;
+}
+
+table.forum-table td {
+  vertical-align:top;
+}
+
+.forum-folder-legend dd {
+  padding-left:0;
+}
+
+.drubb-attach-image {
+  float: right;
+  padding-right: 1em;
+}
+
+.smileys-box {
+  width: 95%;
+  margin-right: 0;
+}
+
+.smileys-box fieldset {
+  padding-right: 0;
+}

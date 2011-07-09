@@ -1,0 +1,15 @@
+; $Id: ut_userpoints.info,v 1.1.2.1 2010/02/02 11:20:15 agileware Exp $
+name = User titles userpoints
+description = Allows user titles to be based on a users userpoints
+dependencies[] = user_titles
+dependencies[] = userpoints
+core = 6.x
+package = User titles
+
+
+; Information added by drupal.org packaging script on 2010-04-01
+version = "6.x-1.0-beta5"
+core = "6.x"
+project = "user_titles"
+datestamp = "1270119619"
+

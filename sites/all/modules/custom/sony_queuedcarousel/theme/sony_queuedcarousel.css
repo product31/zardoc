@@ -1,0 +1,65 @@
+/* */
+
+.queuedcarousel {
+  /* Hide and let javascript make visible. */
+  display: none;
+  /* Provide a bounds for nav position. */
+  position: relative;
+  overflow: hidden; /* This is important for nav placement. Don't remove. */
+  padding: 0;
+}
+
+.queuedcarousel-item {
+}
+
+.queuedcarousel-nav-right,
+.queuedcarousel-nav-left {
+  /* Provide ui feedback that this is clickable. */
+  cursor: pointer;
+  /* Make sure this is in front of the panels sliding. */
+  z-index: 5;
+
+  /* Center vertically */
+  position: absolute;
+}
+.queuedcarousel-nav-left {
+  /* Make sure its all the way to the left. */
+  left: 0;
+}
+.queuedcarousel-nav-right {
+  /* Place on right side. */
+  right: 0;
+}
+
+/*****************************************************************************/
+/****************************** DEMO THEME CODE ******************************/
+/*****************************************************************************/
+div.queuedcarousel {
+  width: 550px;
+  padding: 10px;
+}
+.queuedcarousel-item {
+  /* Set a width so dimensions are set */
+  width: 550px;
+  height: 300px;
+}
+
+li.queuedcarousel-item {
+  background: Grey;
+  padding: 0;
+  margin: 0;
+}
+
+.queuedcarousel-nav-right,
+.queuedcarousel-nav-left {
+  background: Red;
+  opacity: .2;
+
+  /* set a default width so they're visible. */
+  width: 20px;
+
+  /* Dead centre the buttons. */
+  top: 50%;
+  margin-top: -25px;
+  height: 50px;
+}

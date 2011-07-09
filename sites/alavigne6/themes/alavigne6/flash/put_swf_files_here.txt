@@ -1,0 +1,1 @@
+This directory is for storing SWF files within your theme. Please use this directory for consistency across sites.

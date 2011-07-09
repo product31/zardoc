@@ -1,0 +1,9 @@
+name = Sony BMG Views Shuffle
+package = Sony BMG
+description = Provides a shuffling view row style plugin
+core = 6.x
+dependencies[] = views
+
+l10n server = translate.gdb-dev.com
+project = "sonybmg_views_shuffle"
+version = "6.x-2.x"

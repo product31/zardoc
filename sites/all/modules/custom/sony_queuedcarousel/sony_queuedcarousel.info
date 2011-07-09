@@ -1,0 +1,11 @@
+; $Id$
+name = Sony Queued Carousel
+description = magic magic ninja what?
+package = Sony Music
+dependencies[] = panels
+dependencies[] = uicarousel
+core = 6.x
+
+l10n server = translate.gdb-dev.com
+project = "sony_queuedcarousel"
+version = "6.x-2.x"

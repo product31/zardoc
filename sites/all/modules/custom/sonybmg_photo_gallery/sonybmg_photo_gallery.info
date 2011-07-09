@@ -1,0 +1,31 @@
+; $Id$
+name = Photo gallery
+description = Implements a browsable photo gallery using CCK types and views.
+
+dependencies[] = php
+dependencies[] = views
+dependencies[] = content
+dependencies[] = text
+dependencies[] = optionwidgets
+dependencies[] = filefield
+dependencies[] = imagefield
+dependencies[] = imageapi
+dependencies[] = imageapi_gd
+dependencies[] = imagecache
+dependencies[] = fivestar
+dependencies[] = votingapi
+dependencies[] = nodereference
+dependencies[] = userreference
+dependencies[] = date_api
+dependencies[] = date_timezone
+dependencies[] = token
+dependencies[] = custom_pagers
+dependencies[] = flag
+package = Sony BMG
+core = 6.x
+
+rename = photo_gallery
+
+l10n server = translate.gdb-dev.com
+project = "sonybmg_photo_gallery"
+version = "6.x-2.x"

@@ -1,0 +1,7 @@
+; $Id: eparser_twitter.info,v 1.1 2009/10/20 18:12:32 tomot Exp $ 
+
+name = Twitter Eparser
+description = Twitter xml integration for FeedAPI Eparser
+package = FeedAPI Add On
+core = 6.x
+dependencies[] = feedapi_eparser

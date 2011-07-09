@@ -1,0 +1,121 @@
+/* $Id: advanced_forum.boxy.style.css,v 1.1.2.1 2009/06/23 02:59:10 michellec Exp $ */
+
+/*
+This file contains colors, graphics, and text effects. 
+
+Colors used:
+  #DEDEDE Sticky posts, statistics subheader
+  #CCCCCC Borders, post seperator, avatar frame
+*/
+
+/*** FORUM LINK LISTS ********************************************************/
+
+.forum-links li {
+  list-style-image: none;
+  list-style-type: none;
+  background: none;
+}
+
+.forum-links li a {
+  font-weight: bold;
+}
+
+/*** FORUM & TOPIC LIST ******************************************************/
+
+/* General */
+#forum .forum-table,
+#forum .forum-topics {
+  border: 2px solid #CCCCCC;
+}
+
+/* Headers */
+#forum .forum-table th,
+#forum .forum-table th a,
+#forum .forum-topics th,
+#forum .forum-topics th a {
+  font-weight: bold;
+}
+
+/* Topic listings */
+#forum tr.sticky {
+  background-color: #DEDEDE;
+}
+
+#forum tr.forum-last-sticky {
+  border-bottom: 10px solid #CCCCCC;
+}
+
+#forum .sticky-label {
+  font-weight: bold;
+}
+
+
+/*** FORUM STATISTICS *********************************************************/
+
+#forum-statistics {
+  border: 2px solid #CCCCCC;
+}
+
+#forum-statistics-header {
+  font-weight: bold;
+}
+
+.forum-statistics-sub-header {
+  background-color: #DEDEDE;
+  font-weight: bold;
+}
+
+/*** FORUM THREADS ***********************************************************/
+
+.forum-post {
+  border: 2px solid #CCCCCC;
+}
+
+/* Header at the top of each post */
+.post-info {
+  border-bottom: 1px solid #CCCCCC;
+}
+
+.posted-on {
+  font-size: .8em;
+  font-weight: bold;
+}
+
+.post-title {
+  font-weight: bold;
+  border-bottom: 1px solid #CCCCCC;
+}
+
+/* Author information pane */
+.forum-post-panel-sub .author-pane .author-name {
+  font-size: 120%;
+  font-weight: bold;
+}
+
+.forum-post-panel-sub .author-pane .picture img {
+  border: 1px solid #CCCCCC;
+  background: #ffffff;
+}
+
+.forum-post-panel-sub .author-pane .author-pane-label {
+  font-weight: bold;
+}
+
+/* Post text area */
+.forum-post-panel-main {
+  border-left: 1px solid #CCCCCC;
+}
+
+/* Signature */
+.author-signature {
+  font-size: .8em;
+}
+
+/* Post footer */
+.forum-post-footer {
+  border-top: 1px solid #CCCCCC;
+}
+
+.forum-jump-links {
+  border-right: 1px solid #CCCCCC;
+}

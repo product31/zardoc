@@ -1,0 +1,241 @@
+<?php
+// $Id: ajaxcache.module,v 1.1 2010/02/17 19:18:43 andrewlevine Exp $
+
+/**
+ * Implementation of hook_menu().
+ */
+function ajaxcache_menu() {
+  $items = array();
+
+  // standard ajaxcache callback.
+  $items[file_directory_path() .'/ajaxcache'] = array(
+    'page callback' => 'ajaxcache_cache',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK
+  );
+
+  return $items;
+}
+
+/**
+ * 
+ */
+function ajaxcache_cache() {
+  $args = func_get_args();
+  $preset = check_plain(array_shift($args));
+  $filename = array_pop($args);
+  _ajaxcache_cache($preset, $args);
+}
+
+function _ajaxcache_cache($preset_name, $args) {
+  $preset = ajaxcache_get_preset($preset_name);
+
+  // Send a 404 if we don't know of a preset.
+  if (empty($preset)) {
+    header("HTTP/1.0 404 Not Found");
+    exit;
+  };  
+
+  // Load include file if necessary.
+  if ($preset['file'] && file_exists($preset['file'])) {
+    include_once($preset['file']);
+  }
+
+  $path = ajaxcache_get_path($preset, $args);
+  
+  // If the file exists (race-condition) just serve it.
+  if (file_exists($path)) {
+    print file_get_contents($path);
+    exit();
+  }
+
+  $output = call_user_func_array($preset['callback'], $args);
+  print $output;
+  
+  // Save data for the next call
+  ajaxcache_save_data($output, $path);  
+  exit;
+}
+
+/**
+ * Save the data to the destination file, making sure the directory tree
+ * is in place.
+ */
+function ajaxcache_save_data($data, $dst) {
+  $dir = dirname($dst);
+
+  // Build the destination folder tree if it doesn't already exists.
+  if (!ajaxcache_file_check_directory($dir, FILE_CREATE_DIRECTORY) && !mkdir($dir, 0775, true)) {
+    watchdog('ajaxcache', 'Failed to create ajaxcache directory: %dir', array('%dir' => $dir), WATCHDOG_ERROR);
+    return false;
+  }
+
+  file_save_data($data, $dst, FILE_EXISTS_REPLACE);
+}
+
+/**
+ * Fetch the metadata for a given preset.
+ */
+function ajaxcache_get_preset($preset_name = NULL) {
+  static $presets;
+
+  if (!isset($presets)) {
+  $presets = module_invoke_all('ajaxcache_presets');
+    foreach (module_implements('ajaxcache_presets') as $module) {
+      $module_presets = module_invoke($module, 'ajaxcache_presets');
+      foreach ($module_presets as $name => $preset) {
+        $preset['name'] = $name;
+        $preset['module'] = $module;
+
+        // set some sane defaults for extension and filename.
+        $preset['extension'] = isset($preset['extension']) ? $preset['extension'] : 'html';
+        $preset['filename'] = isset($preset['filename']) ? $preset['filename'] : 'ajax';
+        
+        // Flush the 
+        $preset['flush'] = isset($preset['flush']) ? $preset['flush'] : TRUE;
+
+        $presets[$name] = $preset;
+      }
+    }
+  }
+
+  if (isset($preset_name)) {
+    return $presets[$preset_name];
+  }
+  return $presets;
+}
+
+/**
+ * Build an ajaxcache path.
+ */
+function ajaxcache_get_path($preset, $args = array()) {
+  if (is_string($preset)) {
+    $preset = ajaxcache_get_preset($preset);
+  }
+
+  $path = file_directory_path() .'/ajaxcache/'. $preset['name'];
+  if (!empty($args)) {
+    $path .= '/'. join('/', $args);
+  }
+  $path .= '/'. $preset['filename'] .'.'. $preset['extension'];
+
+  return $path;
+}
+
+/**
+ * Build an ajaxcache URL.
+ * This function returns the URL path you should pass to your javascript.
+ */
+function ajaxcache_get_url($preset, $args = array()) {
+  return file_create_url(ajaxcache_get_path($preset, $args));
+}
+
+/**
+ * Test implementation of hook_ajaxcache_presets().
+ */
+function ajaxcache_ajaxcache_presets() {
+  return array(
+    'test' => array(
+      'callback' => 'ajaxcache_test_callback',
+
+      // Optional: include file where the callback is located.
+      // 'file' => 'include.inc',
+
+      // Optional: file extension to be used when serving the file. Defaults to html.
+      // 'extension' => 'json',
+
+      // Optional: file name (without extension) to be used when serving the file. Defaults to ajax.
+      // 'filename' => 'test',
+    ),
+  );
+}
+
+/**
+ * Test ajaxcache callback function.
+ */
+function ajaxcache_test_callback() {
+  $args = func_get_args();
+  
+  $output = print_r($args, 1);
+  $output .= "\n" . format_date(time());
+  
+  return $output;
+}
+
+/**
+ * Implementation of hook_flush_caches().
+ */
+function ajaxcache_flush_caches() {
+  $presets = ajaxcache_get_preset();
+  foreach ($presets as $preset) {
+    if ($preset['flush']) {
+      ajaxcache_flush_preset($preset);
+    }
+  }
+}
+
+/**
+ * Flush the cache file(s) for a specific preset.
+ */
+function ajaxcache_flush_preset($preset) {
+  if (is_string($preset)) {
+    $preset = ajaxcache_get_preset($preset);
+  }
+
+  $presetdir = realpath(file_directory_path() .'/ajaxcache/'. $preset['name']);
+  if (is_dir($presetdir)) {
+    _ajaxcache_recursive_delete($presetdir);
+  } 
+}
+
+/**
+ * Recursively delete all files and folders in the specified filepath, then
+ * delete the containing folder.
+ *
+ * Note that this only deletes visible files with write permission.
+ * Ripped off from imagecache ;)
+ *
+ * @param string $path
+ *   A filepath relative to file_directory_path.
+ */
+function _ajaxcache_recursive_delete($path) {
+  if (is_file($path) || is_link($path)) {
+    unlink($path);
+  }
+  elseif (is_dir($path)) {
+    $d = dir($path);
+    while (($entry = $d->read()) !== false) {
+      if ($entry == '.' || $entry == '..') continue;
+      $entry_path = $path .'/'. $entry;
+      _ajaxcache_recursive_delete($entry_path);
+    }
+    $d->close();
+    rmdir($path);
+  }
+  else {
+    watchdog('ajaxcache', 'Unknown file type(%path) stat: %stat ',
+              array('%path' => $path,  '%stat' => print_r(stat($path),1)), WATCHDOG_ERROR);
+  }
+}
+
+/**
+ * Wrapper function file_check_directory().  Since it will output a stupid
+ * message everytime it creates a new directory, regardless of who the user is.
+ */
+function ajaxcache_file_check_directory(&$directory, $mode = 0, $form_item = NULL) {
+  $messages = drupal_get_messages();
+  
+  $result = file_check_directory($directory, $mode, $form_item);
+
+  // clear anything that was set by file_check_directory.
+  drupal_get_messages();
+  
+  // and re-populate the original messages.
+  foreach ($messages as $type => $type_messages) {
+    foreach ($type_messages as $message) {
+      drupal_set_message($message, $type);
+    }
+  }
+  
+  return $result;
+}

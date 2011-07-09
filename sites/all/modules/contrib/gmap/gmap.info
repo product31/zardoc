@@ -1,0 +1,5 @@
+; $Id: gmap.info,v 1.3 2008/07/15 17:19:33 bdragon Exp $
+name = GMap
+description = Filter to allow insertion of a google map into a node
+core = 6.x
+package = Location

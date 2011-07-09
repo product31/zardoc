@@ -1,0 +1,4 @@
+; $Id: alias.info,v 1.1 2008/11/24 22:45:31 rz Exp $
+name = Alias
+description = Create URL aliases for external URLs.  
+core = 6.x

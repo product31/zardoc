@@ -1,0 +1,92 @@
+<?php
+// $Id: feedapi_eparser.install,v 1.5 2009/09/02 03:22:11 neclimdul Exp $
+/**
+ * @file
+ * Install and update the extensible feedapi parser.
+ *
+ * @todo document schema fields.
+ */
+
+function feedapi_eparser_install() {
+  drupal_install_schema('feedapi_eparser');
+}
+
+function feedapi_eparser_schema() {
+  $schema['feedapi_eparser_node'] = array(
+    'description' => t('Stores per-node eparser settings.'),
+    'fields' => array(
+      'nid' => array(
+        'description' => t('Node ID to link to settings.'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'type' => array(
+        'description' => t('Type of feed.'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'download' => array(
+        'description' => t('Download method.'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'namespaces' => array(
+        'description' => t('Namespaces to use when parsing.'),
+        'type' => 'text',
+        'not null' => TRUE,
+        'serialize' => TRUE,
+      ),
+      'settings' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+        'default' => '',
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('nid'),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function feedapi_eparser_uninstall() {
+  // Drop database schema.
+  drupal_uninstall_schema('feedapi_eparser');
+}
+
+/**
+ * Implementation of hook_update().
+ */
+function feedapi_eparser_update_6101() {
+  $ret = array();
+  db_add_field($ret, 'feedapi_eparser_node', 'download', array(
+    'type' => 'varchar',
+    'length' => '255',
+    'not null' => TRUE,
+    'default' => '',
+    'initial' => 'drupal_http_request',
+  ));
+  return $ret;
+}
+
+/**
+ * Add a new field to store plugins settings
+ */
+function feedapi_eparser_update_6102() {
+  $ret = array();
+  db_add_field($ret, 'feedapi_eparser_node', 'settings', array(
+    'type' => 'text',
+    'not null' => TRUE,
+    'default' => '',
+    'serialize' => TRUE,
+  ));
+  return $ret;
+}

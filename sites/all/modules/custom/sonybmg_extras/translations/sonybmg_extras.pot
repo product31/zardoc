@@ -1,0 +1,37 @@
+# $Id$
+#
+# LANGUAGE translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  sonybmg_extras.module: n/a
+#  sonybmg_extras.info: n/a
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2010-03-01 15:36-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: sonybmg_extras.module:14
+msgid "Extras"
+msgstr ""
+
+#: sonybmg_extras.info:0
+msgid "Sony BMG Extras"
+msgstr ""
+
+#: sonybmg_extras.info:0
+msgid "Buddy icons and wallpapers for the Extras page."
+msgstr ""
+
+#: sonybmg_extras.info:0
+msgid "Sony BMG"
+msgstr ""
+

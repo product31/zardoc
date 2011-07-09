@@ -1,0 +1,6 @@
+; $Id$
+name = DataSync FeedAPI
+description = Import FeedAPI feeds with DataSync instead of cron 
+package = DataSync
+core = 6.x
+dependencies[] = datasync

@@ -1,0 +1,65 @@
+﻿/*
+/ Layout 1
+*/
+
+/*
+/ make sure all major div's are absolute positioned
+*/
+
+body
+{
+  /*this center's everything on the page ... no margin's needed! */
+  text-align: center
+}
+#page {
+  /*this allows us to position EVERYTHING in the page absolutely relative to each other!  */
+  position:relative;
+}
+
+#header-wrapper{
+  display:block;
+  position:relative;
+}
+
+
+#navigation-wrapper{
+  position: absolute;
+  display:block;
+  top: 132px;
+  right:1px;
+}
+
+
+#container
+{
+  display:block;
+  position:relative;
+}
+#logo-title {
+  display:block;
+  position:relative;
+  top: 30px;
+  height:200px;
+}
+#header {
+  display:absolute;
+}
+
+
+/*
+/ front page alterations
+*/
+
+/*remove the ad-top from the home page*/
+
+body.front #ad-top{
+  display:none;
+}
+body.front #navigation-wrapper{
+   top: 0;
+}
+body.front #page-inner{
+  position:absolute;
+  top: 10px;
+}
+

@@ -1,0 +1,39 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ */
+
+/**
+ * Implementation of hook_install().
+ */
+function platform_player_install() {
+  drupal_load('module', 'content');
+  content_notify('install', 'platform_player');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function platform_player_uninstall() {
+  drupal_load('module', 'content');
+  content_notify('uninstall', 'platform_player');
+}
+
+/**
+* Implementation of hook_enable().
+*/
+function platform_player_enable() {
+  drupal_load('module', 'content');
+  content_notify('enable', 'platform_player');
+}
+
+/**
+* Implementation of hook_disable().
+*/
+function platform_player_disable() {
+  drupal_load('module', 'content');
+  content_notify('disable', 'platform_player');
+}
+

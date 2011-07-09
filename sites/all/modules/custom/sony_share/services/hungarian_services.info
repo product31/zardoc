@@ -1,0 +1,8 @@
+; $Id$
+name = "Hungarian Services"
+description = "Provide the Hungarian Service: iWiW"
+core = 6.x
+package = Sony Share
+dependencies[] = sony_share
+
+

@@ -1,0 +1,11 @@
+; $Id$
+name = "Embedded Media Field SWFTools Provider"
+description = "A generic embeded field provider that uses SWFTools to embed media."
+core = 6.x
+dependencies[] = swftools
+dependencies[] = emaudio
+
+l10n server = translate.gdb-dev.com
+project = "emaudio_swftools"
+version = "6.x-2.x"
+

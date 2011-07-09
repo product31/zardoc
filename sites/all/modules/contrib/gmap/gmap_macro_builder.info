@@ -1,0 +1,6 @@
+; $Id: gmap_macro_builder.info,v 1.3 2008/07/15 18:09:12 bdragon Exp $
+name = GMap Macro Builder
+description = UI for building GMap macros.
+package = Location
+core = 6.x
+dependencies[] = gmap

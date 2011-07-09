@@ -1,0 +1,49 @@
+# $Id$
+#
+# LANGUAGE translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  bro.module: n/a
+#  bro.info: n/a
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2010-03-01 14:05-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: bro.module:91
+msgid "Chat domain"
+msgstr ""
+
+#: bro.module:97
+msgid "Chat config"
+msgstr ""
+
+#: bro.module:103
+msgid "Secret key"
+msgstr ""
+
+#: bro.module:7
+msgid "participate in bro chat"
+msgstr ""
+
+#: bro.module:77
+msgid "BRO"
+msgstr ""
+
+#: bro.info:0
+msgid "BRO Integration"
+msgstr ""
+
+#: bro.info:0
+msgid "Integration for the BRO multimedia ad unit."
+msgstr ""
+

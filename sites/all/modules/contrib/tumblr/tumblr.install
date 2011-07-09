@@ -1,0 +1,50 @@
+<?php
+
+// $Id: tumblr.install,v 1.1.2.1 2007/12/04 21:54:43 eaton Exp $
+
+function tumblr_install() {
+  drupal_install_schema('tumblr');
+}
+
+function tumblr_schema() {
+  $schema['tumblr_post'] = array(
+    'fields' => array(
+      'id' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'description' => ''),
+      'type' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => 'regular', 'description' => 'The unique ID of the Tumblr post.'),
+      'tumblr_name' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'description' => 'The name of the Tumblr user who created the post.'),
+      'title' => array('type' => 'varchar', 'length' => 255, 'not null' => FALSE, 'description' => 'The optional title of the Tumblr post.'),
+      'body' => array('type' => 'text', 'not null' => FALSE, 'description' => 'The optional body text of the Tumblr post.'),
+      'link' => array('type' => 'varchar', 'length' => 255, 'not null' => FALSE, 'description' => 'The URL of the link, video, or image.'),
+      'source' => array('type' => 'varchar', 'length' => 255, 'not null' => FALSE, 'description' => 'The source of the quote or video.'),
+      'timestamp' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => 0, 'description' => 'The time at which the post was created on Tumblr.com'),
+    ),
+    'primary key' => array('id'),
+  );
+  $schema['tumblr_user'] = array(
+    'fields' => array(
+      'uid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0, 'description' => 'A Drupal user ID.'),
+      'tumblr_name' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'description' => 'A Tumblr user name.'),
+      'email' => array('type' => 'varchar', 'length' => 255, 'not null' => FALSE, 'description' => 'The login email of Tumblr account.'),
+      'password' => array('type' => 'varchar', 'length' => 255, 'not null' => FALSE, 'description' => 'The login password of the Tumblr account.'),
+    ),
+    'indexes' => array(
+      'uid' => array('uid'),
+      'tumblr_name' => array('tumblr_name'),
+    ),
+  );
+  $schema['tumblr_node'] = array(
+    'fields' => array(
+      'id' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0, 'description' => 'The unique ID of a Tumblr post.'),
+      'nid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0, 'description' => 'The id of a Drupal node.'),
+    ),
+    'primary key' => array('nid', 'id'),
+    'indexes' => array('nid' => array('nid')),
+  );
+  return $schema;
+}
+
+function tumblr_uninstall() {
+  db_query("DROP TABLE {tumblr_post}");
+  db_query("DROP TABLE {tumblr_user}");
+  db_query("DROP TABLE {tumblr_node}");
+}

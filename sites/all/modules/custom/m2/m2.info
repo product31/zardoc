@@ -1,0 +1,9 @@
+; $Id$
+name = M2 Base (Old)
+description = Base module for M2 interactivity
+package = Sony M2
+core = 6.x
+
+l10n server = translate.gdb-dev.com
+project = "m2"
+version = "6.x-2.x"

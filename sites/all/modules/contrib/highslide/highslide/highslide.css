@@ -1,0 +1,283 @@
+.highslide-wrapper div {
+  font-size: 10pt;
+}
+
+.highslide-container img.highslide-image {
+  cursor: url(graphics/restore.png), arrow;
+}
+
+a.highslide-credits,
+a.highslide-credits i {
+  padding: 2px;
+  color: silver;
+  text-decoration: none;
+  font-size: 10px;
+}
+
+a.highslide-credits:hover,
+a.highslide-credits:hover i {
+  color: white;
+  background-color: gray;
+}
+
+/* HTML */
+
+.highslide-html {
+  background-color: white;
+}
+
+.highslide-html-blur {
+  
+}
+
+.highslide-html-content {
+  display: none;
+  font-size: 12px;
+  padding: 0;
+}
+
+.highslide-body p {
+  margin-bottom: 8px;
+  font-family: HelveticaNeue, "Helvetica Neue", Helvetica, Arial, Geneva, sans-serif;
+  padding-right: 8px;
+}
+
+/* Styles for the popup */
+
+.highslide-wrapper .highslide-html-content {
+  padding: 25px;
+  height: auto;
+  width: 600px;
+}
+
+.highslide-wrapper .highslide-header div {
+  margin: 0;
+  padding: 0;
+}
+
+.highslide-wrapper .highslide-header ul {
+  text-align: right;
+  margin: 0;
+  padding: 0;
+}
+
+.highslide-wrapper .highslide-header ul li {
+  display: inline;
+  padding-left: 9px;
+}
+
+.highslide-wrapper .highslide-header ul li.highslide-previous, .highslide-wrapper .highslide-header ul li.highslide-next {
+  display: none;
+}
+
+.highslide-wrapper .highslide-header a {
+  text-transform: uppercase;
+  text-decoration: none;
+  font-weight: normal;
+  font-style: normal;
+}
+
+.highslide-wrapper .highslide-header .highslide-move a {
+  cursor: move;
+}
+
+.highslide-wrapper .highslide-footer {
+  height: 11px;
+  display: none;
+}
+
+.highslide-wrapper .highslide-footer .highslide-resize {
+  float: right;
+  height: 11px;
+  width: 11px;
+  background: url(graphics/resize.gif);
+}
+
+.highslide-wrapper .highslide-body {
+  padding: 0;
+}
+
+.highslide-move {
+  cursor: move;
+}
+
+.highslide-resize {
+  cursor: nw-resize;
+}
+
+.highslide-wrapper a.close img {
+  width: 30px;
+  height: 30px;
+  text-indent: -9999px;
+  display: block;
+  z-index: 5;
+  position: absolute;
+  top: -15px;
+  left: -15px;
+  background-repeat: no-repeat;
+}
+
+.highslide-overlay a.close img {
+  width: 30px;
+  height: 30px;
+  text-indent: -9999px;
+  display: block;
+  z-index: 5;
+  position: absolute;
+  top: -15px;
+  left: -15px;
+  background-repeat: no-repeat;
+}
+
+.highslide-overlay ul.slidenav {
+  background-color: transparent;
+  bottom: -50px;
+  right: 18px;
+  display: block;
+  position: absolute;
+  width: 150px;
+}
+
+.highslide-overlay ul.slidenav li {
+  list-style-type: none;
+  float: right;
+}
+
+.highslide-overlay a.previous {
+  text-indent: -9999px;
+  width: 29px;
+  height: 29px;
+  background: url(graphics/arrow-left.png) no-repeat;
+  display: block;
+}
+
+.highslide-overlay a.previous:hover {
+  background-position: -29px;
+}
+
+.highslide-overlay a.next {
+  text-indent: -9999px;
+  width: 29px;
+  height: 29px;
+  background: url(graphics/arrow-right.png) no-repeat;
+  display: block;
+}
+
+.highslide-overlay a.next:hover {
+  background-position: -29px;
+}
+
+.highslide-dimming {
+  background: black;
+  position: absolute;
+}
+
+.highslide-overlay {
+  display: none;
+}
+
+.closebutton {
+  text-indent: -9999px;
+  position: relative;
+  top: -15px;
+  left: -15px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  background: url(graphics/close.png);
+/* NOTE! For IE6, you also need to update the highslide-ie6.css file. */
+}
+
+/* Extras */
+
+.highslide {
+  cursor: url(graphics/magnifier.png), pointer;
+}
+
+.highslide-active-anchor img {
+  opacity: 0.4;
+}
+
+.highslide img {
+  
+}
+
+.highslide:hover img {
+  
+}
+
+.highslide-wrapper {
+  background: white;
+}
+
+.highslide-image {
+  
+}
+
+.highslide-image-blur {
+  opacity: 0.6;
+}
+
+.highslide-caption {
+  display: none;
+  border-top: 1px solid white;
+  background-repeat: repeat-x;
+  padding: 15px 20px;
+}
+
+.highslide-caption div {
+  display: block;
+  float: left;
+}
+
+.highslide-caption a.next {
+  text-indent: -9999px;
+  width: 29px;
+  height: 29px;
+  background: url(graphics/arrow-right.png) no-repeat;
+  display: block;
+  float: left;
+}
+
+.highslide-caption a.next:hover {
+  background-position: -29px;
+}
+
+.highslide-caption div.hs-nav {
+  float: right;
+  margin: 0 0 0 20px;
+  padding: 0;
+}
+
+.highslide-loading {  
+  background: url(graphics/highslide-loader-bg.png) no-repeat center;
+  display: block;
+  width: 40px; 
+  height: 40px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  opacity: 1 !important;
+}
+
+.highslide-loading img {
+  margin: 6px 4px;
+}
+
+a.highslide-full-expand {
+  background: url(graphics/fullexpand.gif) no-repeat;
+  display: none;
+  margin: 0 10px 10px 0;
+  width: 34px;
+  height: 34px;
+}
+
+/* These must always be last */
+
+.highslide-display-block {
+  display: block;
+}
+
+.highslide-display-none {
+  display: none;
+}

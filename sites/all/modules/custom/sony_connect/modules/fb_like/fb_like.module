@@ -1,0 +1,357 @@
+<?php
+// $Id:
+
+/**
+ * Implementation of hook init
+ * @todo Implement block settings form
+ * @todo og:image (http://developers.facebook.com/docs/reference/plugins/like)
+ *
+ */
+//function fb_like_init(){
+//  if (variable_get('fb_like_opengraph_tags', 1)) {
+//    $object = menu_get_object();
+//    if (fb_like_type($object->type)) {
+//      //add fbml header meta information
+//      $data = '<meta property="og:title" content="'. $object -> title. '"/>' ."\n";
+//      $data .= '<meta property="og:site_name" content="'. variable_get('site_name', '') .'"/>'. "\n";
+//      // @todo maybe look for images/imagefields uploaded/attached to the node ?
+//      // $data .= '<meta property="og:image" content="http://ia.media-imdb.com/rock.jpg"/>';
+//      drupal_set_html_head($data);
+//    }
+//  }
+//}
+
+/**
+ * Implementation of hook_menu
+ */
+function fb_like_menu(){
+  $items = array();
+
+  $items['admin/sony/connect/like'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Like Button',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('fb_like_settings_form'),
+    'file' => 'fb_like.admin.inc',
+    'access callback' => 'user_access',
+    'access arguments' => array('administer site configuration'),
+    //'weight' => 1,
+  );
+//  $items['admin/sony/settings/fb'] = array(
+//    'type' => MENU_NORMAL_ITEM,
+//    'title' => 'Facebook like Button',
+//    'description' => 'Settings for facebook like button plugins.',
+//    'page callback' => 'drupal_get_form',
+//    'page arguments' => array('fb_like_settings_form'),
+//    'file' => 'fb_like.admin.inc',
+//    'access callback' => 'user_access',
+//    'access arguments' => array('administer site configuration'),
+//    'weight' => 10,
+//  );
+//
+//  $items['admin/sony/settings/fb/settings'] = array(
+//    'type' => MENU_DEFAULT_LOCAL_TASK,
+//    'title' => 'Settings',
+//    'page callback' => 'drupal_get_form',
+//    'page arguments' => array('fb_like_settings_form'),
+//    'file' => 'fb_like.admin.inc',
+//    'access callback' => 'user_access',
+//    'access arguments' => array('administer site configuration'),
+//    'weight' => 0,
+//  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_content_extra_fields.
+ */
+function fb_like_content_extra_fields($type_name){
+  if (fb_like_type($type_name) && variable_get('fb_like_location', 0)) {
+    $extras['fb_like_widget'] = array(
+        'label' => t('Facebook like widget'),
+        'description' => t('The facebook like plugin widget'),
+        'weight' => - 10
+    );
+    return $extras;
+  }
+}
+
+/**
+ * Implementation of hook_nodeapi().
+ */
+function fb_like_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL){
+  switch ($op) {
+    case 'view' :
+      if (fb_like_type($node->type) && variable_get('fb_like_location', 0)) {
+        if ($a4 || variable_get('fb_like_display_teasers', 1) && $a3) {
+
+          $output = theme('fb_like_widget', fb_like_url('node/' . $node->nid));
+          $weight = (module_exists('content')) ? content_extra_field_weight($node->type, 'fb_like_widget') : 10;
+          $node->content['fb_like_widget'] = array(
+              '#weight' => $weight,
+              '#value' => $output
+          );
+        }
+      }
+      break;
+  }
+}
+
+
+/**
+ * Implementation of hook_block
+ */
+function fb_like_block($op = 'list', $delta = 0, $edit = array()){
+  switch ($op) {
+    case 'list' :
+
+      $blocks['like'] = array(
+          'info' => t('Facebook Like Button'),
+          'cache' => BLOCK_NO_CACHE,
+          'visibility' => 0,
+          'pages' => 'admin/*'
+      );
+      return $blocks;
+
+    case 'configure':
+      if ($delta == 'like') {
+        $url = fb_like_url('<front>');
+        $form['items'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Like button url'),
+          '#default_value' => variable_get('fb_like_block_items', $url),
+          '#size' => 60,
+          '#maxlength' => 64,
+          '#description' => t('Enter the url you wish to like.')
+        );
+
+        $form['fb_like_block_layout_style'] = array(
+          '#type' => 'select',
+          '#title' => t('Layout style'),
+          '#description' => t('Determines the size and the amount of the social context next to the button'),
+          '#default_value' => variable_get('fb_like_block_layout_style', 'standard'),
+          '#options' => array('standard' => t('standard'), 'button_count' => t('button_count'), 'box_count' => t('box_count') ),
+        );
+
+        $form['fb_like_block_show_faces'] = array(
+          '#type' => 'checkbox',
+          '#title' => t('Show faces'),
+          '#description' => t('Show profiles pictures below the button'),
+          '#default_value' => variable_get('fb_like_block_show_faces', 0),
+        );
+
+        $form['fb_like_block_width'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Width'),
+          '#description' => t('The width of the plugin in pixel'),
+          '#default_value' => variable_get('fb_like_block_width', 350),
+        );
+
+        $form['fb_like_block_verb'] = array(
+          '#type' => 'select',
+          '#title' => t('Verb'),
+          '#description' => t('The verb to display in the button'),
+          '#default_value' => variable_get('fb_like_block_verb', 'like'),
+          '#options' => array('like' => t('like'), 'recommend' => t('recommend') )
+        );
+
+        $form['fb_like_block_font'] = array(
+          '#type' => 'select',
+          '#title' => t('Font'),
+          '#description' => t('The font of the plugin'),
+          '#default_value' => variable_get('fb_like_block_font', 'verdana'),
+          '#options' => array('arial' => t('arial'), 'verdana' => t('verdana') )
+        );
+
+        $form['fb_like_block_color'] = array(
+          '#type' => 'select',
+          '#title' => t('Color'),
+          '#description' => t('The color scheme of the plugin'),
+          '#default_value' => variable_get('fb_like_block_color', 'light'),
+          '#options' => array('dark' => t('dark'), 'light' => t('light'))
+        );
+        return $form;
+      }
+      break;
+
+    case 'save':
+      if ($delta == 'like') {
+        variable_set('fb_like_block_items', $edit['items']);
+        variable_set('fb_like_block_layout_style', $edit['fb_like_block_layout_style']);
+        variable_set('fb_like_block_show_faces', $edit['fb_like_block_show_faces']);
+        variable_set('fb_like_block_width', $edit['fb_like_block_width']);
+        variable_set('fb_like_block_verb', $edit['fb_like_block_verb']);
+        variable_set('fb_like_block_font', $edit['fb_like_block_font']);
+        variable_set('fb_like_block_color', $edit['fb_like_block_color']);
+      }
+      break;
+
+    case 'view' :
+      if ($delta == 'like') {
+        $default_url = fb_like_url('<front>');
+        $url = variable_get('fb_like_block_items', $default_url);
+        return array('content' =>  theme('fb_like_block_widget', $url));
+      }
+      break;
+  }
+}
+
+
+/**
+ * Implementation of hook_theme
+ */
+function fb_like_theme() {
+  return array(
+    'fb_like_widget' => array(
+       'arguments' => array('url' => NULL),
+    ),
+    'fb_like_block_like_view' => array(),
+  );
+}
+
+/**
+ * Returns the fbml content of the like widget.
+ */
+function theme_fb_like_widget($url){
+  $attrs = array(
+    'href' => $url,
+    'layout' => variable_get('fb_like_layout_style', 'standard'),
+    'show_faces' => variable_get('fb_like_show_faces', 0) ? 'true' : 'false',
+    'width' => variable_get('fb_like_width', 350),
+    'action' => variable_get('fb_like_verb', 'like'),
+    'font' => variable_get('fb_like_font', 'verdana'),
+    'colorscheme' => variable_get('fb_like_color', 'light')
+  );
+  return '<div class="fb-like-widget"><fb:like' . drupal_attributes($attrs) . '></fb:like></div>';
+}
+
+/**
+ * Returns the fbml content of the like block.
+ */
+function theme_fb_like_block_widget($url){
+  $attrs = array(
+    'href' => $url,
+    'layout' => variable_get('fb_like_block_layout_style', 'standard'),
+    'show_faces' => variable_get('fb_like_block_show_faces', 0) ? 'true' : 'false',
+    'width' => variable_get('fb_like_block_width', 350),
+    'action' => variable_get('fb_like_block_verb', 'like'),
+    'font' => variable_get('fb_like_block_font', 'verdana'),
+    'colorscheme' => variable_get('fb_like_block_color', 'light')
+  );
+  return '<div class="fb-like-widget"><fb:like' . drupal_attributes($attrs) . '></fb:like></div>';
+}
+/**
+ * Implementation of hook_link
+ */
+function fb_like_link($type, $object, $teaser = FALSE){
+
+  //only nodes are supported
+  if ('node' != $type){
+    return;
+  } // if no widget on teasers return
+  elseif ($teaser && !variable_get('fb_like_display_teasers', 1)){
+    return;
+  }
+
+  // widget is not to be displayed in the node links. return
+  if (variable_get('fb_like_location', 0)){
+    return;
+  }
+
+  // good to go
+  $links = array();
+  if ($type == 'node' && fb_like_type($object -> type)) {
+    $links['fb_like'] = array(
+      'title' => theme_fb_like_widget(fb_like_url('node/' . $object -> nid)),
+      'html' => TRUE,
+    );
+  }
+
+  return $links;
+}
+
+/**
+ * helper function for testing wether $type
+ * is selected to be a fb_like type
+ */
+function fb_like_type($type){
+  $fb_like_types = variable_get('fb_like_node_types', array());
+  return (isset($fb_like_types[$type]) && $fb_like_types[$type]) ? TRUE : FALSE;
+}
+
+/**
+ * Implementation of hook_views_api().
+ */
+function fb_like_views_api() {
+  return array(
+    'api' => '2.0',
+  );
+}
+
+/**
+ * Implementation of hook_footer
+ */
+function fb_like_footer($main = 0) {
+  global $language;
+
+  $languages = _map_active_languages();
+
+  if (fb_like_auto_language()) {
+    if (array_key_exists($language->language, $languages)) {
+      $fb_locale = $languages[$language->language];
+    } else {
+      drupal_set_message("There is no mapping for the current language. Using the default locale.");
+    }
+  } else {
+    $fb_locale = variable_get('fb_like_locale', 'en_US');
+  }
+  $plugin = sony_connect_get_network('facebook');
+
+  $appid = !empty($plugin['conf']['application_id']) ? $plugin['conf']['application_id'] : '';
+  $output = '<div id="fb-root"></div>';
+  $output .=
+  "<script type=\"text/javascript\">
+     window.fbAsyncInit = function() {
+       FB.init({
+         appId: " . drupal_to_js($appid) .",
+         status: true,
+         cookie: true,
+         xfbml: true});
+
+         jQuery.event.trigger('fb:init');
+     };
+     (function() {
+       var e = document.createElement('script');
+       e.async = true;
+       e.src = document.location.protocol + '//connect.facebook.net/" . $fb_locale  . "/all.js';
+       document.getElementById('fb-root').appendChild(e);
+     }());
+  </script>";
+
+  return $output;
+}
+
+function fb_like_auto_language() {
+  return variable_get('fb_like_locale_auto', 0);
+}
+
+function _map_active_languages() {
+  $languages = language_list();
+  $mapped = array();
+  foreach ($languages as $key => $language) {
+    $mapped[$language->language] = variable_get('fb_like_language_' . $language->language, '');
+  }
+  return $mapped;
+}
+
+// API functions
+
+/**
+ *  Based on the user settings return the aliased / unaliased version
+ *  of a given $url
+ */
+function fb_like_url($url = NULL){
+  $aliased = variable_get('fb_like_urls_mode', 0);
+  return url($url, array('absolute' => TRUE, 'alias' => $aliased ));
+}

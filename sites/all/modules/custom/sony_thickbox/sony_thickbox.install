@@ -1,0 +1,82 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * file_description
+ */
+
+/**
+ * Implementation of hook_install().
+ */
+function sony_thickbox_install() {
+  drupal_install_schema('sony_thickbox');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function sony_thickbox_uninstall() {
+  drupal_uninstall_schema('sony_thickbox');
+}
+
+/**
+ * Implementation of hook_schema().
+ */
+function sony_thickbox_schema() {
+  $schema['sony_thickbox'] = array(
+    'fields' => array(
+      'delta' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'path' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'title' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'width' => array(
+        'type' => 'int',
+        'size' => 'small',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'height' => array(
+        'type' => 'int',
+        'size' => 'small',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'cookie' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'auto' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'modal' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('delta'),
+  );
+  return $schema;
+}

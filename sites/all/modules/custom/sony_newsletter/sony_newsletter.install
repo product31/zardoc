@@ -1,0 +1,17 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Install file for sony_register.module
+ */
+
+/**
+ * Implementation of hook_install().
+ */
+function sony_newsletter_install() {
+  // Make sure the old profile newsletter fields are disabled...
+  update_sql("UPDATE {profile_fields} SET register = 0, visibility = 4 WHERE name IN ('profile_newsletter', 'profile_myplay_newsletter', 'profile_mobile_phone')");
+  // ...and country and zip are enabled.
+  update_sql("UPDATE {profile_fields} SET register = 1 WHERE name IN ('profile_zip_code', 'profile_country')");
+}

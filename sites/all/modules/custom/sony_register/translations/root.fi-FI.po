@@ -1,0 +1,107 @@
+# Finland translation of sony_register (all releases)
+# Copyright (c) 2010 by the Finland translation team
+# Generated from files:
+#  sony_register/sony_register.info: n/a
+#  sony_register/sony_register.module: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sony_register (all releases)\n"
+"POT-Creation-Date: 2010-04-06 22:52-0500\n"
+"PO-Revision-Date: 2010-03-26 09:05-0500\n"
+"Language-Team: Finland\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: sony_register.info:0
+msgid "Sony BMG"
+msgstr ""
+
+#: sony_register.module:19,28
+msgid "Please review !terms"
+msgstr ""
+
+#: sony_register.module:35
+msgid "E-mail Description"
+msgstr ""
+
+#: sony_register.module:42
+msgid "Sony Settings"
+msgstr ""
+
+#: sony_register.module:46
+msgid "Enable Sony Settings"
+msgstr ""
+
+#: sony_register.module:52
+msgid "Sony Legal Link"
+msgstr ""
+
+#: sony_register.module:54
+msgid "If left empty it will revert to the default link"
+msgstr ""
+
+#: sony_register.module:115
+msgid "Username"
+msgstr "Käyttäjätunnus"
+
+#: sony_register.module:116
+msgid "E-mail"
+msgstr "Sähköposti"
+
+#: sony_register.module:134
+msgid "When's your birthday?"
+msgstr ""
+
+#: sony_register.module:135
+msgid "Where are you?"
+msgstr ""
+
+#: sony_register.module:136
+msgid "Are you human?"
+msgstr ""
+
+#: sony_register.module:137
+msgid "Enter the word below, in the space here &darr;"
+msgstr ""
+
+#: sony_register.module:142
+msgid "Join the Community"
+msgstr ""
+
+#: sony_register.module:224
+msgid "Thank you for registering."
+msgstr ""
+
+#: sony_register.module:231
+msgid "Left block"
+msgstr ""
+
+#: sony_register.module:236
+msgid "Right block"
+msgstr ""
+
+#: sony_register.module:240
+msgid ""
+"Thank you for registering. We are committed to protecting your rights "
+"and privacy."
+msgstr ""
+
+#: sony_register.module:243
+msgid "Registration success message"
+msgstr ""
+
+#: sony_register.module:172
+msgid "User registration"
+msgstr ""
+
+#: sony_register.info:0
+msgid "Sony Register"
+msgstr ""
+
+#: sony_register.info:0
+msgid "Sony customization of the user registration process"
+msgstr ""
+

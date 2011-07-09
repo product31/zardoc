@@ -1,0 +1,57 @@
+# Thailand translation of m2 (all releases)
+# Copyright (c) 2010 by the Thailand translation team
+# Generated from files:
+#  m2/modules/m2_gracenote/m2-gracenote-formatter-lyrics.tpl.php: n/a
+#  m2/modules/m2_gracenote/m2_gracenote.module: n/a
+#  m2/modules/m2_gracenote/m2_gracenote.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: m2 (all releases)\n"
+"POT-Creation-Date: 2010-04-12 15:29-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Thailand\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: modules/m2_gracenote/m2-gracenote-formatter-lyrics.tpl.php:15
+msgid "Songwriter(s)"
+msgstr ""
+
+#: modules/m2_gracenote/m2-gracenote-formatter-lyrics.tpl.php:21
+msgid "Copyright"
+msgstr ""
+
+#: modules/m2_gracenote/m2-gracenote-formatter-lyrics.tpl.php:31
+msgid "Javascript support is required to display lyrics."
+msgstr ""
+
+#: modules/m2_gracenote/m2_gracenote.module:34
+msgid "Gracenote lyrics"
+msgstr ""
+
+#: modules/m2_gracenote/m2_gracenote.module:62
+msgid "Lyrics are only available in the United States."
+msgstr ""
+
+#: modules/m2_gracenote/m2_gracenote.module:101
+msgid "Please visit %url for lyrics."
+msgstr ""
+
+#: modules/m2_gracenote/m2_gracenote.module:176
+msgid "Lyrics terms of service"
+msgstr ""
+
+#: modules/m2_gracenote/m2_gracenote.module:19
+msgid "Lyrics Terms of Use"
+msgstr ""
+
+#: modules/m2_gracenote/m2_gracenote.info:0
+msgid "M2 Gracenote formatter"
+msgstr ""
+
+#: modules/m2_gracenote/m2_gracenote.info:0
+msgid "Provides Gracenote formatting for M2 lyrics fields."
+msgstr ""
+

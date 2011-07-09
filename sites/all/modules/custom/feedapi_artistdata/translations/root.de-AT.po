@@ -1,0 +1,23 @@
+# Austria translation of feedapi_artistdata (all releases)
+# Copyright (c) 2010 by the Austria translation team
+# Generated from file: feedapi_artistdata/feedapi_artistdata.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: feedapi_artistdata (all releases)\n"
+"POT-Creation-Date: 2010-04-02 15:22-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Austria\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: feedapi_artistdata.info:0
+msgid "Artist Data Feed Parser"
+msgstr ""
+
+#: feedapi_artistdata.info:0
+msgid "FeedAPI parser for ArtistData.com event feeds"
+msgstr ""
+

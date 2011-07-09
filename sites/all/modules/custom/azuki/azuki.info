@@ -1,0 +1,11 @@
+; $Id$
+name = Azuki Integration
+description = Provides RSS feeds for use with the Azuki mobile platform.
+core = 6.x
+package = Sony Music - 3rd Party Integration
+dependencies[] = views 
+
+l10n server = translate.gdb-dev.com
+project = "azuki"
+version = "6.x-2.x"
+

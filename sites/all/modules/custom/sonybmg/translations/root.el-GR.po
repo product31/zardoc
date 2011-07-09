@@ -1,0 +1,296 @@
+# Greece translation of sonybmg (all releases)
+# Copyright (c) 2010 by the Greece translation team
+# Generated from files:
+#  sonybmg/sonybmg.info: n/a
+#  sonybmg/sonybmg.module: n/a
+#  sonybmg/sonybmg.install: n/a
+#  sonybmg/sonybmg.pages.inc: n/a
+#  sonybmg/sonybmg.views_default.inc: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sonybmg (all releases)\n"
+"POT-Creation-Date: 2010-04-07 03:21-0500\n"
+"PO-Revision-Date: 2010-03-30 12:01-0500\n"
+"Language-Team: Greece\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: sonybmg.info:0
+msgid "Sony BMG"
+msgstr ""
+
+#: sonybmg.module:506
+msgid "Edit"
+msgstr "Επεξεργασία"
+
+#: sonybmg.install:118
+msgid "Disabled the %path menu item."
+msgstr ""
+
+#: sonybmg.module:499
+msgid "Permalink"
+msgstr ""
+
+#: sonybmg.module:514
+msgid "Delete"
+msgstr "Διαγραφή"
+
+#: sonybmg.pages.inc:110
+msgid "Footer"
+msgstr "Υποσέλιδο"
+
+#: sonybmg.pages.inc:15
+msgid ""
+"You must log in or <a href=\"@register_url\">create an account</a> to "
+"access this page."
+msgstr ""
+
+#: sonybmg.pages.inc:20
+msgid ""
+"You are already registered as <a href=\"@profile_url\">@username</a>. "
+"Not @username? <a href=\"@logout_url\">Log out</a>."
+msgstr ""
+
+#: sonybmg.pages.inc:52
+msgid ""
+"No content was found in the category you selected. Post your own "
+"content here!"
+msgstr ""
+
+#: sonybmg.pages.inc:56
+msgid ""
+"Be the first to post a %type_name! Login or create a free account to "
+"post!"
+msgstr ""
+
+#: sonybmg.pages.inc:61
+msgid "Be the first to post a %type_name!"
+msgstr ""
+
+#: sonybmg.pages.inc:88
+msgid "Record Label"
+msgstr ""
+
+#: sonybmg.pages.inc:105
+msgid ""
+"Select the record label for this artist. This will be used to "
+"determine which toolbar is called on each page."
+msgstr ""
+
+#: sonybmg.pages.inc:111,129
+msgid "Custom footer"
+msgstr ""
+
+#: sonybmg.pages.inc:113
+msgid ""
+"Select which label information should be displayed in the footer of "
+"each page."
+msgstr ""
+
+#: sonybmg.pages.inc:123
+msgid "Footer Preview"
+msgstr ""
+
+#: sonybmg.pages.inc:130
+msgid "This will only be used if the footer is set to Custom"
+msgstr ""
+
+#: sonybmg.pages.inc:158
+msgid ""
+"Date fix already ran! Tell a developer to delete the d5-d6_datefixran "
+"variable if you really want to run again."
+msgstr ""
+
+#: sonybmg.pages.inc:162
+msgid ""
+"Are you sure you want to add one day to EVERY calendar date node on "
+"the site (both from and to dates)?"
+msgstr ""
+
+#: sonybmg.pages.inc:194
+msgid "@fixed dates fixed."
+msgstr ""
+
+#: sonybmg.views_default.inc:20,127
+msgid "Blog posts"
+msgstr ""
+
+#: sonybmg.views_default.inc:153
+msgid "Latest blog posts"
+msgstr ""
+
+#: sonybmg.views_default.inc:195,310
+msgid "News and Blog"
+msgstr "Νεα και Blog"
+
+#: sonybmg.views_default.inc:338
+msgid ""
+"<div class=\"more\"><a href=\"/news\" class=\"more\">More News and "
+"Blog</a></div>"
+msgstr ""
+
+#: sonybmg.views_default.inc:340
+msgid "Nothing yet."
+msgstr ""
+
+#: sonybmg.views_default.inc:508
+msgid "Node comments threaded"
+msgstr ""
+
+#: sonybmg.views_default.inc:619
+msgid "Sony BMG Node Comments Threaded"
+msgstr ""
+
+#: sonybmg.views_default.inc:871
+msgid "Custom content management."
+msgstr ""
+
+#: sonybmg.views_default.inc:1100
+msgid "Content Management"
+msgstr ""
+
+#: sonybmg.views_default.inc:1102
+msgid ""
+"There are no objects satisfying the filter settings. Try changing them "
+"to get some results."
+msgstr ""
+
+#: sonybmg.module:198
+msgid "Page sidebar"
+msgstr ""
+
+#: sonybmg.module:202
+msgid "Fans with custom avatars"
+msgstr ""
+
+#: sonybmg.module:209
+msgid "Number of fans to display"
+msgstr ""
+
+#: sonybmg.module:218
+msgid "ImageCache to be used"
+msgstr ""
+
+#: sonybmg.module:254
+msgid "Fans"
+msgstr ""
+
+#: sonybmg.module:285
+msgid "Check out %username's profile!"
+msgstr ""
+
+#: sonybmg.module:289
+msgid "<a href=\"@fans_url\" class=\"more\">More fans</a>"
+msgstr ""
+
+#: sonybmg.module:302
+msgid "Artist Name"
+msgstr ""
+
+#: sonybmg.module:304
+msgid ""
+"This field must only be the Artist Name. It will be used for Page "
+"Titles, Footer Links, and Album Imports."
+msgstr ""
+
+#: sonybmg.module:405
+msgid "<a href=\"@upload_url\" class=\"upload\">Upload</a>"
+msgstr ""
+
+#: sonybmg.module:416
+msgid "<a href=\"@news_url\">Create a news article</a>"
+msgstr ""
+
+#: sonybmg.module:499
+msgid "Full Details"
+msgstr ""
+
+#: sonybmg.module:649
+msgid "Use CTools modal windows?"
+msgstr ""
+
+#: sonybmg.module:764
+msgid "Role %role added to %account (%account-mail) by %user (%user-mail)"
+msgstr ""
+
+#: sonybmg.module:787
+msgid "Role %role removed from %account (%account-mail) by %user (%user-mail)"
+msgstr ""
+
+#: sonybmg.module:822
+msgid "Dropdown list of links"
+msgstr ""
+
+#: sonybmg.module:835
+msgid "Enable comments on a node"
+msgstr ""
+
+#: sonybmg.module:862
+msgid "view"
+msgstr "προβολή"
+
+#: sonybmg.module:866
+msgid "Comments could not be enabled."
+msgstr ""
+
+#: sonybmg.module:862
+msgid "action"
+msgstr "Ενέργεια"
+
+#: sonybmg.module:862
+msgid "Enabled comments on node %title"
+msgstr ""
+
+#: sonybmg.module:12
+msgid "sonybmg raised memory limit"
+msgstr ""
+
+#: sonybmg.module:63
+msgid "Sony BMG record label settings"
+msgstr ""
+
+#: sonybmg.module:66
+msgid "Setup record label settings; affects toolbar, and footer."
+msgstr ""
+
+#: sonybmg.module:94
+msgid "Sony Multisite Configuration"
+msgstr ""
+
+#: sonybmg.module:95
+msgid "Various settings and utilities for the Sony Multisite Platform."
+msgstr ""
+
+#: sonybmg.module:102
+msgid "Date fix"
+msgstr ""
+
+#: sonybmg.module:110
+msgid "General"
+msgstr "Γενικά"
+
+#: sonybmg.module:111
+msgid "General settings for the Sony Platform."
+msgstr ""
+
+#: sonybmg.install:110
+msgid "Disabled the %name default view."
+msgstr ""
+
+#: sonybmg.install:159,168
+msgid "Block cache updated for %module:%delta"
+msgstr ""
+
+#: sonybmg.info:0
+msgid "Sony BMG Multisite"
+msgstr ""
+
+#: sonybmg.info:0
+msgid ""
+"Exposes default content types, views, and utility functions for Sony "
+"BMG artist sites."
+msgstr ""
+

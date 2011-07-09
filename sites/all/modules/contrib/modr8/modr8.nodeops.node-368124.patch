@@ -1,0 +1,93 @@
+Index: modr8.module
+===================================================================
+RCS file: /cvs/drupal-contrib/contributions/modules/modr8/modr8.module,v
+retrieving revision 1.21
+diff -u -p -r1.21 modr8.module
+--- modr8.module	5 Sep 2008 00:45:50 -0000	1.21
++++ modr8.module	2 Feb 2009 20:12:15 -0000
+@@ -266,3 +266,85 @@ function theme_modr8_message($teaser = F
+   }
+   $already_messaged = TRUE;
+ }
++
++/**
++ * Implementation of hook_node_operations().
++ */
++function modr8_node_operations() {
++  return array(
++    'modr8_approve' => array(
++      'label' => t('Approve moderated nodes'),
++      'callback' => 'modr8_bulk_approve',
++    ),
++    'modr8_deny' => array(
++      'label' => t('Delete moderated nodes'),
++      'callback' => 'modr8_bulk_deny',
++    ),
++    'modr8_moderate' => array(
++      'label' => t('Mark for moderation'),
++      'callback' => 'modr8_bulk_moderate',
++    ),
++  );
++}
++
++/**
++ * Node operations API Function
++ * Mark the specified nodes for moderation.
++ *
++ * @param $nodes
++ *   An array of node ids.
++ */
++function modr8_bulk_moderate($nodes) {
++  foreach($nodes as $nid) {
++    db_query('UPDATE {node} SET moderate = %d WHERE nid = %d', 1, $nid);
++  }
++}
++
++/**
++ * Node operations API Function
++ * Approve the specified nodes.
++ *
++ * @param $nodes
++ *   An array of node ids.
++ */
++function modr8_bulk_approve($nodes) {
++  module_load_include('inc', 'modr8', 'modr8_admin');
++  foreach($nodes as $nid) {
++    $node = node_load($nid);
++    if (variable_get('modr8_send_approve', FALSE)) {
++      $message = modr8_usermail('approve', $node->nid, (array)$node);
++    }
++    
++    $publish = '';
++    if (user_access('administer nodes')) {
++      $publish = ', status = 1';
++    }
++    
++    db_query('UPDATE {node} SET moderate = 0 '. $publish .' WHERE nid = %d', $node->nid);
++    drupal_set_message(t('The %type with title %title has been approved.', array('%title' => $node->title, '%type' => $node->type)));
++    cache_clear_all();
++    modr8_log_action('approve', $node->nid, array($node), $message);
++  }
++}
++
++/**
++ * Node operations API Function
++ * Delete the specified nodes.
++ * 
++ * @param $nodes
++ *   An array of node ids.
++ */
++function modr8_bulk_deny($nodes) {
++  module_load_include('inc', 'modr8', 'modr8_admin');
++  foreach($nodes as $nid) {
++    $node = node_load($nid);
++    if (variable_get('modr8_send_deny', FALSE)) {
++      $message = modr8_usermail('deny', $node->nid, (array)$node);
++    }
++  
++    node_delete($node->nid);
++    // drupal does its own message
++    modr8_log_action('delete', $node->nid, (array)$node, $message);
++    break;
++  }
++}

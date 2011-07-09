@@ -1,0 +1,78 @@
+# Switzerland (German) translation of broserver (all releases)
+# Copyright (c) 2010 by the Switzerland (German) translation team
+# Generated from files:
+#  broserver/broserver.module: n/a
+#  broserver/broserver.admin.inc: n/a
+#  broserver/broserver.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: broserver (all releases)\n"
+"POT-Creation-Date: 2010-04-12 15:05-0500\n"
+"PO-Revision-Date: 2010-03-30 14:32-0500\n"
+"Language-Team: Switzerland (German)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: broserver.module:373
+msgid "Submit"
+msgstr "Senden"
+
+#: broserver.admin.inc:5
+msgid "None"
+msgstr "Keines"
+
+#: broserver.admin.inc:19
+msgid "BRO configuration"
+msgstr ""
+
+#: broserver.module:221
+msgid "Days"
+msgstr ""
+
+#: broserver.module:222
+msgid "Hours"
+msgstr ""
+
+#: broserver.module:222
+msgid "Minutes"
+msgstr ""
+
+#: broserver.module:329
+msgid "Screen name"
+msgstr ""
+
+#: broserver.module:340
+msgid "Birth date"
+msgstr ""
+
+#: broserver.module:343,350,358
+msgid "--"
+msgstr ""
+
+#: broserver.module:7
+msgid "administer bro"
+msgstr ""
+
+#: broserver.module:7
+msgid "bro chat"
+msgstr ""
+
+#: broserver.module:85
+msgid "BRO"
+msgstr ""
+
+#: broserver.info:0
+msgid "BRO Server"
+msgstr ""
+
+#: broserver.info:0
+msgid "Centralized server to handle off-network BRO implementations."
+msgstr ""
+
+#: broserver.info:0
+msgid "Sony"
+msgstr ""
+

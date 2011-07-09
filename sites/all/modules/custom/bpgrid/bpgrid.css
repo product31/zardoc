@@ -1,0 +1,77 @@
+@CHARSET "UTF-8";
+
+#grid_builder {
+  min-width: 1000px;
+}
+
+#grid_toolbar {
+  background: #777;
+  padding: 0 1em;
+}
+
+.grid-toolbar-button {
+  float: left;
+  margin: .7em .5em .7em 0;
+  padding: 5px 10px 5px 7px;
+  text-decoration: none;
+}
+.grid-toolbar-button .ui-icon {
+  float: left;
+  margin-right: 5px;
+}
+#grid_canvas {
+  background: #c0c0c0;
+  margin: 0 0 1em;
+  min-height: 300px;
+  padding: 1em 0;
+}
+#grid_canvas.loading {
+  background: #c0c0c0 url(loading.gif) no-repeat 50% 50%;
+}
+#grid_canvas.loading * {
+  display: none;
+}
+
+/* always hide the grid form */
+#grid_form {
+  display: none;
+}
+
+/* various "empty" elements */
+.empty {
+	background: #eee;
+	border: dashed 1px #777;
+	font-size: .85em;
+	line-height: 1.2em;
+	margin: .5em;
+	padding: 1em;
+}
+
+/* Widget header
+==============================*/
+.ui-widget-header span {
+  float: left;
+  margin: 2px;
+}
+.ui-widget-header a {
+  float: right;
+  margin: 2px;
+}
+
+.grid-container {
+	width: 972px; /* make room for ui-widget-content borders and padding */
+	margin: 0 auto 20px;
+}
+.grid-container > .ui-widget-content {
+  width: 950px;
+  padding: 10px;
+}
+
+.grid-element .ui-widget-header {
+  background: #eee;
+  border: dashed 1px #777;
+  color: #777;
+  font-weight: normal;
+  font-size: .85em;
+  margin: .5em;
+}

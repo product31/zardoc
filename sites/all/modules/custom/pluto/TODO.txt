@@ -1,0 +1,20 @@
+More activities to earn points
+    - sign up for newsletter
+    - sign up for mobile
+    
+Add a checkbox to badges to denote as 'ranking' badges, add new field in database
+
+Store a users's rank & badge IDs in the database, rather than calculating each time
+
+Base output of badge theming etc. on values in database
+
+Customizable messages to override userpoints messages
+
+Add a message to say when a user has earned a new badge/rank (can optionally disable this message)
+
+Install - set up defaults
+- points categories (Registration, Login, First Poster Bonus, Friending, Sharing)
+- points values
+- disable userpoints messages
+- disable menu items (userpoints, activity)
+- create default achievements

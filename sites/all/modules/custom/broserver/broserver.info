@@ -1,0 +1,12 @@
+name = BRO Server
+description = Centralized server to handle off-network BRO implementations.
+core = 6.x
+package = Sony
+
+dependencies[] = jquery_update
+dependencies[] = jquery_ui
+
+
+l10n server = translate.gdb-dev.com
+project = "broserver"
+version = "6.x-2.x"

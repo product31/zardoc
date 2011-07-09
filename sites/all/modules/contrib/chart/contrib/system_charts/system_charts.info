@@ -1,0 +1,5 @@
+name = Drupal System Charting
+description = Charting for various core modules.
+package = Charting
+dependencies[] = chart
+core = 6.x

@@ -1,0 +1,447 @@
+<?php
+
+/**
+ * Implementation of hook_perm().
+ */
+function broserver_perm() {
+  return array('administer bro', 'bro chat');
+}
+
+function broserver_footer() {
+  $bro = variable_get('bro_config', '');
+  if (!empty($bro)) {
+    return '<script type="text/javascript" src="'. url('v1/'. $bro .'/bro') .'"></script>';
+  }
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function broserver_theme() {
+  $items = array();
+  
+  $items['broserver_bro'] = array(
+    'arguments' => array('bro' => NULL),
+    'template' => 'broserver-bro',
+  );
+  
+  $items['broserver_bro_script'] = array(
+    'arguments' => array('bro' => NULL),
+    'template' => 'broserver-bro-script',
+  );
+
+  $items['broserver_bro_chat'] = array(
+    'arguments' => array('bro' => NULL, 'bro_login_form' => NULL),
+    'template' => 'broserver-bro-chat',
+  );
+  
+  $items['broserver_media_iframe'] = array(
+    'arguments' => array('bro' => NULL),
+    'template' => 'broserver-media-iframe',
+  );
+  
+  $items['broserver_iframe_tag'] = array(
+    'arguments' => array('src' => NULL, 'width' => NULL, 'height' => NULL),
+  );
+  
+  return $items;
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function broserver_menu() {
+  $items = array();
+  
+  $items['v1/%bro/bro'] = array(
+    'type' => MENU_CALLBACK,
+    'page callback' => 'broserver_script_main',
+    'page arguments' => array(1),
+    'access arguments' => array('access content'),
+  );
+
+  $items['v1/%bro/bro/html'] = array(
+    'type' => MENU_CALLBACK,
+    'page callback' => 'broserver_bro_html',
+    'page arguments' => array(1),
+    'access arguments' => array('access content'),
+  );
+  
+  $items['v1/%bro/bro/chat'] = array(
+    'type' => MENU_CALLBACK,
+    'page callback' => 'broserver_chat_iframe',
+    'page arguments' => array(1),
+    'access arguments' => array('access content'),
+  );
+
+  $items['v1/%bro/bro/media'] = array(
+    'type' => MENU_CALLBACK,
+    'page callback' => 'broserver_media_iframe',
+    'page arguments' => array(1),
+    'access arguments' => array('access content'),
+  );
+
+  $items['admin/settings/bro'] = array(
+    'title' => 'BRO',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('broserver_admin_settings'),
+    'access arguments' => array('administer bro'),
+    'file' => 'broserver.admin.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Menu wildcard loader callback for %bro.
+ */
+function bro_load($id) {
+  $id = preg_replace('/[^a-zA-Z0-9_]/', '', $id);
+  $path = drupal_get_path('module', 'broserver') .'/config/'. $id;
+  $config = "$path/config.php";
+
+  if (file_exists($config)) {
+    ob_start();
+    include($config);
+    ob_end_clean();
+
+    if (empty($bro)) {
+      return FALSE;
+    }
+    
+    $bro->id = $id;
+    $bro->path = $path;
+    
+    if (isset($bro->artist_logo)) {
+      $bro->artist_logo = $path .'/'. $bro->artist_logo;
+    }
+    
+    if (isset($bro->countdown_image)) {
+      $bro->countdown_image = $path .'/'. $bro->countdown_image;
+    }
+    
+    if (isset($bro->css)) {
+      $bro->css = $path .'/'. $bro->css;
+    }
+    
+    return $bro;
+  }
+  
+  return FALSE;
+}
+
+function broserver_script_main($bro) {
+  setcookie('sess', session_id(), 0, '/');
+
+  // We are returning JavaScript, so tell the browser.
+  drupal_set_header('Content-Type: text/javascript; charset=utf-8');
+
+  print theme('broserver_bro_script', $bro);
+}
+
+function broserver_bro_html($bro) {
+  global $base_url;
+  $path = drupal_get_path('module', 'broserver');
+  $json = array(
+    'html' => theme('broserver_bro', $bro),
+    'js_deps' => array(
+      JQUERY_UI_PATH .'/ui/jquery-ui.js',
+    ),
+    'js' => array(
+      $path .'/v1/js/jquery.countdown.min.js',
+      $path .'/v1/js/jquery.cookie.js',
+      $path .'/v1/js/sony_bro.js',
+      // 'http://analytics.sonymusic.com/ga/js',
+    ),
+    'css' => array(
+      $path .'/v1/css/sony_bro.css',
+    ),
+    'settings' => array(
+      'chatContent' => theme('broserver_iframe_tag', url('v1/'. $bro->id .'/bro/chat', array('absolute' => TRUE, 'query' => $query)), '462', '367'),
+    ),
+  );
+  
+  if (!empty($bro->css)) {
+    $json['css'][] = $bro->css;
+  }
+  
+  foreach ($json['js_deps'] as $i => $path) {
+    $json['js_deps'][$i] = $base_url .'/'. $path .'?'. broserver_cachebuster();
+  }
+  foreach ($json['js'] as $i => $path) {
+    $json['js'][$i] = $base_url .'/'. $path .'?'. broserver_cachebuster();
+  }
+  foreach ($json['css'] as $i => $path) {
+    $json['css'][$i] = $base_url .'/'. $path .'?'. broserver_cachebuster();
+  }
+  
+  $json = drupal_to_js($json);
+
+  // We are returning JavaScript, so tell the browser.
+  drupal_set_header('Content-Type: text/javascript; charset=utf-8');
+  if (!empty($_GET['callback'])) {
+    $callback = $_GET['callback'];
+    print ";$callback($json);";
+  }
+  else {
+    print $json;
+  }
+}
+
+function theme_broserver_iframe_tag($src, $width, $height) {
+  $attributes = array(
+    'src' => $src,
+    'frameborder' => '0',
+    'border' => '0',
+    'cellspacing' => '0',
+    'allowtransparency' => 'true',
+    'height' => $height,
+    'width' => $width,
+    'scrolling' => 'no',
+  );
+  return '<iframe '. drupal_attributes($attributes) .'></iframe>';
+}
+
+function template_preprocess_broserver_bro(&$variables) {
+  $bro = $variables['bro'];
+
+  if (is_object($bro->artist_logo)) {
+    $variables['artist_logo'] = '<img src="'. file_create_url($bro->artist_logo->filepath) .'" />';
+  }
+  else {
+    $variables['artist_logo'] = '<img src="'. $GLOBALS['base_url'] .'/'. $bro->artist_logo .'" />';
+  }
+  $variables['sponsor_1'] = $bro->ad1;
+  $variables['sponsor_2'] = $bro->ad2;
+  $variables['media'] = theme('broserver_iframe_tag', url('v1/'. $bro->id .'/bro/media', array('absolute' => TRUE)), '475', '475');
+  $variables['chat'] = theme('broserver_iframe_tag', url('v1/'. $bro->id .'/bro/chat', array('absolute' => TRUE, 'query' => $query)), '462', '367');
+  
+  if (!empty($bro->countdown)) {
+    $variables['countdown'] = '<div class="countdown" rel="'. $bro->countdown .'"></div>'
+      . '<div class="description"><span class="days">'. t('Days') .'</span>'
+      . '<span class="hours">'. t('Hours') .'</span><span class="minutes">'. t('Minutes') .'</span></div>';
+  }
+  elseif (!empty($bro->countdown_image)) {
+    $variables['countdown'] = '<img src="'. $GLOBALS['base_url'] .'/'. $bro->countdown_image .'" />';
+  }
+
+  $sites = array(
+    'facebook' => 'Facebook',
+    'twitter' => 'Twitter',
+    'myspace' => 'Myspace',
+    'digg' => 'Digg',
+    'delicious' => 'Delicious',
+  );
+  $links = array();
+  foreach ($bro->links as $key => $href) {
+    if (isset($sites[$key])) {
+      $links[$key] = array(
+        'title' => $sites[$key],
+        'href' => $href,
+        'attributes' => array('target' => '_blank'),
+      );
+    }
+  }
+  $variables['social'] = l($links['facebook']['title'], $links['facebook']['href'], array('attributes' => array('class' => 'facebook-large', 'target' => '_blank')));
+  $variables['social'] .= '<div class="social-title">Share with your friends</div>';
+  $variables['social'] .= theme('links', $links);
+}
+
+function broserver_media_iframe($bro) {
+  print theme('broserver_media_iframe', $bro);
+  exit();
+}
+
+function broserver_chat_iframe($bro) {
+  print theme('broserver_bro_chat', $bro);
+}
+
+function template_preprocess_broserver_bro_chat(&$variables) {
+  global $user;
+	$bro = $variables['bro'];
+
+  $name = 'BRO'. session_id();
+
+  if ($bro->drupal && user_access('bro chat')) {
+    $name = $user->uid;
+    $nick = $user->name;
+    $anon = FALSE;
+  }
+  elseif (isset($_SESSION['bro_nick'])) {
+    $nick = $_SESSION['bro_nick'];
+    $anon = FALSE;
+  }
+  else {
+    $nick = 'anonymous-' . session_id();
+    $anon = TRUE;
+  }
+  
+  if (isset($_COOKIE['U13'])) {
+    $variables['content'] = broserver_u13_error_message();
+  }
+  elseif ($anon && $bro->drupal) {
+    // TODO: set the destination.
+    $variables['content'] = drupal_get_form('user_login');
+  }
+  elseif ($anon) {
+    $variables['content'] = drupal_get_form('broserver_chat_login_form', $variables['bro']);
+  }
+  else {
+    $variables['content'] = <<<EOD
+      <form id="send_chat_form" style="display:none;">
+        <input class="message" type="text" value="Join the Chat. Enter your text here."/>
+        <input class="form-submit" type="submit" value="Send"/>
+      </form>
+EOD;
+  }
+  
+  $output = '';
+  $even = FALSE;
+  foreach (drupal_get_messages(NULL) as $type => $messages) {
+    foreach ($messages as $message) {
+      $output .= '<div class="msg'. ($type == 'error' ? 'error-msg' : '') . ($even ? ' even' : '') . '"><p>'. $message .'</p></div>';
+      $even = !$even;
+    }
+  }
+  $variables['messages'] = $output;
+  
+  $variables['bro_user'] = check_plain($name);
+  $variables['bro_nick'] = check_plain($nick);
+	$variables['bro_domain'] = $bro->domain;
+  
+  $ts = ( isset($_GET['t']) ? intval($_GET['t']) : time() );
+  $hash = broserver_login_hash( $variables['bro_user'], $bro->secret_key, $ts );
+  $variables['bro_timestamp'] = $ts;
+  $variables['bro_hash'] = $hash;
+	$variables['bro_chatroom'] = $variables['bro']->chatroom;
+}
+
+function broserver_login_hash($user,$secret,$timestamp=''){
+	return md5($user . $timestamp . $secret);
+}
+
+function broserver_chat_login_form($form_state, $bro) {
+  $form = array();
+  $form['#bro'] = $bro;
+
+  $form['nick'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Screen name'),
+    '#required' => TRUE,
+  );
+  
+  if ($bro->REAC) {
+    $form['dob'] = array(
+      '#prefix' => '<div id="dob-wrapper">',
+      '#suffix' => '</div>',
+      '#tree' => TRUE,
+    );
+    $form['dob']['month'] = array(
+      '#title' => t('Birth date'),
+      '#type' => 'select',
+      '#attributes' => $element['#attributes'],
+      '#options' => array(0 => t('--')) + drupal_map_assoc(range(1, 12), 'map_month'),
+      '#required' => TRUE,
+    );
+
+    $form['dob']['day'] = array(
+      '#type' => 'select',
+      '#attributes' => $element['#attributes'],
+      '#options' => array(0 => t('--')) + drupal_map_assoc(range(1, 31)),
+      '#required' => TRUE,
+    );
+
+    $year = (int)date('Y');
+    $form['dob']['year'] = array(
+      '#type' => 'select',
+      '#attributes' => $element['#attributes'],
+      '#options' => array(0 => t('--')) + drupal_map_assoc(array_reverse(range($year - 100, $year))),
+      '#required' => TRUE,
+    );
+  }
+
+  $form['U13'] = array(
+    '#type' => 'hidden',
+    '#default_value' => '',
+    '#name' => 'U13',
+  );
+
+  drupal_add_js(drupal_get_path('module', 'sony_coppa') .'/sony_coppa.js');
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+  
+  return $form;
+}
+
+/**
+ * Set a cookie if under 13.
+ */
+function broserver_chat_login_form_validate($form, &$form_state) {
+  $u13 = FALSE;
+  $bro = $form['#bro'];
+
+  if ($bro->REAC) {
+    // dob timestamp
+    $dob = gmmktime(0, 0, 0, $form_state['values']['dob']['month'], $form_state['values']['dob']['day'], $form_state['values']['dob']['year']);
+
+    // cutoff timestamp for today minus 13 years
+    list($m, $d, $y) = explode('-', gmdate('m-d-Y'));
+    $cutoff = gmmktime(0, 0, 0, $m, $d, $y - 13);
+    
+    if ($dob > $cutoff) {
+      $u13 = TRUE;
+    }
+  }
+  
+  if ($form_state['values']['U13'] == 'true') {
+    $u13 = TRUE;
+  }
+  
+  if ($u13) {
+    // set U13 cookie, expires in 30 days, if not already present
+    if (!isset($_COOKIE['U13'])) {
+      setcookie('U13', '1', time() + 60 * 60 * 24 * 30, '/');
+    }
+    // remove the bro_user cookie if it exists.
+    setcookie('bro_user', '', 0, '/');
+
+    $form_state['U13'] = TRUE;
+  }
+}
+
+function broserver_u13_error_message() {
+  $output = '<div class="coppa-error">Thank you for your interest in registering.  As we are committed
+      to protecting your privacy, we are unable to accept your registration.
+      However, we invite you to continue browsing the site without registering.</div>';
+
+  // notify the central U13 server which will set the central U13
+  // cookie and then redirect back to our sorry page.
+  $url = SONY_COPPA_U13_URL .'?siteID='. variable_get('sony_coppa_site_id', NULL);
+  $output .= '<iframe style="width:0px; height:0px; border: 0px" src="'. $url .'"></iframe>';
+
+  return $output;
+}
+
+function broserver_chat_login_form_submit($form, &$form_state) {
+	$bro = $form['#bro'];
+  //TODO: check for u13 != 'true', and that d-o-b > 13 years old.
+  if ($form_state['u13']) {
+    $form_state['redirect'] = array('v1/'. $form['#bro']->id .'/bro/chat');
+    return;
+  } elseif ( in_array(str_replace(' ','',strtolower(trim($form_state['values']['nick']))), $bro->forbidden_names) ) {
+    drupal_set_message('You may not login using this name, please try another','error');
+    $form_state['redirect'] = array('v1/'. $form['#bro']->id .'/bro/chat');
+    return;
+  }
+
+  $name = check_plain($form_state['values']['nick']);
+  $_SESSION['bro_nick'] = $name;
+  $form_state['redirect'] = array('v1/'. $form['#bro']->id .'/bro/chat', $query);
+}
+
+function broserver_cachebuster() {
+  return 'v=0.21';
+}

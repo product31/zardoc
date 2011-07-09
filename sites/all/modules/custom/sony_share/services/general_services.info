@@ -1,0 +1,8 @@
+; $Id$
+name = "General Services"
+description = "Provide the Services: Blinklist, Box, del.icio.us, Digg, Facebook, Furl, Google Bookmark, Google Buzz, Icerocket, Identi.ca, Linkedin, Magnolia, Mister Wong, Mixx, MySpace, Newsvine, Phing this, Propeller, Reddit, StumbleUpon, Technorati, Twitter, Yahoo Bookmark, Yahoo Buzz"
+core = "6.x"
+package = Sony Share
+dependencies[] = sony_share
+
+

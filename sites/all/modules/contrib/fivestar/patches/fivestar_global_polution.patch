@@ -1,0 +1,40 @@
+? .svn
+? po
+? screenshots
+? css/.svn
+? images/.svn
+? js/.svn
+? js/fivestar_global_polution.patch
+? translations/.svn
+? widgets/.svn
+? widgets/basic/.svn
+? widgets/craft/.svn
+? widgets/default/.svn
+? widgets/flames/.svn
+? widgets/hearts/.svn
+? widgets/minimal/.svn
+? widgets/outline/.svn
+? widgets/oxygen/.svn
+? widgets/small/.svn
+Index: js/fivestar.js
+===================================================================
+RCS file: /cvs/drupal-contrib/contributions/modules/fivestar/js/fivestar.js,v
+retrieving revision 1.1.4.17
+diff -u -p -r1.1.4.17 fivestar.js
+--- js/fivestar.js	10 May 2009 20:59:15 -0000	1.1.4.17
++++ js/fivestar.js	2 Mar 2010 19:57:28 -0000
+@@ -307,6 +307,7 @@
+         var $options = $("select option", $widget);
+         var size = $('option', $widget).size() - 1;
+         var cancel = 1;
++        var $div;
+         for (var i = 1, option; option = $options[i]; i++){
+             if (option.value == "0") {
+               cancel = 0;
+@@ -391,4 +392,4 @@
+     $('input.fivestar-submit', context).css('display', 'none');
+   }
+ 
+-})(jQuery);
+\ No newline at end of file
++})(jQuery);

@@ -1,0 +1,410 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * file_description
+ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function missioncontrol_menu() {
+  $items['missioncontrol'] = array(
+    'title' => 'MissionControl',
+    'description' => 'MissionControl multisite manager.',
+    'page callback' => 'missioncontrol_overview',
+    'access arguments' => array('access missioncontrol'),
+  );
+  $items['missioncontrol/overview'] = array(
+    'title' => 'Overview',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -1,
+  );
+  $items['missioncontrol/add'] = array(
+    'title' => 'Add site',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
+    'page callback' => 'drupal_get_form', 
+    'page arguments' => array('missioncontrol_edit_site'),
+    'access arguments' => array('access missioncontrol'),
+  );
+  $items['missioncontrol/%missioncontrol_site'] = array(
+    'type' => MENU_CALLBACK,
+    'page callback' => 'missioncontrol_site_view', 
+    'page arguments' => array(1),
+    'access arguments' => array('access missioncontrol'),
+  );
+  $items['missioncontrol/%missioncontrol_site/view'] = array(
+    'title' => 'View',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -1,
+  );
+  $items['missioncontrol/%missioncontrol_site/edit'] = array(
+    'type' => MENU_CALLBACK,
+    'title' => 'Edit',
+    'page callback' => 'drupal_get_form', 
+    'page arguments' => array('missioncontrol_edit_site', 1),
+    'access arguments' => array('access missioncontrol'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
+  );
+  if(module_exists('devel')) {
+    $items['missioncontrol/%missioncontrol_site/load'] = array(
+      'title' => 'Dev load',
+      'page callback' => 'devel_print_object',
+      'page arguments' => array(1),
+      'access arguments' => array('access devel information'),
+      'type' => MENU_LOCAL_TASK,
+    );
+  }
+  
+  return $items;  
+}
+
+function missioncontrol_site_load($mcid) {
+  $site = db_fetch_object(db_query('SELECT * FROM {missioncontrol_sites} WHERE mcid=%d', $mcid));
+  
+  $result = db_query('SELECT name, value FROM {missioncontrol_variable} WHERE mcid=%d', $mcid);
+  while($row = db_fetch_array($result)) {
+    $site->variables[$row['name']] = unserialize($row['value']);
+  }
+  
+  return $site;
+}
+
+function missioncontrol_site_view($site) {
+  drupal_set_title($site->title);
+  drupal_set_breadcrumb(array(
+    l(t('Home'), '<front>'),
+    l('MissionControl', 'missioncontrol'),
+  ));
+  return theme('missioncontrol_site', $site, TRUE);
+}
+
+/**
+ * Add/edit form for missioncontrol sites
+ */
+function missioncontrol_edit_site(&$form_state, $site = NULL) {
+  drupal_set_title($site->title);
+  drupal_set_breadcrumb(array(
+    l(t('Home'), '<front>'),
+    l('MissionControl', 'missioncontrol'),
+  ));
+  
+  $form['mcid'] = array('#type' => 'value', '#value' => $site->mcid);
+  
+  $form['title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Title'),
+    '#default_value' => $site->title,
+    '#max_length' => 32,
+    '#required' => TRUE,
+  );
+  
+  $form['url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('URL'),
+    '#default_value' => $site->url,
+    '#max_length' => 255,
+  );
+  
+  $form['image'] = array('#type' => 'value', '#value' => $site->image);
+  if($site->image) {
+    if(_missioncontrol_imagecache_add_preset()) {
+      $form['_image'] = array('#value' => theme('imagecache', 'missioncontrol_overview', $site->image));      
+    }
+    else {
+      $attr = array('width' => $width, 'height' => $height);
+      $form['_image'] = array('#value' => theme('image', $site->image, '', '', $attr, FALSE));
+    }
+  }
+  
+  $form['image_upload'] = array(
+    '#type' => 'file',
+    '#title' => t('Image preview'),
+    '#description' => t('Uploading an image will overwrite any previously uploaded image.'),
+  );
+  
+  $form['nid'] = array(
+  );
+  
+  $form['keys'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Security keys'),
+  );    
+  $form['keys']['public'] = array(
+    '#type' => 'item',
+    '#title' => t('Public Key'),
+    '#value' => $site->public_key ? $site->public_key : theme('placeholder', 'none'),
+  );
+  $form['keys']['private'] = array(
+    '#type' => 'item',
+    '#title' => t('Private Key'),
+    '#value' => $site->private_key ? $site->private_key : theme('placeholder', 'none'),
+  );
+  $form['keys']['reset'] = array(
+    '#type' => 'submit',
+    '#value' => t('Regenerate keys'),
+    '#submit' => array('missioncontrol_regenerate_keys_submit'),
+  );
+  
+  $form[] = array('#type' => 'submit', '#value' => t('Submit'));
+  $form['#attributes']['enctype'] = 'multipart/form-data';
+  
+  return $form;
+}
+
+/**
+ * mission control site form validation
+ */
+function missioncontrol_edit_site_validate($form, &$form_state) {
+  $dir = file_directory_path() . '/missioncontrol';
+  file_check_directory($dir, FILE_CREATE_DIRECTORY);
+  
+  if($file = file_save_upload('image_upload', array('file_validate_is_image' => array()), $dir)) {
+    file_set_status($file, FILE_STATUS_PERMANENT);
+    $form_state['values']['image'] = $file->filepath;
+  }
+  elseif(!$form_values['image']) {
+    //form_set_error('image_upload', t('Image is required.'));
+  }
+}
+
+/**
+ * mission control site form submit handler
+ */
+function missioncontrol_edit_site_submit($form, &$form_state) {
+  $site = (object)$form_state['values'];
+
+  if($site->mcid) {
+    drupal_write_record('missioncontrol_sites', $site, 'mcid');
+  }
+  else {
+    drupal_write_record('missioncontrol_sites', $site);
+  }
+  
+  $form_state['redirect'] = 'missioncontrol/'. $site->mcid .'/edit';
+  drupal_set_message(t('Your changes have been saved.'));  
+  
+  missioncontrol_regenerate_keys($site);
+  
+  return missioncontrol_site_load($site->mcid);
+}
+
+/**
+ * Submit handler for the regenerate keys button
+ */
+function missioncontrol_regenerate_keys_submit($form, &$form_state) {
+  $site = missioncontrol_site_load($form_state['values']['mcid']);
+
+  missioncontrol_regenerate_keys($site);
+  
+  $form_state['redirect'] = 'missioncontrol/'. $site->mcid .'/edit';
+  return missioncontrol_site_load($site->mcid);
+}
+
+/**
+ */
+function missioncontrol_regenerate_keys($site) {
+  $site->public_key = md5($site->url . time());
+  $site->private_key = md5($site->url . time() . md5(mt_rand()));
+  
+  drupal_write_record('missioncontrol_sites', $site, 'mcid');
+  drupal_set_message(t('New keys have been generated. Make sure to update the client site with these new keys.'));
+}
+
+function missioncontrol_theme() {
+  return array(
+    'missioncontrol_site' => array('site' => NULL),
+  );
+}
+/**
+ * Overview page
+ */
+function missioncontrol_overview() {
+  $result = db_query('SELECT * FROM {missioncontrol_sites}');
+  while($site = db_fetch_object($result)) {
+    $output .= theme('missioncontrol_site', $site, FALSE);
+  }
+  if($output) {
+    return $output;
+  }
+  else {
+    return '<p>No sites defined yet.</p>';
+  }
+}
+
+function theme_missioncontrol_site($site, $page = TRUE) {
+  $image = '';
+  if($site->image) {
+    if(_missioncontrol_imagecache_add_preset()) {
+      $image = theme('imagecache', 'missioncontrol_overview', $site->image);      
+    }
+    else {
+      $image = theme('image', $site->image, '', '', array('width' => $width, 'height' => $height), FALSE);
+    }
+  }
+  
+  $output = '<div class="clear-block missioncontrol-site">';
+  $output .= '<div class="image" style="float:left; margin: 0 1em 1em 0;">'. $image .'</div>';
+  $output .= '<h2>'. l($site->title, 'missioncontrol/'. $site->mcid) .'</h2>';
+  $output .= '<div class="details">'. l($site->url, $site->url) .'</div>';
+  
+  if($page) {
+    $rows = array();
+    foreach((array)$site->variables as $name => $value) {
+      $rows[] = array(
+        array('header' => TRUE, 'data' => $name),
+        $value,
+      );
+    }
+    $output .= '<h3>'. t('Variables') .'</h3>';
+    $output .= theme('table', array('Variable', 'Value'), $rows);
+  }
+  $output .= '</div>';
+
+  return $output;
+}
+
+/**
+ * Implementation of hook_xmlrpc_hmac().
+ */
+function missioncontrol_xmlrpc_hmac() {
+  return array(
+    array(
+      'missioncontrol.hmac.verify',
+      'missioncontrol_xmlrpc_verify',
+      array('string'),
+      t('Verify communication and authentication between the client and MissionControl.'),
+    ),
+    array(
+      'missioncontrol.hmac.variable_set',
+      'missioncontrol_xmlrpc_variable_set',
+      array('string', 'string', 'string'),
+      t('Set the value of a variable.'),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_xmlrpc_hmac_key().
+ *
+ * @return $private_key
+ */
+function missioncontrol_xmlrpc_hmac_key($public_key) {
+  $mcid = db_result(db_query('SELECT mcid FROM {missioncontrol_sites} WHERE public_key="%s"', $public_key));
+  $site = missioncontrol_site_load($mcid);
+  
+  return $site->private_key;
+}
+
+/**
+ * xmlrpc callback for missioncontrol.verify
+ */
+function missioncontrol_xmlrpc_verify($data = array()) {
+  return 'verified';
+}
+
+/**
+ * xmlrpc callback for missioncontrol.variable_set
+ */
+function missioncontrol_xmlrpc_variable_set($data) {
+  missioncontrol_variable_set($site->mcid, $data['name'], $data['value']);
+ 
+  return print_r($data,1);
+}
+
+/**
+ * Add the imagecache preset
+ */
+function _missioncontrol_imagecache_add_preset() {
+  $created = variable_get('missioncontrol_imagecache_preset_created', FALSE);
+  
+  if(!$created && module_exists('imagecache')) {
+    $presets = imagecache_presets();
+    if (!in_array('missioncontrol_overview', $presets)) {
+      $preset = imagecache_preset_save(array('presetname' => 'missioncontrol_overview'));
+      $action = array(
+        'action' => 'imagecache_scale_and_crop',
+        'presetid' => $preset['presetid'],
+        'weight' => 0,
+        'data' => array('width' => 200, 'height' => 200),
+      );
+      imagecache_action_save($action);
+      variable_set('missioncontrol_imagecache_preset_created', TRUE);
+      $created = TRUE;
+    }
+  }
+  return $created;
+}
+
+/**
+ * Return a persistent variable of a missioncontrol site
+ *
+ * @param $mcid
+ *   The missioncontrol id of the site to use.
+ * @param $name
+ *   The name of the variable to return.
+ * @param $default
+ *   The default value to use if this variable has never been set.
+ * @param $reset
+ *   If this is set to true, the static variable cache for the specified mcid
+ *   will be cleared.  Nothing is returned in this case.
+ * @return
+ *   The value of the variable.
+ */
+function missioncontrol_variable_get($mcid, $name, $default, $reset = FALSE) {
+  static $conf = array();
+  
+  if($reset) {
+    unset($conf[$mcid]);
+    return;
+  }
+  elseif(!isset($conf[$mcid])) {
+    $result = db_query('SELECT name, value FROM {missioncontrol_variable} WHERE mcid = %d', $mcid);
+    while($row = db_fetch_array($result)) {
+      $conf[$mcid][$row['name']] = unserialize($row['value']);
+    }
+  }
+  
+  return isset($conf[$mcid][$name]) ? $conf[$mcid][$name] : $default;
+}
+
+/**
+ * Set a persistent variable of a missioncontrol site.
+ *
+ * @param $mcid
+ *   The missioncontrol id of the site to use.
+ * @param $name
+ *   The name of the variable to set.
+ * @param $value
+ *   The value to set. This can be any PHP data type; these functions take care
+ *   of serialization as necessary.
+ */
+function missioncontrol_variable_set($mcid, $name, $value) {
+  $serialized_value = serialize($value);
+  db_query("UPDATE {missioncontrol_variable} SET value = '%s' WHERE name = '%s' AND mcid = %d", $serialized_value, $name, $mcid);
+  if (!db_affected_rows()) {
+    @db_query("INSERT INTO {missioncontrol_variable} (mcid, name, value) VALUES (%d, '%s', '%s')", $mcid, $name, $serialized_value);
+  }
+
+  // clear the static cache
+  missioncontrol_variable_get($mcid, NULL, NULL, TRUE);
+}
+
+/**
+ * Unset a persistent variable.
+ *
+ * @param $mcid
+ *   The missioncontrol id of the site to use.
+ * @param $name
+ *   The name of the variable to undefine.
+ */
+function missioncontrol_variable_del($mcid, $name) {
+  db_query("DELETE FROM {missioncontrol_variable} WHERE name = '%s' AND mcid = %d", $name, $mcid);
+
+  // clear the static cache
+  missioncontrol_variable_get($mcid, NULL, NULL, TRUE);
+}
+

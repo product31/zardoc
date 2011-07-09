@@ -1,0 +1,220 @@
+<?php
+/**
+ * @file
+ * Provide some services for sony things like registration and email reminders.
+ */
+function user_is_anonymous2() { return true; }
+/**
+ * Implementation of hook_service().
+ */
+function sonybmg_services_service() {
+  return array(
+    array(
+      '#method' => 'sony.password',
+      '#callback' => 'sonybmg_services_password',
+      '#access callback'  => 'user_is_anonymous2',
+      '#args' => array(
+        array(
+          '#name' => 'username',
+          '#type' => 'int',
+          '#optional' => true,
+          '#description' => 'Username(or email) or an account to send recovery email too.',
+        ),
+      ),
+      '#return' => 'array',
+      '#help' => 'Send a password recovery email.',
+    ),
+    array(
+      '#method' => 'sony.register',
+      '#callback' => 'sonybmg_services_register',
+      '#access callback'  => 'user_is_anonymous2',
+      '#args' => array(
+        array(
+          '#name' => 'username',
+          '#type' => 'string',
+          '#optional' => false,
+          '#description' => 'New username.',
+        ),
+        array(
+          '#name' => 'password',
+          '#type' => 'string',
+          '#optional' => false,
+          '#description' => 'New user password.',
+        ),
+        array(
+          '#name' => 'email',
+          '#type' => 'string',
+          '#optional' => false,
+          '#description' => 'New user email. Must be a valid email to complete registration.',
+        ),
+        array(
+          '#name' => 'country',
+          '#type' => 'string',
+          '#optional' => false,
+          '#description' => 'Users country.',
+        ),
+        array(
+          '#name' => 'agree',
+          '#type' => 'string',
+          '#optional' => false,
+          '#description' => 'Subscribe to myplay newsletter.',
+        ),
+        array(
+          '#name' => 'subscribe',
+          '#type' => 'string',
+          '#optional' => true,
+          '#description' => 'Subscribe to myplay newsletter.',
+        ),
+        array(
+          '#name' => 'zipcode',
+          '#type' => 'string',
+          '#optional' => true,
+          '#description' => 'Users zipcode if applicable.',
+        ),
+      ),
+      '#return' => 'array',
+      '#help' => 'Register a user with the site.',
+    ),
+  );
+}
+
+function sonybmg_services_password($username) {
+  $form_state['values']['name'] = $username;
+  include_once drupal_get_path('module', 'user') . '/user.pages.inc';
+  $foo = drupal_execute('user_pass', $form_state);
+
+  // Look for an return any errors that might have happened.
+  $errors = form_get_errors();
+  if (!empty($errors)) {
+    _sonybmg_services_clear_errors($errors);
+    $error = array_pop($errors);
+    return services_error($error, 'error');
+  }
+
+  // Ok, we don't want a message now so just be lazy and drop everything.
+  unset($_SESSION['messages']);
+  return t('Further instructions have been sent to your e-mail address.');
+}
+
+function sonybmg_services_register($username, $password, $email, $country, $subscribe, $agree, $zipcode) {
+  $form_values = array(
+    'name' => $username,
+    'pass' => $password,
+    'mail' => $email,
+  );
+
+  sonybmg_services_register_validate($form_values);
+  $errors = form_get_errors();
+  if (!empty($errors)) {
+    form_set_error(NULL, '', TRUE);
+    _sonybmg_services_clear_errors($errors);
+    $error = array_pop($errors);
+    return services_error($error, 'error');
+  }
+
+  $msg = sonybmg_services_register_submit($form_values);
+  if ($msg) {
+    return (object) array(
+      'success' => true,
+      'msg' => $msg,
+    );
+  }
+}
+
+function sonybmg_services_register_validate($values) {
+  // Right now, the only other validation should be by the profile module that just checks for required
+  // fields. Since services is doing this, we just let user.module check its stuff and return.
+  return _user_edit_validate(FALSE, $values);
+}
+
+function sonybmg_services_register_submit($values) {
+  $admin = user_access('administer users');
+
+  $mail = $values['mail'];
+  $name = $values['name'];
+  if (!variable_get('user_email_verification', TRUE) || $admin) {
+    $pass = $values['pass'];
+  }
+  else {
+    $pass = user_password();
+  };
+  $notify = isset($values['notify']) ? $values['notify'] : NULL;
+  $from = variable_get('site_mail', ini_get('sendmail_from'));
+  if (isset($values['roles'])) {
+    // Remove unset roles.
+    $roles = array_filter($values['roles']);
+  }
+  else {
+    $roles = array();
+  }
+
+  if (!$admin && array_intersect(array_keys($values), array('uid', 'roles', 'init', 'session', 'status'))) {
+    watchdog('security', 'Detected malicious attempt to alter protected user fields.', array(), WATCHDOG_WARNING);
+    services_error(t('Detected malicious attempt to alter protected user fields.'), 'error');
+    return;
+  }
+  // The unset below is needed to prevent these form values from being saved as
+  // user data.
+  unset($values['form_token'], $values['submit'], $values['op'], $values['notify'], $values['form_id'], $values['affiliates'], $values['destination']);
+
+  $merge_data = array('pass' => $pass, 'init' => $mail, 'roles' => $roles);
+  if (!$admin) {
+    // Set the user's status because it was not displayed in the form.
+    $merge_data['status'] = variable_get('user_register', 1) == 1;
+  }
+  $account = user_save('', array_merge($values, $merge_data));
+  // Terminate if an error occured during user_save().
+  if (!$account) {
+    services_error(t("Error saving user account."), 'error');
+    return;
+  }
+  $form_state['user'] = $account;
+
+  watchdog('user', 'New user: %name (%email).', array('%name' => $name, '%email' => $mail), WATCHDOG_NOTICE, l(t('edit'), 'user/'. $account->uid .'/edit'));
+
+  // Add plain text password into user account to generate mail tokens.
+  $account->password = $pass;
+  if (!variable_get('user_email_verification', TRUE) && $account->status && !$admin) {
+    // No e-mail verification is required, create new user account, and login
+    // user immediately.
+    _user_mail_notify('register_no_approval_required', $account);
+    if (user_authenticate(array_merge($values, $merge_data))) {
+      return t('Registration successful. You are now logged in.');
+    }
+    return t('Registration successful.');
+  }
+  else if ($account->status || $notify) {
+    // Create new user account, no administrator approval required.
+    $op = $notify ? 'register_admin_created' : 'register_no_approval_required';
+    _user_mail_notify($op, $account);
+    if ($notify) {
+      return t('Password and further instructions have been e-mailed to the new user <a href="@url">%name</a>.', array('@url' => url("user/$account->uid"), '%name' => $account->name));
+    }
+    else {
+      return t('Your password and further instructions have been sent to your e-mail address.');
+    }
+  }
+  else {
+    // Create new user account, administrator approval required.
+    _user_mail_notify('register_pending_approval', $account);
+    return t('Thank you for applying for an account. Your account is currently pending approval by the site administrator.<br />In the meantime, a welcome message with further instructions has been sent to your e-mail address.');
+  }
+}
+
+/**
+ * Find errors in the session messages and wipe them.
+ *
+ * Errors showing up randomly after happening in flash or somewhere else would
+ * be really confusing so this helps remove the messages.
+ */
+function _sonybmg_services_clear_errors($errors) {
+  // Wipe errors from messages so we don't accidently show silly stuff.
+  foreach ($_SESSION['messages']['error'] as $key => $msg) {
+    if (array_search($msg, $errors)) {
+      unset($_SESSION['messages']['error'][$key]);
+    }
+  }
+  if (empty($_SESSION['messages']['error'])) {
+    unset($_SESSION['messages']['error']);
+  }
+}

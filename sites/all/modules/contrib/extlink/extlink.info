@@ -1,0 +1,5 @@
+; $Id: extlink.info,v 1.2 2008/02/23 03:53:10 quicksketch Exp $
+name = External Links
+description = Adds icon next to external links on the site.
+package = User interface
+core = 6.x

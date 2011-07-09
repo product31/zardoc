@@ -1,0 +1,23 @@
+; $Id$
+name = Sony BMG Extras
+description = Buddy icons and wallpapers for the Extras page.
+dependencies[] = content
+dependencies[] = imagefield
+dependencies[] = imageapi
+dependencies[] = imageapi_gd
+dependencies[] = views
+dependencies[] = path
+dependencies[] = token
+dependencies[] = pathauto
+dependencies[] = menu
+dependencies[] = imageapi
+dependencies[] = imagecache
+dependencies[] = imagecache_ui
+package = Sony BMG
+core = 6.x
+
+rename = downloadable_extras
+
+l10n server = translate.gdb-dev.com
+project = "sonybmg_extras"
+version = "6.x-2.x"

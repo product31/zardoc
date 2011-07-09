@@ -1,0 +1,378 @@
+<?php
+
+/*
+ * Author   : Tom MacWright, Young Hahn
+ * Revision : $Id: word2web.module,v 1.6.2.2 2009/01/22 00:27:32 sumit Exp $
+ */
+
+/**
+ * This module utilizes XSLT transforms to go from "export to web"
+ * Word documents to clean, valid XHTML.
+ *
+ */
+
+/**
+ * Implementation off hook_menu()
+ */
+function word2web_menu() {
+  $items = array();
+
+  $items['admin/settings/word2web'] = array(
+    'title' => 'Word2Web Settings',
+    'description' => 'Configure word2web nodetypes and settings.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('word2web_settings_form'),
+    'access arguments' => array('administer site configuration'),
+  );
+  $items['node/'.'%'.'/manage_images'] = array(
+    'title' => 'Manage Images',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('word2web_manage_images', arg(1)),
+	'access callback' => 'word2web_images_access',
+    'type' => MENU_LOCAL_TASK,
+  );
+  return $items;
+}
+
+function word2web_images_access() {
+  	if(arg(0) == 'node' && is_numeric(arg(1))){
+	  if(variable_get('word2web_images', false)){
+	  $node = node_load(arg(1));
+      $nodetypes = variable_get('word2web_nodetypes', array());
+	  if ($nodetypes[$node->type]) {
+		return TRUE;
+	  }
+	}
+  }
+}
+
+/**
+ * Implementation off hook_form_alter()
+ */
+function word2web_form_alter(&$form, &$form_state, $form_id) {
+  $nodetypes = variable_get('word2web_nodetypes', array());
+
+  if ($form['#node'] && $nodetypes[$form['#node']->type]) {
+    $form['#attributes']['enctype'] = 'multipart/form-data';
+    $form['#validate'][] = 'word2web_validate';
+    $form['word_doc'] = array(
+	  '#type' => 'fieldset',
+	  '#title' => t('Upload a word file here'),
+	);
+	$form['word_doc']['word_document'] = array(
+      '#type' => 'file',
+      '#title' => t('Upload Word document'),
+      '#description' => t("Please upload an HTML file produced by Word's <strong>export to web</strong> feature."),
+      '#weight' => -1,
+    );
+
+    // Modify body field to help user
+    $form['body_field']['body']['#disabled'] = true;
+    $form['body_field']['body']['#rows'] = 10;
+    $form['body_field']['body']['#description'] = t('This field will be populated automatically by the uploaded document.');
+  }
+}
+
+
+/**
+ * Provides the image management/upload page, which is linked to on the node view page
+ * @param $nid The node id
+ * @return A form array which will be parsed by drupal_get_form
+ */
+
+function word2web_manage_images($nid) {
+
+  set_error_handler("_word2web_suppress_errors");
+  $node = node_load(arg(1));
+  $images = _word2web_get_orphan_images($node->body);
+  if ($images) {
+    $form['images_help'] = array(
+      '#value' => t("These images were included in the !type but have not been uploaded yet.<br /><br />",
+        array('!type' => $node->type)));
+    $i = 0;
+    foreach ($images as $img) {
+      $form['images']['upload_'. $i] = array(
+        '#type'   =>  'file',
+        '#title'  =>  t('!filename', array('!filename' => $img)),
+        '#size' => 40);
+      $form['file_names']['upload_'. $i] = array(
+        '#type' => 'hidden',
+        '#value' => $img);
+      $i++;
+    }
+	$form['loop_value'] = array(
+	  '#type' => 'hidden',
+	  '#value' => $i
+	);
+    $form['book_nid'] = array(
+      '#type' => 'hidden',
+      '#value' => $node->nid);
+    $form['#attributes'] = array('enctype' => 'multipart/form-data');
+    $form['images_submit'] = array(
+      '#type' => 'submit',
+      '#value' => 'Upload Images');
+    restore_error_handler();
+  }
+  else {
+    $form['images_complete'] = array(
+      '#value' => t("All of the images in this report have been uploaded"));
+  }
+  return $form;
+}
+
+/**
+ * Handle form submission
+ * @param $form_id: the id of the form submitted (it's going to be word2web_manage_images
+ * @param $form: form values
+ */
+
+function word2web_manage_images_submit($form, &$form_state) {
+  $success = true;
+  for ($p = 0; $p < $form_state['values']['loop_value']; $p++) {
+
+  $validators = array(
+    'file_validate_is_image' => array(),
+    'file_validate_image_resolution' => array('1600x1600'),
+    'file_validate_size' => array(30 * 1024),
+  );
+
+      if ($fi = file_save_upload('upload_'.$p, $validators)) {
+        $new_id = _word2web_node_image($fi->filepath, $fi->filename, $fi->fid);
+        if ($new_id == -1) {
+          drupal_set_message("Image files could not be uploaded because the image directory is not configured correctly.");
+          $success = false;
+          break;
+        }
+        $map[$form_state['values'][upload_."$p"]] = $new_id;
+      }
+  }
+  if ($success) {
+    _word2web_insert_images($form_state['values']['book_nid'], $map);
+  }
+}
+
+/**
+ * Replace <image src="xxx.jpg">test</image> with <image nid="4214" /> and so on
+ * @param $nid node id of the report or other book node
+ * @param $map map of image urls to new node ids
+ */
+
+function _word2web_insert_images($nid, $map) {
+  $node = node_load($nid);
+  restore_error_handler();
+  set_error_handler("_word2web_suppress_errors");
+  $html = new DOMDocument();
+  $html->loadXML($node->body);
+  $images = $html->getElementsByTagName("image");
+  $i = 0;
+  foreach ($images as $im) {
+    // Only do the replacement if
+    // 1. This image hasn't already been replaced
+    // 2. A file has been uploaded to replace this image
+    if (!$im->getAttribute("nid") && $map[$im->getAttribute("src")]) {
+      $im->setAttribute("nid", $map[$im->getAttribute("src")]);
+	  $im->removeAttribute("src");
+    }
+  }
+  $node->body = $html->saveXML();
+  node_save(&$node);
+  restore_error_handler();
+}
+
+
+function _word2web_node_image($url, $title='', $fid) {
+	global $user;
+  //restore_error_handler();
+  if (!$title) {
+    $title = basename($url);
+  }
+  $node = new StdClass();
+  $node->type = 'image';
+  $node->uid = $user->uid;
+  $node->title = $title;
+  $node->body = '';
+
+  $file_data = file_get_contents($url);
+  $file_temp = file_save_data($file_data, file_directory_path() .'/'. basename($url), FILE_EXISTS_RENAME);
+  if ($file_temp) {
+	$node->field_imagefile[0]['fid'] = $fid;
+	$node->field_imagefile[0]['list'] = 1;
+	$node->field_imagefile[0]['uid'] = $user->uid;
+	$node->field_imagefile[0]['filename'] = basename($file_temp);
+	$node->field_imagefile[0]['filepath'] = $file_temp;
+	$node->field_imagefile[0]['filesize'] = filesize($file_temp);
+	$node->field_imagefile[0]['status'] = 1;
+  node_save(&$node);
+  return $node->nid;
+  }
+  else {
+    return -1;
+  }
+}
+
+function word2web_image_upload_message($node) {
+  set_error_handler("_word2web_suppress_errors");
+  $html = new DOMDocument();
+  $html->loadHTML($node->body);
+  $images = $html->getElementsByTagName("image");
+  $i = 0;
+  foreach ($images as $im) {
+    if (!$im->getAttribute("nid")) {
+      $i++;
+    }
+  }
+  restore_error_handler();
+  if ($i > 0) {
+    drupal_set_message(l(t('!num '.format_plural($i, 'image', 'images').' in this !type need to be uploaded.', array('!type' => $node->type, '!num' => $i)), 'node/'. $node->nid .'/manage_images'), 'error');
+  }
+}
+
+/**
+* Implementation off hook_nodeapi()
+*/
+function word2web_nodeapi(&$node, $op) {
+  switch ($op) {
+    case 'view':
+      if (in_array($node->type, variable_get('word2web_nodetypes', array()))) {
+        if (user_access("administer nodes")) {
+          word2web_image_upload_message($node);
+        }
+      }
+    case 'presave':
+    case 'update':
+      $validators = array(
+      );
+      if ($html_file = file_save_upload('word_document', $validators)) {
+        // Include our helper file.
+        module_load_include('inc', 'word2web');
+        $html = _word2web_filter(file_get_contents($html_file->filepath));
+
+        if (variable_get('word2web_filter', 0)) {
+          $node->format = variable_get('word2web_filter', 0);
+        }
+        $node->body = $html;
+      }
+      break;
+  }
+}
+
+
+/**
+ * Get orphaned (not uploaded yet) embedded images in word HTML
+ * @param $c  A string of Word HTML that went through word2web
+ * @return  An array of images in the HTML in the form array(url, url1)
+ */
+
+function _word2web_get_orphan_images($c) {
+  set_error_handler('_word2web_suppress_errors');
+  $html = new DOMDocument();
+  $html->loadHTML($c);
+  $images = $html->getElementsByTagName('image');
+  foreach ($images as $im) {
+    if (!$im->getAttribute("nid")) { // If it doesn't have a node id, it isn't up
+      $urls[] =  $im->getAttribute("src");
+    }
+  }
+  restore_error_handler();
+  return $urls;
+}
+
+/**
+ * Get embedded images in word HTML
+ * @param $c  A string of Word HTML that went through word2web
+ * @return  An array of images in the HTML in the form array(url, url1)
+ */
+
+function _word2web_get_images($c) {
+  set_error_handler('_word2web_suppress_errors');
+  $html = new DOMDocument();
+  $html->loadHTML($c);
+  $images = $html->getElementsByTagName('image');
+  foreach ($images as $im) {
+    $urls[] =  $im->getAttribute("src");
+  }
+  restore_error_handler();
+  return $urls;
+}
+
+/**
+ * Word2web function that handles manual node insertions
+ * Unlike word2web, this doesn't run during node creation
+ * @param $html_raw A string of raw Word HTML
+ * @return  word2web-processed HTML
+ */
+
+function word2web_manual($html_raw) {
+
+  $html_raw = preg_replace("/<(img)([^>]*)>/mi",
+    "<addr class='image' $2>-</addr>",
+    $html_raw);
+
+  // Include our helper file.
+  module_load_include('inc', 'word2web');
+  return _word2web_filter($html_raw);
+}
+
+/**
+ * Admin settings form for selecting content types
+ * @return string a rendered settings form
+ */
+function word2web_settings_form() {
+  $form = array();
+
+  // Build list of content types
+  $nodetypes = array();
+  foreach (node_get_types() as $type) {
+    $nodetypes[$type->type] = t($type->name);
+  }
+
+  // Build list of filter formats
+  $formats = array();
+  foreach (filter_formats() as $format) {
+    $formats[$format->format] = $format->name;
+  }
+
+  $form['word2web_nodetypes'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Content types'),
+    '#description' => t('Enable word2web for the following content types.'),
+    '#options' => $nodetypes,
+    '#default_value' => variable_get('word2web_nodetypes', array()),
+  );
+
+  $form['word2web_filter'] = array(
+    '#type' => 'select',
+    '#title' => t('Filter formats'),
+    '#description' => t('Select an input format to use by default for imported Word documents. Choose a filter similar to "Full HTML" which allows XML tags.'),
+    '#options' => $formats,
+    '#default_value' => variable_get('word2web_filter', 0),
+  );
+
+  if (module_exists('imagefield') && true) {
+    if (isset($nodetypes['image'])) {
+      $imagetype = content_types("image");
+      if (isset($imagetype['fields']['field_imagefile'])) {
+        $form['word2web_images'] = array(
+          '#type' => 'checkbox',
+          '#default_value' => variable_get('word2web_images', 0),
+          '#title' => 'Enable Image Uploads',
+        );
+      }
+      else {
+        drupal_set_message(t('An "image" content type exists, but there is no imagefile field defined.'));
+      }
+    }
+    else {
+      drupal_set_message(t('There is no "image" content type defined in this Drupal installation.'));
+    }
+  }
+  else {
+    drupal_set_message(t('The imagefield module is not installed or enabled on this site'));
+  }
+  return system_settings_form($form);
+}
+
+/**
+ * Utility function for hiding errors, esp. on loading XML from bad HTML input
+ */
+function _word2web_suppress_errors() { }

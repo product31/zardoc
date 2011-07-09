@@ -1,0 +1,22 @@
+<?php
+
+/**
+ * @file
+ * This module gives translators the ability to translate and artisit discography via bulk operation.
+ */
+
+/**
+ * Implementation of hook_install
+ * Enable translation on Track and Album content types.
+ */
+function global_discography_install() {
+  variable_set('language_content_type_album', 2);
+
+  variable_set('language_content_type_track', 2);
+}
+
+/**
+ * Implementation of hook_uninstall
+ */
+function global_discography_uninstall() {
+}

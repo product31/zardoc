@@ -1,0 +1,55 @@
+# Hungary translation of emaudio_audio_player (all releases)
+# Copyright (c) 2010 by the Hungary translation team
+# Generated from files:
+#  emaudio_audio_player/emaudio_audio_player.emaudio.inc: n/a
+#  emaudio_audio_player/emaudio_audio_player.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: emaudio_audio_player (all releases)\n"
+"POT-Creation-Date: 2010-04-08 15:25-0500\n"
+"PO-Revision-Date: 2010-03-26 09:11-0500\n"
+"Language-Team: Hungary\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: emaudio_audio_player.emaudio.inc:25
+msgid "Audio Player"
+msgstr ""
+
+#: emaudio_audio_player.emaudio.inc:27
+msgid "Renders a custom url using the WordPress Audio Player flash."
+msgstr ""
+
+#: emaudio_audio_player.emaudio.inc:29
+msgid "Autoplay"
+msgstr ""
+
+#: emaudio_audio_player.emaudio.inc:29
+msgid "Yes"
+msgstr "Igen"
+
+#: emaudio_audio_player.emaudio.inc:30
+msgid "RSS Attachment"
+msgstr ""
+
+#: emaudio_audio_player.emaudio.inc:30,31
+msgid "No"
+msgstr "Nem"
+
+#: emaudio_audio_player.emaudio.inc:31
+msgid "Thumbnails"
+msgstr ""
+
+#: emaudio_audio_player.info:0
+msgid "Embedded Media Field Audio Player"
+msgstr ""
+
+#: emaudio_audio_player.info:0
+msgid ""
+"A generic embeded field provider that uses the WordPress Audio Player "
+"plugin flash to embed media."
+msgstr ""
+

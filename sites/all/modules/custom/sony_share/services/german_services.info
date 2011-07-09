@@ -1,0 +1,7 @@
+; $Id$
+name = "German Services"
+description = "Provide the German Services: Alltagz, Colivia, Icio, InfoPirat, Linkarena, MeinVZ, Mister Wong, Netselektor, Oneview, Readster, seekXL, SeoIGG, Weblinkr, Webnews, Yigg"
+core = 6.x
+package = Sony Share
+dependencies[] = sony_share
+

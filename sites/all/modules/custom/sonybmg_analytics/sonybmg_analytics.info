@@ -1,0 +1,11 @@
+; $Id$
+name = SonyBMG Analytics
+description = This adds the code for our nextgen analytics playtform. Make sure IS&T has the domain address of the site using this in their analytics platform.
+package = Sony BMG
+core = 6.x
+dependencies[] = services
+dependencies[] = rest_server
+
+l10n server = translate.gdb-dev.com
+project = "sonybmg_analytics"
+version = "6.x-2.x"

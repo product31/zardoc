@@ -1,0 +1,7 @@
+; $Id: gmap_location.info,v 1.3 2008/07/15 18:45:37 bdragon Exp $
+name = GMap Location
+description = Display location.module information on Google Maps
+package = Location
+core = 6.x
+dependencies[] = gmap
+dependencies[] = location

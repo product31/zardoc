@@ -1,0 +1,26 @@
+# Taiwan translation of azuki (all releases)
+# Copyright (c) 2010 by the Taiwan translation team
+# Generated from file: azuki/azuki.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: azuki (all releases)\n"
+"POT-Creation-Date: 2010-04-12 15:15-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Taiwan\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: azuki.info:0
+msgid "Azuki Integration"
+msgstr ""
+
+#: azuki.info:0
+msgid "Provides RSS feeds for use with the Azuki mobile platform."
+msgstr ""
+
+#: azuki.info:0
+msgid "Sony Music - 3rd Party Integration"
+msgstr ""
+

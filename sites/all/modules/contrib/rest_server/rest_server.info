@@ -1,0 +1,6 @@
+; $Id: rest_server.info,v 1.1.2.1.2.2 2009/03/08 10:52:30 robloach Exp $
+name = REST Server
+description = Provides a REST server.
+package = "Services - servers"
+dependencies[] = services
+core = 6.x

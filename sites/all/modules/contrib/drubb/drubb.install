@@ -1,0 +1,362 @@
+<?php
+// $Id: drubb.install,v 1.43 2009/07/19 06:56:15 merlinofchaos Exp $
+
+/**
+ * @file
+ * Install, update and uninstall functions for the DruBB module.
+ */
+
+/**
+ * Implementation of hook_enable().
+ */
+function drubb_enable() {
+  // we use enable because this way we ensure all requirements were actually installed already.
+  if (!variable_get('drubb_installed', FALSE)) {
+    // Fix DruBB module's weight.
+    $forum_weight = db_result(db_query("SELECT weight FROM {system} WHERE type = 'module' AND name = 'forum'"));
+    db_query("UPDATE {system} SET weight = %d WHERE type = 'module' AND name = 'drubb'", $forum_weight + 1);
+
+    // Perform set up tasks.
+    drubb_configure_modules();
+    drubb_create_sample_content();
+    drubb_set_permissions();
+    variable_set('drubb_installed', TRUE);
+  }
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function drubb_uninstall() {
+  $forum_vid = variable_get('forum_nav_vocabulary', '');
+
+  // Remove sample data.
+  $result = db_query("SELECT tid FROM {term_data} WHERE vid = %d AND (name = 'Your first category' OR name = 'Your first forum')", $forum_vid);
+  while ($sample_forum = db_fetch_array($result)) {
+    taxonomy_del_term($sample_forum['tid']);
+  }
+  $sample_post_nid = db_result(db_query("SELECT n.nid FROM {node} n INNER JOIN {node_revisions} nr ON n.vid = nr.vid WHERE n.type = 'forum' AND n.title = 'Welcome to DruBB'"));
+  if ($sample_post_nid) {
+    node_delete($sample_post_nid);
+  }
+
+  // Set default format back to Filtered HTML and remove Forum input format.
+  variable_set('filter_default_format', 1);
+  // TODO: Uncomment these lines once http://drupal.org/node/472558 is committed.
+  //install_include(array('filter'));
+  //install_remove_format(t('Forum'));
+  drubb_remove_format(t('Forum'));
+}
+
+/**
+ * A mish-mash of configuration tasks.
+ */
+function drubb_configure_modules() {
+  $t = get_t();
+  $forum_vid = variable_get('forum_nav_vocabulary', '');
+  $forum_vocabulary = taxonomy_vocabulary_load($forum_vid);
+
+  // Add poll to the list of content that can be posted to a forum.
+  $forum_vocabulary->nodes['poll'] = 'poll';
+  $values = (array)$forum_vocabulary;
+  taxonomy_save_vocabulary($values);
+
+  drubb_filter_setup();
+
+  $types = node_get_types();
+  $types = array_change_key_case($types, CASE_LOWER);
+  if (!in_array('forum_reply', array_keys($types))) {
+    // Create the comment content type.
+    $reply_type = array(
+      'type' => 'forum_reply',
+      'name' => t('reply'),
+      'module' => 'node',
+      'description' => t('Replies to forum topics and polls.'),
+      'title_label' => t('Subject'),
+      'body_label' => t('Body'),
+      'custom' => TRUE,
+      'modified' => TRUE,
+      'locked' => FALSE,
+    );
+    $reply_type = (object)_node_type_set_defaults($reply_type);
+    node_type_save($reply_type);
+
+    // Default to not promoted.
+    variable_set('node_options_forum_reply', array('status'));
+
+    // Default to not allowing comments.
+    variable_set('comment_forum_reply', 0);
+  }
+
+  // Configure forum comment settings.
+  variable_set('node_comment_type_forum', 'forum_reply');
+  variable_set('node_comment_type_poll', 'forum_reply');
+  variable_set('node_comment_topic_review_forum', 1);
+  variable_set('node_comment_topic_review_poll', 1);
+  variable_set('comment_default_mode_forum', COMMENT_MODE_FLAT_EXPANDED);
+  variable_set('comment_default_order_forum', COMMENT_ORDER_OLDEST_FIRST);
+  variable_set('comment_preview_forum', COMMENT_PREVIEW_OPTIONAL);
+  variable_set('comment_form_location_forum', COMMENT_FORM_BELOW);
+  variable_set('draft_on_edit', 1);
+  $settings = array(
+    'title' => 'title', 
+    'body' => 'body', 
+    'update' => 'updated', 
+    'node_type' => 0, 
+    'uid' => 0, 
+    'cron_remove' => 0,
+    );
+  variable_get('draft_php_view_display_columns', $settings);
+
+  // Enable smileys block.
+  variable_set('smileys_enable_for_nodes', 1);
+  variable_set('smileys_enable_for_comments', 1);
+  $forum_types = array();
+  foreach ($forum_vocabulary->nodes as $type) {
+    $forum_types[$type] = $type;
+  }
+
+  // Add our reply type to the types.
+  $all_types = $forum_types;
+  $all_types['forum_reply'] = 'forum_reply';
+
+  foreach ($all_types as $type) {
+    // Enable drafts on the forum types.
+    variable_set('save_as_draft_'. $type, 1);
+    variable_set('save_as_draft_title_'. $type, 'title');
+    variable_set('save_as_draft_body_'. $type, 'body_field');
+  }
+
+  variable_set('save_as_draft_comment', 1);
+  variable_set('smileys_node_types_content', $all_types);
+  variable_set('smileys_select_box_expanded', FALSE);
+  
+  // Set up Comment Notify on forum node types.
+  variable_set('comment_notify_node_types', $forum_types);
+  // Allow comment notifications.
+  variable_set('comment_notify_available_alerts', array(COMMENT_NOTIFY_NODE => COMMENT_NOTIFY_NODE));
+ 
+  // Set AF default to show number of views.
+  variable_set('advanced_forum_get_new_comments', 1);
+ 
+  // Enable signatures.
+  variable_set('user_signatures', 1);
+  $settings = signature_forum_defaults();
+  $settings['signature_forum_show_for_comment'] = 1;
+  $settings['signature_forum_show_for_forum'] = 1;
+  $settings['signature_forum_auto_insert'] = 0;
+  variable_set('signature_forum_settings', $settings);
+
+  // Enable user pictures.
+  variable_set('user_pictures', 1);
+
+  // Automatically enable view counting:
+  variable_get('statistics_count_content_views', '1');
+  drubb_bueditor_setup();
+  
+}
+
+/**
+ * Adds a sample forum container, forum, and topic.
+ */
+function drubb_create_sample_content() {
+  $t = get_t();
+  $forum_vid = variable_get('forum_nav_vocabulary', '');
+
+  // Create sample data if no forums exist.
+  $existing_forums = db_result(db_query('SELECT 1 FROM {term_data} WHERE vid = %d', $forum_vid));
+  if (!$existing_forums) {
+    $container = array(
+      'name' => $t('Your first category'),
+      'vid' => $forum_vid,
+    );
+    taxonomy_save_term($container);
+    variable_set('forum_containers', array($container['tid'] => $container['tid']));
+
+    $forum = array(
+      'name' => $t('Your first forum'),
+      'description' => $t('Description of your first forum.'),
+      'parent' => $container['tid'],
+      'vid' => $forum_vid,
+    );
+    taxonomy_save_term($forum);
+
+    // Note: This may look like a stupid number of properties, but we need all
+    // of them to eliminate notices.
+    global $user;
+    $topic = new stdClass();
+    $topic->nid = NULL;
+    $topic->type = 'forum';
+    $topic->uid = $user->uid;
+    $topic->name = $user->name;
+    $topic->title = $t('Welcome to DruBB');
+    $topic->body = $t('This is an example post. :) [i]Everything[/i] seems to be working. You may delete this post if you like. Have fun!');
+    $topic->format = FILTER_FORMAT_DEFAULT;
+    $topic->taxonomy = array(
+      $forum_vid => $forum['tid'],
+    );
+    $topic->comment = COMMENT_NODE_READ_WRITE;
+    $topic->status = 1;
+
+    $topic = node_submit($topic);
+    node_save($topic);
+  }
+}
+
+/**
+ * Set default permissions.
+ */
+function drubb_set_permissions() {
+  // Anonymous users can't do much except view and search content.
+  $anonymous_permissions = array(
+    // Comment module.
+    'access comments',
+    // Node module.
+    'access content',
+    'search content',
+    // Search module.
+    'search content',
+    'use advanced search',
+    // Upload module.
+    'view uploaded files',
+    // User module.
+    'access user profiles',
+  );
+  install_add_permissions(DRUPAL_ANONYMOUS_RID, $anonymous_permissions);
+
+  // Authenticated users can interact with the forum and private messages.
+  $authenticated_permissions = array(
+    // Comment module.
+    'access comments',
+    'post comments',
+    'post comments without approval',
+    // Advanced forum
+    'view forum statistics',
+    // Forum module.
+    'create forum topics',
+    'edit own forum topics',
+    // Node module.
+    'access content',
+    // Node comment module
+    'create forum_reply content',
+    // Poll module.
+    'create poll content',
+    'edit own poll content',
+    'cancel own vote',
+    'vote on polls',
+    // Privatemsg module.
+    'read privatemsg',
+    'write privatemsg',
+    // Search module.
+    'search content',
+    'use advanced search',
+    // Smileys module.
+    'use smiley select box',
+    // Upload module.
+    'upload files',
+    'view uploaded files',
+    // User module.
+    'access user profiles',
+    // Comment Notify module
+    'subscribe to comments',
+    // Draft module
+    'access save as draft',
+  );
+  install_add_permissions(DRUPAL_AUTHENTICATED_RID, $authenticated_permissions);
+}
+
+
+function drubb_filter_setup() {
+  // Create Forum input format with smileys and bbcode support and set it as
+  // default, then add and order our filters.
+  install_include(array('filter'));
+  $t = get_t();
+  $forum_format_id = install_add_format($t('Forum'));
+  variable_set('filter_default_format', $forum_format_id);
+  
+  // Quote filter.
+  install_set_filter($forum_format_id, 'quote', 0, -10);
+  // Allow for possibility that BBCode is not being used.
+  if (module_exists('bbcode')) {
+    // Set BBCode after quote so BBCode doesn't try to handle quotes.
+    // They will already be transformed by the time we get here.
+    install_set_filter($forum_format_id, 'bbcode', 0, -9);
+  }
+  // URL filter. 
+  install_set_filter($forum_format_id, 'filter', 2, -8); 
+  // Smiley filter.
+  install_set_filter($forum_format_id, 'smileys', 0, -7);
+  // HTML filter, last filter to remove remaining invalid html.
+  install_set_filter($forum_format_id, 'filter', 0, -6); 
+  // Line break filter -- last so that html filter doesn't take away our ps and brs.
+  install_set_filter($forum_format_id, 'filter', 1, -5); 
+  // HTML corrector filter, final step to clean up results.
+  install_set_filter($forum_format_id, 'filter', 3, -4); 
+  
+  // Make sure we allow div, blockquote, and img tags.
+  variable_set('allowed_html_'. $forum_format_id, '<a> <em> <strong> <cite> <code> <ul> <ol> <li> <dl> <dt> <dd> <blockquote> <div> <img>');
+    
+}
+
+/**
+ * Remove an existing input format.
+ *
+ * @todo Remove this once http://drupal.org/node/472558 is committed.
+ *
+ * @param $name
+ *   The human-readable name of the format.
+ * @return
+ *   The deleted format ID.
+ */
+function drubb_remove_format($name) {
+  $format = db_result(db_query("SELECT format FROM {filter_formats} WHERE name = '%s'", $name));
+  db_query("DELETE FROM {filter_formats} WHERE format = %d", $format);
+  db_query("DELETE FROM {filters} WHERE format = %d", $format);
+
+  $default = variable_get('filter_default_format', 1);
+  // Replace existing instances of the deleted format with the default format.
+  db_query("UPDATE {node_revisions} SET format = %d WHERE format = %d", $default, $format);
+  db_query("UPDATE {comments} SET format = %d WHERE format = %d", $default, $format);
+  db_query("UPDATE {boxes} SET format = %d WHERE format = %d", $default, $format);
+
+  cache_clear_all($format . ':', 'cache_filter', TRUE);
+
+  return $format;
+}
+
+/**
+ * Code to create and insert two editors into BUEditor, one for simple HTML,
+ * and one using the same buttons for simple BB Code, with the ability to
+ * switch between them to the one you want to use on this site.
+ */
+function drubb_bueditor_setup() {
+  global $db_type;
+  
+  $file1 = dirname(__FILE__) . '/bueditor_buttons.html.csv'; 
+  $file2 = dirname(__FILE__) . '/bueditor_buttons.bbcode.csv'; 
+  $default = module_exists('bbcode') ? 2 : 1;
+  $roles = array ( 
+    2 => array (
+      'editor' => $default, 
+      'alt' => '0', 
+      'weight' => 11), 
+    1 => array (
+      'editor' => '0', 
+      'alt' => '0', 
+      'weight' => 12,),
+    );
+    variable_set('bueditor_roles', $roles);
+    variable_set('bueditor_user1', $default);
+    db_query("REPLACE INTO {bueditor_editors} VALUES (1, 'HTML', 'node/*\ncomment/*', 'edit-log', '%BUEDITOR/icons', '%BUEDITOR/library');");
+    db_query("REPLACE INTO {bueditor_editors} VALUES (2, 'BBCode', 'node/*\ncomment/*', 'edit-log', '%BUEDITOR/icons', '%BUEDITOR/library');");
+   
+  // Will this work for non-MYSQL dbs?? 
+  if ($db_type == 'mysql' || $db_type == 'mysqli'){
+    db_query("LOAD DATA LOCAL INFILE '$file1' REPLACE INTO TABLE {bueditor_buttons}");
+    db_query("LOAD DATA LOCAL INFILE '$file2' REPLACE INTO TABLE {bueditor_buttons}");     
+  }
+  else {
+    drupal_set_message(t("Manually insert custom HTML and BBCode buttons by importing $file1 and $file2 into BUEditor."));
+  }
+  
+}

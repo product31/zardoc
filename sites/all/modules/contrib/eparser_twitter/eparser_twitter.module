@@ -1,0 +1,27 @@
+<?php
+// $Id: eparser_twitter.module,v 1.1 2009/10/20 18:12:32 tomot Exp $ 
+
+/**
+ * @file
+ * Twitter Eparser.
+ *
+ * An extension of Feed API Extensible Parser that parses information
+ * out of a Twitter XML feed.
+ */
+
+function eparser_twitter_eparse_type_plugins() {
+  $base_path = drupal_get_path('module', 'eparser_twitter') . '/plugins';
+  return array(
+    'twitter' => array(
+      'name' => 'Twitter',
+      'description' => 'Parses Twitter xml feeds.',
+      'handler' => array(
+        'class' => 'FeedapiEparserTypeTwitter',
+        'parent' => 'xml',
+      ),
+      'system' => FALSE,
+      'path' => $base_path,
+    ),
+  );
+}
+

@@ -1,0 +1,83 @@
+# Peru translation of sony_ads (all releases)
+# Copyright (c) 2010 by the Peru translation team
+# Generated from files:
+#  sony_ads/sony_ads_admin.inc: n/a
+#  sony_ads/sony_ads.module: n/a
+#  sony_ads/sony_ads.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sony_ads (all releases)\n"
+"POT-Creation-Date: 2010-04-12 13:05-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Peru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: sony_ads_admin.inc:7
+msgid "Ad Sitename"
+msgstr ""
+
+#: sony_ads_admin.inc:11
+msgid ""
+"Sitename that will be passed to the ads. Please only use letters "
+"numbers and ."
+msgstr ""
+
+#: sony_ads_admin.inc:15
+msgid "Exclude HAM on these pages"
+msgstr ""
+
+#: sony_ads_admin.inc:20
+msgid ""
+"Enter one page per line as Drupal paths. The '*' character is a "
+"wildcard. Example paths are blog for the blog page and blog/* for "
+"every personal blog. @front is the front page."
+msgstr ""
+
+#: sony_ads_admin.inc:24
+msgid "Freewheel Account Settings"
+msgstr ""
+
+#: sony_ads_admin.inc:30
+msgid "FreeWheel Network ID"
+msgstr ""
+
+#: sony_ads_admin.inc:34
+msgid ""
+"Network ID that is passed into FreeWheel Javascript. Should always be "
+"a positive integer."
+msgstr ""
+
+#: sony_ads_admin.inc:38
+msgid "FreeWheel Server Hex"
+msgstr ""
+
+#: sony_ads_admin.inc:42
+msgid ""
+"Server Hex that is passed into FreeWheel Javascript. Consists of a "
+"combination of digits and letters from A to E"
+msgstr ""
+
+#: sony_ads_admin.inc:46
+msgid "FreeWheel Network Root"
+msgstr ""
+
+#: sony_ads_admin.inc:50
+msgid "Network root that is passed into FreeWheel Javascript."
+msgstr ""
+
+#: sony_ads.module:9
+msgid "Ad Settings"
+msgstr ""
+
+#: sony_ads.info:0
+msgid "Sony Ads"
+msgstr ""
+
+#: sony_ads.info:0
+msgid "Ad integration with freewheel"
+msgstr ""
+

@@ -1,0 +1,54 @@
+<?php
+// $Id: alias.install,v 1.1 2008/11/24 22:45:31 rz Exp $
+
+/**
+ * @file
+ * Install file for alias.module
+ */
+
+/**
+ * Implementation of hook_install().
+ */
+function alias_install() {
+  drupal_install_schema('alias');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function alias_uninstall() {
+  drupal_uninstall_schema('alias');
+}
+
+/**
+ * Implementation of hook_schema().
+ */
+function alias_schema() {
+  $schema['alias'] = array(
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE, 
+        'not null' => TRUE,
+      ),
+      'path' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'url' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'code' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),  
+    'primary key' => array('id'),   
+  );
+  return $schema;
+}

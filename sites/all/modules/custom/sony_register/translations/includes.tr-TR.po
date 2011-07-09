@@ -1,0 +1,30 @@
+# Turkey translation of sony_register (all releases)
+# Copyright (c) 2010 by the Turkey translation team
+# Generated from file: sony_register/includes/register.inc: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sony_register (all releases)\n"
+"POT-Creation-Date: 2010-04-12 15:44-0500\n"
+"PO-Revision-Date: 2010-03-30 14:56-0500\n"
+"Language-Team: Turkey\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: includes/register.inc:27
+msgid "Create a new account"
+msgstr ""
+
+#: includes/register.inc:95
+msgid "Where are you"
+msgstr ""
+
+#: includes/register.inc:125
+msgid "Sign up"
+msgstr ""
+
+#: includes/register.inc:159,169
+msgid "Log in"
+msgstr "Üye Girişi"
+

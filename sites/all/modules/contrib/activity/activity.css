@@ -1,0 +1,15 @@
+td.activity-table-delete-link { 
+  width: 10px;
+}
+a.activity-delete-record { 
+  display: none;
+}
+ul.activity-list li:hover a.activity-delete-record,
+tr:hover a.activity-delete-record { 
+  color: #ff4444;
+  display: inline;
+  font-weight: bold;
+}
+ul.activity-list li:hover a.activity-delete-record { 
+  padding-left: 5px;
+}

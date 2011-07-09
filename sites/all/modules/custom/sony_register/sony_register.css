@@ -1,0 +1,89 @@
+/* country and zip
+----------------------------------------*/
+.popups-box form#user-register #edit-profile-zip-code,
+.popups-box form#user-register #edit-profile-country {
+  width: 110px;
+  display: inline;
+  margin-left: 20px;
+}
+.popups-box form#user-register #edit-profile-country {
+  margin-left: 3px;
+}
+.popups-box form#user-register #edit-profile-country-wrapper {
+  display: inline;
+}
+
+/* COPPA date of birth
+----------------------------------------*/
+.popups-box form#user-register #edit-coppa-dob-wrapper {
+  height: 40px;
+}
+.popups-box form#user-register #edit-coppa-dob-wrapper select {
+  width: 80px;
+}
+.popups-box form#user-register #edit-coppa-dob-day-wrapper select {
+  width: 76px;
+}
+.popups-box form#user-register #edit-coppa-dob-wrapper .form-item {
+  position: relative; /* bug in jquery.select requires the parent of the select to be positioned */
+  float: left;
+  margin: 0 7px 0 0;
+}
+.popups-box form#user-register #edit-coppa-dob-year-wrapper.form-item {
+  margin-right: 0;
+}
+
+/* Password
+----------------------------------------*/
+.popups-box form#user-register #edit-pass-pass1-wrapper {
+  margin-bottom: 5px;
+}
+
+/* captcha
+----------------------------------------*/
+.popups-box form#user-register #edit-mollom-captcha-wrapper .field-prefix { 
+  float: left;
+  margin-left: 20px;
+  width: 120px;
+  font-size: 11px;
+  line-height: 11px;
+}
+.popups-box form#user-register #edit-mollom-captcha-wrapper .form-text {
+  margin: 5px 0 0 6px; 
+  float: left;
+  width: 100px;
+}
+.popups-box form#user-register #edit-mollom-captcha-wrapper {
+  padding-top: 1em;
+  position: relative;
+}
+.popups-box form#user-register #edit-mollom-captcha-wrapper .description {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+/* set the height of captcha img to avoid jumpiness */
+.popups-box form#user-register #captcha img { height: 50px; }
+
+/* misc
+----------------------------------------*/
+.popups-box form#user-register .form-buttons { clear: both; }
+.popups-box form#user-register span.form-required { display: none; }
+
+.popups-box .inline-label {
+  color: #999;
+  font-weight: normal;
+}
+
+#popups-success .left {
+  float: left;
+  margin: 0;
+  padding: 0;
+  width: 300px;
+}
+#popups-success .right {
+  float: right;
+  margin: 0;
+  padding: 0;
+  width: 330px;
+}

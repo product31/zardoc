@@ -1,0 +1,178 @@
+# Mexico translation of sony_queuedcarousel (all releases)
+# Copyright (c) 2010 by the Mexico translation team
+# Generated from files:
+#  sony_queuedcarousel/sony_queuedcarousel.queue.admin.inc: n/a
+#  sony_queuedcarousel/sony_queuedcarousel.panel.admin.inc: n/a
+#  sony_queuedcarousel/sony_queuedcarousel.module: n/a
+#  sony_queuedcarousel/sony_queuedcarousel.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sony_queuedcarousel (all releases)\n"
+"POT-Creation-Date: 2010-04-12 11:23-0500\n"
+"PO-Revision-Date: 2010-03-30 12:58-0500\n"
+"Language-Team: Mexico\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: sony_queuedcarousel.queue.admin.inc:53
+msgid "Name"
+msgstr "Nombre"
+
+#: sony_queuedcarousel.panel.admin.inc:326,438
+msgid "CSS"
+msgstr ""
+
+#: sony_queuedcarousel.panel.admin.inc:250
+msgid "Next"
+msgstr "Siguiente"
+
+#: sony_queuedcarousel.panel.admin.inc:59
+msgid "Update order"
+msgstr ""
+
+#: sony_queuedcarousel.panel.admin.inc:123
+msgid "No flash header items found."
+msgstr ""
+
+#: sony_queuedcarousel.panel.admin.inc:189,421
+msgid "Panel title"
+msgstr ""
+
+#: sony_queuedcarousel.panel.admin.inc:190,422
+msgid ""
+"The title for this panel. If not set, some forms will be confusing and "
+"unusable."
+msgstr ""
+
+#: sony_queuedcarousel.panel.admin.inc:197,429
+msgid "Panel name"
+msgstr ""
+
+#: sony_queuedcarousel.panel.admin.inc:200,432
+msgid ""
+"A unique name used to identify this panel page internally. It must be "
+"only be alpha characters and underscores. No spaces, numbers or "
+"uppercase characters."
+msgstr ""
+
+#: sony_queuedcarousel.panel.admin.inc:215
+msgid "Advanced"
+msgstr "Avanzado"
+
+#: sony_queuedcarousel.panel.admin.inc:217
+msgid ""
+"By enabling the advanced creation features you will be able to take "
+"advantage of the full panels administraion system. When disabled you "
+"will get a streamlined simple content addition form."
+msgstr ""
+
+#: sony_queuedcarousel.panel.admin.inc:243
+msgid "Choose layout"
+msgstr ""
+
+#: sony_queuedcarousel.panel.admin.inc:276,511
+msgid "Categories may contain only alphanumerics or spaces."
+msgstr ""
+
+#: sony_queuedcarousel.panel.admin.inc:475
+msgid "Contexts"
+msgstr ""
+
+#: sony_queuedcarousel.panel.admin.inc:483
+msgid "Save and proceed"
+msgstr ""
+
+#: sony_queuedcarousel.panel.admin.inc:529
+msgid "Your changes have been saved."
+msgstr ""
+
+#: sony_queuedcarousel.panel.admin.inc:594
+msgid "Are you sure you want to delete the panel \"@title\"?"
+msgstr ""
+
+#: sony_queuedcarousel.queue.admin.inc:56
+msgid ""
+"A system name for the carousel. This will be used when creating the "
+"CSS ID and for administration links. May only contain alphanumeric "
+"characters or underscores and must be unique."
+msgstr ""
+
+#: sony_queuedcarousel.queue.admin.inc:62
+msgid ""
+"A descriptive title. If provided, this will be used as a title when "
+"displaying the carousel."
+msgstr ""
+
+#: sony_queuedcarousel.queue.admin.inc:68
+msgid "Delay"
+msgstr ""
+
+#: sony_queuedcarousel.queue.admin.inc:71
+msgid ""
+"Number of seconds between automated rotation. If set to 0, the "
+"carousel will have no automated rotation, only manual navigation."
+msgstr ""
+
+#: sony_queuedcarousel.queue.admin.inc:118
+msgid "Are you sure you want to delete the queue \"@name\"?"
+msgstr ""
+
+#: sony_queuedcarousel.module:21
+msgid "create sony queued carousel panel"
+msgstr ""
+
+#: sony_queuedcarousel.module:21
+msgid "administer sony queued carousel panels"
+msgstr ""
+
+#: sony_queuedcarousel.module:42
+msgid "Create and administer queued panels."
+msgstr ""
+
+#: sony_queuedcarousel.module:45
+msgid "List Queues"
+msgstr ""
+
+#: sony_queuedcarousel.module:50
+msgid "Add Queue"
+msgstr ""
+
+#: sony_queuedcarousel.module:57,104
+msgid "Panel Settings"
+msgstr ""
+
+#: sony_queuedcarousel.module:62
+msgid "Delete Queue"
+msgstr ""
+
+#: sony_queuedcarousel.module:83
+msgid "Manage panels"
+msgstr ""
+
+#: sony_queuedcarousel.module:90
+msgid "Add panel"
+msgstr ""
+
+#: sony_queuedcarousel.module:96
+msgid "Add panel - Simple"
+msgstr ""
+
+#: sony_queuedcarousel.module:131
+msgid "Context"
+msgstr ""
+
+#: sony_queuedcarousel.info:0
+msgid "Sony Queued Carousel"
+msgstr ""
+
+#: sony_queuedcarousel.info:0
+msgid "magic magic ninja what?"
+msgstr ""
+
+#: sony_queuedcarousel.info:0
+msgid "Sony Music"
+msgstr ""
+

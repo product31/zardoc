@@ -1,0 +1,57 @@
+<?php
+/*
+ * Implementation of hook_theme_registry_alter().
+ * This function was implemented in the sony_ads module to override the actual
+ * theme_emvideo_brightcove3_flash() to allowscriptaccess to freewheel ads and
+ * other sponsor's ads.
+ *
+ * This funciton is implemented here to add wmode=opaque.
+ */
+
+function alavignecustom_theme_registry_alter(&$theme_registry) {
+	if (!empty($theme_registry['emvideo_brightcove3_flash'])) {
+		$theme_registry['emvideo_brightcove3_flash']['function'] = 'alavignecustom_emvideo_brightcove3_flash';
+  }
+}
+
+/**
+ * The Override function for embedded flash displaying the brightcove3 video.
+ * allowscriptaccess=always is added to allow access to freewheel ads.
+ * wmode=opaque to help with layout issues.
+ */
+function alavignecustom_emvideo_brightcove3_flash($item, $width, $height, $autoplay) {
+  $output = '';
+
+	if ($item['embed']) {
+    $publisher_id = variable_get('brightcove3_publisher_id', '');
+    $player_id = variable_get('brightcove3_player_id', '');
+
+    if (!empty($publisher_id) && !empty($player_id)) {
+      // If SWFObject API is available, use it.
+      if (function_exists('theme_swfobject_api')) {
+        $url = 'http://c.brightcove.com/services/viewer/federated_f9/' . $player_id . '?isVid=1&publisherID=' . $publisher_id;
+        $params = array(
+          'base' => 'http://admin.brightcove.com',
+          'name' => 'flashObj',
+          'width' => $width,
+          'height' => $height,
+					'allowScriptAccess' => 'always',
+          'seamlesstabbing' => 'false',
+          'type' => 'application/x-shockwave-flash',
+          'allowFullScreen' => 'true',
+          'swLiveConnect' => 'true',
+          'wmode' => 'opaque'
+        );
+        $vars = array(
+          'videoId' => $item['value'],
+          'playerId' => $player_id,
+        );
+			  return theme('swfobject_api', $url, $params, $vars);
+      }
+      $autostart = $autoplay ? 'autoStart=true' : 'autoStart=false';
+			return sprintf('<embed src="http://c.brightcove.com/services/viewer/federated_f9/%3$s?isVid=1&publisherID=%2$s" wmode="opaque" bgcolor="#FFFFFF" allowScriptAccess="always" flashVars="videoId=%1$s&playerID=%3$s&domain=embed&" base="http://admin.brightcove.com" name="flashObj" width="%4$d" height="%5$d" seamlesstabbing="false" type="application/x-shockwave-flash" allowFullScreen="true" swLiveConnect="true" pluginspage="http://www.macromedia.com/shockwave/download/index.cgi?P1_Prod_Version=ShockwaveFlash"></embed>',
+        $item['value'], $publisher_id, $player_id, $width, $height, $autoplay
+      );
+    }
+  }
+}

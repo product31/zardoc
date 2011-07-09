@@ -1,0 +1,68 @@
+﻿/*
+/ This style sheet can be used to assist you in the intial layout of the theme
+*/
+
+/*
+/ color ids:
+html: #BBBBBB
+body: #CC0000
+page-top
+page: #FF6600
+container: #FFCC00
+
+
+
+sidebar-right: steelblue
+sidebar-left: skyblue
+*/
+
+html {
+  border: 1px solid  #BBBBBB;
+}
+body {
+  border: 1px solid  #CC0000;
+}
+#page {
+  border: 1px solid  #FF6600;
+}
+#container {
+  border: 1px solid  #FFCC00;
+}
+
+html{
+ /*background: url(../images/htmlBG.png) ;*/
+}
+.panel-2col-stacked .panel-col-first .inside{
+  padding: 25px 0 0 0;
+  margin:0;
+}
+
+
+div.panel-col-first .inside .panel-pane {
+  background: url(../images/backgroundInside.png) center repeat-y;
+  margin:0;
+  padding:20px;
+  /*border: 1px red solid;*/
+}
+
+div.panel-col-first .panel-header-bg{
+ background: url(../images/backgroundTop.png) center top no-repeat ;
+ padding-top:20px;
+}
+
+div.panel-col-first .panel-footer-bg{
+  background: url(../images/backgroundBottom.png) center bottom no-repeat;
+  padding-bottom:1px;
+  height:75px;
+}
+
+div.panel-col-first .inside h2.title{
+  margin-top: -45px;
+}
+
+
+div.panel-col-first .inside .content {
+  margin: 0 18px;
+  color:#FFFFFF;
+}
+

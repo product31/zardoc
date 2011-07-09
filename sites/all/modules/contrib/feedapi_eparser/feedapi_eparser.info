@@ -1,0 +1,8 @@
+; $Id: feedapi_eparser.info,v 1.3 2009/08/13 16:54:55 neclimdul Exp $
+name = The Extensible XML FeedAPI Parser
+description = Fetchs and parses a feed using SimpleXML and allows other modules to further parse the feed.
+package = FeedAPI Add On
+dependencies[] = feedapi
+dependencies[] = ctools
+core = 6.x
+php = 5.0

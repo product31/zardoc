@@ -1,0 +1,86 @@
+# $Id$
+#
+# LANGUAGE translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  globalnews.admin.inc: n/a
+#  globalnews.module: n/a
+#  globalnews.info: n/a
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2010-05-11 13:10-0400\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: globalnews.admin.inc:23
+msgid "Step 1: Select region"
+msgstr ""
+
+#: globalnews.admin.inc:24
+msgid "Step 2: Subscribe to news"
+msgstr ""
+
+#: globalnews.admin.inc:77
+msgid "Region Settings"
+msgstr ""
+
+#: globalnews.admin.inc:78
+msgid "Configure Global News subscriptions."
+msgstr ""
+
+#: globalnews.admin.inc:83
+msgid "Global Region"
+msgstr ""
+
+#: globalnews.admin.inc:87
+msgid "Select your region."
+msgstr ""
+
+#: globalnews.admin.inc:92
+msgid "Global News Subscriptions"
+msgstr ""
+
+#: globalnews.admin.inc:94
+msgid "Current Global News subscriptions by region."
+msgstr ""
+
+#: globalnews.admin.inc:109
+msgid "Global News subscriptions."
+msgstr ""
+
+#: globalnews.admin.inc:134
+msgid "Select subscriptions for "
+msgstr ""
+
+#: globalnews.admin.inc:142
+msgid "Available news feeds."
+msgstr ""
+
+#: globalnews.module:29
+msgid "edit own news translation"
+msgstr ""
+
+#: globalnews.module:14 globalnews.info:0
+msgid "Global News"
+msgstr ""
+
+#: globalnews.module:15
+msgid "Select regional news feeds to subscribe to."
+msgstr ""
+
+#: globalnews.info:0
+msgid "Control access to edit news content in different languages."
+msgstr ""
+
+#: globalnews.info:0
+msgid "Multilanguage"
+msgstr ""
+

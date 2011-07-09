@@ -1,0 +1,95 @@
+/**
+*  LAYOUT STYLES
+*
+*  Define CSS classes to create a table-free,
+*  2-column, or single column layout 
+*  depending on whether blocks are enabled in the 
+*  right columns.
+*
+* starter widths:
+* page = 960px
+* main = 100% or 620px with right-sidebar
+* right-sidebar = 330px
+*/
+
+/**
+ * Layout
+ */
+body {
+  margin: 0 auto;
+  padding: 0 0 0 0;
+  min-width: 960px;
+}
+
+#page {
+  text-align: center;
+  width: 960px;
+  margin: 26px auto; /* this is for the sony toolbar */
+}
+
+#container {
+  margin: 0 auto;
+  text-align: left;
+}
+
+#header {
+  max-width: 960px;
+  position: relative;
+  text-align: left;
+  margin: 0 auto;
+}
+
+/* We must define 100% width to avoid the body being too narrow for near-empty pages */
+#main {
+  float: left;
+  width: 100%;
+  padding-bottom: 0;
+  margin-bottom: 10px;
+}
+
+/* So we move the #main container over the sidebars to compensate */
+
+body.sidebar-right #main {
+  width: 610px;
+}
+
+#squeeze {
+  position: relative;
+  padding: 0 10px 0 0;
+  margin: 0;
+}
+
+/* And add blanks left and right for the sidebars to fill */
+#sidebar-right {
+  width: 330px;
+  float: right;
+}
+
+/* We ensure the sidebars are still clickable using z-index */
+#container .sidebar {
+  padding-bottom: 0;
+  z-index: 2;
+  position: relative;
+}
+
+#container .sidebar .block {
+  margin: 0 0 1.5em 0;
+}
+
+#sidebar-left .block {
+  padding: 0 15px 0 0px;
+}
+
+#sidebar-right .block {
+  padding: 0 0px 0 15px;
+}
+
+.block .content {
+  margin: 0.5em 0;
+}
+
+#footer {
+  float: none;
+  clear: both;
+  margin: 4em 0 -3em;
+}

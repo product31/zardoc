@@ -1,0 +1,32 @@
+/* service links fixes */
+
+div.service_links ul {
+  width: 300px;
+}
+
+div.service_links ul li {
+  width: 100px;
+}
+
+div.view-events .pager li a,
+div.view-events .pager li.last a,
+#block-sonybmg_photo_gallery-photos_pager .pager-previous,
+#block-sonybmg_photo_gallery-photos_pager .pager-next,
+#block-sonybmg_photo_gallery-photos_pager span,
+.node-navigation span.arrow,
+.node-navigation a.arrow {
+  background: transparent url('../images/icons/arrow-next-large-ie.gif') no-repeat 0 0;
+}
+
+div.view-events .pager li.first a,
+div.node-navigation a.node-previous,
+div.node-navigation span.arrow.node-previous-disabled,
+div#block-sonybmg_photo_gallery-photos_pager .pager-previous {
+  background-image: url('../images/icons/arrow-prev-large-ie.gif');
+}
+
+.tabs ul.primary li a,
+.tabs ul.primary li a .tab {
+  float: left;
+  display: inline;
+}

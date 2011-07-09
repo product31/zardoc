@@ -1,0 +1,28 @@
+# Malaysia (Malay) translation of sonybmg_forum (all releases)
+# Copyright (c) 2010 by the Malaysia (Malay) translation team
+# Generated from files:
+#  sonybmg_forum/styles/sony/advanced_forum.sony.search-forum.tpl.php: n/a
+#  sonybmg_forum/styles/sony/advanced_forum.sony.search-topic.tpl.php: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sonybmg_forum (all releases)\n"
+"POT-Creation-Date: 2010-04-12 11:15-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Malaysia (Malay)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: styles/sony/advanced_forum.sony.search-forum.tpl.php:19; styles/sony/advanced_forum.sony.search-topic.tpl.php:20
+msgid "Search"
+msgstr ""
+
+#: styles/sony/advanced_forum.sony.search-forum.tpl.php:21; styles/sony/advanced_forum.sony.search-topic.tpl.php:22
+msgid "Enter the terms you wish to search for."
+msgstr ""
+
+#: styles/sony/advanced_forum.sony.search-forum.tpl.php:23; styles/sony/advanced_forum.sony.search-topic.tpl.php:25
+msgid "GO"
+msgstr ""
+

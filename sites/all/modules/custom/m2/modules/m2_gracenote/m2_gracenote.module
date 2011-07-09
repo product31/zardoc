@@ -1,0 +1,190 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Provides Gracenote formatting for M2 lyrics fields.
+ */
+
+// Switch this flag to TRUE to output lyrics as utf8 encoded html. For now this
+// is FALSE, but if its deemed necessary, the hard-work is already done.
+define('M2_GRACENOTE_OBSCURE_LYRICS', FALSE);
+
+/**
+ * Implementation of hook_menu().
+ */
+function m2_gracenote_menu() {
+  $items = array();
+  $items['music/lyrics/terms'] = array(
+    'title' => 'Lyrics Terms of Use',
+    'page callback' => 'theme',
+    'page arguments' => array('m2_gracenote_eula'),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['admin/sony/lyrics_admin'] = array(
+    'title' => 'Administer lyrics',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('m2_gracenote_admin_form'),
+    'access arguments' => array('administer nodes'),
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_field_formatter_info().
+ */
+function m2_gracenote_field_formatter_info() {
+  return array(
+    'lyrics' => array(
+      'label' => t('Gracenote lyrics'),
+      'field types' => array('m2_music_lyrics'),
+      'multiple values' => CONTENT_HANDLE_CORE,
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function m2_gracenote_theme($existing, $type, $theme, $path) {
+  return array(
+    'm2_gracenote_formatter_lyrics' => array(
+      'arguments' => array('element' => NULL),
+      'template' => 'm2-gracenote-formatter-lyrics',
+    ),
+    'm2_gracenote_eula' => array(
+      'template' => 'm2-gracenote-eula',
+    ),
+    'm2_gracenote_branding' => array(),
+  );
+}
+
+/**
+ * Implementation of hook_preprocess_m2_gracenote_formatter_lyrics().
+ */
+function m2_gracenote_preprocess_m2_gracenote_formatter_lyrics(&$vars) {
+  if (!m2_gracenote_lyrics_access()) {
+    $vars['lyrics'] = '<p>'. t('Lyrics are only available in the United States.') .'</p>';
+    return;
+  }
+
+  $document = $vars['element']['#item']['document'];
+  if (!$document) {
+    return;
+  }
+  if (!is_object($document)) {
+    $document = json_decode($document);
+  }
+  $vars['document'] = $document;
+
+  $vars['title'] = check_plain($document->title);
+  $vars['performer'] = check_plain($document->artist_text);
+  $vars['writer'] = is_array($document->credits->SONGWRITER) ? check_plain(join("; ", $document->credits->SONGWRITER)) : '';
+  $vars['copyright'] = '';
+  if (is_array($document->credits->PUBLISHER)) {
+    foreach ($document->credits->PUBLISHER as $publisher) {
+      $vars['copyright'] .= "&copy; $publisher<br/>\n";
+    }
+  }
+
+  // Combine content array into well formed html.
+  $lyrics = '';
+  foreach ($document->content as $stanza) {
+    $lyrics .= "<p>";
+    foreach ($stanza as $line) {
+      $lyrics .= (M2_GRACENOTE_OBSCURE_LYRICS ? m2_utf8_encode($line) : $line) ."<br/>";
+    }
+    $lyrics .= "</p>";
+  }
+  $lyrics .= "\n";
+
+  // TODO: Add reporting image to $lyrics
+  $lyrics .= m2_gracenote_reporting_gif($document->id);
+  $vars['lyrics'] = $lyrics;
+
+  // The message for the printed page
+  $vars['print_message'] = t('Please visit %url for lyrics.', array('%url' => url(NULL, array('absolute' => TRUE))));
+
+  $vars['branding'] = theme('m2_gracenote_branding');
+
+  $css = <<<EOD
+  <style type="text/css">
+  .gracenote-lyrics { display: none; }
+  .gracenote-lyrics-print { display: none; }
+  body { -moz-user-select: none; }
+
+  @media print{
+    .gracenote-lyrics { display: none !important; }
+    .gracenote-lyrics-print { display: block; }
+  }
+  </style>
+  <script type="text/javascript">
+		document.oncontextmenu = function() { return false; };
+		document.onkeydown = catchCtrl;
+		if(document.captureEvents) document.captureEvents(Event.ONKEYDOWN)
+
+		function catchCtrl(e){
+			if(!e) var e = window.event;
+			if(e.keyCode == 17){
+				return false;
+			}
+		}
+	</script>
+EOD;
+  drupal_set_html_head($css);
+  $script = <<<EOD
+$(function() {
+  $('body').attr('unselectable', 'on');
+  $('.gracenote-lyrics').show();
+});
+EOD;
+  drupal_add_js($script, 'inline');
+}
+
+/**
+ *
+ */
+function m2_gracenote_lyrics_access() {
+  global $language;
+
+  // We can display lyrics to all countries now!
+  return TRUE;
+
+  $countries = array('US', 'CA');
+  $geoip_cc = strtoupper(geoip_country_code());
+  list($ignore, $lang_cc) = explode('-', strtoupper($language->language));
+
+  $access = (in_array($geoip_cc, $countries) && in_array($lang_cc, $countries))
+    || (geoip_ip_address() == '127.0.0.1');
+
+  return $access;
+}
+
+/**
+ * Convert text to utf-8 html entities, to obfuscate the source.
+ */
+function m2_utf8_encode($text) {
+  $convmap = array(0x0, 0xffff, 0, 0xffff);
+  return mb_encode_numericentity($text, $convmap, 'UTF-8');
+}
+
+function m2_gracenote_reporting_gif($id) {
+  $url = M2_ENDPOINT_NOAUTH ."document_access/{$id}.gif";
+  $url .= '?nocache='. time();
+
+  return "<img src=\"{$url}\" />";
+}
+/**
+ * Theme function for the standard Gracenote branding and Terms of Service link.
+ */
+function theme_m2_gracenote_branding() {
+  $output = l(t('Lyrics terms of service'), 'music/lyrics/terms');
+  $output .= '<br/>';
+  $output .= theme('image', drupal_get_path('module', 'm2_gracenote') .'/gracenote.gif');
+  $output .= ' Lyrics provided by Gracenote';
+  return $output;
+}
+

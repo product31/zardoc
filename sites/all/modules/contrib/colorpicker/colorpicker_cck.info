@@ -1,0 +1,8 @@
+; $Id$
+name = Colorpicker Widget
+description = Adds a color picker widget.
+package = CCK
+core = 6.x
+dependencies[] = colorpicker
+dependencies[] = content
+dependencies[] = text

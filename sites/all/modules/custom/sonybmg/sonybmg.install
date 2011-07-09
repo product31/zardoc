@@ -1,0 +1,170 @@
+<?php
+// $Id$
+/**
+ * @file
+ * Install file for sonybmg.module
+ */
+
+/**
+ * Implementation of hook_install().
+ */
+function sonybmg_install() {
+  variable_set('site_403', 'sonybmg/access-denied');
+}
+
+/**
+ * Implementation of hook_update_N().
+ * Upgrade from Drupal 5.x
+ */
+function sonybmg_update_6000() {
+  $ret = array();
+
+  // remove HTML corrector filter from 'Full HTML no breaks' format
+  include_once(drupal_get_path('module', 'install_profile_api') .'/core/filter.inc');
+  install_remove_filter(4, 'filter', 3);
+
+  // use sonybmg_nodecomments view
+  foreach (node_get_types('types') as $type) {
+    variable_set('comment_view_'. $type->type, 'sonybmg_nodecomments');
+  }
+
+  return $ret;
+}
+
+/**
+ * Set the site_403 variable to sonybmg/access-denied if not already set.
+ */
+function sonybmg_update_6001() {
+  $ret = array();
+
+  $site_403 = variable_get('site_403', '');
+  if (!$site_403) {
+    variable_set('site_403', 'sonybmg/access-denied');
+    $ret[] = array('success' => TRUE, 'query' => "variable_set('site_403', 'sonybmg/access-denied')");
+  }
+
+  return $ret;
+}
+
+/**
+ * Set Page Sidebar block to no cache
+ */
+function sonybmg_update_6002() {
+  $ret = array();
+  $ret[] = update_sql('UPDATE {blocks} SET cache = '. BLOCK_NO_CACHE .' WHERE module = "sonybmg" AND delta = "10"');
+  return $ret;
+}
+
+/**
+ * Fix block caching.
+ */
+function sonybmg_update_6003() {
+  _sonybmg_fix_block_cache();
+  return array();
+}
+
+/**
+ * Set the SonyBMG forum module to active, skipping the normal install.
+ */
+function sonybmg_update_6004() {
+  $ret = array();
+  if (module_exists('nodeforum')) {
+    // Enable Sony BMG Forum module manually.
+    $ret[] = update_sql("UPDATE {system} SET status = 1 WHERE type = 'module' AND name = 'sonybmg_forum'");
+    if (!db_affected_rows()) {
+      $ret[] = update_sql("INSERT INTO {system} (filename, name, type, status) VALUES ('sites/all/modules/custom/sonybmg_forum/sonybmg_forum.module', 'sonybmg_forum', 'module', 0)");
+    }
+    // Reset the schema for nodeforum module, which had been hacked with a custom update function.
+    drupal_set_installed_schema_version('nodeforum', 0);
+  }
+  return $ret;
+}
+
+/**
+ * Disable unnecessary menu items and views.
+ */
+function sonybmg_update_6005() {
+  $ret = array();
+
+  $views = array(
+    'friendlist_manage_oneway',
+    'friendlist_manage_twoway',
+    'friendlist_public_oneway',
+    'friendlist_public_twoway',
+    'flag_favorite',
+    'flag_favorites',
+    'flag_signup',
+    'flag_promote',
+    'flag_bookmarks',
+    'flag_offensive',
+  );
+
+  $menu_items = array(
+    'invite',
+  );
+
+  // Disable views.
+  $views_status = variable_get('views_defaults', array());
+  foreach ($views as $view_name) {
+    $views_status[$view_name] = TRUE;
+    $ret[] = array('success' => TRUE, 'query' => t('Disabled the %name default view.', array('%name' => $view_name)));
+  }
+  variable_set('views_defaults', $views_status);
+
+  // Disable the menu items.
+  foreach ($menu_items as $path) {
+    db_query("UPDATE {menu_links} SET hidden = 1 WHERE menu_name = 'navigation' AND link_path = '%s'", $path);
+    if (db_affected_rows()) {
+      $ret[] = array('success' => TRUE, 'query' => t('Disabled the %path menu item.', array('%path' => $path)));
+    }
+  }
+  menu_cache_clear('navigation');
+
+  return $ret;
+}
+
+/**
+ * Implementation of hook_enable().
+ */
+function sonybmg_enable() {
+  $menu = array();
+  $menu = menu_tree_all_data();
+  foreach ( $menu as $items => $item ) {
+    if (strstr(($item['link']['link_path']), 'oneway') || strstr(($item['link']['link_path']), 'flags') || strstr(($item['link']['link_path']), 'invite') || strstr(($item['link']['link_path']), 'messages') || strstr(($item['link']['link_path']), 'connections') || ($item['link']['link_path'] == 'news')) {
+      $menu_item = menu_link_load($item['link']['mlid']);
+      $menu_item['hidden'] = '1';
+      menu_link_save($menu_item);
+    };
+  }
+
+  _sonybmg_fix_block_cache();
+}
+
+/**
+ * In the upgrade/install process there are several blocks that have an
+ * inappropriate cache value. The only way to update this is by direct query so
+ * we are forced to do it here. This is abstracted so it can be used in an
+ * update as well as on install.
+ */
+function _sonybmg_fix_block_cache() {
+  _block_rehash();
+
+  foreach (module_list() as $module) {
+    $module_blocks = module_invoke($module, 'block', 'list');
+    if ($module_blocks) {
+      foreach ($module_blocks as $delta => $block) {
+        if (isset($block['cache'])) {
+          // update for all themes
+          db_query('UPDATE {blocks} SET cache = %d WHERE module = "%s" AND delta = "%s"', $block['cache'], $module, $delta);
+          drupal_set_message(t('Block cache updated for %module:%delta', array('%module' => $module, '%delta' => $delta)));
+        }
+      }
+    }
+  }
+
+  // Views doesn't set a default for default views blocks.  should be no cache.
+  // see http://admin.gdb-dev.com/project/issues/724
+  db_query('UPDATE {blocks} SET cache = %d WHERE module = "%s"', BLOCK_NO_CACHE, 'views');
+  drupal_set_message(t('Block cache updated for %module:%delta', array('%module' => 'views', '%delta' => '*')));
+
+}

@@ -1,0 +1,73 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * This file implements usernodes, a lightweight way to associate a certain number of
+ * nodes with a user account. This module was created as a fork of the nodelimit project in drupal.
+ */
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function usernodes_form_alter(&$form, $form_state, $form_id) {
+  global $user;
+  if ($form_id == 'node_type_form') {
+    $form['workflow']['usernodes_limit'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Maximum number per user'),
+      '#default_value' => variable_get('usernodes_limit_'. $form['old_type']['#value'], 0),
+      '#size' => 7,
+      '#maxlength' => 7,
+      '#description' => t('The maximum number of nodes of this content type that a user is allowed to create. Enter 0 for no limit.'),
+      '#validate' => array('usernodes_validate_integer' => array()),
+    );
+  }
+  
+  // if the form_id is for a specific node type, and there is no node id, and the user cannot create
+  // any more nodes of this type, then either send them to an existing node,
+  // or simply unset the form.
+  if (arg(0) != 'admin') {
+    if (isset($form['#node'])) {
+      $node = $form['#node'];
+      if ($type = $form['type']['#value']) {
+        if ($form_id == $type .'_node_form' && !$node->nid && usernodes_nodes_left($type, $user->uid) === 0) {
+          // If the user can only create one of this $type, and one exists, it is safe to send them there to edit.
+          if (variable_get('usernodes_limit_'. $type, 0) == 1 && node_access('update', $node)) {
+            // if there's only one node of this type, go to it.
+            drupal_set_message(t('You cannot create another %type post, but you can edit the one you already have.', array('%type' => node_get_types('name', $node))));
+            $nid = db_result(db_query("SELECT nid FROM {node} WHERE uid = %d AND type = '%s'", $node->uid, $node->type));
+            drupal_goto('node/'. $nid .'/edit');
+          }
+          else {
+            drupal_set_message(t("You cannot create any more %type items.", array('%type' => node_get_types('name', $node))));
+            drupal_goto('node/add');
+          }
+        }
+      }
+    }
+  }
+}
+
+function usernodes_validate_integer($formelement) {
+  if (!is_numeric($formelement['#value'])) {
+    form_set_error($formelement['#name'], t('@title: Must be an integer.', array('@title' => $formelement['#title'])));      
+  }
+  if ((int)$formelement['#value'] < 0) {
+    form_set_error($formelement['#name'], t('@title: Must be zero or greater.', array('@title' => $formelement['#title'])));  
+  }
+  // form_set_value($formelement['#value'], (int) $formelement['#value']);
+}
+
+/**
+ * @return int
+ *   The number of nodes the user has left to create or -1 if unlimited.
+ */
+function usernodes_nodes_left($type, $uid) {
+  if ($usernode_max = variable_get('usernodes_limit_'. $type, 0)) {
+    $usernode_count = db_result(db_query('SELECT count(nid) FROM {node} WHERE uid = %d AND type = "%s"', $uid, $type));
+    $difference = $usernode_max - $usernode_count;
+    return $difference >= 0 ? $difference : 0;
+  }
+  return -1;
+}

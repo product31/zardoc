@@ -1,0 +1,83 @@
+<?php
+/**
+ * Convert Event dates from "datestamp" to "date" type to match other D6 sites.
+ */
+function sonybmg_events_update_6000() {
+  if ($abort = content_check_update('sonybmg_events')) {
+    return $abort;
+  }
+
+  // Date fields will not update properly unless Date module has updated.
+  if (drupal_get_installed_schema_version('date') < 6000) {
+    return array(
+      '#abort' => array('success' => FALSE, 'query' => t('Date module must be updated before events can be updated.')),
+    );
+  }
+
+  $ret = array();
+
+  // Load necessary modules and files need for this operation.
+  module_enable(array('content', 'content_copy', 'install_profile_api'));
+  include_once drupal_get_path('module', 'content') .'/includes/content.crud.inc';
+  include_once drupal_get_path('module', 'install_profile_api') .'/contrib/content_copy.inc';
+
+  // Copy the entire date table over to preserve dates.
+  $ret[] = update_sql("CREATE TABLE {tmp_date} LIKE {content_type_date}");
+  $ret[] = update_sql("INSERT INTO {tmp_date} SELECT * FROM {content_type_date}");
+
+  // Delete the original date field.
+  content_field_instance_delete('field_date', 'date');
+
+  // Create the new date field.
+  $file = drupal_get_path('module', 'sonybmg_events') .'/node.date.inc';
+  install_content_copy_import_from_file($file, 'date');
+
+  // Move data from the the temp date table into the new date field.
+  $result = db_query('SELECT vid, nid, field_date_value FROM {tmp_date}');
+  while ($row = db_fetch_array($result)) {
+    db_query("UPDATE {content_type_date} SET field_date_value = '%s' WHERE nid = %d AND vid = %d", date('Y-m-d', $row['field_date_value']) . 'T00:00:00', $row['nid'], $row['vid']);
+  }
+
+  // Remove our temporary tables.
+  db_drop_table($ret, 'tmp_date');
+
+  return $ret;
+}
+
+/**
+ * Set block cache to BLOCK_CACHE_PER_PAGE for the photos_pager block.
+ */
+function sonybmg_events_update_6001() {
+  $ret = array();
+  $ret[] = update_sql('UPDATE {blocks} SET cache = '. BLOCK_CACHE_PER_PAGE .' WHERE module = "sonybmg_events"');
+  return $ret;
+}
+
+/**
+ * Change URL lengths in created fields to 2048 because 255 is too short
+ */
+function sonybmg_events_update_6002() {
+  $ret = array();
+  // Get ticket_sales_url and field_venue_url fields from all content types
+  $update_fields = array();
+  foreach (content_types_install() as $type_name => $fields) {
+    foreach ($fields as $field) {
+      if ($field['field_name'] == 'field_venue_url' || $field['field_name'] == 'field_ticket_sales_url') {
+        // We only process a given field once.
+        $update_fields[$field['field_name']] = $field;
+      }
+    }
+  }
+  
+  // Update each field
+  module_load_include('inc', 'content', 'includes/content.crud');
+  foreach ($update_fields as $field) {
+    $fields = content_field_instance_read(array('field_name' => $field['field_name']));
+    foreach ($fields as $field_new) {
+      $field_new['max_length'] = 2048;
+      content_field_instance_update($field_new);
+    }
+  }
+  content_clear_type_cache(TRUE);
+  return $ret;
+}

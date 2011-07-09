@@ -1,0 +1,20 @@
+# Taiwan translation of sonybmg_photo_gallery (all releases)
+# Copyright (c) 2010 by the Taiwan translation team
+# Generated from files:
+#  sonybmg_photo_gallery/sonybmg_photo_gallery.module: n/a
+#  sonybmg_photo_gallery/sonybmg_photo_gallery.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sonybmg_photo_gallery (all releases)\n"
+"POT-Creation-Date: 2010-04-12 15:24-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Taiwan\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: sonybmg_photo_gallery.module:183; sonybmg_photo_gallery.info:0
+msgid "Photo gallery"
+msgstr ""
+

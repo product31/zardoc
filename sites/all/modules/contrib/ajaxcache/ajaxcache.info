@@ -1,0 +1,4 @@
+; $Id: ajaxcache.info,v 1.1 2010/02/17 19:18:43 andrewlevine Exp $ 
+name = Ajax Cache
+description = Static file cache for ajax callbacks.
+core = 6.x

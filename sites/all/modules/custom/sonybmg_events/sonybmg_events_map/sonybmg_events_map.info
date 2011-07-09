@@ -1,0 +1,12 @@
+; $Id$
+name = Sony BMG Events Map
+description = Implements mapping views and blocks for Sony events.
+dependencies[] = sonybmg_events
+dependencies[] = views
+dependencies[] = content
+dependencies[] = gmap
+dependencies[] = location
+dependencies[] = gmap_location
+dependencies[] = location_node
+package = Sony BMG
+core = 6.x

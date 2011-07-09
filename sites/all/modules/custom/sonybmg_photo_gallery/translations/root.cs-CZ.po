@@ -1,0 +1,238 @@
+# Czech Republic translation of sonybmg_photo_gallery (all releases)
+# Copyright (c) 2010 by the Czech Republic translation team
+# Generated from files:
+#  sonybmg_photo_gallery/sonybmg_photo_gallery.module: n/a
+#  sonybmg_photo_gallery/sonybmg_photo_gallery.info: n/a
+#  sonybmg_photo_gallery/sonybmg_photo_gallery.admin.inc: n/a
+#  sonybmg_photo_gallery/sonybmg_photo_gallery.install: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sonybmg_photo_gallery (all releases)\n"
+"POT-Creation-Date: 2010-04-05 15:59-0500\n"
+"PO-Revision-Date: 2010-03-30 11:21-0500\n"
+"Language-Team: Czech Republic\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=((((n%10)==1)&&((n%100)!=11))?(0):(((((n%10)>=2)&&((n%10)<=4))&&(((n%100)<10)||((n%100)>=20)))?(1):2));\n"
+
+#: sonybmg_photo_gallery.module:587
+msgid "Home"
+msgstr "Domů"
+
+#: sonybmg_photo_gallery.info:0
+msgid "Sony BMG"
+msgstr ""
+
+#: sonybmg_photo_gallery.module:541
+msgid "View"
+msgstr "Zobrazit"
+
+#: sonybmg_photo_gallery.module:776,779
+msgid "Next"
+msgstr ""
+
+#: sonybmg_photo_gallery.module:758,761
+msgid "Previous"
+msgstr ""
+
+#: sonybmg_photo_gallery.module:267
+msgid "Photo"
+msgstr ""
+
+#: sonybmg_photo_gallery.module:588,156
+msgid "Photos"
+msgstr "Foto"
+
+#: sonybmg_photo_gallery.module:447
+msgid "<strong>1</strong> image"
+msgid_plural "<strong>@count</strong> images"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: sonybmg_photo_gallery.admin.inc:29
+msgid "Official gallery"
+msgstr ""
+
+#: sonybmg_photo_gallery.admin.inc:32
+msgid "The gallery to use for official photos."
+msgstr ""
+
+#: sonybmg_photo_gallery.admin.inc:37
+msgid "User gallery"
+msgstr ""
+
+#: sonybmg_photo_gallery.admin.inc:40
+msgid "The gallery to use for user photos."
+msgstr ""
+
+#: sonybmg_photo_gallery.admin.inc:45
+msgid "Additional gallery links (compact view)"
+msgstr ""
+
+#: sonybmg_photo_gallery.admin.inc:47
+msgid ""
+"These links (one per line) will appear in the compacy list of "
+"galleries alongside the dynamic categories. Use it for links to "
+"offsite photo galleries like HotOrNot, etc."
+msgstr ""
+
+#: sonybmg_photo_gallery.admin.inc:52
+msgid "Additional gallery links (full view)"
+msgstr ""
+
+#: sonybmg_photo_gallery.admin.inc:54
+msgid ""
+"This HTML will appear in the gallery sidebar on the main photo page, "
+"in addition to the dynamic categories. Use it for links to offsite "
+"photo galleries like HotOrNot, etc."
+msgstr ""
+
+#: sonybmg_photo_gallery.admin.inc:59
+msgid "Pager settings"
+msgstr ""
+
+#: sonybmg_photo_gallery.admin.inc:64
+msgid "Location"
+msgstr "Místo"
+
+#: sonybmg_photo_gallery.admin.inc:66
+msgid "Above the photo"
+msgstr ""
+
+#: sonybmg_photo_gallery.admin.inc:67
+msgid "Below the photo"
+msgstr ""
+
+#: sonybmg_photo_gallery.admin.inc:68
+msgid ""
+"Don't display the pager. Use this if you would rather display the "
+"pager block."
+msgstr ""
+
+#: sonybmg_photo_gallery.admin.inc:74
+msgid "Number of photos per page"
+msgstr ""
+
+#: sonybmg_photo_gallery.module:27
+msgid "Photo galleries"
+msgstr ""
+
+#: sonybmg_photo_gallery.module:28
+msgid "Photo galleries (Compact)"
+msgstr ""
+
+#: sonybmg_photo_gallery.module:29
+msgid "Photos official (featured)"
+msgstr ""
+
+#: sonybmg_photo_gallery.module:30
+msgid "Photos official (latest)"
+msgstr ""
+
+#: sonybmg_photo_gallery.module:31
+msgid "Photos user (featured)"
+msgstr ""
+
+#: sonybmg_photo_gallery.module:33
+msgid "Photos Pager"
+msgstr ""
+
+#: sonybmg_photo_gallery.module:41
+msgid "Photos official (latest @name)"
+msgstr ""
+
+#: sonybmg_photo_gallery.module:42
+msgid "Photos official (featured @name)"
+msgstr ""
+
+#: sonybmg_photo_gallery.module:57
+msgid "Image display"
+msgstr ""
+
+#: sonybmg_photo_gallery.module:59
+msgid ""
+"The individual image will be displayed using this preset. To configure "
+"your presets, visit the <a href=\"!path\">imagecache settings "
+"page</a>."
+msgstr ""
+
+#: sonybmg_photo_gallery.module:73,78
+msgid "Fan Photos"
+msgstr ""
+
+#: sonybmg_photo_gallery.module:83,89
+msgid "Official @artist Photos"
+msgstr ""
+
+#: sonybmg_photo_gallery.module:94
+msgid "Featured @artist Fan Photo"
+msgstr ""
+
+#: sonybmg_photo_gallery.module:112
+msgid "Latest @name"
+msgstr ""
+
+#: sonybmg_photo_gallery.module:117
+msgid "@name"
+msgstr ""
+
+#: sonybmg_photo_gallery.module:295
+msgid "Only jpg, png, and gif format images may be uploaded."
+msgstr ""
+
+#: sonybmg_photo_gallery.module:443
+msgid "<strong>Upload your images</strong>"
+msgstr ""
+
+#: sonybmg_photo_gallery.module:557
+msgid "Currently no featured photos."
+msgstr ""
+
+#: sonybmg_photo_gallery.module:569
+msgid "Supersize!"
+msgstr ""
+
+#: sonybmg_photo_gallery.module:571
+msgid "Show a full sized version of this photo"
+msgstr ""
+
+#: sonybmg_photo_gallery.module:800
+msgid ""
+"Want to share your pictures with other fans? <a "
+"href=\"@photo_url\">Click here!</a>"
+msgstr ""
+
+#: sonybmg_photo_gallery.module:803
+msgid ""
+"Want to share your pictures with other fans? <a "
+"href=\"@login_url\">Login or create an account!</a>"
+msgstr ""
+
+#: sonybmg_photo_gallery.module:538
+msgid "@count more"
+msgid_plural "more"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+#: sonybmg_photo_gallery.module:199
+msgid "administer photo gallery"
+msgstr ""
+
+#: sonybmg_photo_gallery.module:184
+msgid ""
+"Configure the taxonomy vocabularies and settings for the online photo "
+"gallery."
+msgstr ""
+
+#: sonybmg_photo_gallery.install:22
+msgid "Sony BMG Photo Gallery has been uninstalled."
+msgstr ""
+
+#: sonybmg_photo_gallery.info:0
+msgid "Implements a browsable photo gallery using CCK types and views."
+msgstr ""
+

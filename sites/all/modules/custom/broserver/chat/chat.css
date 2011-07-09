@@ -1,0 +1,171 @@
+body {
+  background: #777777;
+  font-family: arial, sans-serif;
+  font-size: 14px;
+  margin: 0;
+  padding: 0;
+}
+
+/* Chat
+----------------------------------------*/
+#chat {
+  width: 462px;
+  height: 325px;
+  margin: 0;
+  overflow-y: scroll;
+  overflow-x: hidden;  
+	background-color: #fff;
+}
+
+#chat .msg {
+  background: #fff;
+  padding: 10px 5px;
+}
+#chat .even{
+  background-color: #ebebeb;
+}
+#chat .msg strong {
+	padding-right: 10px;
+}
+#chat .msg p {
+display: inline;
+}
+
+#chat .error-msg {
+  text-align: center;
+  font-style: italic;
+  background: #fcc;
+  border-bottom: 1px solid #DD7777;
+  border-top: 1px solid #DD7777;
+}
+#chat .presence p {
+  color: #999;
+  display: block;
+  font-style: italic;
+  margin: 0;
+  text-align: center;
+}
+#chat .info-msg p {
+  color: #999;
+  display: block;
+  font-style: italic;
+  margin: 0;
+  text-align: center;
+}
+
+form {
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  width: 100%;
+  background: #777777;
+  margin: 0;
+  padding: 4px 0;
+  height: auto;
+}
+#send_chat_form input.message {
+  background: #fff;
+  border: none;
+  color: #999;
+  font-size: 16px;
+  line-height: 24px;
+  height: 24px;
+  width: 375px;
+  padding: 3px 5px 0;
+  float: left;
+}
+#send_chat_form input.message:focus {
+  color: #222;
+}
+
+/* @group Clearfix */
+#chat .msg:after {
+  content: ".";
+  display: block;
+  clear: both;
+  visibility: hidden;
+  line-height: 0;
+  height: 0;
+}
+
+#chat .msg {
+  display: inline-block;
+}
+
+html[xmlns] #chat .msg {
+  display: block;
+}
+
+* html #chat .msg {
+  height: 1%;
+}
+/* @end */
+
+/* clearfix adds weird space to the bottom.  this overflow fixes that */
+#chat .msg {
+  overflow: hidden;
+}
+
+
+#broserver-chat-login-form label {
+  display: inline;
+  color: #fff;
+  float: left;
+  width: 110px;
+  padding: 3px 0;
+}
+.form-item { margin: 5px 0; }
+.form-item .form-item { margin: 0; }
+
+.form-text {
+  background: #fff;
+  border: none;
+  color: #999;
+  font-size: 16px;
+  line-height: 24px;
+  height: 24px;
+  padding: 3px 5px 0;
+}
+#edit-nick {
+  width: 200px;
+}
+.form-submit {
+  background: url(../v1/img/silver/chat-send.png) no-repeat 0 0;
+  border: none;
+  color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+  height: 24px;
+  width: 67px;
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  display: block;
+}
+.form-select {
+  background: #fff;
+  border: none;
+  color: #999;
+  font-size: 16px;
+  line-height: 24px;
+  height: 24px;
+  padding: 3px 3px 3px 5px;
+}
+#dob-wrapper .form-item {
+  float: left;
+  margin-right: 5px;
+}
+
+div.coppa-error {
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  width: 100%;
+  background: #777777;
+  margin: 0;
+  padding: 4px 0;
+  height: 24px;
+  font-size: 10px;
+  text-align: center;
+  color: #fff;
+}

@@ -1,0 +1,5 @@
+name = Tumblr API
+description = Provides integration with the Tumblr microblogging API.
+package = Microblogging
+core = 6.x
+php = 5.2

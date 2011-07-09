@@ -1,0 +1,11 @@
+K 10
+svn:ignore
+V 19
+settings.php
+files
+
+K 13
+svn:mergeinfo
+V 90
+/multisite/branches/d6-dev/public_html/sites/alavigne6:17228,28570,28650,33455,33924-45751
+END

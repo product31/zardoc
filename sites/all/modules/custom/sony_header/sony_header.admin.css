@@ -1,0 +1,101 @@
+@CHARSET "US-ASCII";
+
+div.subitem {
+	clear: both;
+	height: 1.7em;
+	margin: -0.4em 0.2em -0.4em -0.4em;
+	padding: 0.42em 0 0.42em 0.6em;
+}
+
+.sh-indentation {
+	width: 20px;
+	height: 1.7em;
+	margin: -0.4em 0.6em -0.4em -0.4em;
+	padding: 0.42em 0 0.42em 0.6em;
+	float: left;
+	background: transparent url(../../../../misc/tree.png) no-repeat scroll 11px center;
+}
+
+#sony-header-items td {
+	vertical-align: top;
+}
+
+.sony-header-operations div.item-list ul li {
+    list-style-type: none;
+    display: inline;
+    margin-left: 1px;    
+}
+.sony-header-operations div.item-list ul li a:link,
+.sony-header-operations div.item-list ul li a:visited {
+  padding:1px 5px 1px;
+  cursor: pointer;
+}
+.sony-header-operations div.item-list ul li a:hover{
+   color: #CCC;
+  background-color:#333;
+ }
+
+tr .subitem:last-child .sh-indentation {
+	background: transparent url(../../../../misc/tree-bottom.png) no-repeat scroll 11px center;
+}
+
+.default-attributes .form-item {
+	float:left;
+    margin-left:10px;
+    width:150px;
+}
+
+.flash-header-preview,
+.flash-header-preview img{
+  display: block;
+  position: relative;
+  max-width: 400px;
+  height: auto; 
+}
+
+.flash-header-preview img,
+.flash-header-preview .item-content {
+    background-color: #FFF;
+    border: 1px dashed orange;
+    margin: 5px;
+    padding: 5px;
+}
+
+.flash-header-preview h1,
+.flash-header-preview h2{
+  font-size: 14px;  
+}
+
+#flash-header-admin-preview object,
+.flash-header-preview img {
+  border: 1px dashed grey;  
+  margin: 0;
+  padding: 0;
+}
+
+#sony-header-admin-header-manage {
+  position: relative;
+}
+
+a#flash-header-new-link {
+  cursor:pointer;
+  display:block;
+  font-size:14px;
+  margin:5px;
+  padding:5px;
+  position: relative;
+  text-decoration:none;
+}
+
+#sony-header-items a.published,
+#sony-header-items a.published:link,
+#sony-header-items a.published:visited{
+  border-right: 15px  green solid;
+  padding-right: 5px;
+}
+#sony-header-items a.unpublished,
+#sony-header-items a.unpublished:link,
+#sony-header-items a.unpublished:visited{
+  border-right: 15px red solid;
+  padding-right: 5px;
+}

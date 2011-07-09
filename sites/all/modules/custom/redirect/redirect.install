@@ -1,0 +1,54 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * file_description
+ */
+
+/**
+ * Implementation of hook_install().
+ */
+function redirect_install() {
+  drupal_install_schema('redirect');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function redirect_uninstall() {
+  drupal_uninstall_schema('redirect');
+}
+
+/**
+ * Implementation of hook_schema().
+ */
+function redirect_schema() {
+  $schema['redirect'] = array(
+    'fields' => array(
+      'rid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE, 
+        'not null' => TRUE,
+      ),
+      'path' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'url' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'code' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),  
+    'primary key' => array('rid'),   
+  );
+  return $schema;
+}

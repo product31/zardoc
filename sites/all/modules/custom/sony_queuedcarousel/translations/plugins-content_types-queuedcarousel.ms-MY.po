@@ -1,0 +1,18 @@
+# Malaysia (Malay) translation of sony_queuedcarousel (all releases)
+# Copyright (c) 2010 by the Malaysia (Malay) translation team
+# Generated from file: sony_queuedcarousel/plugins/content_types/queuedcarousel/queuedcarousel.inc: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sony_queuedcarousel (all releases)\n"
+"POT-Creation-Date: 2010-04-12 11:12-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Malaysia (Malay)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: plugins/content_types/queuedcarousel/queuedcarousel.inc:45
+msgid "Configure carousel"
+msgstr ""
+

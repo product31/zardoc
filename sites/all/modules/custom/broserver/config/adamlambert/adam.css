@@ -1,0 +1,10 @@
+#bro-main {
+  background-image: url(bg.png);
+}
+
+.bro-countdown .countdown {
+  background-image: url(countdown.png);
+}
+.bro-countdown .countdown span {
+  color: #3e74d2;
+}

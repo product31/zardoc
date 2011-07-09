@@ -1,0 +1,219 @@
+# Romania translation of sonybmg_dev (all releases)
+# Copyright (c) 2010 by the Romania translation team
+# Generated from files:
+#  sonybmg_dev/sonybmg_dev.info: n/a
+#  sonybmg_dev/sonybmg_dev.module: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sonybmg_dev (all releases)\n"
+"POT-Creation-Date: 2010-04-12 13:56-0500\n"
+"PO-Revision-Date: 2010-03-26 09:22-0500\n"
+"Language-Team: Romania\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: sonybmg_dev.info:0
+msgid "Sony BMG"
+msgstr ""
+
+#: sonybmg_dev.module:227
+msgid "Path"
+msgstr "Cale"
+
+#: sonybmg_dev.module:266,273
+msgid "Modules"
+msgstr "Module"
+
+#: sonybmg_dev.module:181,238,574
+msgid "Cancel"
+msgstr "Renunţă"
+
+#: sonybmg_dev.module:131
+msgid "You do not have any administrative items."
+msgstr ""
+
+#: sonybmg_dev.module:145
+msgid "Site"
+msgstr ""
+
+#: sonybmg_dev.module:148
+msgid ""
+"Choose a site to down-sync from the live site. Selecting \"all\" will "
+"down-sync the live database of every artist site."
+msgstr ""
+
+#: sonybmg_dev.module:152
+msgid "Database type"
+msgstr "Tip bază de date"
+
+#: sonybmg_dev.module:155
+msgid "Choose the target database for the down-sync."
+msgstr ""
+
+#: sonybmg_dev.module:178
+msgid "Sync database"
+msgstr ""
+
+#: sonybmg_dev.module:180
+msgid ""
+"Are you sure you want to completely replace the current database? All "
+"configuration will be replaced with a copy of the live database."
+msgstr ""
+
+#: sonybmg_dev.module:181
+msgid "Sync"
+msgstr ""
+
+#: sonybmg_dev.module:206
+msgid "Run update as user"
+msgstr ""
+
+#: sonybmg_dev.module:209
+msgid ""
+"Updates must always be done by the same user, whose name has been "
+"prepopulated (if available). Leave blank to use the default user."
+msgstr ""
+
+#: sonybmg_dev.module:219
+msgid "Update to revision"
+msgstr ""
+
+#: sonybmg_dev.module:222
+msgid ""
+"If there is a specific revision you would like to update/revert to, "
+"enter that number here. Otherwise, the latest revision will be used."
+msgstr ""
+
+#: sonybmg_dev.module:230
+msgid ""
+"Select the path you wish to update, relative to public_html/sites/all. "
+"You should be updating the most specific directory as you can, so that "
+"only the work you are doing is updated.  If you need to do updates "
+"outside of public_html/sites/all, you should probably be doing it from "
+"the command-line."
+msgstr ""
+
+#: sonybmg_dev.module:235,40
+msgid "SVN Update"
+msgstr ""
+
+#: sonybmg_dev.module:237
+msgid ""
+"Are you sure you want to run svn update? This will affect ALL @type "
+"sites on the server."
+msgstr ""
+
+#: sonybmg_dev.module:238
+msgid "svn update"
+msgstr ""
+
+#: sonybmg_dev.module:267,279
+msgid "Themes"
+msgstr "Teme"
+
+#: sonybmg_dev.module:516
+msgid ""
+"The server is currently running SVN revision: "
+"<strong>@revision</strong> by <strong>@author</strong>"
+msgstr ""
+
+#: sonybmg_dev.module:572
+msgid "Are you sure you want to clean up the test data?"
+msgstr ""
+
+#: sonybmg_dev.module:574
+msgid "Cleanup"
+msgstr ""
+
+#: sonybmg_dev.module:589
+msgid "Cleaning up test data"
+msgstr ""
+
+#: sonybmg_dev.module:590
+msgid "Starting cleanup"
+msgstr ""
+
+#: sonybmg_dev.module:591
+msgid "Error cleaning up test data"
+msgstr ""
+
+#: sonybmg_dev.module:610
+msgid "Deleting content for user %name"
+msgstr ""
+
+#: sonybmg_dev.module:623
+msgid "Cleanup finished successfully. %nodes nodes and %users users deleted."
+msgstr ""
+
+#: sonybmg_dev.module:626
+msgid "Finished with an error"
+msgstr ""
+
+#: sonybmg_dev.module:18
+msgid "Multisite Dev"
+msgstr ""
+
+#: sonybmg_dev.module:24
+msgid "Development Tools"
+msgstr ""
+
+#: sonybmg_dev.module:28
+msgid "Various tools for managing development and QA sites."
+msgstr ""
+
+#: sonybmg_dev.module:32
+msgid "Sync Database"
+msgstr ""
+
+#: sonybmg_dev.module:36
+msgid ""
+"Update this site (or others) with a copy of the latest live database. "
+"Then optionally commit this database dump to SVN."
+msgstr ""
+
+#: sonybmg_dev.module:44
+msgid "Update the Dev or QA multisite with the latest SVN revision."
+msgstr ""
+
+#: sonybmg_dev.module:48
+msgid "Cleanup test data"
+msgstr ""
+
+#: sonybmg_dev.module:52
+msgid "Remove nodes and users created during testing."
+msgstr ""
+
+#: sonybmg_dev.module:56
+msgid "Jump to Dev site"
+msgstr ""
+
+#: sonybmg_dev.module:59
+msgid ""
+"Devlopment sites display the very latest code available for Multisite. "
+"They automatically update their code from SVN every two minutes."
+msgstr ""
+
+#: sonybmg_dev.module:63
+msgid "Jump to QA site"
+msgstr ""
+
+#: sonybmg_dev.module:66
+msgid ""
+"QA sites are used to ensure no sites are broken during a push of code "
+"to the live sites. Updates are done on the QA site before pushing new "
+"code."
+msgstr ""
+
+#: sonybmg_dev.info:0
+msgid "Sony BMG Multisite Development Tools"
+msgstr ""
+
+#: sonybmg_dev.info:0
+msgid ""
+"Do not enable on live multisites. This is a tool for managing "
+"multisites in development and QA environments."
+msgstr ""
+

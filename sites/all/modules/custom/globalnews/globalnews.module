@@ -1,0 +1,537 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ *   Translate news articles based on subscriptions.
+ */
+
+/**
+* Implementation of hook_menu().
+*/
+function globalnews_menu() {
+  $items['admin/content/globalnews/settings'] = array(
+    'title' => 'Global News Subscriptions',
+    'description' => 'Select regional news feeds to subscribe to.',
+    'page callback' => 'globalnews_wizard',
+    'access arguments' => array('access admin theme'),
+    'file' => 'globalnews.admin.inc',
+  );
+  $items['globalnews/subscriptions_js/%'] = array(
+    'page callback' => 'globalnews_subscriptions_js',
+    'page arguments' => array(2),
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('access admin theme'),
+  );
+  $items['globalnews/get_subscriptions_js/%'] = array(
+    'page callback' => 'globalnews_get_subscriptions_js',
+    'page arguments' => array(2),
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('access admin theme'),
+  );
+
+return $items;
+}
+
+/**
+ * Menu callback for AHAH additions.
+ */
+function globalnews_subscriptions_js($langcode) {
+  $data = globalnews_get_subscriptions($langcode);
+  drupal_json($data);
+}
+
+/**
+ * Menu callback 2 for AHAH additions.
+ */
+function globalnews_get_subscriptions_js($langcode) {
+
+  $data = globalnews_get_subscriptions($langcode);
+
+  drupal_json($data);
+
+}
+
+/**
+ * Implementation of hook_perm().
+ */
+function globalnews_perm() {
+  $perms = array('edit own news translation');
+  return $perms;
+}
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function globalnews_form_alter(&$form, $form_state, $form_id) {
+  global $user;
+  global $language;
+
+  switch ($form_id) {
+    case $form_id == 'globalnews_add_form':
+      // @todo Does this really need to be here? It's our form.
+      $node = $form['#node'];
+      $form['globalnews']['buttons'] = $form ['buttons'];
+      unset($form ['buttons']);
+    break;
+
+    case $form_id == 'globalnews_deployment_form':
+      // @todo Does this really need to be here? It's our form.
+      // Should also go through t().
+      $form ['buttons']['return']['#value'] = 'Subscribe';
+    break;
+
+    case $form_id == 'news_node_form':
+      // Only show on news creation form.
+      if (!empty($form['nid']['#value']) || isset($form['#node']->translation_source)) {
+        return;
+      }
+      $options = i18n_language_list();
+      // Use i18n_access permission for any role other than administrator.
+      if (!in_array('administrator', $user->roles)) {
+        $options = array_intersect_key($options, i18n_access_load_permissions($user->uid));
+      }
+      // Get array of subscribed territories.
+      $globalnews_languages = array();
+      if (isset($form_state['values']['language'])) {
+        $globalnews_languages = globalnews_get_subscriptions($form_state['values']['language']);
+      }
+      // Add divs in order for javascript to unset
+      // corresponding global publishing option language code.
+      $form['language']['#prefix'] = '<div id="language">';
+      $form['language']['#suffix'] = '</div>';
+      $form['language']['#default_value'] = $options;
+      $form['language']['#options'] = $options;
+      $form['language']['#subscriptions'] = 'globalnews-subscriptions';
+      unset($form['language']['#after_build']);
+      // From i18n_access: If we are down to a single value, use a value
+      // instead of a select.
+      if (isset($form['_language'])) {
+        // @todo Clean up this logic.
+        $checkboxes = i18n_language_list();
+        $checkbox = array_flip($checkboxes);
+        unset($checkbox[$form['_language']['#value']]);
+        $checklist = array_flip($checkbox);
+      }
+      else{
+        $checklist = i18n_language_list();
+      }
+      // Build the global publishing options.
+      $warning = '<p>' . t('WARNING: Changing these defaults can cause news items to be published to unsubscribed territories!') . '</p>';
+      $form['translation'] = array(
+       '#type' => 'fieldset',
+       '#title' => t('Global News Publishing options'),
+       '#prefix' => '<div id="news">',
+       '#weight' => 22,
+       '#collapsible' => TRUE,
+       '#collapsed' => TRUE,
+       '#description' => t('Select the territories that this article should be published to.') . ' ' . $warning,
+       '#suffix' => '</div>',
+      );
+
+      $form['translation']['checkboxes'] = array(
+        '#type' => 'markup',
+        '#value' => '<div class="checkall-action">
+                     <a id="globalnews-checkall" href="#" title="Check all items in this group">Check all</a>
+                     <span> / </span>
+                     <a id="globalnews-reset" href="#" title="Toggle the values of all items in this group">Reset</a>
+                     <span> / </span>
+                     <a id="globalnews-checknone" href="#" title="Uncheck all items in this group">Uncheck all</a>
+                     </div>'
+      );
+
+      $form['translation']['translations'] = array(
+        '#type' => 'checkboxes',
+        '#title' => t('Region Translations'),
+        '#prefix' => '<div id="translations">',
+        '#options' => $checklist,
+         '#default_value' => $globalnews_languages,
+        '#description' => t('Global publishing configuration.'),
+        '#suffix' => '</div>',
+        '#checkall' => 'globalnews-translations',
+      );
+
+      $form['#after_build'] = array('globalnews_form_after_build');
+  }
+}
+
+/**
+ * Implementation of hook_nodeapi().
+ */
+function globalnews_nodeapi(&$node, $op, $teaser, $page) {
+  switch ($op) {
+  // The node is about to be saved.
+    case 'insert':
+      if ($node->type == 'news' && isset($node->translations) && empty($node->tnid)) {
+        global $user;
+        db_query("UPDATE {node} SET tnid = %d, translate = %d WHERE nid = %d", $node->nid, 0, $node->nid);
+      foreach ($node->translations as $language => $langcode) {
+       if (!is_numeric($langcode)) {
+        $translatoruid = db_result(db_query("SELECT u.name FROM {users} u INNER JOIN {users_roles} ur ON u.uid = ur.uid INNER JOIN {i18n_access} ax ON ur.uid = ax.uid INNER JOIN {role} r ON ur.rid = r.rid WHERE ax.perm = '%s' AND r.name = 'translator'", $langcode));
+        $translator = empty($translatoruid) ? $node->name : $translatoruid;
+        module_load_include('inc', 'node', 'node.pages'); // needed for node_object_prepare()// prepare the new node
+        // Prepare the new node translation.
+        $new_node = (object)array();
+        node_object_prepare($new_node);
+        $new_node->title = $node->title;
+        $new_node->body = $node->body;
+        $new_node->name = $translator;
+        $new_node->type  = $node->type;
+        $new_node->language = $langcode;
+        $new_node->tnid = $node->nid;
+        // Create the new node translation.
+        node_save(node_submit($new_node));
+        db_query("UPDATE {node} SET moderate = %d WHERE nid = %d", 1, $new_node->nid);
+        // Inform user of new translations.
+        $translated_to = db_result(db_query("SELECT native FROM {languages} WHERE language = '%s'", $language));
+        $translated_from = db_result(db_query("SELECT native FROM {languages} WHERE language = '%s'", $node->language));
+        $account = user_load(array('name' => $translatoruid));
+        $site_name = variable_get('site_name', '');
+        $accountlanguage = user_preferred_language($account);
+        $url = url('admin/content/moderation/news/' . $langcode, array('language' => $accountlanguage, 'prefix' => $accountlanguage->prefix ));
+        drupal_set_message(t('%langcode news article translation created for <a href="!view-url">%title</a> and placed in the news <a href="!view-url2">moderation queue</a>.<br/>', array('%langcode' => $translated_to, '!view-url' => url('node/' . $new_node->nid), '%title' => $new_node->title, '!view-url2' => $url)));
+        $subject = t('New global news translation awaiting !region22 approval', array('!region22' => $translated_to));
+        $message = t('A new !language global news translation was created from the !region2 news article "!title." This article is awaiting approval in the !site <a href="!url">moderation queue</a>.', array('!language' => $translated_to, '!region2' => $translated_from, '!title' => $new_node->title, '!url' => $url, '!site' => $site_name));
+        $params = array('account' => $account, 'node' => $new_node, 'subject' => $subject, 'message' => $message, 'note' => '');
+        if (drupal_mail('globalnews', 'notify', $account->mail, $accountlanguage, $params)) {
+          drupal_set_message(t('Globalnews moderation email message was sent to %username', array('%type' => $optype, '%username' => $account->name)));
+        }
+        watchdog('globalnews', 'Username %name created news translation for %title with language code of %language.', array('%name' => $user->name, '%title' => $new_node->title, '%language' => $new_node->language), WATCHDOG_NOTICE, url('node/' . $new_node->nid));
+        }
+      }
+    }
+
+      break;
+    case 'alter':
+      // Add translated node's language flag icon to nodes that are not the source translation.
+      if ($node->type == 'news' && $node->tnid) {
+        if ($node->nid == $node->tnid) {
+          return;
+        }
+        $nid = $node->tnid;
+        $translations = translation_node_get_translations($nid);
+        // Pull out the first value since translation_node_get_translations() always returns the source value first.
+        $source = reset($translations);
+        $flag = sony_global_flag_icon($source);
+        $node->body = "<div class='globalnews-flag' style='float:left; padding-right: 5px;'>" . $flag . '</div>' . ' ' . $node->body;
+        $node->teaser = "<div class='globalnews-flag' style='float:left; padding-right: 5px;'>" . $flag . '</div>' . $node->teaser;
+      }
+     break;
+    }
+  }
+
+/**
+ * Implementation of hook_mail()
+ */
+function globalnews_mail($key, &$message, $params) {
+  $language = $message['language'];
+  $node = $params['node'];
+  $account = $params['account'];
+  $note = $params['note'];
+  switch ($key) {
+    case 'notify':
+      // Eval the replacements.
+      $replacements_raw = globalnews_replacements();
+      foreach ($replacements_raw as $key => $val) {
+        eval('$replacements["$key"] = ' . $val . ';');
+      }
+      $params['subject'] = strtr($params['subject'], $replacements);
+      $params['message'] = strtr($params['message'], $replacements);
+      $message['subject'] = $params['subject'];
+      $message['body'][] = drupal_html_to_text($params['message']);
+    break;
+  }
+}
+
+/**
+ * Token replacements for global news emails sent to translators.
+ */
+function globalnews_replacements() {
+  return array(
+    '%title' => '$node->title',
+    '%teaser' => '$node->teaser',
+    '%body' => '$node->body',
+    '%short_date' => 'format_date($node->created, "short")',
+    '%medium_date' => 'format_date($node->created, "medium")',
+    '%long_date' => 'format_date($node->created, "long")',
+    '%type' => 'node_get_types("name", $node)',
+    '%node_url' => 'url("node/". $node->nid, array("absolute" => TRUE))',
+    '%nid' => '$node->nid',
+    '%author_name' => '$account->name',
+    '%author_mail' => '$account->mail',
+    '%author_url' => 'url("user/". $account->uid, array("absolute" => TRUE))',
+    '%site' => 'variable_get("site_name", "Drupal")',
+    '%note' => '$note',
+  );
+}
+
+/**
+ * Load the subscriptions selected by region.
+ *
+ *  @param $region
+ *   A territory's language code.
+ */
+function globalnews_load_subscriptions($region) {
+  static $langs = array();
+  $default = language_default('language');
+  $langs = array();
+  $lang_string = db_result(db_query("SELECT langs FROM {globalnews} WHERE region = '%s'", $region));
+
+  if ($lang_string) {
+    $langs = explode(', ', $lang_string);
+  }
+
+  return $langs;
+}
+
+/**
+ * Get the enabled languages for this node from the database and store it in the node object.
+ *
+ * @param $region
+ *   A territory's language code.
+ */
+function globalnews_get_subscriptions($region) {
+  // Get the enabled languages for this node from the database
+  // and store it in the node object.
+  $langcode = array();
+  $result = db_query('SELECT region, langs from {globalnews}');
+  while ($subscriptions = db_fetch_object($result)) {
+    $langs = explode(', ', $subscriptions->langs);
+    if (in_array($region, $langs)) {
+      $langcode[] = $subscriptions->region;
+    }
+    else {
+      continue;
+    }
+  }
+  return $langcode;
+}
+
+/**
+ * After build callback used in hook_form_alter.
+ */
+function globalnews_form_after_build($elements, &$form_state) {
+  globalnews_form_after_build_recursive($elements, $form_state);
+  globalnews_form_after_build_recursive_subscriptions($elements, $form_state);
+  return $elements;
+}
+
+/**
+ * Helper function to find elements with '#checkall' attribute recursively.
+ *
+ * @todo
+ *   Check to see if there is a better way to do this.
+ */
+function globalnews_form_after_build_recursive(&$elements, &$form_state, $checkall = NULL) {
+  foreach (element_children($elements) as $key) {
+    if (isset($elements[$key]) && $elements[$key]) {
+
+      if (isset($checkall)) {
+        // Inherit checkall attribute if specified by the caller.
+        $children_checkall = $checkall;
+      }
+      elseif (!empty($elements[$key]['#checkall'])) {
+        // Inherit checkall attribute if specified in the form element.
+        $children_checkall = $elements[$key]['#checkall'];
+      }
+      else {
+        // Assume no checkall attribute has been specified.
+        $children_checkall = NULL;
+
+        // Inherit checkall attribute if specified in CCK field settings.
+        if (isset($elements[$key]['#field_name']) && isset($elements[$key]['#type_name'])) {
+          $field = content_fields($elements[$key]['#field_name'], $elements[$key]['#type_name']);
+          if (!empty($field) && isset($field['widget']) && !empty($field['widget']['checkall'])) {
+            $children_checkall = TRUE;
+          }
+        }
+      }
+
+      globalnews_form_after_build_recursive($elements[$key], $form_state, $children_checkall);
+    }
+  }
+  if (isset($checkall) && isset($elements['#type']) && $elements['#type'] == 'checkboxes') {
+    $elements['#checkall'] = $checkall;
+    $elements = globalnews_element_process($elements);
+  }
+}
+
+/**
+ * Process the checkall extension for the checkboxes element.
+ *
+ * @todo
+ *   Check if there is a better way to do this.
+ */
+function globalnews_element_process($element) {
+  // See if the #checkall flag is present.
+  if (!empty($element['#checkall'])) {
+    $class = is_string($element['#checkall']) ? trim($element['#checkall']) : '';
+    if (empty($class)) {
+      $class = 'checkall-' . $element['#id'];
+    }
+
+    // Append classes to the checkboxes element.
+    if (!isset($element['#attributes'])) {
+      $element['#attributes'] = array();
+    }
+    if (empty($element['#attributes']['class'])) {
+      $element['#attributes']['class'] = 'form-checkall ' . $class;
+    }
+    else {
+      $element['#attributes']['class'] .= ' form-checkall ' . $class;
+    }
+
+    // Append class to the checkboxes items.
+    foreach (element_children($element) as $key) {
+      if ($element[$key]['#type'] == 'checkbox') {
+        if (!isset($element[$key]['#attributes'])) {
+          $element[$key]['#attributes'] = array();
+        }
+        if (empty($element[$key]['#attributes']['class'])) {
+          $element[$key]['#attributes']['class'] = $class;
+        }
+        else {
+          $element[$key]['#attributes']['class'] .= ' ' . $class;
+        }
+      }
+    }
+
+    // Add our stylesheet and javascript files to the page.
+    drupal_add_css(drupal_get_path('module', 'globalnews') . '/checkall.css');
+    drupal_add_js(drupal_get_path('module', 'globalnews') . '/checkall.js');
+  }
+
+  // See if the #subscriptions flag is present.
+  if (!empty($element['#subscriptions'])) {
+    $class = is_string($element['#subscriptions']) ? trim($element['#subscriptions']) : '';
+    if (empty($class)) {
+      $class = 'subscriptions-' . $element['#id'];
+    }
+
+    // Append classes to the checkboxes element.
+    if (!isset($element['#attributes'])) {
+      $element['#attributes'] = array();
+    }
+    if (empty($element['#attributes']['class'])) {
+      $element['#attributes']['class'] = 'form-select ' . $class;
+    }
+    else {
+      $element['#attributes']['class'] .= ' form-select ' . $class;
+    }
+
+    // Append class to the checkboxes items.
+    foreach (element_children($element) as $key) {
+      if ($element[$key]['#type'] == 'select') {
+        if (!isset($element[$key]['#attributes'])) {
+          $element[$key]['#attributes'] = array();
+        }
+        if (empty($element[$key]['#attributes']['class'])) {
+          $element[$key]['#attributes']['class'] = $class;
+        }
+        else {
+          $element[$key]['#attributes']['class'] .= ' ' . $class;
+        }
+      }
+    }
+
+    // Add javascript file to the page.
+    drupal_add_js(drupal_get_path('module', 'globalnews') . '/subscriptions.js');
+  }
+
+  return $element;
+}
+
+/**
+ * Helper function to find elements with '#subscriptions' attribute recursively.
+ *
+ * @todo
+ *   See if there is a better way to do this.
+ */
+function globalnews_form_after_build_recursive_subscriptions(&$elements, &$form_state, $subscriptions = NULL) {
+  foreach (element_children($elements) as $key) {
+    if (isset($elements[$key]) && $elements[$key]) {
+
+      if (isset($subscriptions)) {
+        // Inherit subscriptions attribute if specified by the caller.
+        $children_subscriptions = $subscriptions;
+      }
+      elseif (!empty($elements[$key]['#subscriptions'])) {
+        // Inherit subscriptions attribute if specified in the form element.
+        $children_subscriptions = $elements[$key]['#subscriptions'];
+      }
+      else {
+        // Assume no subscriptions attribute has been specified.
+        $children_subscriptions = NULL;
+
+        // Inherit subscriptions attribute if specified in CCK field settings.
+        if (isset($elements[$key]['#field_name']) && isset($elements[$key]['#type_name'])) {
+          $field = content_fields($elements[$key]['#field_name'], $elements[$key]['#type_name']);
+          if (!empty($field) && isset($field['widget']) && !empty($field['widget']['subscriptions'])) {
+            $children_subscriptions = TRUE;
+          }
+        }
+      }
+      globalnews_form_after_build_recursive_subscriptions($elements[$key], $form_state, $children_subscriptions);
+    }
+  }
+  if (isset($subscriptions) && isset($elements['#type']) && $elements['#type'] == 'select') {
+    $elements['#subscriptions'] = $subscriptions;
+    $elements = globalnews_element_process($elements);
+  }
+}
+
+/*
+* Add Translate link to news node teaser view.
+*/
+function globalnews_link($type, $node = NULL, $teaser = FALSE) {
+  global $user;
+  if ((in_array('translator', $user->roles)) || (in_array('administrator', $user->roles))) {
+  // If this node is not translatable bail out here.
+  if (variable_get('language_content_type_' . $node->type, 0) == 0) {
+    return;
+  }
+  global $language;
+  $links = array();
+  if ($type == 'node' && $teaser) {
+    $links["node_translate_link"] = array(
+      'title' => t('Translate'),
+      'href' => 'node/' . $node->nid . '/translate',
+      'language' => $language->language,
+      'attributes' => array('title' => t('Translate'), 'class' => 'translation-link'),
+    );
+  }
+  return $links;
+  }
+  else {
+    return;
+  }
+}
+
+/**
+ * Implementation of hook_link_alter.
+ */
+function globalnews_link_alter(&$links, $node) {
+  global $user;
+  if ((in_array('translator', $user->roles)) || (in_array('administrator', $user->roles))) {
+    if (variable_get('language_content_type_' . $node->type, 0) == 0) {
+      return;
+    }
+    // Here we will make sure that 'node_translate_link' is last.
+    $temp = $links['node_translate_link'];
+    unset($links['node_translate_link']);
+    $links['node_translate_link'] = $temp;
+  }
+  else {
+    return;
+  }
+}
+
+/**
+ * Implementation of hook_views_api().
+ */
+function globalnews_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'globalnews'),
+  );
+}

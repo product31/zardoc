@@ -1,0 +1,44 @@
+# Hong Kong translation of sony_bro (all releases)
+# Copyright (c) 2010 by the Hong Kong translation team
+# Generated from files:
+#  sony_bro/sony_bro.module: n/a
+#  sony_bro/sony_bro.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sony_bro (all releases)\n"
+"POT-Creation-Date: 2010-04-08 15:04-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Hong Kong\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: sony_bro.module:80
+msgid "Days"
+msgstr ""
+
+#: sony_bro.module:81
+msgid "Hours"
+msgstr ""
+
+#: sony_bro.module:81
+msgid "Minutes"
+msgstr ""
+
+#: sony_bro.module:84
+msgid "Online now"
+msgstr ""
+
+#: sony_bro.module:9
+msgid "Browser Overlay (BRO)"
+msgstr ""
+
+#: sony_bro.info:0
+msgid "Sony BRO"
+msgstr ""
+
+#: sony_bro.info:0
+msgid "Browser Overlay (BRO) advertising product."
+msgstr ""
+

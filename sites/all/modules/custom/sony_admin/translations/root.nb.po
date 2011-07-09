@@ -1,0 +1,94 @@
+# Norwegian Bokmål translation of sony_admin (all releases)
+# Copyright (c) 2010 by the Norwegian Bokmål translation team
+# Generated from files:
+#  sony_admin/sony_admin.module: n/a
+#  sony_admin/sony_admin.info: n/a
+#  sony_admin/sony_admin.deployment.inc: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sony_admin (all releases)\n"
+"POT-Creation-Date: 2010-04-12 12:54-0500\n"
+"PO-Revision-Date: 2010-03-26 09:19-0500\n"
+"Language-Team: Norwegian Bokmål\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: sony_admin.module:134
+msgid "Save changes"
+msgstr ""
+
+#: sony_admin.module:151
+msgid "Updated lyrics for track %track_title."
+msgstr ""
+
+#: sony_admin.module:43
+msgid "Administer lyrics"
+msgstr ""
+
+#: sony_admin.info:0
+msgid "Sony BMG"
+msgstr ""
+
+#: sony_admin.deployment.inc:22
+msgid "Submit"
+msgstr ""
+
+#: sony_admin.deployment.inc:21
+msgid "This action cannot be undone."
+msgstr "Denne handlingen kan ikke gjøres om."
+
+#: sony_admin.deployment.inc:23
+msgid "Cancel"
+msgstr "Avbryt"
+
+#: sony_admin.deployment.inc:19
+msgid "Are you sure you want to change the site setting to %mode mode?"
+msgstr ""
+
+#: sony_admin.module:61
+msgid "Block cache settings"
+msgstr ""
+
+#: sony_admin.module:75
+msgid "Default setting for this type of block"
+msgstr ""
+
+#: sony_admin.module:79
+msgid "Cache"
+msgstr ""
+
+#: sony_admin.module:16
+msgid "Deployment"
+msgstr ""
+
+#: sony_admin.module:17
+msgid "Deployment related administration tasks"
+msgstr ""
+
+#: sony_admin.module:25
+msgid "Live Settings"
+msgstr ""
+
+#: sony_admin.module:26
+msgid "Put the site into Live Production mode."
+msgstr ""
+
+#: sony_admin.module:34
+msgid "Dev Settings"
+msgstr ""
+
+#: sony_admin.module:35
+msgid "Put the site into Development mode."
+msgstr ""
+
+#: sony_admin.info:0
+msgid "Sony Admin Utilities"
+msgstr ""
+
+#: sony_admin.info:0
+msgid "Administration utilities for the Sony Multisite platform."
+msgstr ""
+

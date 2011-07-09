@@ -1,0 +1,14 @@
+; $Id$
+name = Global News
+description = Control access to edit news content in different languages.
+package = Multilanguage
+core = 6.x
+
+dependencies[] = locale
+dependencies[] = translation
+dependencies[] = i18n
+dependencies[] = i18n_access
+
+l10n server = translate.gdb-dev.com
+project = "globalnews"
+version = "6.x-2.x"

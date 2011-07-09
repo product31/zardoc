@@ -1,0 +1,50 @@
+# Greece translation of userpoints_first_comment (all releases)
+# Copyright (c) 2010 by the Greece translation team
+# Generated from files:
+#  userpoints_first_comment/userpoints_first_comment.info: n/a
+#  userpoints_first_comment/userpoints_first_comment.module: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: userpoints_first_comment (all releases)\n"
+"POT-Creation-Date: 2010-04-07 03:33-0500\n"
+"PO-Revision-Date: 2010-03-26 09:08-0500\n"
+"Language-Team: Greece\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: userpoints_first_comment.info:0
+msgid "Userpoints"
+msgstr ""
+
+#: userpoints_first_comment.module:32
+msgid "Category"
+msgstr "Κατηγορία"
+
+#: userpoints_first_comment.module:19
+msgid "!Points for being the first poster"
+msgstr ""
+
+#: userpoints_first_comment.module:24
+msgid ""
+"!Points for being the first to post a comment/reply (first poster "
+"bonus)"
+msgstr ""
+
+#: userpoints_first_comment.module:35
+msgid ""
+"First poster !points will be assigned to this category. You can modify "
+"what categories are available by modifying the <a "
+"href=\"!url\">Userpoints taxonomy</a>."
+msgstr ""
+
+#: userpoints_first_comment.info:0
+msgid "Userpoints First Comment"
+msgstr ""
+
+#: userpoints_first_comment.info:0
+msgid "Allows users to earn points for posting the first comment"
+msgstr ""
+

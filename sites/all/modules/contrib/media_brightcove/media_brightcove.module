@@ -1,0 +1,518 @@
+<?php
+// $Id: media_brightcove.module,v 1.1.2.23 2010/09/01 21:30:13 aaron Exp $
+
+/**
+ *  @file
+ *  Embedded Video Field provider file for Brightcove.com.
+ */
+
+/* ***************************************** */
+/* INCLUDES                                  */
+/* ***************************************** */
+
+// A registry of variable_get defaults.
+include_once('includes/media_brightcove.variables.inc');
+
+/**
+ * Implementation of hook_menu().
+ */
+function media_brightcove_menu() {
+  return array(
+    'admin/settings/media_brightcove' => array(
+      'title' => 'Media: Brightcove',
+      'description' => 'Administer the Media: Brightcove module.',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('media_brightcove_settings'),
+      'access arguments' => array('administer site configuration'),
+      'file' => 'includes/media_brightcove.admin.inc',
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function media_brightcove_theme($existing, $type, $theme, $path) {
+  return array(
+    'media_brightcove_unavailable_message' => array(
+      'file' => 'media_brightcove.theme.inc',
+      'path' => $path .'/themes',
+      'arguments' => array('message' => NULL, 'status' => array()),
+    ),
+    'media_brightcove_video' => array(
+      'arguments' => array('video_id' => NULL, 'width' => NULL, 'height' => NULL, 'options' => array()),
+      'file' => 'media_brightcove.theme.inc',
+      'path' => $path .'/themes',
+      'template' => 'media-brightcove-video',
+    ),
+    'media_brightcove_videos' => array(
+      'arguments' => array('video_ids' => array(), 'width' => NULL, 'height' => NULL, 'options' => array()),
+      'file' => 'media_brightcove.theme.inc',
+      'path' => $path .'/themes',
+      'template' => 'media-brightcove-videos',
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_flush_caches().
+ */
+function media_brightcove_flush_caches() {
+  return array('cache_media_brightcove_status');
+}
+
+/**
+ * Implementation of hook_emfield_providers().
+ */
+function media_brightcove_emfield_providers($module, $provider = NULL) {
+  // We know this module only includes the main provider file, avoid needless
+  // PHP warnings.
+  if ($module == 'emvideo' && (!isset($provider) || ($provider == 'brightcove'))) {
+    static $path;
+    // Cache the result for later.
+    if (!isset($path)) {
+      $found = drupal_system_listing("$provider\.inc$", drupal_get_path('module', 'media_brightcove') ."/providers", 'name', 0);
+      if (is_array($found) && !empty($found)) {
+        $path = $found;
+      }
+    }
+    return $path;
+  }
+}
+
+/**
+ * Implementation of media_mover hook
+ * @param $op is the operator to return
+ * @param $action is which action is being called
+ * @param $verb is the verb being run
+ * @param $configuration is the specific configuration saved for the action for this configuration
+ * @param $file is the file in use
+ * @param $job is the full configuration data currently running
+ */
+function media_brightcove_media_mover($op = NULL, $action = NULL, $configuration = NULL, &$file=array(), $job = NULL, $nid = NULL) {
+  switch ($op) {
+    case 'name':
+      return t('Media: Brightcove');
+      break;
+
+    case 'actions':
+      return array(
+        'process' => array(
+          1 => t('Upload video to Brightcove.'),
+        ),
+        'storage' => array(
+          2 => t('Upload video to Brightcove.'),
+        ),
+      );
+      break;
+
+    case 'process':
+    case 'storage':
+      module_load_include('inc', 'media_brightcove', 'includes/media_brightcove.media_mover');
+      return media_brightcove_upload_video($file, $configuration);
+      break;
+
+    case 'config':
+      switch ($action) {
+        case '1':
+        case '2':
+          module_load_include('inc', 'media_brightcove', 'includes/media_brightcove.media_mover');
+          return media_brightcove_config($configuration);
+      }
+      break;
+  }
+}
+
+/**
+ * Return the status of a specific video.
+ *
+ * @param string $code
+ *  The code for the Brightcove video.
+ * @param boolean $reset
+ *  (Optional) If TRUE, then reset the cached status.
+ * @return string
+ *  The status code returned by Brightcove.
+ */
+function media_brightcove_status($code, $reset = FALSE) {
+  static $status;
+
+  if (!$code) {
+    return;
+  }
+
+  if (!isset($status) || $reset) {
+    $status = array();
+  }
+
+  $code = media_brightcove_extract_id_from_uri($code);
+
+  if (!isset($status[$code])) {
+    if (($cache = cache_get('media_brightcove:status:'. $code, 'cache_media_brightcove_status'))) {
+      $status[$code] = $cache->data;
+    }
+    else {
+      if (media_brightcove_echove_path()) {
+        $echove = new Echove(media_brightcove_variable_get('read_token'), media_brightcove_variable_get('write_token'));
+
+        try {
+          // Get the status of the desired status.
+          $status[$code] = $echove->getStatus('video', $code);
+        }
+        catch (EchoveException $error) {
+          watchdog('media_brightcove', 'Unhandled error from Brightcove when retrieving the status of video ID %video: %error', array('%video' => $code, '%error' => $error->getMessage()), WATCHDOG_ERROR);
+          $status[$code] = MEDIA_BRIGHTCOVE_STATUS_UNKNOWN;
+        }
+      }
+      else {
+        // We don't have the echove library installed, so the status is unknown.
+        $status[$code] = MEDIA_BRIGHTCOVE_STATUS_UNKNOWN;
+      }
+      cache_set('media_brightcove:status:'. $code, $status[$code], 'cache_media_brightcove_status', CACHE_TEMPORARY);
+    }
+  }
+
+  return $status[$code];
+}
+
+/**
+ * Determine if a video upload has been completed.
+ *
+ * @param string $code
+ *  The code or URI for the Brightcove video.
+ * @return boolean
+ *  Returns TRUE if the video has been uploaded and completed.
+ */
+function media_brightcove_video_available($code) {
+  // Assume the video is available if we don't know the status.
+  return in_array(media_brightcove_status($code), array(MEDIA_BRIGHTCOVE_STATUS_COMPLETE, MEDIA_BRIGHTCOVE_STATUS_UNKNOWN));
+}
+
+/**
+ * Convert a Brightcove ID to a URI.
+ *
+ * @param string $code
+ *  The Brightcove ID or URI to convert.
+ * @param string $pub
+ *  (Optional) The publisher ID. Defaults to the global default.
+ * @return string
+ *  A unique URI in the form of 'brightcove://pub/56789/id/12345'.
+ */
+function media_brightcove_uri($code, $pub = NULL) {
+  static $uris = array();
+
+  if (!isset($pub)) {
+    // Extract the publisher's ID from the URI, or get the default.
+    $pub = media_brightcove_extract_pub_from_uri($code);
+  }
+
+  if (!isset($uris[$pub])) {
+    // Set the publisher's array.
+    $uris[$pub] = array();
+  }
+
+  // We just need the media ID now.
+  $code = media_brightcove_extract_id_from_uri($code);
+  if (!isset($uris[$pub][$code])) {
+    // Create the unique URI for this media.
+    $uris[$pub][$code] = 'brightcove://pub/'. $pub .'/id/'. $code;
+  }
+
+  return $uris[$pub][$code];
+}
+
+/**
+ * Return the direct URL to this video.
+ *
+ * @param string $id
+ *  The Brightcove video id or URI.
+ * @param string $player
+ *  (Optional) The Brightcove player to display the video with.
+ *
+ * @return string
+ *  The direct URL to the video in question.
+ */
+function media_brightcove_video_url($id, $player = NULL) {
+  $id = media_brightcove_extract_id_from_uri($id);
+  if (!isset($player)) {
+    $player = media_brightcove_variable_get('full_player_id');
+  }
+  return url('http://link.brightcove.com/services/player/bcpid'. $player, array('query' => 'bctid='. $id));
+}
+
+/**
+ * Extract the publisher's ID from brightcove://pub/56789/id/12345 to 56789.
+ *
+ * @param string $uri
+ *  The Brightcove URI or video code.
+ * @return string
+ *  The Brightcove publisher ID corresponding to the supplied URI, or the
+ *  global default if not available.
+ */
+function media_brightcove_extract_pub_from_uri($uri) {
+  static $codes = array();
+
+  if (!isset($codes[$uri])) {
+    if (preg_match('@^brightcove://.*?pub/(\d+)@i', $uri, $matches)) {
+      $matched = $matches[1];
+    }
+    $codes[$uri] = $matched ? $matched : media_brightcove_variable_get('publisher_id');
+  }
+
+  return $codes[$uri];
+}
+
+/**
+ * Convert a URI in the form of brightcove://pub/56789/id/12345 to 12345.
+ *
+ * @param string $uri
+ *  The URI or Brightcove ID.
+ * @return string
+ *  The Brightcove ID corresponding to the supplied URI.
+ */
+function media_brightcove_extract_id_from_uri($uri) {
+  static $codes = array();
+
+  if (!isset($codes[$uri])) {
+    if (preg_match('@^brightcove://.*?id/(\d+)@i', $uri, $matches)) {
+      $matched = $matches[1];
+    }
+    $codes[$uri] = $matched ? $matched : $uri;
+  }
+
+  return $codes[$uri];
+}
+
+/**
+ * Provides an array of the raw Brightcove metadata.
+ *
+ * This data can be used to store any extraneous information available
+ * specifically to the brightcove provider.
+ *
+ * @param string $code
+ *  The Brightcove video ID or URI.
+ * @param boolean $reset
+ *  (Optional) If TRUE, then reset the cached data array.
+ * @return array
+ *  A fully populated data array.
+ */
+function media_brightcove_data($code, $reset = FALSE) {
+  $code = media_brightcove_extract_id_from_uri($code);
+
+  // Try to load a cached value.
+  if ((!$reset) && ($cache = cache_get('emvideo_brightcove_data_' . $code, 'cache'))) {
+    return $cache->data;
+  }
+
+  // Attempt to grab the stored data from the db.
+  $data = unserialize(db_result(db_query("SELECT data FROM {media_brightcove_metadata} WHERE uri = '%s'", array('uri' => media_brightcove_uri($code)))));
+
+  // Note that if $data is an empty array, we'll attempt to fetch it again.
+  if (empty($data) || $reset) {
+    // Read the raw data directly from Brightcove.
+    module_load_include('inc', 'media_brightcove', 'includes/media_brightcove.utilities');
+    $data = _media_brightcove_raw_data($code);
+  }
+
+  // Cache the data for the next pass.
+  cache_set('emvideo_brightcove_data_' . $code, $data, 'cache', time() + variable_get('emfield_cache_duration', 3600));
+  return $data;
+}
+
+/**
+ * Retrieve a video's duration in seconds.
+ */
+function media_brightcove_duration($code, $reset = FALSE) {
+  $data = media_brightcove_data($code, $reset);
+
+  // Convert the results from miliseconds to seconds.
+  return isset($data['length']) ? round($data['length'] / 1000) : 0;
+}
+
+/**
+ * Validation function for Media: Brightcove's Media Mover configuration form.
+ *
+ * @see media_brightcove_config().
+ */
+function media_brightcove_validate_configuration($element, &$form_state) {
+  if ($values = media_mover_api_extract_form_data($element, $form_state)) {
+    foreach (array('media_brightcove_default_title' => t('Default title'), 'media_brightcove_default_description' => t('Default description')) as $field => $field_name) {
+      if (empty($values[$field])) {
+        form_set_error('storage--media_brightcove--1--'. $field, t('%field field is required.', array('%field' => $field_name)));
+      }
+    }
+  }
+  if (strlen($values['media_brightcove_default_description']) > media_brightcove_variable_get('description_length')) {
+    form_set_error('storage--media_brightcove--1--media_brightcove_default_description', t('The default description must be @length characters or less.', array('@length' => media_brightcove_variable_get('description_length'))));
+  }
+}
+
+/**
+ * Implementation of hook_init().
+ */
+function media_brightcove_init() {
+  // Autoload the Echove class when needed.
+  spl_autoload_register('media_brightcove_autoload');
+}
+
+/**
+ * Autoload the Echove class when needed.
+ */
+function media_brightcove_autoload($class_name) {
+  if (in_array($class_name, array('Echove', 'EchoveException')) && media_brightcove_echove_path()) {
+    include_once(media_brightcove_echove_path() . '/echove.php');
+  }
+}
+
+/**
+ * Return the path to the Echove library.
+ *
+ * If media_brightcove_variable_get('echove_path') has not yet been set, then
+ * this will attempt to autodiscover the path if the echove.php file exists
+ * within sites/all/libraries/* or sites/example.com/libraries/*. It will also
+ * set the path to media_brightcove_variable_get('echove_path').
+ *
+ * The library is available from http://echove.net/.
+ *
+ * @param boolean $reset
+ *  (Optional) If TRUE, then reset the variable and attempt a new autodiscovery.
+ * @return string
+ *  The path to the echove.php file.
+ */
+function media_brightcove_echove_path($reset = FALSE) {
+  static $path;
+
+  if (!isset($path) || $reset) {
+    if (!($path = media_brightcove_variable_get('echove_path')) || $reset) {
+      $files = drupal_system_listing('^echove\.php$', 'libraries', 'basename', 0);
+      if (isset($files['echove.php'])) {
+        $path = dirname($files['echove.php']->filename);
+        media_brightcove_variable_set('echove_path', $path);
+      }
+    }
+  }
+
+  return $path;
+}
+
+/**
+ * Ensure we delete any field data for a node revision before updating.
+ */
+function _media_brightcove_update_delete(&$node, $field, &$items, $teaser, $page) {
+  static $_media_brightcove_update_delete = array();
+
+  if (!$_media_brightcove_update_delete[$node->vid]) {
+    // We delete all revision info only once, so we don't inadvertently delete
+    // it again when inserting the data later.
+    media_brightcove_emfield_field_extra_delete_revision($node, $field, $items, $teaser, $page);
+    $_media_brightcove_update_delete[$node->vid] = TRUE;
+  }
+}
+
+/**
+ * Implementation of hook_emfield_field_extra_update().
+ */
+function media_brightcove_emfield_field_extra_update(&$node, $field, &$items, $teaser, $page) {
+  _media_brightcove_update_delete($node, $field, $items, $teaser, $page);
+}
+
+/**
+ * Implementation of hook_emfield_field_insert().
+ */
+function media_brightcove_emfield_field_insert(&$node, $field, &$items, $teaser, $page, $item, $delta) {
+  // Associate the brightcove video with this field item.
+  $uri = media_brightcove_uri($item['uri']);
+  $data = media_brightcove_data($uri);
+  $info = array(
+    'nid' => $node->nid,
+    'vid' => $node->vid,
+    'field_name' => $field['field_name'],
+    'delta' => $delta,
+    'uri' => $uri,
+    'data_collected' => !empty($data),
+  );
+  drupal_write_record('media_brightcove_fields', $info);
+}
+
+/**
+ * Implementation of hook_emfield_field_update().
+ */
+function media_brightcove_emfield_field_update(&$node, $field, &$items, $teaser, $page, $item, $delta) {
+  _media_brightcove_update_delete($node, $field, $items, $teaser, $page);
+  return media_brightcove_emfield_field_insert($node, $field, $items, $teaser, $page, $item, $delta);
+}
+
+/**
+ * Implement hook_emfield_widget_settings_extra().
+ */
+function media_brightcove_emfield_widget_settings_extra($op, $widget) {
+  module_load_include('inc', 'media_brightcove', 'includes/media_brightcove.cck');
+  return _media_brightcove_emfield_widget_settings_extra($op, $widget);
+}
+
+/**
+ * Implementation of hook_emfield_field_extra_delete().
+ */
+function media_brightcove_emfield_field_extra_delete(&$node, $field, &$items, $teaser, $page) {
+  // Delete any field associations for this node.
+  db_query("DELETE FROM {media_brightcove_fields} WHERE nid = %d", $node->nid);
+}
+
+/**
+ * Implementation of hook_emfield_field_extra_delete_revision().
+ */
+function media_brightcove_emfield_field_extra_delete_revision(&$node, $field, &$items, $teaser, $page) {
+  // Delete any field associations for this revision.
+  db_query("DELETE FROM {media_brightcove_fields} WHERE vid = %d", $node->vid);
+}
+
+/**
+ * Implement hook_emfield_field_extra().
+ */
+function media_brightcove_emfield_field_extra($op, &$node, $field, &$items, $teaser, $page, $module) {
+  // This is support for the soon-to-be-deprecated emvideo module.
+  switch ($op) {
+    case 'update':
+      // Ensure we first delete any stored associations for this revision.
+      _media_brightcove_update_delete($node, $field, $items, $teaser, $page);
+      // Don't break so we can now insert the data.
+    case 'insert':
+      // Associate any field data.
+      foreach ($items as $delta => $item) {
+        if ($item['provider'] == 'brightcove') {
+          $item['uri'] = media_brightcove_uri($item['value']);
+          media_brightcove_emfield_field_insert($node, $field, $items, $teaser, $page, $item, $delta);
+        }
+      }
+      break;
+    case 'delete':
+      media_brightcove_emfield_field_extra_delete($node, $field, $items, $teaser, $page);
+      break;
+    case 'delete revision':
+      media_brightcove_emfield_field_extra_delete_revision($node, $field, $items, $teaser, $page);
+      break;
+  }
+}
+
+/**
+ * Implementation of hook_emapi_register().
+ */
+function media_brightcove_emapi_register() {
+  return array(
+    'brightcove' => array(
+      'name' => t('Brightcove'),
+      'class_name' => 'MediaBrightcove',
+      'url' => 'http://brightcove.com/',
+      'description' => t(media_brightcove_variable_get('class_media_brightcove_description')),
+      'path' => drupal_get_path('module', 'media_brightcove') .'/includes',
+      'file' => 'media_brightcove.class.inc',
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_cron().
+ */
+function media_brightcove_cron() {
+  module_load_include('inc', 'media_brightcove', 'includes/media_brightcove.utilities');
+  _media_brightcove_cron();
+}

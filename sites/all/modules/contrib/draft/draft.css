@@ -1,0 +1,17 @@
+/* $id */
+
+.draft_save {
+  background-color: #ffaa44;
+  z-index: 1000;
+  position: fixed;
+  display: none;
+  text-align: center;
+  padding: 5px;
+  top: 0px;
+  right: 0px;
+  width: 100px;
+  height: 14px;
+  border: 2px solid #ee2222; }
+  .draft_save .title {
+    font-weight: bold;
+    color: #fff; }

@@ -1,0 +1,198 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Provides a UI for searching the M2 document database.
+ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function m2_search_menu() {
+  $items = array();
+
+  $items['m2/documents/list'] = array(
+    'title' => 'M2 search',
+    'page callback' => 'm2_search_page',
+    'access arguments' => array('access devel information'),
+  );
+
+  $items['m2/documents/%m2_document'] = array(
+    'title' => 'M2 Document',
+    'page callback' => 'm2_search_document_view',
+    'page arguments' => array(2),
+    'access arguments' => array('access devel information'),
+  );
+
+  return $items;
+}
+
+/**
+ * Menu callback for m2/documents/%m2_document
+ * Display a single document
+ */
+function m2_search_document_view($document) {
+  return '<pre>'. print_r($document, 1) .'</pre>';
+}
+
+/**
+ * Menu callback for m2/documents/list
+ */
+function m2_search_page() {
+  $output = drupal_get_form('m2_search_form');
+  $output .= m2_search_results();
+
+  return $output;
+}
+
+/**
+ * Return rendered search results based on session data.
+ */
+function m2_search_results() {
+  $session = &$_SESSION['m2_search'];
+
+  if (isset($session['plugin']) && isset($session['index'])) {
+    $plugins = m2_load_plugins();
+    $plugin = $plugins[$session['plugin']];
+
+    $query = $session['query'] ? ($session['index'] .':'. $session['query']) : '';
+    $result = m2_search_query($query, $plugin);
+    $rows = array();
+    foreach ($result->items as $item) {
+      $doc = m2_document_parse($item);
+      $row = array();
+      $row[] = l("{$doc->id}", "m2/documents/{$doc->id}");
+      foreach ($plugin['fields'] as $field_name => $type) {
+        if (is_array($doc->$field_name) || is_object($doc->$field_name)) {
+          $row[] = drupal_to_js($doc->$field_name);
+        }
+        elseif (is_bool($doc->$field_name)) {
+          $row[] = ($doc->$field_name) ? 'true' : 'false';
+        }
+        else {
+          $row[] = $doc->$field_name;
+        }
+      }
+      $rows[] = $row;
+    }
+
+    $header = array('Id');
+    foreach ($plugin['fields'] as $key => $type) {
+      $header[] = $key;
+    }
+
+    $output = theme('table', $header, $rows);
+
+    $pager = theme('pager', array(), (string)$result->perPage);
+    $output = $pager . $output . $pager;
+
+    return $output;
+  }
+}
+
+/**
+ * Emulate pager_query(), instead returning an array of M2 document objects
+ *
+ * @return
+ *   The M2 object. Check the items property for an array of results.
+ */
+function m2_search_query($query = NULL, $plugin = NULL, $element = 0) {
+  $page = empty($_GET['page']) ? 1 : (int) $_GET['page'];
+
+  $url = M2_ENDPOINT ."documents/list/{$plugin['class']}.json?";
+  $params = array('q' => $query, 'page' => $page + 1);
+  $url .= drupal_query_string_encode($params);
+
+  $result = drupal_http_request($url);
+
+  // Check for an invalid response code. There's probably a better way but this
+  // will catch 400 and 500 errors.
+  if ($result->code > 400) {
+    watchdog('m2_search', 'The HTTP search request failed with @error_code error code.', array('@error_code' => $result->code), WATCHDOG_ERROR, $url);
+    return array();
+  }
+
+  $items = array();
+  $json = json_decode($result->data);
+
+  m2_search_pager_set((int)$json->count, (int)$json->perPage, $element);
+
+  return $json;
+}
+
+function m2_search_pager_set($count, $per_page, $element = 0) {
+  global $pager_page_array, $pager_total, $pager_total_items;
+  $page = isset($_GET['page']) ? $_GET['page'] : '';
+
+  // Convert comma-separated $page to an array, used by other functions.
+  $pager_page_array = explode(',', $page);
+
+  // We calculate the total of pages as ceil(items / limit).
+  $pager_total_items[$element] = $count;
+  $pager_total[$element] = ceil($pager_total_items[$element] / $per_page);
+  $pager_page_array[$element] = max(0, min((int)$pager_page_array[$element], ((int)$pager_total[$element]) - 1));
+}
+
+/**
+ * Search form
+ */
+function m2_search_form(&$form_state) {
+  $session = &$_SESSION['m2_search'];
+  $session = is_array($session) ? $session : array();
+
+  $plugins = m2_load_plugins();
+  foreach ($plugins as $key => $plugin) {
+    $options[$plugin['name']] = array();
+    if (is_array($plugin['index'])) {
+      foreach ($plugin['index'] as $index => $title) {
+        $index = $key .'-'. $index;
+        $options[$plugin['name']][$index] = $title;
+      }
+    }
+  }
+  $form['search'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Search fields'),
+    '#tree' => 0,
+  );
+  $form['search']['query'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Query'),
+    '#default_value' => empty($session['query']) ? '': $session['query'],
+  );
+  $form['search']['type'] = array(
+    '#type' => 'select',
+    '#title' => t('Search by'),
+    '#options' => $options,
+    '#default_value' => empty($session['type']) ? '': $session['type'],
+  );
+  $form['search']['buttons']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Search'),
+  );
+  if (!empty($session)) {
+    $form['search']['buttons']['reset'] = array(
+      '#type' => 'submit',
+      '#value' => t('Reset')
+    );
+  }
+
+  return $form;
+}
+
+function m2_search_form_submit($form, &$form_state) {
+  $op = $form_state['values']['op'];
+  switch ($op) {
+    case t('Search'):
+      list($plugin, $index) = explode('-', $form_state['values']['type']);
+      $form_state['values']['plugin'] = $plugin;
+      $form_state['values']['index'] = $index;
+      $_SESSION['m2_search'] = $form_state['values'];
+      break;
+    case t('Reset'):
+      $_SESSION['m2_search'] = array();
+      break;
+  }
+  return 'm2/documents/list';
+}

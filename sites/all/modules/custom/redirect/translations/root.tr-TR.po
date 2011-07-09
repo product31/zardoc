@@ -1,0 +1,92 @@
+# Turkey translation of redirect (all releases)
+# Copyright (c) 2010 by the Turkey translation team
+# Generated from files:
+#  redirect/redirect.module: n/a
+#  redirect/redirect.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: redirect (all releases)\n"
+"POT-Creation-Date: 2010-04-12 15:42-0500\n"
+"PO-Revision-Date: 2010-03-30 14:56-0500\n"
+"Language-Team: Turkey\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: redirect.module:34
+msgid "Edit"
+msgstr "Düzenle"
+
+#: redirect.module:92
+msgid "Operations"
+msgstr "İşlemler"
+
+#: redirect.module:135
+msgid "Submit"
+msgstr "Gönder"
+
+#: redirect.module:173,41
+msgid "Delete"
+msgstr "Sil"
+
+#: redirect.module:174
+msgid "Cancel"
+msgstr "Vazgeç"
+
+#: redirect.module:21
+msgid "List"
+msgstr "Listele"
+
+#: redirect.module:27
+msgid "Add"
+msgstr ""
+
+#: redirect.module:89,109
+msgid "Drupal path"
+msgstr ""
+
+#: redirect.module:90,115
+msgid "Redirect URL"
+msgstr ""
+
+#: redirect.module:91
+msgid "Response code"
+msgstr ""
+
+#: redirect.module:124
+msgid "301: Moved Permanently"
+msgstr ""
+
+#: redirect.module:125
+msgid "302: Found"
+msgstr ""
+
+#: redirect.module:126
+msgid "303: See Other"
+msgstr ""
+
+#: redirect.module:127
+msgid "304: Not Modified"
+msgstr ""
+
+#: redirect.module:128
+msgid "305: Use Proxy"
+msgstr ""
+
+#: redirect.module:129
+msgid "307: Temporary Redirect"
+msgstr ""
+
+#: redirect.module:170
+msgid "Are you sure you want delete this redirect?"
+msgstr ""
+
+#: redirect.module:172
+msgid "%path redirects to %url.  This action cannot be undone."
+msgstr ""
+
+#: redirect.info:0
+msgid "Redirect a Drupal path to an external URL"
+msgstr ""
+

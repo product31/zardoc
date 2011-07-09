@@ -1,0 +1,152 @@
+<?php
+
+/**
+ * Implementation of hook_action_info().
+ */
+function global_discography_action_info() {
+  return array(
+    'global_discography_translate_albums_action' => array(
+      'description' => t('Translate Discography'),
+      'type' => 'node',
+      'behavior' => array('changes_property'),
+	  'configurable' => TRUE,
+      'hooks' => array(
+      ),
+    ),
+  );
+}
+
+function global_discography_translate_albums_action_form($context = array()) {
+  global $user;
+    $form ['global_discography_translate_albums_action']['language'] = array(
+      '#type' => 'select',
+      '#title' => t('Language setting'),
+      '#options' => i18n_access_load_permissions(),
+      '#default_value' => array(),
+      '#description' => t('Please select your region.'),
+  );
+    return $form;
+}
+
+function global_discography_translate_albums_action_submit($form, $form_state) {
+ //We're setting all nodes to the same weight
+  return array('language' => $form_state['values']['language']);
+}
+
+/**
+ * Creates a translation for albums enabled language.
+ */
+function global_discography_translate_albums_action($node, $context = array()) {
+  global $user;
+
+  if (!user_access('translate interface')) {
+    return;
+  }
+  // If this node is not translatable bail out here.
+  if (variable_get('language_content_type_'. $node->type, 0) == 0) {
+    drupal_set_message('Content translation for albums has not been configured!', 'error');
+    return;
+  }
+  $language = $context['language'];
+  $nid = $node->nid;
+  $default = language_default('language');
+  $count = db_result(db_query("SELECT COUNT(*) FROM {node} WHERE language = '%s' AND tnid = %d", $language, $nid));
+  if ($count < 1) {
+    $result = db_result(db_query('SELECT n.tnid FROM {node} n WHERE n.nid = %d', $nid));
+    if ($result != $nid) {
+      db_query("UPDATE {node} SET tnid = %d, translate = %d, WHERE nid = %d", $nid, 0, $nid);
+    }
+    $new_result = db_result(db_query('SELECT n.language FROM {node} n WHERE n.nid = %d', $nid));
+
+    if ($new_result != $language) {
+      $translatoruid = db_result(db_query("SELECT u.name FROM {users} u INNER JOIN {users_roles} ur ON u.uid = ur.uid INNER JOIN {role} r ON ur.rid = r.rid WHERE u.language = '%s' AND r.name = 'translator'", $language));
+      $translator = empty($translatoruid) ? $user->name : $translatoruid;
+      module_load_include('inc', 'node', 'node.pages'); // needed for node_object_prepare()// prepare the new node
+
+      $new_node = new stdClass();
+      $new_node->type = $node->type;
+      node_object_prepare($new_node);
+
+      // Let every module add custom translated fields.
+      $new_node->translation_source = $node;
+      $new_node->language = $language;
+      $new_node->title = $node->title;
+      $new_node->body = $node->body;
+      $new_node->name = $translator;
+      node_invoke_nodeapi($new_node, 'prepare translation');
+
+      // create the new translation node
+      node_save(node_submit($new_node));
+
+      // inform user of new translation
+      drupal_set_message(t('New album translation with language code of %language created for <a href="!view-url">%title</a>.'.'<br/>', array('%language' => $new_node->language, '%title' => $new_node->title, '!view-url' => url('node/'. $new_node->nid))));
+      watchdog('global_discography', 'Username %name created translation for %title at %timestamp with language code of %language.', array('%name' => $user->name, '%title' => $new_node->title, '%timestamp' => $timestamp, '%language' => $new_node->language), WATCHDOG_NOTICE, url('node/'. $new_node->nid));
+
+      // translate every track related to this album
+      global_discography_tracks($nid, $language, $new_node);
+    }
+  }
+  else {
+    drupal_set_message(t('%language album translations for %title have already been created.'.'<br/>', array('%language' => $language, '%title' => $node->title)), 'warning');
+  }
+}
+
+function global_discography_tracks($album_nid, $track_language, $new_node) {
+  global $user;
+  $default = language_default('language');
+  // get all track nodes associated with this album
+  $result = db_query("SELECT c.nid FROM {content_type_track} c LEFT JOIN {node} n ON c.nid = n.nid WHERE c.field_album_nid = %d AND n.translate = %d", $album_nid, 0);
+  while ($track_id = db_fetch_array($result)) {
+    $track_node = node_load($track_id);
+    if (variable_get('language_content_type_'. $track_node->type, 0) == 0) {
+      drupal_set_message('Content translation for tracks has not been configured!', 'error');
+      return;
+    }
+    $nid = $track_node->nid;
+     //Check to see if the node has already been translated
+    $new_result = db_result(db_query('SELECT n.tnid FROM {node} n WHERE n.nid = %d', $nid));
+    if ($new_result != $nid) {
+      db_query("UPDATE {node} SET tnid = %d, translate = %d, WHERE nid = %d", $nid, 0, $nid);
+    }
+
+    if ($track_node->language != $track_language) {
+      $translatoruid = db_result(db_query("SELECT u.name FROM {users} u INNER JOIN {users_roles} ur ON u.uid = ur.uid INNER JOIN {role} r ON ur.rid = r.rid WHERE u.language = '%s' AND r.name = 'translator'", $track_language));
+      $translator = empty($translatoruid) ? $user->name : $translatoruid;
+      module_load_include('inc', 'node', 'node.pages'); // needed for node_object_prepare()// prepare the new node
+
+      $new_track_node = new stdClass();
+      $new_track_node->type  = $track_node->type;
+      node_object_prepare($new_track_node);
+      // Let every module add custom translated fields.
+      $new_track_node->translation_source = $track_node;
+      $new_track_node->title = $track_node->title;
+      $new_track_node->body = $track_node->body;
+      $new_track_node->name = $translator;
+      $new_track_node->language = $track_language;
+      node_invoke_nodeapi($new_track_node, 'prepare translation');
+
+      // We might not need this but I'm not certain.
+      $new_track_node->field_album[0]['nid'] = $new_node->nid;
+
+      // create the new translation node
+      node_save(node_submit($new_track_node));
+
+      drupal_set_message(t('Track translation with language code of %language created for <a href="!view-url">%title</a>.', array('%language' => $new_track_node->language, '%title' => $new_track_node->title, '!view-url' => url('node/'. $new_track_node->nid))));
+      watchdog('global_discography', 'Username %name created translation for %title at %timestamp with language code of %language.', array('%name' => $user->name, '%title' => $new_track_node->title, '%timestamp' => $timestamp, '%language' => $new_track_node->language), WATCHDOG_NOTICE, url('node/'. $new_track_node->nid));
+    }
+    else {
+      drupal_set_message(t('Track translation already created for node %nid'.'<br/>', array('%nid' => $track_node->nid)), 'warning');
+    }
+  }
+}
+
+/**
+ * Implementation of hook_views_api().
+ */
+function global_discography_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'global_discography'),
+    //'path' => drupal_get_path('module', 'global_discography') . '/includes',
+  );
+}

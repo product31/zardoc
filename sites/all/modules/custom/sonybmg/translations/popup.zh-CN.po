@@ -1,0 +1,22 @@
+# China translation of sonybmg (all releases)
+# Copyright (c) 2010 by the China translation team
+# Generated from file: sonybmg/popup/popup.js: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sonybmg (all releases)\n"
+"POT-Creation-Date: 2010-04-05 15:33-0500\n"
+"PO-Revision-Date: 2010-03-30 11:10-0500\n"
+"Language-Team: China\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: popup/popup.js:0
+msgid "Continue"
+msgstr "继续"
+
+#: popup/popup.js:0
+msgid "Close"
+msgstr ""
+

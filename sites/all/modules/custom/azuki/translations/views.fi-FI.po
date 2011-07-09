@@ -1,0 +1,45 @@
+# Finland translation of azuki (all releases)
+# Copyright (c) 2010 by the Finland translation team
+# Generated from file: azuki/views/azuki.views.inc: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: azuki (all releases)\n"
+"POT-Creation-Date: 2010-04-06 22:31-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Finland\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: views/azuki.views.inc:12
+msgid "Azuki Feed"
+msgstr ""
+
+#: views/azuki.views.inc:13
+msgid "Display the view as a feed, such as an RSS feed."
+msgstr ""
+
+#: views/azuki.views.inc:20
+msgid "Feed"
+msgstr ""
+
+#: views/azuki.views.inc:27
+msgid "Azuki RSS Feed"
+msgstr ""
+
+#: views/azuki.views.inc:28
+msgid ""
+"Generates a Media RSS feed from a view, appropriate for use with the "
+"Azuki mobile platform."
+msgstr ""
+
+#: views/azuki.views.inc:41
+msgid "Azuki RSS"
+msgstr ""
+
+#: views/azuki.views.inc:42
+msgid "Output the node according to Azuki RSS specs."
+msgstr ""
+

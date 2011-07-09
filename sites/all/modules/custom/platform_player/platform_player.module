@@ -1,0 +1,373 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * description
+ */
+
+define('PLATFORM_PLAYER_AUDIO', 0);
+define('PLATFORM_PLAYER_VIDEO', 1);
+
+/**
+ * Implementation of hook_perm().
+ */
+function platform_player_perm() {
+  return array('access platform players');
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function platform_player_menu() {
+  $items = array();
+
+  $items['platform/%platform_player_field/audio/%'] = array(
+    'type' => MENU_CALLBACK,
+    'page callback' => 'platform_player_page',
+    'page arguments' => array(1, 2, 3),
+    'access arguments' => array('access platform players'),
+  );
+
+  $items['platform/%platform_player_field/video/%'] = array(
+    'type' => MENU_CALLBACK,
+    'page callback' => 'platform_player_page',
+    'page arguments' => array(1, 2, 3),
+    'access arguments' => array('access platform players'),
+  );
+
+  return $items;
+}
+
+/**
+ * Menu argument loader for %platform_player_field
+ */
+function platform_player_field_load($field_name) {
+  return content_fields($field_name);
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function platform_player_theme() {
+  return array(
+    'platform_player_formatter_default' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'platform_player' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'platform_player_audio' => array(
+      'arguments' => array(
+        'field' => NULL,
+        'platform_id'    => NULL,
+      ),
+      'template' => 'platform-player-audio',
+    ),
+    'platform_player_video' => array(
+      'arguments' => array(
+        'field' => NULL,
+        'platform_id'    => NULL,
+      ),
+      'template' => 'platform-player-video',
+    ),
+  );
+}
+
+/**
+ * Preprocess function for theme('platform_player_audio')
+ */
+function platform_player_preprocess_platform_player_audio(&$vars) {
+  drupal_add_js(drupal_get_path('module', 'platform_player') .'/swfobject.js');
+  $vars['platform_url'] = 'http://release.sonymusic.com/media/release/' . $vars['platform_id'];
+}
+
+/**
+ * Preprocess function for theme('platform_player_video')
+ */
+function platform_player_preprocess_platform_player_video(&$vars) {
+  drupal_add_js(drupal_get_path('module', 'platform_player') .'/swfobject.js');
+  $vars['platform_url'] = 'http://release.sonymusic.com/media/release/' . $vars['platform_id'];
+}
+
+function platform_player_page($field, $type, $id) {
+  $hook = 'platform_player_'. $type;
+  print theme($hook, $field, $id);
+}
+
+/**
+ * Implementation of hook_elements().
+ */
+function platform_player_elements() {
+  $elements = array();
+  $elements['platform_player'] =  array(
+    '#input' => TRUE,
+    '#columns' => array('url', 'format'),
+    '#process' => array('platform_player_element_process'),
+  );
+  return $elements;
+}
+
+/**
+ * Process the platform_player type element before displaying the field.
+ *
+ * Build the form element. When creating a form using FAPI #process,
+ * note that $element['#value'] is already set.
+ *
+ * The $fields array is in $form['#field_info'][$element['#field_name']].
+ */
+function platform_player_element_process($element, $edit, $form_state, $form) {
+  $field = $form['#field_info'][$element['#field_name']];
+  $field_key   = $element['#columns'][0];
+
+  $field = $form['#field_info'][$element['#field_name']];
+  $delta = $element['#delta'];
+  $element['url'] = array(
+    '#type' => 'textfield',
+    '#maxlength' => '255',
+    '#title' => t('Platform URL'),
+    '#description' => $element['#description'],
+    '#required' => $element['#required'],
+    '#default_value' => isset($element['#value']['url']) ? $element['#value']['url'] : NULL,
+  );
+  $options = array();
+  if ($field['audio_player']['enabled']) {
+    $options[PLATFORM_PLAYER_AUDIO] = t('Audio Player');
+  }
+  if ($field['video_player']['enabled']) {
+    $options[PLATFORM_PLAYER_VIDEO] = t('Video Player');
+  }
+  $element['format'] = array(
+    '#type' => 'radios',
+    '#title' => t('Media Format'),
+    '#required' => $element['#required'],
+    '#default_value' => isset($element['#value']['format']) ? $element['#value']['format'] : NULL,
+    '#options' => $options,
+  );
+
+  return $element;
+}
+
+/**
+ * FAPI theme for an individual platform_player element.
+ */
+function theme_platform_player($element) {
+  // theme_fieldset expects #value to contain markup.  our #value is an array.
+  unset($element['#value']);
+  return theme('fieldset', $element);
+}
+
+/**
+ * Implementation of hook_field_info().
+ */
+function platform_player_field_info() {
+  return array(
+    'platform_player' => array(
+      'label' => t('Platform Media Player'),
+      'description' => t('Store the data necessary to build a Platform Media Player link.'),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_field_settings().
+ */
+function platform_player_field_settings($op, $field) {
+  switch ($op) {
+    case 'form':
+      $form['audio_player'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Audio player settings'),
+        '#tree' => 1,
+      );
+      $form['audio_player']['enabled'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Enabled?'),
+        '#default_value' => $field['audio_player']['enabled'] ? $field['audio_player']['enabled'] : 0,
+      );
+      $form['audio_player']['swf'] = array(
+        '#type' => 'textfield',
+        '#title' => t('SWF file path'),
+        '#default_value' => $field['audio_player']['swf'] ? $field['audio_player']['swf'] : '',
+      );
+      $form['audio_player']['width'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Player width'),
+        '#default_value' => $field['audio_player']['width'] ? $field['audio_player']['width'] : 0,
+      );
+      $form['audio_player']['height'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Player height'),
+        '#default_value' => $field['audio_player']['height'] ? $field['audio_player']['height'] : 0,
+      );
+
+      $form['video_player'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Video player settings'),
+        '#tree' => 1,
+      );
+      $form['video_player']['enabled'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Enabled?'),
+        '#default_value' => $field['video_player']['enabled'] ? $field['video_player']['enabled'] : 0,
+      );
+      $form['video_player']['swf'] = array(
+        '#type' => 'textfield',
+        '#title' => t('SWF file path'),
+        '#default_value' => $field['video_player']['swf'] ? $field['video_player']['swf'] : '',
+      );
+      $form['video_player']['width'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Player width'),
+        '#default_value' => $field['video_player']['width'] ? $field['video_player']['width'] : 0,
+      );
+      $form['video_player']['height'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Player height'),
+        '#default_value' => $field['video_player']['height'] ? $field['video_player']['height'] : 0,
+      );
+
+      return $form;
+
+    case 'validate':
+      foreach (array('audio_player', 'video_player') as $player) {
+        if (!empty($field[$player]['enabled'])) {
+          if (empty($field[$player]['swf'])) {
+            form_set_error("$player][swf", t('!name field is required.', array('!name' => t('SWF file path'))));
+          }
+          if (empty($field[$player]['width'])) {
+            form_set_error("$player][width", t('!name field is required.', array('!name' => t('Player width'))));
+          }
+          if (empty($field[$player]['swf'])) {
+            form_set_error("$player][height", t('!name field is required.', array('!name' => t('Player height'))));
+          }
+        }
+      }
+      break;
+
+    case 'save':
+      return array('audio_player', 'video_player');
+
+    case 'database columns':
+      return array(
+        'url'     => array('type' => 'varchar', 'length' => 255, 'not null' => FALSE),
+        'format'  => array('type' => 'int', 'not null' => FALSE),
+      );
+  }
+}
+
+/**
+ * Implementation of hook_field().
+ */
+function platform_player_field($op, &$node, $field, &$items, $teaser, $page) {
+  switch ($op) {
+    case 'load':
+      foreach ($items as $delta => $item) {
+        // load something if needed.
+      }
+      break;
+
+    case 'validate':
+      foreach($items as $delta => $value) {
+        $error_field = $field['field_name'] .']['. $delta .'][url';
+        if (!empty($value['url'])) {
+          $xml = simplexml_load_file(trim($value['url']));
+          if (!$xml || ($xml->getName() != 'playlist')) {
+            form_set_error($error_field, t('The platform URL provided could not be retrieved.'));
+          }
+        }
+      }
+      break;
+
+    case 'presave':
+      break;
+
+    case 'sanitize':
+      if (!user_access('access platform players')) {
+        $items = array();
+      }
+      else {
+        foreach ($items as $delta => $value) {
+          $format = ($value['format'] == PLATFORM_PLAYER_AUDIO) ? 'audio_player' : 'video_player';
+          $items[$delta]['player'] = $field[$format];
+        }
+      }
+      break;
+  }
+}
+
+/**
+ * Implementation of hook_content_is_empty().
+ */
+function platform_player_content_is_empty($item, $field) {
+  if (empty($item['url'])) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/**
+ * Implementation of hook_widget_info().
+ */
+function platform_player_widget_info() {
+  return array(
+    'platform_player' => array(
+      'label' => 'Textfield for platform URL',
+      'field types' => array('platform_player'),
+      'multiple values' => CONTENT_HANDLE_CORE,
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_widget().
+ */
+function platform_player_widget(&$form, &$form_state, $field, $items, $delta = 0) {
+  $element = array(
+    '#type' => $field['widget']['type'],
+    '#default_value' => isset($items[$delta]) ? $items[$delta] : '',
+    '#title' => $field['widget']['label'],
+    '#weight' => $field['widget']['weight'],
+    '#description' => $field['widget']['description'],
+    '#required' => $field['required'],
+    '#field' => $field,
+  );
+  return $element;
+}
+
+/**
+ * Implementation of hook_field_formatter_info().
+ */
+function platform_player_field_formatter_info() {
+  return array(
+    'default' => array(
+      'label' => t('Platform player popup link (default)'),
+      'field types' => array('platform_player'),
+      'multiple values' => CONTENT_HANDLE_CORE,
+    ),
+  );
+}
+
+/**
+ * Theme function for 'default' platform_player field formatter.
+ */
+function theme_platform_player_formatter_default($element) {
+  $item = $element['#item'];
+
+  if ($item['url']) {
+    drupal_add_js(drupal_get_path('module', 'platform_player') .'/platform_player.js');
+    
+    $query = parse_url($item['url'], PHP_URL_PATH);
+    $path = explode('/media/release/', $query);
+    $pid = $path[1];
+    $player = ($item['format'] == PLATFORM_PLAYER_AUDIO) ? 'audio' : 'video';
+    $url = 'platform/'. $element['#field_name'] .'/'. $player .'/'. $pid;
+
+    return l('Play', $url, array(
+      'attributes' => array(
+        'onclick' => 'Drupal.platformPlayer.open(this.href,'. $item['player']['width'] .','. $item['player']['height'] .'); return false;',
+      ),
+    ));
+  }
+}
+

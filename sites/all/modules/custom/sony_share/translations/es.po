@@ -1,0 +1,315 @@
+# $Id: es.po,v 1.1.4.2 2009/04/03 11:22:23 thecrow Exp $
+#
+# LANGUAGE translation of Drupal (sony_share.module)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  sony_share.module,v 1.19 2007/02/25 21:15:33 frjo
+#  sony_share.info,v 1.1 2006/11/05 12:29:36 frjo
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sony share\n"
+"POT-Creation-Date: 2007-03-02 11:35+0100\n"
+"PO-Revision-Date: 2007-03-12 15:53+0100\n"
+"Last-Translator: Jorge Calás Lozano <jorge@e-calas.net>\n"
+"Language-Team: Jorge Calás <calas@four-two.net>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Spanish\n"
+"X-Poedit-Country: SPAIN\n"
+
+#: sony_share.module:16
+msgid "Here you can configure the sony share."
+msgstr "Aquí puede configurar sus enlaces de servicio (sony share)."
+
+#: sony_share.module:36
+#, fuzzy
+msgid "Where to show the sony share"
+msgstr "Dónde mostrar los enlaces de servicios"
+
+#: sony_share.module:37
+#, fuzzy
+msgid "Set the node types and categories you want to display links for."
+msgstr "Configure los tipos de nodo y categorías donde quiere que se muestren los enlaces."
+
+#: sony_share.module:41
+#, fuzzy
+msgid "Node types"
+msgstr "Tipos de nodo."
+
+#: sony_share.module:48
+#, fuzzy
+msgid "Categories"
+msgstr "Categorías"
+
+#: sony_share.module:55
+#, fuzzy
+msgid "What bookmark links to show"
+msgstr "Qué enlaces a marcadores mostrar"
+
+#: sony_share.module:59
+#, fuzzy
+msgid "Show del.icio.us link"
+msgstr "Mostrar enlace a del.icio.us"
+
+#: sony_share.module:65
+#, fuzzy
+msgid "Show Digg link"
+msgstr "Mostrar enlace a Digg"
+
+#: sony_share.module:77
+#, fuzzy
+msgid "Show Reddit link"
+msgstr "Mostrar enlace a Reddit"
+
+#: sony_share.module:83
+#, fuzzy
+msgid "Show ma.gnolia.com link"
+msgstr "Mostrar enlace a ma.gnolia.com"
+
+#: sony_share.module:89
+#, fuzzy
+msgid "Show Newsvine link"
+msgstr "Mostra enlace a Newsvine"
+
+#: sony_share.module:95
+#, fuzzy
+msgid "Show Furl link"
+msgstr "Mostrar enlace a Furl"
+
+#: sony_share.module:101
+#, fuzzy
+msgid "Show Google link"
+msgstr "Mostrar enlace a Google"
+
+#: sony_share.module:107
+#, fuzzy
+msgid "Show Yahoo link"
+msgstr "Mostrar enlace a Yahoo"
+
+#: sony_share.module:114
+#, fuzzy
+msgid "What search links to show"
+msgstr "Qué enlaces de búsqueda mostrar"
+
+#: sony_share.module:118
+#, fuzzy
+msgid "Show Technorati link"
+msgstr "Mostrar enlace a Technorati"
+
+#: sony_share.module:124
+#, fuzzy
+msgid "Show IceRocket link"
+msgstr "Mostrar enlace a IceRocket"
+
+#: sony_share.module:131
+#, fuzzy
+msgid "When and how to show the links"
+msgstr "Cuándo y cómo mostrar los enlaces"
+
+#: sony_share.module:135
+#, fuzzy
+msgid "sony share in links"
+msgstr "Enlaces de servicio en enlaces"
+
+#: sony_share.module:137;144
+#, fuzzy
+msgid "Disabled"
+msgstr "Desactivado"
+
+#: sony_share.module:137;144
+#, fuzzy
+msgid "Teaser view"
+msgstr "Versión recortada"
+
+#: sony_share.module:137;144
+#, fuzzy
+msgid "Full-page view"
+msgstr "Vista completa"
+
+#: sony_share.module:137;144
+#, fuzzy
+msgid "Teasers and full-page view"
+msgstr "Versión recortada y vista completa"
+
+#: sony_share.module:138
+#, fuzzy
+msgid "When to display the services in the links section."
+msgstr "Cuándo mostrar los enlaces de servicio en la sección de enlaces."
+
+#: sony_share.module:142
+#, fuzzy
+msgid "sony share in nodes"
+msgstr "Enlaces de servicio en los nodos"
+
+#: sony_share.module:145
+#, fuzzy
+msgid "When to display the services after the node text."
+msgstr "Cuándo mostrar los enlaces de servicio después del texto del nodo."
+
+#: sony_share.module:149
+#, fuzzy
+msgid "sony share style"
+msgstr "Estilo de los enlaces de servicio"
+
+#: sony_share.module:151
+#, fuzzy
+msgid "Text links"
+msgstr "Solo texto"
+
+#: sony_share.module:151
+#, fuzzy
+msgid "Image links"
+msgstr "Imágenes"
+
+#: sony_share.module:151
+#, fuzzy
+msgid "Image and text links"
+msgstr "Imágenes y Texto"
+
+#: sony_share.module:157
+#, fuzzy
+msgid "Aggregator2 settings"
+msgstr "opciones de !key"
+
+#: sony_share.module:161
+msgid "Use link to original article aggregated by aggregator2 module"
+msgstr "Usar enlace al artículo original añadido al sitio con el módulo aggregator2"
+
+#: sony_share.module:179;273
+#: sony_share.info:0
+#, fuzzy
+msgid "sony share"
+msgstr "sony share"
+
+#: sony_share.module:180
+#, fuzzy
+msgid "Control which and where sony share should be active."
+msgstr "Controla cuales enlaces de servicios deben estar activos y dónde. "
+
+#: sony_share.module:281
+#, fuzzy
+msgid "Bookmark/Search this post"
+msgstr "Marcar/Buscar este post con:"
+
+#: sony_share.module:308
+#, fuzzy
+msgid "Delicious"
+msgstr "Delicious"
+
+#: sony_share.module:308
+#, fuzzy
+msgid "Bookmark this post on del.icio.us."
+msgstr "Marcar en del.icio.us."
+
+#: sony_share.module:311
+#, fuzzy
+msgid "Digg"
+msgstr "Digg"
+
+#: sony_share.module:311
+#, fuzzy
+msgid "Digg this post on digg.com."
+msgstr "Marcar en digg.com."
+
+#: sony_share.module:317
+#, fuzzy
+msgid "Reddit"
+msgstr "Reddit"
+
+#: sony_share.module:317
+#, fuzzy
+msgid "Submit this post on reddit.com."
+msgstr "Enviar a reddit.com."
+
+#: sony_share.module:320
+#, fuzzy
+msgid "Magnoliacom"
+msgstr "Ma.gnolia.com"
+
+#: sony_share.module:320
+#, fuzzy
+msgid "Submit this post on ma.gnolia.com."
+msgstr "Enviar a ma.gnolia.com"
+
+#: sony_share.module:323
+#, fuzzy
+msgid "Newsvine"
+msgstr "Newsvine"
+
+#: sony_share.module:323
+#, fuzzy
+msgid "Submit this post on newsvine.com."
+msgstr "Enviar a newsvine.com"
+
+#: sony_share.module:326
+#, fuzzy
+msgid "Furl"
+msgstr "Furl"
+
+#: sony_share.module:326
+#, fuzzy
+msgid "Submit this post on furl.net."
+msgstr "Enviar a furl.net"
+
+#: sony_share.module:329
+#, fuzzy
+msgid "Google"
+msgstr "Google"
+
+#: sony_share.module:329
+#, fuzzy
+msgid "Bookmark this post on Google."
+msgstr "Marcar en Google."
+
+#: sony_share.module:332
+#, fuzzy
+msgid "Yahoo"
+msgstr "Yahoo"
+
+#: sony_share.module:332
+#, fuzzy
+msgid "Bookmark this post on Yahoo."
+msgstr "Marcar en Yahoo."
+
+#: sony_share.module:335
+#, fuzzy
+msgid "Technorati"
+msgstr "Technorati"
+
+#: sony_share.module:335
+#, fuzzy
+msgid "Search Technorati for links to this post."
+msgstr "Buscar en Technorati enlaces a esta página."
+
+#: sony_share.module:338
+#, fuzzy
+msgid "Icerocket"
+msgstr "Icerocket"
+
+#: sony_share.module:338
+#, fuzzy
+msgid "Search IceRocket for links to this post."
+msgstr "Buscar en IceRocket enlaces a esta página."
+
+#: sony_share.module:395
+#, fuzzy
+msgid "Bookmark/Search this post with: "
+msgstr "Marcar/Buscar este post con:"
+
+#: sony_share.module:26
+#, fuzzy
+msgid "use sony share"
+msgstr "Enlaces de servicio en enlaces"
+
+#: sony_share.module:0
+#, fuzzy
+msgid "sony_share"
+msgstr "sony_share"
+
+#: sony_share.info:0
+#, fuzzy
+msgid "Add Digg, del.icio.us, reddit, Technorati etc. links to nodes."
+msgstr "Añadir enlaces a Digg, del.icio.us, reddit, Technorati, etc. a los nodos."
+

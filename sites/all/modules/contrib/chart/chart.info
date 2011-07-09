@@ -1,0 +1,4 @@
+name = Chart API
+description = Chart generation API.
+package = Charting
+core = 6.x

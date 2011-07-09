@@ -1,0 +1,14 @@
+<a href="http://httpd.apache.org/">Apache HTTPD</a><br>
+<a href="http://www.gknw.net/">mod_autoindex_color module</a><br>
+<a href="http://www.openssl.org/">OpenSSL</a><br>
+<a href="http://www.sqlite.org/">SQLite</a><br>
+<a href="http://www.webalizer.org/">The Webalizer</a><br>
+<a href="http://msmtp.sourceforge.net/">msmtp (a sendmail compatible SMTP client)</a><br>
+<a href="http://www.mysql.org/">MySQL</a><br>
+<a href="http://www.primebase.org/">PrimeBase XT Storage Engine for MySQL</a><br>
+<a href="http://www.php.net/">PHP</a><br>
+<a href="http://www.libming.org/">Ming extension</a><br>
+<a href="http://www.pdflib.com/products/pdflib-family/pdflib-lite/">PDFlib Lite extension</a><br>
+<a href="http://pear.php.net/">PEAR</a><br>
+<a href="http://www.phpmyadmin.net/">phpMyAdmin</a><br>
+<a href="http://www.perl.org/">Mini Perl</a><br>

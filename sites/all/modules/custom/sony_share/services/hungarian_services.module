@@ -1,0 +1,23 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Hungarian services that extend Sony Share module
+ * by Denes Szabo
+ */
+
+/**
+ * Implementation of hook_sony_share().
+ */
+function hungarian_services_sony_share() {
+  $links = array();
+
+  $links['_hu_iwiw'] = array(
+    'name' => 'IWIW',
+    'description' => t('Add to iWiW.'),
+    'link' => 'http://iwiw.hu/pages/share/share.jsp?u=<encoded-url>&t=<encoded-title>',
+  );
+
+  return $links;
+}

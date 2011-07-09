@@ -1,0 +1,1037 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ */
+
+/**
+ * Implementation of hook_perm().
+ */
+function pluto_perm() {
+  return array('administer pluto');
+}
+
+/**
+ *  Implementation of hook_views_api()
+ */
+
+function pluto_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'pluto'),
+  );
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function pluto_menu() {
+  $items = array();
+    $items['membership'] = array(
+      'title' => 'Membership Benefits',
+      'page callback' => 'pluto_membership_about',
+      'access arguments' => array('access content'),
+      'menu_name' => 'primary-links',
+      'type' => MENU_SUGGESTED_ITEM,
+      'file' => 'pluto.user.inc',
+    );
+    $items['admin/settings/pluto'] = array(
+      'title' => 'Pluto',
+      'page callback' => 'pluto_admin_overview',
+      'access arguments' => array('administer pluto'),
+      'file' => 'system.admin.inc',
+      'file path' => drupal_get_path('module', 'system'),
+    );
+    $items['admin/settings/pluto/overview'] = array(
+      'title' => 'Overview',
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+      'weight' => -10,
+    );
+    $items['admin/settings/pluto/settings'] = array(
+      'title' => 'Settings',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('pluto_admin_settings'),
+      'access arguments' => array('administer pluto'),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => -1,
+    );
+    $items['admin/settings/pluto/reward'] = array(
+      'title' => 'Rewards',
+      'description' => 'Manage the rewards that are available to users.',
+      'page callback' => 'pluto_admin_reward',
+      'access arguments' => array('administer pluto'),
+      'file' => 'pluto.admin.reward.inc',
+
+    );
+    $items['admin/settings/pluto/reward/overview'] = array(
+      'title' => 'Overview',
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+      'weight' => -10,
+    );
+    $items['admin/settings/pluto/reward/add'] = array(
+      'title' => 'New reward',
+      'page callback' => 'pluto_admin_reward_add',
+      'access arguments' => array('administer pluto'),
+      'type' => MENU_LOCAL_TASK,
+      'file' => 'pluto.admin.reward.inc',
+    );
+    $items['admin/settings/pluto/reward/add/node'] = array(
+      'title' => 'New reward',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('pluto_admin_reward_edit', array('type' => 'node')),
+      'access arguments' => array('administer pluto'),
+      'type' => MENU_CALLBACK,
+      'file' => 'pluto.admin.reward.inc',
+    );
+    $items['admin/settings/pluto/achievement'] = array(
+      'title' => 'Achievements',
+      'description' => 'Manage the achievement settings.',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('pluto_admin_achievement'),
+      'access arguments' => array('administer pluto'),
+      'file' => 'pluto.admin.achievement.inc',
+    );
+    $items['admin/settings/pluto/achievement/overview'] = array(
+      'title' => 'Overview',
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+      'weight' => -10,
+    );
+    $items['admin/settings/pluto/achievement/add'] = array(
+      'title' => 'New achievement',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('pluto_admin_achievement_edit'),
+      'access arguments' => array('administer pluto'),
+      'type' => MENU_LOCAL_TASK,
+      'file' => 'pluto.admin.achievement.inc',
+    );
+    $items['admin/settings/pluto/reward/%pluto_reward/edit'] = array(
+      'title' => 'Edit reward',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('pluto_admin_reward_edit', 4),
+      'file' => 'pluto.admin.reward.inc',
+      'access arguments' => array('administer pluto'),
+      'type' => MENU_CALLBACK,
+    );
+    $items['admin/settings/pluto/reward/%pluto_reward/delete'] = array(
+      'title' => 'Delete reward',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('pluto_admin_reward_delete', 4),
+      'access arguments' => array('administer pluto'),
+      'type' => MENU_CALLBACK,
+      'file' => 'pluto.admin.reward.inc',
+    );
+    $items['admin/settings/pluto/achievement/%pluto_achievement'] = array(
+      'title' => 'View',
+      'page callback' => 'pluto_admin_achievement_view',
+      'page arguments' => array(4),
+      'access arguments' => array('administer pluto'),
+      'type' => MENU_CALLBACK,
+      'file' => 'pluto.admin.achievement.inc',
+    );
+    $items['admin/settings/pluto/achievement/%pluto_achievement/view'] = array(
+      'title' => 'View',
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+      'weight' => -10,
+    );
+    $items['admin/settings/pluto/achievement/%pluto_achievement/edit'] = array(
+      'title' => 'Edit',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('pluto_admin_achievement_edit', 4),
+      'access arguments' => array('administer pluto'),
+      'type' => MENU_LOCAL_TASK,
+      'file' => 'pluto.admin.achievement.inc',
+    );
+    $items['admin/settings/pluto/achievement/%pluto_achievement/delete'] = array(
+      'title' => 'Delete',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('pluto_admin_achievement_delete', 4),
+      'access arguments' => array('administer pluto'),
+      'type' => MENU_LOCAL_TASK,
+      'weight' => 10,
+      'file' => 'pluto.admin.achievement.inc',
+    );
+    if (module_exists('devel')) { // is this allowed?
+      $items['admin/settings/pluto/achievement/%pluto_achievement/load'] = array(
+        'title' => 'Dev load',
+        'page callback' => 'devel_print_object',
+        'page arguments' => array(4),
+        'access arguments' => array('access devel information'),
+        'type' => MENU_LOCAL_TASK,
+        'file' => 'pluto.admin.achievement.inc',
+      );
+    }
+    $items['admin/settings/pluto/achievement/%pluto_achievement/task/%pluto_achievement_task/delete'] = array(
+      'title' => 'Delete',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('pluto_admin_achievement_task_delete', 6),
+      'access arguments' => array('administer pluto'),
+      'type' => MENU_CALLBACK,
+      'file' => 'pluto.admin.achievement.inc',
+    );
+    $items['pluto/badge/%pluto_achievement'] = array(
+      'type' => MENU_CALLBACK,
+      'file' => 'pluto.badgecallback.inc',
+      'title' => 'View',
+      'page callback' => 'pluto_badge_view',
+      'page arguments' => array(2),
+      'access arguments' => array('access content'),
+    );
+
+  return $items;
+}
+
+/*
+* implementation of hook_block()
+*/
+
+function pluto_block($op = 'list', $delta = 0) {
+  if ($op == 'list') {
+    $blocks[0] = array(
+      'info' => t('Pluto Block'),
+      'cache' => BLOCK_CACHE_PER_PAGE,
+      'weight' => -10,
+      'enabled' => TRUE,
+      'region' => 'sidebar',
+    );
+    return $blocks;
+  }
+  else if ($op == 'view') {
+    switch ($delta) {
+      case 0:
+        $block = array(
+          'subject' => t('Achievements'),
+          'content' => pluto_user_block(),
+        );
+        break;
+    }
+    return $block;
+  }
+}
+
+/*
+ * Callback function for block for user profile
+ */
+
+function pluto_user_block() {
+
+  $account = menu_get_object('user');
+  return theme_pluto_badges($account->uid);
+
+}
+
+
+/**
+ * Callback function for /admin/settings/pluto/overview
+ */
+function pluto_admin_overview() {
+  global $user;
+  $user->admin_compact_mode = FALSE;
+  return system_admin_menu_block_page();
+}
+
+/**
+ * Pluto admin settings form, /admin/settings/pluto/settings
+ */
+function pluto_admin_settings() {
+  $form = array();
+
+  $form['pluto_badge_dimensions'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Maximum badge dimensions (pixels)'),
+    '#default_value' => variable_get('pluto_badge_dimensions', '200x85'),
+  );
+  $form['pluto_badge_file_size'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Maximum file size for the badge (kb)'),
+    '#default_value' => variable_get('pluto_badge_file_size', '100'),
+  );
+  $form['pluto_badge_path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Directory for badge files'),
+    '#default_value' => variable_get('pluto_badge_path', 'badges'),
+  );
+  $form['pluto_membership_benefits'] = array(
+    '#value' => '<p>' . l(t('Edit the membership benefits page'), 'node/' . variable_get('pluto_about_nid', NULL)) . '</p>',
+  );
+
+  // @todo allow override of default userpoints messages
+  // @todo - write the messages and hook_userpionts function to display them\
+  // @todo - move all this to a separate .inc file
+
+  $form['messages'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Messages'),
+  );
+
+  $form['messages']['pluto_messages'] = array(
+    '#type' => 'radios',
+    '#title' => t('Display Pluto messages when !points are earned or lost', userpoints_translation()),
+    '#prefix' => '<p>' . t('The userpoints module outputs confusing messages because it totals the points by category, rather than giving an actual total. It is recommended that you use the Pluto modules messages instead. Set the first option below to yes, and the second option to no.') . '</p>',
+    '#default_value' => variable_get('pluto_messages', 1),
+    '#options'       => array(0 => t('No'), 1 => t('Yes')),
+    '#description'   => t('Typically this should be YES'),
+    '#disabled' => TRUE,
+  );
+
+    $form['messages'][USERPOINTS_DISPLAY_MESSAGE] = array(
+    '#type'          => 'radios',
+    '#title'         => t('Display Userpoints message when !points are earned or lost', userpoints_translation()),
+    '#default_value' => variable_get(USERPOINTS_DISPLAY_MESSAGE, 0),
+    '#options'       => array(0 => t('No'), 1 => t('Yes')),
+    '#description'   => t('Typically this should be NO'),
+  );
+
+  // @todo allow renaming of 'badges' (pins, buttons, ) and 'rank' (class?) -
+  // @todo write the translation function and insert where necessary
+
+  $group = 'badge_branding';
+  $form[$group] = array(
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#title' => t('Badges branding'),
+  );
+  $form[$group][pluto_trans_ucbadges] = array(
+  '#type' => 'textfield',
+  '#title' => t('Word to use in the interface for the upper case plural word !Badges', userpoints_translation()),
+  '#default_value' => variable_get(pluto_trans_ucbadges, 'Badges'),
+  '#size' => 20,
+  '#maxlength' => 20,
+  '#disabled' => TRUE,
+  );
+  $form[$group][pluto_trans_lcbadges] = array(
+  '#type' => 'textfield',
+  '#title' => t('Word to use in the interface for the lower case plural word !badges', userpoints_translation()),
+  '#default_value' => variable_get(pluto_trans_lcbadges, 'badges'),
+  '#size' => 20,
+  '#maxlength' => 20,
+  '#disabled' => TRUE,
+  );
+  $form[$group][pluto_trans_ucbadge] = array(
+  '#type' => 'textfield',
+  '#title' => t('Word to use in the interface for the upper case singular word !Badge', userpoints_translation()),
+  '#default_value' => variable_get(pluto_trans_ucbadge, 'Badge'),
+  '#size' => 20,
+  '#maxlength' => 20,
+  '#disabled' => TRUE,
+  );
+  $form[$group][pluto_trans_lcbadge] = array(
+  '#type' => 'textfield',
+  '#title' => t('Word to use in the interface for the lower case singular word !badge', userpoints_translation()),
+  '#default_value' => variable_get(pluto_trans_lcbadge, 'badge'),
+  '#size' => 20,
+  '#maxlength' => 20,
+  '#disabled' => TRUE,
+  );
+
+  $group = 'class_branding';
+  $form[$group] = array(
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#title' => t('Class branding'),
+  );
+  $form[$group][pluto_trans_ucclass] = array(
+  '#type' => 'textfield',
+  '#title' => t('Words to use as the title for My Class/Rank/Bird/etc'),
+  '#default_value' => variable_get(pluto_trans_ucclass, 'My Class'),
+  '#size' => 20,
+  '#maxlength' => 40,
+  '#disabled' => TRUE,
+  );
+
+
+  return system_settings_form($form);
+}
+
+/**
+ * Return a list of achievement filters.
+ */
+function pluto_achievement_filters($name = NULL) {
+  static $filters;
+
+  if (!isset($filters)) {
+    $filters = array(
+      'pluto_user' => array(
+        'callback' => 'pluto_achievement_filter_user',
+        'name' => t('User'),
+        'description' => t('Specify a comma-separated list of user ids.'),
+        'group' => t('User')
+      ),
+      'pluto_userpoints' => array(
+        'callback' => 'pluto_achievement_filter_userpoints',
+        'name' => t('Userpoints'),
+        'description' => t('Specify the minimum number of acquired userpoints.'),
+        'group' => t('Userpoints'),
+      ),
+      'pluto_userpoints_rank' => array(
+        'callback' => 'pluto_achievement_filter_userpoints_rank',
+        'name' => t('Userpoints Rank'),
+        'description' => t('Specify the minimum rank based on userpoints.'),
+        'group' => t('Userpoints'),
+      ),
+      'pluto_userpoints_range' => array(
+        'callback' => 'pluto_achievement_filter_userpoints_range',
+        'name' => t('Userpoints Range'),
+        'description' => t('Specify the min and max userpoints in the format min:max - e.g. 0:100 to give a user an achievement when they have between 0 and 100 points.'),
+        'group' => t('Userpoints'),
+      ),
+    );
+
+    /**
+     * Adding a module exists so that we can turn off activity if not used.
+     * Looks like it allows you to add points to a series of activity events, like
+     * on avettsbros, "Posted over 10 blogs", "Uploading over 50 photos", etc.
+     * This can be quite inefficient to keep checking when the activity table gets huge. --frankcarey
+     */
+    if (module_exists('activity') && $activity_info = activity_get_info()) {
+      foreach ($activity_info as $module => $info) {
+        if ($types = $info['types']) {
+          foreach ($info['ops'] as $op_name => $op) {
+            if ($module == 'nodeactivity' && in_array($op_name, array('update', 'delete'))) {
+              continue;
+            }
+            foreach ($info['types'] as $type_name => $type) {
+              $token_field = "{$module}_{$type_name}_{$op_name}_{$role_name}";
+              $key = "{$module}_{$type_name}_{$op_name}";
+              $filters[$key] = array(
+                'callback' => 'pluto_achievement_filter_activity',
+                'name' => $op .' a '. $type,
+                'description' => t('Specify the number of times a user must complete this activity.'),
+                'group' => $module,
+                'extra' => array(
+                  'module' => $module,
+                  'type' => $type_name,
+                  'operation' => $op_name,
+                ),
+              );
+            }  // foreach ($info['types'])
+          }  // foreach ($info['ops'])
+        }  // if ($types)
+      }  // foreach ($activity_info)
+    }  // if ($activity_info)
+  }  // !(isset($filters))
+
+  if ($name) {
+    return $filters[$name];
+  }
+
+  return $filters;
+}
+
+/**
+ * Is the user in the list of uid's?
+ */
+function pluto_achievement_filter_user($uid, $value) {
+  $values = array_map('trim', explode(',', $value));
+  return in_array($uid, $values);
+}
+
+/**
+ * Does the user have enough points?
+ */
+function pluto_achievement_filter_userpoints($uid, $value) {
+  $userpoints = userpoints_get_current_points($uid, 'all');
+  return ($userpoints > $value);
+}
+
+/**
+ * Is the user's points within the specified range?
+ */
+function pluto_achievement_filter_userpoints_range($uid, $value) {
+  $userpoints = userpoints_get_current_points($uid, 'all');
+  $range = split(":", $value, 2);
+  sort($range); // sort the array just to make sure that max and min are correct way round
+  return (($range[1] >= $userpoints) && ($userpoints >= $range[0]));
+}
+
+/**
+ * Is the user ranked high enough?
+ */
+function pluto_achievement_filter_userpoints_rank($uid, $value) {
+  $rank = pluto_userpoints_rank($uid);
+  return ($rank <= $value);
+}
+
+/**
+ * Get the users rank by userpoints
+ */
+function pluto_userpoints_rank($uid) {
+  static $rank = array();
+
+  if (!$rank[$uid]) {
+    $userpoints = userpoints_get_current_points($uid, 'all');
+    // this rank is off by one, so if $rank = 0, that means #1
+    $rank[$uid] = db_result(db_query('SELECT COUNT(pid) FROM {userpoints} points > %d', $userpoints));
+    $rank[$uid] += 1;
+  }
+
+  return $rank[$uid];
+}
+
+/**
+ * Has the user completed the activity enough times?
+ */
+function pluto_achievement_filter_activity($uid, $value, $extra = array()) {
+  // activity_get_activity calls node_access which is wrong and sucks for
+  // performance so we are manually counting our achievements
+  $sql = "SELECT COUNT(*)
+    FROM {activity_targets} activity_targets INNER JOIN {activity} activity ON activity.aid = activity_targets.aid
+    WHERE activity_targets.target_uid = %d AND activity_targets.target_role = 'author' AND activity.module = '%s' AND activity.type = '%s' AND activity.operation = '%s'";
+  $count = db_result(db_query($sql, $uid, $extra['module'], $extra['type'], $extra['operation']));
+  return ($count >= $value);
+}
+
+/**
+ * Calculate achievements for a user
+ */
+function pluto_calculate_achievements($uid, $reset=FALSE) {
+  if (empty($uid)) {
+    return;
+  }
+  // If !$reset see if user is in cache
+  if (!$reset) {
+    $completed = cache_get($uid, 'cache_pluto');
+    if ($completed) { return $completed->data; }
+  }
+  // If not in cache, or cache is being reset
+  $completed = array();
+  $achievements = pluto_achievement_load_all();
+  $methods = pluto_achievement_filters();
+
+  foreach ($achievements as $achievement) {
+    $success = FALSE;
+    foreach ($achievement->tasks as $task) {
+      $method = $methods[$task->method];
+      $func = $method['callback'];
+      $extra = isset($method['extra']) ? $method['extra'] : array();
+      $success = (bool)call_user_func($func, $uid, $task->value, $extra);
+      if (!$success) {
+        break;
+      }
+    }
+    if ($success) {
+      $completed[] = $achievement->aid;
+    }
+  }
+
+  // Cache achievements
+  cache_set($uid, $completed, 'cache_pluto');
+  return $completed;
+}
+
+/**
+ * Implementation of hook_user().
+ */
+function pluto_user($op, &$edit, &$account, $category = NULL) {
+  switch ($op) {
+    case 'load':
+      $account->achievements = pluto_calculate_achievements($account->uid);
+      break;
+    case 'view':
+      if ($account->achievements) {
+        drupal_add_css(drupal_get_path('module', 'pluto') .'/pluto.css');
+        $badges = theme('pluto_badges', $account->uid);
+        $best_badge = theme('pluto_best_badge', $account->uid);
+        $best_badge .= theme('pluto_profile_link');
+
+        $account->content['achievements'] = array(
+            '#type' => 'user_profile_category',
+            '#title' => t('Badges'),
+        );
+        $account->content['achievements']['badges'] = array(
+            '#type' => 'user_profile_item',
+            '#title' => t('Badges'),
+            '#value' => $badges,
+        );
+        $account->content['achievements']['best_badge'] = array(
+            '#type' => 'user_profile_item',
+            '#title' => t('Best Badge'),
+            '#value' => $best_badge,
+        );
+
+      }
+      break;
+  }
+}
+
+/*
+ * Implementation of hook_userpoints.
+ * Updates pluto_userpoints table after points are awarded
+ */
+
+function pluto_userpoints($op, $params = array()) {
+  switch ($op) {
+    case 'points before':
+      return TRUE;
+      break;
+    case 'points after':
+      // Clear cached achievements
+      cache_clear_all($params['uid'], 'cache_pluto');
+      // Update the pluto userpoints table.
+      $old_pluto_userpoints_data = _pluto_userpoints_load_data($params['uid']);
+      // Compare today's date with last date and reset monthly total if it's a new month, update monthly total otherwise.
+      if (date('m') != date('m', $old_pluto_userpoints_data->date)) {
+        $old_pluto_userpoints_data->monthly_points = 0;
+      }
+      $monthly_points = $old_pluto_userpoints_data->monthly_points + $params['points'];
+      // Update overall total
+      $total_points = $old_pluto_userpoints_data->total_points + $params['points'];
+      // @todo check if they've earned a new rank badge, and if so set a message and update rank badge data
+      // @todo check if they've earned any other badges
+      if ($old_pluto_userpoints_data->uid) {
+        db_query("UPDATE {pluto_userpoints} SET date = %d, monthly_points = %d, total_points = %d WHERE uid = %d", time(), $monthly_points, $total_points, $params['uid']);
+      }
+      else {
+        db_query("INSERT INTO {pluto_userpoints} (date, monthly_points, total_points, uid) VALUES (%d, %d, %d, %d)", time(), $monthly_points, $total_points, $params['uid']);
+      }
+      break;
+  }
+}
+
+function _pluto_userpoints_load_data($uid = NULL) {
+  if (!$uid) {
+    global $user;
+    $uid = $user->uid;
+  }
+  return db_fetch_object(db_query("SELECT * FROM {pluto_userpoints} WHERE uid = %d", $uid));
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+
+function pluto_theme() {
+  return array(
+    'pluto_badge' => array(
+      'arguments' => array('achievement' => NULL, 'size' => 'small', 'popup' => FALSE),
+    ),
+    'pluto_placeholder' => array(
+      'arguments' => array('achievement' => NULL),
+    ),
+    'pluto_badges' => array(
+      'arguments' => array('uid' => NULL, 'nobest' => FALSE),
+    ),
+    'pluto_best_badge' => array(
+      'arguments' => array('uid' => NULL),
+    ),
+    'pluto_badge_popup' => array(
+      'arguments' => array('badge' => NULL, 'path' => NULL),
+    ),
+    'pluto_admin_achievement' => array(
+      'arguments' => array('form' => NULL),
+    ),
+    'pluto_profile_link' => array(
+      'arguments' => array(),
+    ),
+    'pluto_badge_popup_view' => array(
+      'arguments' => array('achievement' => NULL),
+      'template' => 'pluto_badge_popup_view',
+    )
+  );
+}
+
+/**
+ * Theme a badge
+ * @param object $achievement an achievement object
+ * @param string $size small or large badge
+ * @param bool $popup whether clicking on the badge should open a modal popup
+ * @return string html code for a badge
+ */
+
+function theme_pluto_badge($achievement, $size='small', $popup=TRUE) {
+  $image = ($size == 'small') ? $achievement->badge : $achievement->fullsize;
+  $output = '<div class="pluto-badge">';
+  // $output .= '<strong>'. $achievement->name .'</strong><br/>'; // don't think we want this
+  $badge = theme('image', $image, $achievement->name, $achievement->name .' - '. $achievement->description, array('class' => 'badge-image'));
+  if ($popup) {
+    $badge = theme('pluto_badge_popup', $badge, 'pluto/badge/' . $achievement->aid);
+  }
+  $output .= $badge;
+  $output .= "</div>\n";
+  return $output;
+}
+
+/**
+ * Theme a link to find out more about the badges
+ */
+function theme_pluto_profile_link() {
+  $output = '<div class="bigbadgefooter">';
+  $output .= l(t('What is this? Find out more!'),'membership');
+  $output .= '</div>';
+  return $output;
+}
+
+/**
+ * Theme a placeholder
+ */
+function theme_pluto_placeholder($achievement) {
+  $output = '<div class="pluto-placeholder">';
+  // $output .= '<strong>'. $achievement->name .'</strong><br/>'; // don't think we want this
+  $output .= theme('image', $achievement->placeholder, $achievement->name, $achievement->name .' - '. $achievement->description, array('class' => 'badge-image'));
+  $output .= "</div>\n";
+  return $output;
+}
+
+/**
+ * Theme all badges for a user
+ * Setting $nobest to TRUE removes the best badge (lowest weight) from the list of badges - useful when displaying the best badge elsewhere
+ */
+function theme_pluto_badges($uid, $nobest=FALSE) {
+  $completed = pluto_calculate_achievements($uid);
+  $all_achievements = pluto_achievement_load_all();
+
+  foreach ($all_achievements as $achievement) {
+    if (in_array($achievement->aid, $completed)) {
+      // If we're ignoring the best badge, don't print it, but print the rest
+      if    (!$nobest){
+        $output .= theme('pluto_badge', $achievement);
+      } else {
+        $nobest = FALSE;
+      }
+    }
+    /* else { // TODO: Make this a configurable option
+      $output .= theme('pluto_placeholder', $achievement);
+    } */
+  }
+
+  return '<div class="pluto-badges">'. $output ."</div>\n";
+}
+
+/**
+ * Theme best badge for a user
+ */
+
+function theme_pluto_best_badge($uid) {
+  $completed = pluto_calculate_achievements($uid);
+  if (!$completed) { return; }
+  $output = NULL;
+  // pluto_achievement_load_all() is ordered by weight, so for the first one that they've achieved, make the badge, and exit loop
+  foreach (pluto_achievement_load_all() as $achievement) {
+    if (in_array($achievement->aid, $completed)) {
+      // use imagecache to resize - same size as user picture
+      $output = theme('image', $achievement->badge, $achievement->name, $achievement->name . ' ' . $achievement->description, array('class' => 'badge-image'));
+      $output = theme('pluto_badge_popup', $output, 'pluto/badge/' . $achievement->aid);
+      break;
+    }
+  }
+  return $output;
+}
+
+/**
+ * Wrap badges with jquery for popup
+ */
+
+function theme_pluto_badge_popup($badge, $path) {
+    // add js & css
+    drupal_add_js(drupal_get_path('module', 'pluto') .'/jqModal.js');
+    drupal_add_css(drupal_get_path('module', 'pluto') .'/jqModal.css');
+    drupal_add_css(drupal_get_path('module', 'pluto') .'/pluto.css');
+    // add js to create placeholder
+    drupal_add_js(drupal_get_path('module', 'pluto') .'/pluto.js');
+    // add js to attach behaviour
+    // add link to badge/id around image
+    $output = l($badge, $path, array('html' => TRUE, 'attributes' => array('class' => 'badgelink')));
+    // return wrapped badge
+    return $output;
+}
+
+/**
+ * Access callback function to check if a user has access to a given reward.
+ * This is the basis for the entire reward system.
+ *
+ * @param $rid The id of the reward being checked for.
+ * @param $account (optional) The account to check, in not given use currently logged in user
+ * @return boolean TRUE if the current user has the requested permission.
+ */
+function pluto_reward_access($rid, $account = NULL) {
+  global $user;
+
+  if (is_null($acct)) {
+    $account = $user;
+  }
+
+  $achievements = pluto_calculate_achievements($account->uid);
+  foreach ($achievements as $aid) {
+    $achievement = pluto_achievement_load($aid);
+    if ($achievement->rewards[$rid]) {
+      return TRUE;
+    }
+  }
+
+  return FALSE;
+}
+
+/**
+ * Fetch the list of available reward types
+ */
+function pluto_reward_get_types($type = NULL) {
+  $types = module_invoke_all('pluto_reward', 'info');
+
+  if ($type) {
+    return $types[$type];
+  }
+
+  return $types;
+}
+
+/**
+ * Implementation of hook_pluto_reward().
+ * Creates node reward type
+ */
+function pluto_pluto_reward($op, $reward = NULL) {
+  switch ($op) {
+    case 'info':
+      $types = array(
+        'node' => array(
+          'name' => t('Node access'),
+          'description' => t('Create a reward that gives a user access to a node.'),
+        ),
+      );
+      return $types;
+    case 'form':
+      if ($reward->type == 'node') {
+        $form['nid'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Node id'),
+          '#description' => t('The id of the node being used as a reward.'),
+          '#default_value' => $reward->data['nid'],
+          '#size' => 10,
+        );
+        return $form;
+      }
+      break;
+    case 'save':
+      if ($reward->type == 'node') {
+        db_query('DELETE FROM {pluto_reward_node} WHERE rid=%d', $reward->rid);
+        db_query('INSERT INTO {pluto_reward_node} (rid, nid) VALUES (%d, %d)', $reward->rid, $reward->data['nid']);
+      }
+      break;
+    case 'delete':
+      if ($reward->type == 'node') {
+        db_query('DELETE FROM {pluto_reward_node} WHERE rid=%d', $reward->rid);
+      }
+      break;
+  }
+}
+
+/**
+ * Implementation of hook_nodeapi().
+ * Restrict access to nodes being used as rewards.
+ */
+function pluto_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  if ($op == 'view' && $a4) {
+    $reward_nodes = array();
+    $result = db_query('SELECT * FROM {pluto_reward_node}');
+    while ($row = db_fetch_array($result)) {
+      if (($row['nid'] == $node->nid)) {
+        if (user_access('administer pluto')) {
+          drupal_set_message(t('This node is being used as a !reward', array('!reward' => l('reward', 'admin/settings/pluto/reward'))));
+        }
+        elseif (!pluto_reward_access($row['rid'])) {
+          print drupal_access_denied();
+          exit;
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implementation of hook_flush_caches().
+ *
+ * This tells Drupal's cache handling system the name of our caching
+ * table, so expired items will be purged automatically and this table
+ * also affected by the empty all caches function.
+*/
+function pluto_flush_caches() {
+  return array('cache_pluto');
+}
+
+/**
+ * Reward CRUD
+ * ======================================================================
+ */
+
+/**
+ * Load a reward object
+ */
+function pluto_reward_load($rid) {
+  $reward = db_fetch_object(db_query('SELECT * FROM {pluto_reward} WHERE rid=%d', $rid));
+  $reward->data = unserialize($reward->data);
+  return $reward;
+}
+
+/**
+ * Save a reward object.  Update if rid exists, create if not.  Return the re-loaded object.
+ */
+function pluto_reward_save($reward) {
+  $reward = (object)$reward;
+  if ($reward->rid) {
+    db_query('UPDATE {pluto_reward} SET name="%s", description="%s", type="%s", data="%s" WHERE rid=%d',
+      $reward->name, $reward->description, $reward->type, serialize($reward->data), $reward->rid);
+  }
+  else{
+    db_query('INSERT INTO {pluto_reward} (name, description, type, data) VALUES ("%s", "%s", "%s", "%s")',
+      $reward->name, $reward->description, $reward->type, serialize($reward->data));
+    $reward->rid = db_last_insert_id('pluto_reward', 'rid');
+  }
+
+  module_invoke_all('pluto_reward', 'save', $reward);
+
+  return pluto_reward_load($reward->rid);
+}
+
+/**
+ * Delete a reward object
+ */
+function pluto_reward_delete($rid) {
+  $reward = pluto_reward_load($rid);
+
+  db_query('DELETE FROM {pluto_reward} WHERE rid=%d', $reward->rid);
+
+  module_invoke_all('pluto_reward', 'delete', $reward);
+}
+
+/**
+ * Return an array of all rewards
+ */
+function pluto_reward_load_all() {
+  $rewards = array();
+
+  $result = db_query('SELECT rid FROM {pluto_reward} ORDER BY name');
+  while ($row = db_fetch_array($result)) {
+    $rewards[] = pluto_reward_load($row['rid']);
+  }
+
+  return $rewards;
+}
+
+/**
+ * Achievement CRUD
+ * ======================================================================
+ */
+
+/**
+ * Load an achievement object
+ */
+function pluto_achievement_load($aid, $reset = NULL) {
+  // Cache the achievements;
+  static $cache = array();
+
+  if (!isset($cache[$aid]) || $reset === TRUE) {
+    $achievement = db_fetch_object(db_query('SELECT * FROM {pluto_achievement} WHERE aid=%d', $aid));
+    $achievement->tasks = array();
+
+    // load tasks
+    $achievement->tasks = array();
+    $result = db_query('SELECT * FROM {pluto_achievement_task} WHERE aid=%d ORDER BY weight', $aid);
+    while ($task = db_fetch_object($result)) {
+      $achievement->tasks[] = $task;
+    }
+
+    // load rewards
+    $achievement->rewards = array();
+    $result = db_query('SELECT rid FROM {pluto_achievement_reward} WHERE aid=%d', $aid);
+    while ($row = db_fetch_array($result)) {
+      $achievement->rewards[$row['rid']] = pluto_reward_load($row['rid']);
+    }
+    // Set the cache.
+    $cache[$aid] = $achievement;
+  }
+
+  return $cache[$aid];
+}
+
+/**
+ * Save an achievement object.  Update if rid exists, create if not.  Return the re-loaded object.
+ */
+
+// TODO - change all these to drupal_write_record - see http://api.drupal.org/api/function/drupal_write_record/6
+// TODO - fix for all other CRUD
+
+function pluto_achievement_save($achievement) {
+  $achievement = (object)$achievement;
+
+  if ($achievement->aid) {
+    db_query('UPDATE {pluto_achievement} SET name="%s", description="%s", weight=%d, badge="%s", placeholder="%s", fullsize="%s" WHERE aid=%d',
+      $achievement->name, $achievement->description, $achievement->weight, $achievement->badge, $achievement->placeholder, $achievement->fullsize, $achievement->aid);
+  }
+  else{
+    db_query('INSERT INTO {pluto_achievement} (name, description, weight, badge, placeholder, fullsize) VALUES ("%s", "%s", %d, "%s", "%s", "%s")',
+      $achievement->name, $achievement->description, $achievement->weight, $achievement->badge, $achievement->placeholder, $achievement->fullsize);
+    $achievement->aid = db_last_insert_id('pluto_achievement', 'aid');
+  }
+
+  db_query('DELETE FROM {pluto_achievement_reward} WHERE aid=%d', $achievement->aid);
+  if($achievement->rewards){
+    foreach ($achievement->rewards as $rid => $checked) {
+      if ($checked) {
+        db_query('INSERT INTO {pluto_achievement_reward} (aid, rid) VALUES (%d, %d)', $achievement->aid, $rid);
+      }
+    }
+  }
+
+  return pluto_achievement_load($achievement->aid);
+}
+
+/**
+ * Delete an achievement object
+ */
+function pluto_achievement_delete($aid) {
+  db_query('DELETE FROM {pluto_achievement} WHERE aid=%d', $aid);
+}
+
+/**
+ * Return an array of all achievements
+ */
+function pluto_achievement_load_all() {
+  $achievements = array();
+
+  $result = db_query('SELECT aid FROM {pluto_achievement} ORDER BY weight, name');
+  while ($row = db_fetch_array($result)) {
+    $achievements[] = pluto_achievement_load($row['aid']);
+  }
+
+  return $achievements;
+}
+
+/**
+ * Achievement task CRUD
+ * ======================================================================
+ */
+
+/**
+ * Load an achievement task object
+ */
+function pluto_achievement_task_load($tid) {
+  return db_fetch_object(db_query('SELECT * FROM {pluto_achievement_task} WHERE tid=%d', $tid));
+}
+
+/**
+ * Save an achievement task object.  Update if tid exists, create if not.  Return the re-loaded object.
+ */
+function pluto_achievement_task_save($task) {
+  $task = (object)$task;
+
+  if ($task->tid) {
+    db_query('UPDATE {pluto_achievement_task} SET aid=%d, method="%s", value="%s", weight=%d WHERE tid=%d',
+      $task->aid, $task->method, $task->value, $task->weight, $task->tid);
+  }
+  else{
+    db_query('INSERT INTO {pluto_achievement_task} (aid, method, value, weight) VALUES (%d, "%s", "%s", %d)',
+      $task->aid, $task->method, $task->value, $task->weight);
+    $task->tid = db_last_insert_id('pluto_achievement_task', 'tid');
+  }
+
+  return pluto_achievement_task_load($task->tid);
+}
+
+/**
+ * Delete an achievement object
+ */
+function pluto_achievement_task_delete($tid) {
+  db_query('DELETE FROM {pluto_achievement_task} WHERE tid=%d', $tid);
+}
+

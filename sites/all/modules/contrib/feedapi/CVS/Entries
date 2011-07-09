@@ -1,0 +1,14 @@
+D/feedapi_inherit////
+D/feedapi_node////
+D/parser_common_syndication////
+D/parser_simplepie////
+D/translations////
+D/views////
+/feedapi.module/1.23.2.119.2.72/Mon Jan  4 19:30:45 2010//TDRUPAL-6--1-8
+/CHANGELOG.txt/1.1.2.4.2.23/Wed Oct 20 20:05:30 2010//TDRUPAL-6--1-8
+/README.txt/1.1.2.6.2.8/Wed Oct 20 20:05:30 2010//TDRUPAL-6--1-8
+/feedapi.admin.inc/1.1.2.2/Wed Oct 20 20:05:30 2010//TDRUPAL-6--1-8
+/feedapi.drush.inc/1.1.2.3/Wed Oct 20 20:05:30 2010//TDRUPAL-6--1-8
+/feedapi.info/1.1.2.3.2.3/Wed Oct 20 20:05:30 2010//TDRUPAL-6--1-8
+/feedapi.install/1.5.2.21.2.20/Wed Oct 20 20:05:30 2010//TDRUPAL-6--1-8
+/feedapi.opml.inc/1.1.2.2/Wed Oct 20 20:05:30 2010//TDRUPAL-6--1-8

@@ -1,0 +1,106 @@
+? ._quicktabs.module
+? .svn
+? tmp.patch
+? css/.svn
+? includes/._admin.inc
+? includes/.svn
+? js/._quicktabs.js
+? js/._quicktabs_ahah.js
+? js/.svn
+? tabstyles/.svn
+? tabstyles/arrows/.svn
+? tabstyles/arrows/images/.svn
+? tabstyles/basic/.svn
+? tabstyles/bullets/.svn
+? tabstyles/bullets/images/.svn
+? tabstyles/excel/.svn
+? tabstyles/excel/images/.svn
+? tabstyles/garland/.svn
+? tabstyles/garland/images/.svn
+? tabstyles/mac/.svn
+? tabstyles/mac/images/.svn
+? tabstyles/navlist/.svn
+? tabstyles/phylactere/.svn
+? tabstyles/phylactere/images/.svn
+? tabstyles/sky/.svn
+? tabstyles/sky/images/.svn
+? tabstyles/zen/.svn
+? tabstyles/zen/images/.svn
+? translations/.svn
+Index: quicktabs.module
+===================================================================
+RCS file: /cvs/drupal-contrib/contributions/modules/quicktabs/quicktabs.module,v
+retrieving revision 1.10.2.65
+diff -u -p -r1.10.2.65 quicktabs.module
+--- quicktabs.module	18 Jul 2009 03:05:13 -0000	1.10.2.65
++++ quicktabs.module	31 Aug 2009 22:03:05 -0000
+@@ -238,8 +238,16 @@ function quicktabs_ajax_node($nid, $teas
+     'teaser' => $teaser,
+     'hide_title' => $hide_title,
+   );
+-  $output = quicktabs_render_tabpage($tabpage);
+-  print drupal_to_js(array('status' => TRUE, 'data' => $output));
++
++  $return = array(
++    'status' => TRUE,
++    'data' => quicktabs_render_tabpage($tabpage),
++  );
++
++  $javascript = drupal_add_js(NULL, NULL, 'header');
++  $return['settings'] = call_user_func_array('array_merge_recursive', $javascript['setting']);
++
++  print drupal_to_js($return);
+ }
+ 
+ /**
+@@ -252,8 +260,15 @@ function quicktabs_ajax_block($bid, $hid
+     'hide_title' => $hide_title,
+   );
+ 
+-  $output = quicktabs_render_tabpage($tabpage);
+-  print drupal_to_js(array('status' => TRUE, 'data' => $output));
++  $return = array(
++    'status' => TRUE,
++    'data' => quicktabs_render_tabpage($tabpage),
++  );
++
++  $javascript = drupal_add_js(NULL, NULL, 'header');
++  $return['settings'] = call_user_func_array('array_merge_recursive', $javascript['setting']);
++
++  print drupal_to_js($return);
+ }
+ 
+ /**
+@@ -265,8 +280,15 @@ function quicktabs_ajax_qtabs($qtid) {
+     'qtid' => $qtid,
+   );
+ 
+-  $output = quicktabs_render_tabpage($tabpage);
+-  print drupal_to_js(array('status' => TRUE, 'data' => $output));
++  $return = array(
++    'status' => TRUE,
++    'data' => quicktabs_render_tabpage($tabpage),
++  );
++
++  $javascript = drupal_add_js(NULL, NULL, 'header');
++  $return['settings'] = call_user_func_array('array_merge_recursive', $javascript['setting']);
++
++  print drupal_to_js($return);
+ }
+ 
+ /**
+Index: js/quicktabs.js
+===================================================================
+RCS file: /cvs/drupal-contrib/contributions/modules/quicktabs/js/quicktabs.js,v
+retrieving revision 1.3.2.17
+diff -u -p -r1.3.2.17 quicktabs.js
+--- js/quicktabs.js	18 Jul 2009 02:42:16 -0000	1.3.2.17
++++ js/quicktabs.js	31 Aug 2009 22:03:05 -0000
+@@ -66,6 +66,7 @@ Drupal.quicktabs.tab = function (el) {
+ // ajax callback for non-views tabs
+ Drupal.quicktabs.tab.prototype.success = function(response) {
+   var result = Drupal.parseJson(response.data);
++  $.extend(Drupal.settings, response.settings);
+   this.container.append(Drupal.theme('quicktabsResponse', this, result));
+   Drupal.attachBehaviors(this.container);
+ }

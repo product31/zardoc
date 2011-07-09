@@ -1,0 +1,644 @@
+<?php
+// $Id: media_brightcove.install,v 1.1.2.10 2010/09/01 21:30:13 aaron Exp $
+
+/**
+ * @file
+ * This is Media: Brightcove's installation, configuration, and removal file.
+ */
+
+/**
+ * Implementation of hook_install().
+ */
+function media_brightcove_install() {
+  $success = drupal_install_schema('media_brightcove');
+
+  if ($success) {
+    drupal_set_message(st('The Media: Brightcove module installed tables successfully.'));
+  }
+  else {
+    drupal_set_message(st('The installation of the Media: Brightcove module failed.'), 'error');
+  }
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function media_brightcove_uninstall() {
+  foreach (media_brightcove_variable_default() as $variable => $value) {
+    media_brightcove_variable_del($variable);
+  }
+  drupal_uninstall_schema('media_brightcove');
+  return array(array('success' => TRUE, 'query' => "Deleted all variables in the Media: Brightcove namespace and dropped relevant tables."));
+}
+
+/**
+ * Implementation of hook_disable().
+ */
+function media_brightcove_disable() {
+  cache_clear_all('*', 'cache_media_brightcove_status', TRUE);
+}
+
+
+/**
+ * Implementation of hook_schema().
+ */
+function media_brightcove_schema() {
+  $schema = array();
+
+  $schema['cache_media_brightcove_status'] = drupal_get_schema_unprocessed('system', 'cache');
+  $schema['cache_media_brightcove_status']['description'] = 'Cache table used to store video status for Media: Brightcove.';
+
+  $schema['media_brightcove_metadata'] = array(
+    'description' => 'Stores Brightcove Metadata.',
+    'fields' => array(
+      'uri' => array(
+        'description' => 'Unique URI for the media.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'uid' => array(
+        'description' => 'The {users}.uid of the user who is associated with the media.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'status' => array(
+        'description' => 'A bitmapped field indicating the status of the media. The least significant bit indicates temporary (0) or permanent (1). Temporary media older than DRUPAL_MAXIMUM_TEMP_FILE_AGE will be removed during a cron run.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'timestamp' => array(
+        'description' => 'UNIX timestamp for when the media was added.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'data' => array(
+        'description' => 'The raw data returned from the Brightcove API.',
+        'type' => 'text',
+        'not null' => FALSE,
+        'size' => 'big',
+      ),
+      'title' => array(
+        'description' => 'The title of the media.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'duration' => array(
+        'description' => t('Store the duration of a video in seconds.'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'description' => array(
+        'description' => t('The short description of the video.'),
+        'type' => 'varchar',
+        'length' => 250,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'thumbnail' => array(
+        'description' => t('The URL of the video still.'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'indexes' => array(
+      'uid' => array('uid'),
+      'status' => array('status'),
+      'timestamp' => array('timestamp'),
+      'duration' => array('duration'),
+      'title' => array('title'),
+    ),
+    'primary key' => array('uri'),
+    'foreign keys' => array(
+      'uid' => array('users' => 'uid'),
+    ),
+  );
+
+  $schema['media_brightcove_fields'] = array(
+    'description' => 'A table to keep node field Brightcove data synchronized.',
+    'fields' => array(
+      'nid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => "The associated content's {node}.nid.",
+      ),
+      'vid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => "The associated content's {node}.vid.",
+      ),
+      'field_name' => array(
+        'description' => 'The name of the field storing the uri.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'delta' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => "The delta of the field storing the uri.",
+      ),
+      'uri' => array(
+        'description' => 'Unique URI for the media.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'data_collected' => array(
+        'description' => "A boolean field indicating whether a media item's metadata has been collected.",
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'indexes' => array(
+      'nid' => array('nid'),
+      'vid' => array('vid'),
+      'field_name' => array('field_name'),
+      'delta' => array('delta'),
+      'uri' => array('uri'),
+      'data_collected' => array('data_collected'),
+    ),
+    'foreign keys' => array(
+      'nid' => array('node' => 'nid'),
+      'vid' => array('node' => 'vid'),
+      'uri' => array('media_brightcove_metadata' => 'uri'),
+    ),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implementation of hook_update_N().
+ * Copy the existing brightcove3_player_id variable to
+ * brightcove3_player_preview for users upgrading who won't have it.
+ */
+function media_brightcove_update_6100() {
+  $ret = array();
+
+  // Set the variable.
+  variable_set('brightcove3_player_preview', variable_get('brightcove3_player_id', ''));
+  $ret[] = array('success' => TRUE, 'query' => "Created a new variable for the Preview display player ID, copying the existing Full Size player ID.");
+
+  // Rebuild the theme to add an $options array.
+  drupal_rebuild_theme_registry();
+
+  return $ret;
+}
+
+/**
+ *  Change variable names from brightcove3_* to brightcove_*.
+ */
+function media_brightcove_update_6101() {
+  $ret = array();
+
+  // Copy the old variables to the new namespace.
+  variable_set('brightcove_publisher_id', variable_get('brightcove3_publisher_id', ''));
+  variable_set('brightcove_player_id', variable_get('brightcove3_player_id', ''));
+  variable_set('brightcove_player_preview', variable_get('brightcove3_player_preview', ''));
+  variable_set('emvideo_brightcove_token', variable_get('emvideo_brightcove3_token', ''));
+
+  // Delete the old variables.
+  variable_del('brightcove3_publisher_id');
+  variable_del('brightcove3_player_id');
+  variable_del('brightcove3_player_preview');
+  variable_del('emvideo_brightcove3_token');
+
+  $ret[] = array('success' => TRUE, 'query' => "Changed all internal references of brightcove3 to brightcove.");
+
+  // Rebuild the theme to catch the new theme function names.
+  drupal_rebuild_theme_registry();
+
+  return $ret;
+}
+
+/**
+ * Convert variables to the Media: Brightcove variable namespace.
+ */
+function media_brightcove_update_6102() {
+  $ret = array();
+
+  $variables = array(
+    'brightcove_publisher_id' => 'publisher_id',
+    'brightcove_player_id' => 'full_player_id',
+    'brightcove_player_preview' => 'preview_player_id',
+    'emvideo_brightcove_token' => 'read_token',
+    'emvideo_brightcove_write_token' => 'write_token',
+  );
+
+  foreach ($variables as $old_variable => $new_variable) {
+    _media_brightcove_migrate_variable($old_variable, $new_variable);
+  }
+  $ret[] = array('success' => TRUE, 'query' => "Converted variables to the Media: Brightcove variable namespace.");
+
+  // Add the new settings page to the menu.
+  menu_rebuild();
+  $ret[] = array('success' => TRUE, 'query' => "Rebuilt the menu for the new administrative settings page.");
+
+  return $ret;
+}
+
+/**
+ * Migrate a variable from the old namespace.
+ */
+function _media_brightcove_migrate_variable($old_variable, $new_variable) {
+  $value = variable_get($old_variable, media_brightcove_variable_default($new_variable));
+  if (media_brightcove_variable_get($new_variable) != $value) {
+    media_brightcove_variable_set($new_variable, $value);
+  }
+  variable_del($old_variable);
+}
+
+/**
+ * Add a new themes.
+ */
+function media_brightcove_update_6103() {
+  $ret = array();
+
+  // Catch our new theme functions for unavailable videos.
+  drupal_rebuild_theme_registry();
+
+  // Proper access for settings page.
+  menu_rebuild();
+  return $ret;
+}
+
+/**
+ * Build a table to cache video status.
+ */
+function media_brightcove_update_6104() {
+  $schema = array();
+
+  $schema['cache_media_brightcove_status'] = drupal_get_schema_unprocessed('system', 'cache');
+  $schema['cache_media_brightcove_status']['description'] = 'Cache table used to store video status for Media: Brightcove.';
+
+  $ret = array();
+  if (!db_table_exists('cache_media_brightcove_status')) {
+    db_create_table($ret, 'cache_media_brightcove_status', $schema['cache_media_brightcove_status']);
+  }
+
+  return $ret;
+}
+
+/**
+ * Forgot to grab the full size default variable earlier...
+ */
+function media_brightcove_update_6105() {
+  _media_brightcove_migrate_variable('media_brightcove_fullsize_default', 'full_size_default');
+  return array();
+}
+
+/**
+ * Add a new theme. (Same as 6106).
+ */
+function media_brightcove_update_6107() {
+  $ret = array();
+
+  // Catch our new theme functions for videos & video playlists.
+  drupal_rebuild_theme_registry();
+  return $ret;
+}
+
+function media_brightcove_update_6108() {
+  $schema = array();
+  $schema['media_brightcove_metadata'] = array(
+    'description' => 'Stores Brightcove Metadata.',
+    'fields' => array(
+      'uri' => array(
+        'description' => 'Unique URI for the media.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'uid' => array(
+        'description' => 'The {users}.uid of the user who is associated with the media.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'status' => array(
+        'description' => 'A bitmapped field indicating the status of the media. The least significant bit indicates temporary (0) or permanent (1). Temporary media older than DRUPAL_MAXIMUM_TEMP_FILE_AGE will be removed during a cron run.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'timestamp' => array(
+        'description' => 'UNIX timestamp for when the media was added.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'data' => array(
+        'description' => 'The raw data returned from the Brightcove API.',
+        'type' => 'text',
+        'not null' => FALSE,
+        'size' => 'big',
+      ),
+      'title' => array(
+        'description' => 'The title of the media.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'duration' => array(
+        'description' => t('Store the duration of a video in seconds.'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'description' => array(
+        'description' => t('The short description of the video.'),
+        'type' => 'varchar',
+        'length' => 250,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'thumbnail' => array(
+        'description' => t('The URL of the video still.'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'indexes' => array(
+      'uid' => array('uid'),
+      'status' => array('status'),
+      'timestamp' => array('timestamp'),
+      'duration' => array('duration'),
+      'title' => array('title'),
+    ),
+    'primary key' => array('uri'),
+    'foreign keys' => array(
+      'uid' => array('users' => 'uid'),
+    ),
+  );
+
+  $schema['media_brightcove_fields'] = array(
+    'description' => 'A table to keep node field Brightcove data synchronized.',
+    'fields' => array(
+      'nid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => "The associated content's {node}.nid.",
+      ),
+      'vid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => "The associated content's {node}.vid.",
+      ),
+      'field_name' => array(
+        'description' => 'The name of the field storing the uri.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'delta' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => "The delta of the field storing the uri.",
+      ),
+      'uri' => array(
+        'description' => 'Unique URI for the media.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'data_collected' => array(
+        'description' => "A boolean field indicating whether a media item's metadata has been collected.",
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'indexes' => array(
+      'nid' => array('nid'),
+      'vid' => array('vid'),
+      'field_name' => array('field_name'),
+      'delta' => array('delta'),
+      'uri' => array('uri'),
+      'data_collected' => array('data_collected'),
+    ),
+    'foreign keys' => array(
+      'nid' => array('node' => 'nid'),
+      'vid' => array('node' => 'vid'),
+      'uri' => array('media_brightcove_metadata' => 'uri'),
+    ),
+  );
+
+  $ret = array();
+  if (!db_table_exists('media_brightcove_metadata')) {
+    db_create_table($ret, 'media_brightcove_metadata', $schema['media_brightcove_metadata']);
+  }
+  if (!db_table_exists('media_brightcove_fields')) {
+    db_create_table($ret, 'media_brightcove_fields', $schema['media_brightcove_fields']);
+  }
+
+    // Build a list of fields that need data updating.
+  $fields = array();
+  foreach (content_types_install() as $type_name => $type_fields) {
+    foreach ($type_fields as $field) {
+      if (in_array($field['type'], array('emvideo', 'emfield'))) {
+        // We only process a given field once.
+        $fields[$field['field_name']] = $field;
+      }
+    }
+  }
+
+  // Build a batch that grabs the Brightcove metadata for each video field.
+  $batch = array(
+    'title' => t('Importing Brightcove metadata.'),
+    'operations' => array(),
+    'file' => drupal_get_path('module', 'media_brightcove') .'/media_brightcove.install',
+  );
+  foreach ($fields as $field_name => $field) {
+    $batch['operations'][] = array('_media_brightcove_update_get_metadata', array($field));
+    $ret[] = array(
+      'query' => t('Saved available Brightcove metadata for the %field field.', array('%field' => $field['field_name'])),
+      'success' => TRUE,
+    );
+  }
+  batch_set($batch);
+
+  return $ret;
+}
+
+/**
+ *  Batch function to grab the Brightcove metadata for each video field.
+ */
+function _media_brightcove_update_get_metadata($field, &$context) {
+  // Setup the first through
+  if (!isset($context['sandbox']['progress'])) {
+    $db_info = content_database_info($field);
+    $context['sandbox']['db_info'] = $db_info;
+    $context['sandbox']['table'] = $db_info['table'];
+
+    switch($field['module']) {
+      case 'emvideo':
+        $context['sandbox']['col_embed'] = $db_info['columns']['embed']['column'];
+        $context['sandbox']['col_value'] = $db_info['columns']['value']['column'];
+        $context['sandbox']['col_provider'] = $db_info['columns']['provider']['column'];
+        $context['sandbox']['col_data'] = $db_info['columns']['data']['column'];
+        $context['sandbox']['col_duration'] = $db_info['columns']['duration']['column'];
+        $context['sandbox']['col_version'] = $db_info['columns']['version']['column'];
+        $context['sandbox']['col_status'] = $db_info['columns']['status']['column'];
+        $context['sandbox']['max'] = db_result(db_query("SELECT COUNT(*) FROM {". $db_info['table'] ."} WHERE {$context['sandbox']['col_provider']} = 'brightcove' AND {$context['sandbox']['col_version']} < %d", MEDIA_BRIGHTCOVE_DATA_VERSION));
+        break;
+      case 'emfield':
+        $context['sandbox']['col_uri'] = $db_info['columns']['uri']['column'];
+        $context['sandbox']['max'] = db_result(db_query("SELECT COUNT(*) FROM {". $db_info['table'] ."} WHERE {$context['sandbox']['col_uri']} LIKE 'brightcove://%%'"));
+        break;
+    }
+    $context['sandbox']['progress'] = 0;
+    $context['sandbox']['current_node'] = 0;
+    $context['sandbox']['limit'] = media_brightcove_variable_get('update_get_metadata_limit');
+  }
+
+  switch ($field['module']) {
+    case 'emvideo':
+      _media_brightcove_update_get_metadata_emvideo($field, $context);
+      break;
+    case 'emfield':
+      _media_brightcove_update_get_metadata_emfield($field, &$context);
+      break;
+  }
+
+  // Inform the batch engine that we are not finished,
+  // and provide an estimation of the completion level we reached.
+  if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
+    $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+  }
+}
+
+/**
+ * This will populate the new data for brightcove videos.
+ */
+function _media_brightcove_update_get_metadata_emvideo($field, &$context) {
+  // Autoload the Echove class when needed.
+  spl_autoload_register('media_brightcove_autoload');
+
+  $result = db_query_range("SELECT * FROM {{$context['sandbox']['table']}} WHERE vid > %d AND {$context['sandbox']['col_provider']} = 'brightcove' AND {$context['sandbox']['col_version']} < %d ORDER BY vid ASC", $context['sandbox']['current_node'], MEDIA_BRIGHTCOVE_DATA_VERSION, 0, $context['sandbox']['limit']);
+  while ($row = db_fetch_array($result)) {
+    // Unserialize our data array.
+    $row[$context['sandbox']['col_data']] = unserialize($row[$context['sandbox']['col_data']]);
+    if (!is_array($row[$context['sandbox']['col_data']])) {
+      $row[$context['sandbox']['col_data']] = array();
+    }
+
+    // Ensure we grab the latest available data.
+    $row[$context['sandbox']['col_data']] = media_brightcove_data($row[$context['sandbox']['col_value']], TRUE);
+    $row[$context['sandbox']['col_duration']] = media_brightcove_duration($row[$context['sandbox']['col_value']]);
+    $row[$context['sandbox']['col_status']] = media_brightcove_video_available($row[$context['sandbox']['col_value']]);
+
+    $data_collected = !empty($row[$context['sandbox']['col_data']]);
+
+    // Now set the correct data version and save the data.
+//    $row[$context['sandbox']['col_version']] = MEDIA_BRIGHTCOVE_DATA_VERSION;
+    $row[$context['sandbox']['col_data']] = serialize($row[$context['sandbox']['col_data']]);
+    $cols = array('nid', 'vid');
+    if (isset($row['delta'])) {
+      $cols[] = 'delta';
+    }
+    drupal_write_record($context['sandbox']['table'], $row, $cols);
+
+    $info = array(
+      'nid' => $row['nid'],
+      'vid' => $row['vid'],
+      'field_name' => $field['field_name'],
+      'delta' => isset($row['delta']) ? $row['delta'] : 0,
+      'uri' => media_brightcove_uri($row[$context['sandbox']['col_value']]),
+      'data_collected' => $data_collected,
+    );
+    db_query("DELETE FROM {media_brightcove_fields} WHERE nid = %d AND vid = %d AND field_name = '%s' AND delta = %d", $info);
+    drupal_write_record('media_brightcove_fields', $info);
+
+    // Display a helpful message re progress.
+    $url = media_brightcove_video_url($row[$context['sandbox']['col_value']]);
+    $context['message'] = l($url, $url);
+
+    // Update our progress information.
+    $context['sandbox']['progress']++;
+    $context['sandbox']['current_node'] = $row['vid'];
+  }
+}
+
+/**
+ * Ensure we store any data of current emfield videos as well.
+ */
+function _media_brightcove_update_get_metadata_emfield($field, &$context) {
+  // Autoload the Echove class when needed.
+  spl_autoload_register('media_brightcove_autoload');
+
+  $result = db_query_range("SELECT * FROM {{$context['sandbox']['table']}} WHERE vid > %d AND {$context['sandbox']['col_uri']} LIKE 'brightcove://%%' ORDER BY vid ASC", $context['sandbox']['current_node'], 0, $context['sandbox']['limit']);
+
+  // We need to write the correct uri.
+  $schema = drupal_get_schema($context['sandbox']['table']);
+  $write_args = array('nid', 'vid');
+  if (isset($schema['fields']['delta'])) {
+    $write_args[] = 'delta';
+  }
+
+  while ($row = db_fetch_array($result)) {
+    $data = media_brightcove_data($row[$context['sandbox']['col_uri']], TRUE);
+
+    // Write the correct URI if needed.
+    $uri = media_brightcove_uri($row[$context['sandbox']['col_uri']]);
+    if ($row[$context['sandbox']['col_uri']] != $uri) {
+      $row[$context['sandbox']['col_uri']] = media_brightcove_uri($row[$context['sandbox']['col_uri']]);
+      drupal_write_record($context['sandbox']['table'], $row, $write_args);
+    }
+
+    // Display a helpful message re progress.
+    $url = media_brightcove_video_url($row[$context['sandbox']['col_uri']]);
+    $context['message'] = l($url, $url);
+
+    $info = array(
+      'nid' => $row['nid'],
+      'vid' => $row['vid'],
+      'field_name' => $field['field_name'],
+      'delta' => isset($row['delta']) ? $row['delta'] : 0,
+      'uri' => $row[$context['sandbox']['col_uri']],
+      'data_collected' => !empty($data),
+    );
+    db_query("DELETE FROM {media_brightcove_fields} WHERE nid = %d AND vid = %d AND field_name = '%s' AND delta = %d", $info);
+    drupal_write_record('media_brightcove_fields', $info);
+
+    // Update our progress information.
+    $context['sandbox']['progress']++;
+    $context['sandbox']['current_node'] = $row['vid'];
+  }
+}

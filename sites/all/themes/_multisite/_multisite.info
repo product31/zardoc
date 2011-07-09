@@ -1,0 +1,21 @@
+name = Multisite Base Theme
+description = The common base theme for all subsites.
+core = 6.x
+engine = phptemplate
+stylesheets[all][] = css/layout.css
+stylesheets[all][] = css/base.css
+stylesheets[all][] = css/tabs.css
+stylesheets[all][] = css/system-menus.css
+scripts[] = js/utilities.js
+scripts[] = js/swfobject.js
+regions[right] = sidebar
+regions[page_top] = page top
+regions[ad_top] = ad top
+regions[ad_bottom] = ad bottom
+regions[ad_forum] = ad forum side
+regions[content_header] = content header
+regions[content_top] = content top
+regions[content_bottom] = content bottom
+regions[footer] = footer
+
+hidden = TRUE

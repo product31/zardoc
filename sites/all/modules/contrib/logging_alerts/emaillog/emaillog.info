@@ -1,0 +1,4 @@
+name = Email logging and alerts
+description = Sends logs and alerts to email addresses, with different severity going to different emails.
+package = Logging and alerts
+core = 6.x

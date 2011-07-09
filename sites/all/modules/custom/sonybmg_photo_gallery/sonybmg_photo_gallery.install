@@ -1,0 +1,69 @@
+<?php
+// $Id$
+
+/**
+ * Implementation of hook_install().
+ */
+function sonybmg_photo_gallery_install() {
+  if(variable_get('photo_gallery_user_vocabulary', NULL) != NULL) {
+    sonybmg_photo_gallery_convert_photo_gallery();
+  }
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function sonybmg_photo_gallery_uninstall() {
+  $result = db_query('SELECT name FROM {variable} WHERE name LIKE "sonybmg_photo_gallery_%"');
+  while ($row = db_fetch_object($result)) {
+    variable_del($row->name);
+  }
+
+  drupal_set_message(t('Sony BMG Photo Gallery has been uninstalled.'));
+}
+
+function sonybmg_photo_gallery_convert_photo_gallery() {
+  drupal_set_message('Converting photo_gallery.module to sonybmg_photo_gallery.module');
+  
+  $vars = array(
+    'photo_gallery_official_breadcrumb',
+    'photo_gallery_official_pager',
+    'photo_gallery_official_vocabulary',
+    'photo_gallery_promote_views_bookmark',
+    'photo_gallery_user_breadcrumb',
+    'photo_gallery_user_pager',
+    'photo_gallery_user_vocabulary',
+  );
+  
+  foreach($vars as $var) {
+    $value = variable_get($var, NULL);
+    variable_del($var);
+    if(!is_null($value)) {
+      variable_set('sonybmg_'. $var, $value);
+    }
+  }
+  
+  // sites being upgraded will be using blocks for the pager 
+  variable_set('sonybmg_photo_gallery_pager_location', 'none');
+  
+  db_query('UPDATE {vocabulary} set module="sonybmg_photo_gallery" WHERE module="photo_gallery"');
+  db_query('UPDATE {blocks} set module="sonybmg_photo_gallery" WHERE module="photo_gallery"');
+  
+}
+
+/**
+ * Upgrade photo_gallery (drupal 5) to sonybmg_photo_gallery (drupal 6)
+ */
+function sonybmg_photo_gallery_update_6000() {
+  sonybmg_photo_gallery_convert_photo_gallery();
+  return array();  
+}
+
+/**
+ * Set block cache to BLOCK_CACHE_PER_PAGE for the photos_pager block.
+ */
+function sonybmg_photo_gallery_update_6001() {
+  $ret = array();
+  $ret[] = update_sql('UPDATE {blocks} SET cache = '. BLOCK_CACHE_PER_PAGE .' WHERE module = "sonybmg_photo_gallery" AND delta = "photos_pager"');
+  return $ret;
+}

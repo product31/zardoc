@@ -1,0 +1,43 @@
+# India translation of mozes (all releases)
+# Copyright (c) 2010 by the India translation team
+# Generated from files:
+#  mozes/mozes.info: n/a
+#  mozes/mozes.module: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: mozes (all releases)\n"
+"POT-Creation-Date: 2010-04-08 15:43-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: India\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: mozes.info:0
+msgid "Sony BMG"
+msgstr ""
+
+#: mozes.module:29
+msgid "Mozes Redirect URL"
+msgstr ""
+
+#: mozes.module:30
+msgid ""
+"A full URL to redirect to if a mobile browser is detected. If empty, "
+"no detection will happen."
+msgstr ""
+
+#: mozes.module:15
+msgid "Mozes"
+msgstr ""
+
+#: mozes.info:0
+msgid "Mozes integration"
+msgstr ""
+
+#: mozes.info:0
+msgid "Simple Mozes mobile platform integration."
+msgstr ""
+

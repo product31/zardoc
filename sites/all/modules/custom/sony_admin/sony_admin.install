@@ -1,0 +1,28 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * file_description
+ */
+
+/**
+ * Implementation of hook_enable().
+ */
+function sony_admin_enable() {
+
+  // We were using the _sonyadmin theme as our admin theme, but rubik is better.
+  // Once we get everyone move over to the new one, we could delete the custom admin theme.
+  variable_set('admin_theme', 'rubik');
+  drupal_set_message('Admin theme enabled and configured.');
+
+}
+/**
+ * Implementation of hook_update_N().
+ *
+ * Remove variables left over from the removal of admin_theme module.
+ */
+function sony_admin_update_6100() {
+  db_query("DELETE FROM {variable} WHERE name LIKE 'admin_theme_%'");
+  cache_clear_all('variables', 'cache');
+}

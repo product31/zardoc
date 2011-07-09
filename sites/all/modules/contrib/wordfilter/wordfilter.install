@@ -1,0 +1,110 @@
+<?php
+// $Id: wordfilter.install,v 1.4.2.1.2.6 2010/04/02 18:39:11 jaydub Exp $
+
+/**
+ * @file
+ * Module install and update functions for the Wordfilter module.
+ */
+
+/**
+ * Implementation of hook_schema().
+ */
+function wordfilter_schema() {
+  $schema['wordfilter'] = array(
+    'description' => 'The {wordfilter} table stores user ids of users and other users that they have chosen to ignore.',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The ID of the wordfilter word pair.',
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'words' => array(
+        'description' => 'The word to filter.',
+        'type' => 'text',
+        'not null' => TRUE,
+      ),
+      'replacement' => array(
+        'description' => 'The replacement word to filter with.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'language' => array(
+        'description' => 'The {languages}.language of this word to filter.',
+        'type' => 'varchar',
+        'length' => 12,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'standalone' => array(
+        'description' => 'A boolean to indicate if the word filtering should only be done if the word is not part of another word.',
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+
+  return $schema;
+}
+/**
+ * Implementation of hook_install().
+ */
+function wordfilter_install() {
+  drupal_install_schema('wordfilter');
+}
+
+/**
+ * Implementation of hook_update_N().
+ */
+function wordfilter_update_1() {
+  return _system_update_utf8(array('wordfilter'));
+}
+
+/**
+ * Implementation of hook_update_N().
+ */
+function wordfilter_update_2() {
+  $ret = array();
+  db_change_field($ret, 'wordfilter', 'words', 'words', array('type' => 'text', 'not null' => TRUE));
+  return $ret;
+}
+
+/**
+ * Implementation of hook_update_N().
+ *
+ * Update to lower module weight so that wordfiltering
+ * can occur before other modules can run hook_nodeapi
+ * and hook_comment
+ */
+function wordfilter_update_3() {
+  $ret = array();
+  $ret[] = update_sql("UPDATE {system} SET weight = -1 WHERE name = '%s' AND type = '%s'", 'wordfilter', 'module');
+  return $ret;
+}
+
+/**
+ * Implementation of hook_update_N().
+ *
+ * Update function to add a language column to the wordfilter
+ * table so that words and replacement words can be set on
+ * a per language basis
+ */
+function wordfilter_update_6100() {
+  $ret = array();
+  db_add_field($ret, 'wordfilter', 'language', array('type' => 'varchar', 'length' => 12, 'not null' => TRUE, 'default' => ''));
+  return $ret;
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function wordfilter_uninstall() {
+  drupal_uninstall_schema('wordfilter');
+  variable_del('wordfilter_default_replacement');
+  variable_del('wordfilter_node_title');
+  variable_del('wordfilter_comment_title');
+}

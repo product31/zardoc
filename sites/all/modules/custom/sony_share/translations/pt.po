@@ -1,0 +1,256 @@
+# Portuguese translation of Drupal (sony_share.module)
+# Copyright 2006 Miguel Figueiredo <elmig@debianpt.org.>
+# Generated from file: sony_share.module,v 1.15 2006/09/26 16:20:43 frjo
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: sony_share\n"
+"POT-Creation-Date: 2006-10-22 15:07+0200\n"
+"PO-Revision-Date: 2006-11-03 22:14+0000\n"
+"Last-Translator: Miguel Figueiredo < <mailto:elmig@debianpt.org>elmig@debianpt.org>\n"
+"Language-Team: Portuguese <<mailto:traduz@debianpt.org>traduz@debianpt.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: sony_share.module:16
+msgid "Add Digg, <http://del.icio.us>del.icio.us, reddit, Technorati etc. links to nodes."
+msgstr "Acrescentar links Digg, <http://del.icio.us>del.icio.us, reddit, Technorati etc aos nodes."
+
+#: sony_share.module:19
+msgid "Here you can configure the sony share."
+msgstr "Aqui pode configurar os links de serviços."
+
+#: sony_share.module:39
+msgid "Node types"
+msgstr "Tipos de nodes"
+
+#: sony_share.module:40
+msgid "Set the node types you want to display links for."
+msgstr "Definir os tipos de nodes para os quais quer mostrar os links."
+
+#: sony_share.module:44
+msgid "Types"
+msgstr "Tipos"
+
+#: sony_share.module:51
+msgid "What bookmark links to show"
+msgstr "Que links de bookmarks mostrar"
+
+#: sony_share.module:55
+msgid "Show <http://del.icio.us>del.icio.us link"
+msgstr "Mostrar link <http://del.icio.us>del.icio.us"
+
+#: sony_share.module:61
+msgid "Show Digg link"
+msgstr "Mostrar link Digg"
+
+#: sony_share.module:73
+msgid "Show Reddit link"
+msgstr "Mostrar link Reddit"
+
+#: sony_share.module:79
+msgid "Show <http://ma.gnolia.com>ma.gnolia.com link"
+msgstr "Mostrar link <http://ma.gnolia.com>ma.gnolia.com"
+
+#: sony_share.module:85
+msgid "Show Newsvine link"
+msgstr "Mostrar link Newsvine"
+
+#: sony_share.module:91
+msgid "Show Furl link"
+msgstr "Mostrar link Furl"
+
+#: sony_share.module:97
+msgid "Show Google link"
+msgstr "Mostrar link Google"
+
+#: sony_share.module:103
+msgid "Show Yahoo link"
+msgstr "Mostrar link Yahoo"
+
+#: sony_share.module:110
+msgid "What search links to show"
+msgstr "Que tipos de links de buscas mostrar"
+
+#: sony_share.module:114
+msgid "Show Technorati link"
+msgstr "Mostrar link Technorati"
+
+#: sony_share.module:120
+msgid "Show IceRocket link"
+msgstr "Mostrar link IceRocket"
+
+#: sony_share.module:126
+msgid "Show PubSub link"
+msgstr "Mostrar link PubSub"
+
+#: sony_share.module:133
+msgid "When and how to show the links"
+msgstr "Quando e como mostrar os links"
+
+#: sony_share.module:137
+msgid "sony share in links"
+msgstr "Links de serviços nos links"
+
+#: sony_share.module:139;146
+msgid "Disabled"
+msgstr "Desligado"
+
+#: sony_share.module:139;146
+msgid "Teaser view"
+msgstr "Vista Teaser"
+
+#: sony_share.module:139;146
+msgid "Full-page view"
+msgstr "vista página-inteira"
+
+#: sony_share.module:139;146
+msgid "Teasers and full-page view"
+msgstr "Teasers e vista de página-inteira"
+
+#: sony_share.module:140
+msgid "When to display the services in the links section."
+msgstr "Quando mostrar os serviços na secção de links."
+
+#: sony_share.module:144
+msgid "sony share in nodes"
+msgstr "Links de serviços em nodes"
+
+#: sony_share.module:147
+msgid "When to display the services after the node text."
+msgstr "Quando mostrar os serviços após o node de texto."
+
+#: sony_share.module:151
+msgid "sony share style"
+msgstr "Estilo de links de serviços"
+
+#: sony_share.module:153
+msgid "Text links"
+msgstr "Links como texto"
+
+#: sony_share.module:153
+msgid "Image links"
+msgstr "Links como imagens"
+
+#: sony_share.module:153
+msgid "Image and text links"
+msgstr "Links como texto e imagens"
+
+#: sony_share.module:159
+msgid "Aggregator2 settings"
+msgstr "Configurações Aggregator2"
+
+#: sony_share.module:163
+msgid "Use link to original article aggregated by aggregator2 module"
+msgstr "Utilize o link para o link original agregado pelo módulo aggregator2"
+
+#: sony_share.module:242
+msgid "sony share"
+msgstr "Links de serviços"
+
+#: sony_share.module:250
+msgid "Bookmark/Search this post"
+msgstr "Bookmark/Procurar este post"
+
+#: sony_share.module:277
+msgid "delicious"
+msgstr "delicious"
+
+#: sony_share.module:277
+msgid "Bookmark this post on <http://del.icio.us>del.icio.us."
+msgstr "Bookmark a este post em <http://del.icio.us>del.icio.us."
+
+#: sony_share.module:280
+msgid "digg"
+msgstr "digg"
+
+#: sony_share.module:280
+msgid "Digg this post on <http://digg.com>digg.com."
+msgstr "Digg a este post em <http://digg.com>digg.com."
+
+#: sony_share.module:286
+msgid "reddit"
+msgstr "reddit"
+
+#: sony_share.module:286
+msgid "Submit this post on <http://reddit.com>reddit.com."
+msgstr "Submeter este post em <http://reddit.com>reddit.com."
+
+#: sony_share.module:289
+msgid "magnoliacom"
+msgstr "magnoliacom"
+
+#: sony_share.module:289
+msgid "Submit this post on <http://ma.gnolia.com>ma.gnolia.com."
+msgstr "Submeter este post em <http://ma.gnolia.com>ma.gnolia.com."
+
+#: sony_share.module:292
+msgid "newsvine"
+msgstr "newsvine"
+
+#: sony_share.module:292
+msgid "Submit this post on <http://newsvine.com>newsvine.com."
+msgstr "Submeter este post em <http://newsvine.com>newsvine.com."
+
+#: sony_share.module:295
+msgid "furl"
+msgstr "furl"
+
+#: sony_share.module:295
+msgid "Submit this post on <http://furl.net>furl.net."
+msgstr "Submeter este post em <http://furl.net>furl.net."
+
+#: sony_share.module:298
+msgid "google"
+msgstr "google"
+
+#: sony_share.module:298
+msgid "Bookmark this post on Google."
+msgstr "Bookmark a este post no Google."
+
+#: sony_share.module:301
+msgid "yahoo"
+msgstr "yahoo"
+
+#: sony_share.module:301
+msgid "Bookmark this post on Yahoo."
+msgstr "Bookmark a este post no Yahoo."
+
+#: sony_share.module:304
+msgid "technorati"
+msgstr "technorati"
+
+#: sony_share.module:304
+msgid "Search Technorati for links to this post."
+msgstr "Procurar em Technorati links para este post."
+
+#: sony_share.module:307
+msgid "icerocket"
+msgstr "icerocket"
+
+#: sony_share.module:307
+msgid "Search IceRocket for links to this post."
+msgstr "Procurar links para este post em IceRocket."
+
+#: sony_share.module:310
+msgid "pubsub"
+msgstr "pubsub"
+
+#: sony_share.module:310
+msgid "Search PubSub for links to this post."
+msgstr "Procurar links para este post em PubSub."
+
+#: sony_share.module:338
+msgid "Bookmark/Search this post with: "
+msgstr "Bookmark/Procurar este post com: "
+
+#: sony_share.module:29
+msgid "use sony share"
+msgstr "utilizar links de serviços"
+
+#: sony_share.module:0
+msgid "sony_share"
+msgstr "sony_share"

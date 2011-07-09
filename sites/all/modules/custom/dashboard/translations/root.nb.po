@@ -1,0 +1,45 @@
+# Norwegian Bokmål translation of dashboard (all releases)
+# Copyright (c) 2010 by the Norwegian Bokmål translation team
+# Generated from files:
+#  dashboard/dashboard.module: n/a
+#  dashboard/dashboard.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: dashboard (all releases)\n"
+"POT-Creation-Date: 2010-04-12 12:51-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Norwegian Bokmål\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: dashboard.module:119
+msgid "Next"
+msgstr ""
+
+#: dashboard.module:114
+msgid "Previous"
+msgstr ""
+
+#: dashboard.module:158
+msgid "Nodes created on !date"
+msgstr ""
+
+#: dashboard.module:175
+msgid "Nodes created from !from to !to"
+msgstr ""
+
+#: dashboard.module:183
+msgid "Nodes created in !date"
+msgstr ""
+
+#: dashboard.module:19,24,30,36
+msgid "Charts"
+msgstr ""
+
+#: dashboard.info:0
+msgid "Dashboard"
+msgstr ""
+

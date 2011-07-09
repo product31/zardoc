@@ -1,0 +1,239 @@
+# Finland translation of ccd (all releases)
+# Copyright (c) 2010 by the Finland translation team
+# Generated from files:
+#  ccd/ccd.info: n/a
+#  ccd/ccd.module: n/a
+#  ccd/ccd.admin.inc: n/a
+#  ccd/ccd.pages.inc: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ccd (all releases)\n"
+"POT-Creation-Date: 2010-04-06 22:34-0500\n"
+"PO-Revision-Date: 2010-03-26 09:05-0500\n"
+"Language-Team: Finland\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: ccd.info:0
+msgid "Sony BMG"
+msgstr ""
+
+#: ccd.module:510
+msgid "Media Format"
+msgstr ""
+
+#: ccd.admin.inc:19
+msgid "Edit"
+msgstr "Muokkaa"
+
+#: ccd.admin.inc:31
+msgid "Operations"
+msgstr "Toiminnot"
+
+#: ccd.admin.inc:31,59
+msgid "Name"
+msgstr "Nimi"
+
+#: ccd.pages.inc:19,56
+msgid "Submit"
+msgstr ""
+
+#: ccd.module:29
+msgid "Overview"
+msgstr "Yleiskatsaus"
+
+#: ccd.admin.inc:20,122
+msgid "Delete"
+msgstr "Poista"
+
+#: ccd.admin.inc:26
+msgid "Form"
+msgstr ""
+
+#: ccd.admin.inc:31
+msgid "ID"
+msgstr ""
+
+#: ccd.admin.inc:31
+msgid "Verification form"
+msgstr ""
+
+#: ccd.admin.inc:34
+msgid ""
+"There are no releases defined yet.  Use the <em>Add release</em> tab "
+"to create a new release."
+msgstr ""
+
+#: ccd.admin.inc:51
+msgid "Release ID"
+msgstr ""
+
+#: ccd.admin.inc:52
+msgid "The release ID from the ConnectedCD system."
+msgstr ""
+
+#: ccd.admin.inc:60
+msgid "A descriptive name to identify this release throughout the site."
+msgstr ""
+
+#: ccd.admin.inc:67
+msgid "Validation Error"
+msgstr ""
+
+#: ccd.admin.inc:68
+msgid ""
+"Where should the validation process redirect to upon error.  This "
+"should be a valid Drupal path, or left blank to use the default."
+msgstr ""
+
+#: ccd.admin.inc:74
+msgid "Validation Success"
+msgstr ""
+
+#: ccd.admin.inc:75
+msgid ""
+"Where should the validation process redirect to upon success.  This "
+"should be a valid Drupal path, or left blank to use the default."
+msgstr ""
+
+#: ccd.admin.inc:82
+msgid ""
+"Where should the redemption process redirect after an unauthorized "
+"redemption attempt.  This should be a valid Drupal path, or left blank "
+"to use the default."
+msgstr ""
+
+#: ccd.admin.inc:88
+msgid "Already redeemed"
+msgstr ""
+
+#: ccd.admin.inc:89
+msgid ""
+"Where should the redemption process redirect to if the item has "
+"already been redeemed.  This should be a valid Drupal path, or left "
+"blank to use the default."
+msgstr ""
+
+#: ccd.admin.inc:96
+msgid "Save release"
+msgstr ""
+
+#: ccd.admin.inc:119
+msgid "Are you sure you want to delete %title?"
+msgstr "Haluatko varmasti poistaa kirjoituksen %title?"
+
+#: ccd.admin.inc:121
+msgid "This action cannot be undone."
+msgstr "Tätä ei voi perua."
+
+#: ccd.admin.inc:123
+msgid "Cancel"
+msgstr "Peruuta"
+
+#: ccd.pages.inc:13
+msgid "Enter your key"
+msgstr ""
+
+#: ccd.pages.inc:32
+msgid "%name key verified successfully"
+msgstr ""
+
+#: ccd.pages.inc:43
+msgid "There was an error verifying your %name key"
+msgstr ""
+
+#: ccd.pages.inc:50
+msgid "Enter the download ID"
+msgstr ""
+
+#: ccd.pages.inc:81
+msgid "This media has already been downloaded."
+msgstr ""
+
+#: ccd.module:23
+msgid "Connected CD"
+msgstr ""
+
+#: ccd.module:35
+msgid "Add release"
+msgstr ""
+
+#: ccd.module:44
+msgid "Edit release"
+msgstr ""
+
+#: ccd.module:52
+msgid "Delete release"
+msgstr ""
+
+#: ccd.module:145
+msgid "Release %release has been updated."
+msgstr ""
+
+#: ccd.module:150
+msgid "Release %release has been created."
+msgstr ""
+
+#: ccd.module:169
+msgid "Release %release has been deleted."
+msgstr ""
+
+#: ccd.module:355
+msgid "Connected CD Media"
+msgstr ""
+
+#: ccd.module:356
+msgid "Store a the data necessary to build a Connected CD download link."
+msgstr ""
+
+#: ccd.module:369
+msgid "Link text"
+msgstr ""
+
+#: ccd.module:370
+msgid "Download"
+msgstr "Lataa"
+
+#: ccd.module:425
+msgid "ID must be numeric."
+msgstr ""
+
+#: ccd.module:503
+msgid "Media ID"
+msgstr ""
+
+#: ccd.module:514
+msgid "Default"
+msgstr "Oletus"
+
+#: ccd.module:524
+msgid "Release"
+msgstr ""
+
+#: ccd.module:548
+msgid "ConnectedCD Download Link (default)"
+msgstr ""
+
+#: ccd.module:144
+msgid "Updated release: %release"
+msgstr ""
+
+#: ccd.module:149
+msgid "Created release: %release"
+msgstr ""
+
+#: ccd.module:168
+msgid "Deleted release: %release"
+msgstr ""
+
+#: ccd.module:13
+msgid "access connectedcd downloads"
+msgstr ""
+
+#: ccd.info:0
+msgid "Integration with the Sony ConnectedCD system."
+msgstr ""
+

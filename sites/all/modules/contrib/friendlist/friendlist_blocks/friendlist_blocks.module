@@ -1,0 +1,291 @@
+<?php
+// $Id: friendlist_blocks.module,v 1.1.2.16 2008/10/11 18:47:29 mercmobily Exp $
+
+
+/**
+ * @file
+ * Friendlist's blocks.
+ *
+ * Some handy blocks for FriendList. These blocks are the ones that
+ * cannot be done with views.
+ */
+
+
+/**
+ * Implementation of hook_block().
+ */
+function friendlist_blocks_block($op = 'list', $delta = 0, $edit = array()) {
+
+  global $user;
+
+  switch ($op) {
+    case 'list':
+      $blocks[0]['info'] = t('People you might know');
+      $blocks[1]['info'] = t('Friendlist actions to the content\'s author');
+      $blocks[2]['info'] = t('Mutual friends');
+
+      return $blocks;
+
+    case 'configure':
+
+      if ($delta == 0) {
+
+        $relation_types = friendlist_api_relation_types_load_all();
+        $options = array();
+        foreach ($relation_types as $rt) {
+          $options[ $rt->rtid ] = $rt->name;
+        }
+
+        $form['friendlist_blocks_0_rtid'] = array(
+          '#type' => 'select',
+          '#title' => t('Relation type to consider'),
+          '#required' => TRUE,
+          '#options' => $options,
+          '#default_value' => variable_get('friendlist_blocks_0_rtid', 0)
+        );
+      }
+
+
+      elseif ($delta == 1) {
+      }
+
+
+      elseif ($delta == 2) {
+
+        $relation_types = friendlist_api_relation_types_load_all();
+        $options = array();
+        foreach ($relation_types as $rt) {
+          if (!$rt['oneway']) {
+            $options[ $rt->rtid ] = $rt->name;
+          }
+        }
+        $form['friendlist_blocks_2_rtid'] = array(
+          '#type' => 'select',
+          '#title' => t('Relation type to consider'),
+          '#required' => TRUE,
+          '#options' => $options,
+          '#default_value' => variable_get('friendlist_blocks_2_rtid', 0)
+        );
+      }
+
+      return $form;
+      break;
+
+    case 'save':
+
+      if ($delta == 0) {
+        variable_set('friendlist_blocks_0_rtid', $edit['friendlist_blocks_0_rtid']);
+      }
+      elseif ($delta == 2) {
+        variable_set('friendlist_blocks_2_rtid', $edit['friendlist_blocks_2_rtid']);
+      }
+
+
+      break;
+
+    case 'view':
+
+      if (user_access('access content')) {
+
+        // Case #0.
+        if ($delta == 0) {
+          $subject = t('People you might know');
+
+          $output = friendlist_blocks_contents_0();
+        }
+
+
+        // Block to display possible actions with the content's author.
+        elseif ($delta == 1) {
+          if ($n = menu_get_object('node') &&  $u = user_load(array('uid' => $n->uid)) && $user->uid != $u->uid) {
+            $subject = t('You and !user', array('!user' => theme('username', $u)));
+            $output = friendlist_ui_user_links($u);
+          }
+        }
+
+
+        // Block to display possible actions with the content's author or
+        // user being viewed.
+        elseif ($delta == 2) {
+
+          if (($n = menu_get_object('node') &&  $u = user_load(array('uid' => $n->uid)) && $user->uid != $u->uid)
+												|| ($u = menu_get_object('user') && $user->uid != $u->uid)) {
+              $subject = t('Common relations');
+              $output = friendlist_blocks_contents_2($u);
+          }
+        }
+
+
+        $block['content'] = $output;
+        $block['subject'] = $subject;
+        return $block;
+      }
+  } // End of switch.
+
+}
+
+/**
+ * Return the contents for the block with ID 0.
+ *
+ * @return
+ *   A string with the contents.
+ */
+function friendlist_blocks_contents_0() {
+
+  global $user;
+  $rtid = variable_get('friendlist_blocks_0_rtid', 0);
+
+  // Limits the number of results that will show.
+  $limit = 10;
+
+  $results = db_query_range("
+
+SELECT u.uid
+FROM {users} AS u
+LEFT JOIN {friendlist_relations} AS fr ON (u.uid = fr.requester_id OR u.uid = fr.requestee_id)
+LEFT JOIN {friendlist_statuses} AS fs ON (fr.requester_id = fs.requester_id AND fr.requestee_id = fs.requestee_id)
+WHERE (u.uid = fr.requester_id OR u.uid = fr.requestee_id)
+  AND (fr.requester_id IN (
+    SELECT u.uid
+    FROM {users} AS u
+    LEFT JOIN {friendlist_relations} AS fr ON (u.uid = fr.requester_id OR u.uid = fr.requestee_id)
+    LEFT JOIN {friendlist_statuses} AS fs ON (fr.requester_id = fs.requester_id AND fr.requestee_id = fs.requestee_id)
+    WHERE (u.uid = fr.requester_id OR u.uid = fr.requestee_id)
+      AND (fr.requester_id = %d OR fr.requestee_id = %d)
+      AND (fr.rtid = %d)
+      AND (fs.status = 'TW_BOTH')
+    GROUP BY (u.uid)
+    ORDER BY COUNT(fr.requester_id OR fr.requestee_id) DESC
+  ) OR fr.requestee_id IN (
+    SELECT u.uid
+    FROM {users} AS u
+    LEFT JOIN {friendlist_relations} AS fr ON (u.uid = fr.requester_id OR u.uid = fr.requestee_id)
+    LEFT JOIN {friendlist_statuses} AS fs ON (fr.requester_id = fs.requester_id AND fr.requestee_id = fs.requestee_id)
+    WHERE (u.uid = fr.requester_id OR u.uid = fr.requestee_id)
+      AND (fr.requester_id = %d OR fr.requestee_id = %d)
+      AND (fr.rtid = %d)
+      AND (fs.status = 'TW_BOTH')
+    GROUP BY (u.uid)
+    ORDER BY COUNT(fr.requester_id OR fr.requestee_id) DESC
+  ))
+  AND (fr.rtid = %d)
+  AND (u.uid NOT IN (
+    SELECT u.uid
+    FROM {users} AS u
+    LEFT JOIN {friendlist_relations} AS fr ON (u.uid = fr.requester_id OR u.uid = fr.requestee_id)
+    LEFT JOIN {friendlist_statuses} AS fs ON (fr.requester_id = fs.requester_id AND fr.requestee_id = fs.requestee_id)
+    WHERE (u.uid = fr.requester_id OR u.uid = fr.requestee_id)
+      AND (fr.requester_id = %d OR fr.requestee_id = %d)
+      AND (fr.rtid = %d)
+      AND (fs.status = 'TW_BOTH')
+    GROUP BY (u.uid)
+    ORDER BY COUNT(fr.requester_id OR fr.requestee_id) DESC
+  ))
+  AND (fs.status = 'TW_BOTH')
+GROUP BY (u.uid)
+ORDER BY COUNT(fr.requester_id OR fr.requestee_id) DESC
+
+    ",
+    $user->uid,
+    $user->uid,
+    $rtid,
+    $user->uid,
+    $user->uid,
+    $rtid,
+    $rtid,
+    $user->uid,
+    $user->uid,
+    $rtid,
+    0,
+    $limit
+);
+
+  return friendlist_blocks_display_user_list($results, 'user-might-know');
+
+}
+
+
+/**
+ * Return the contents for the block with ID 2.
+ *
+ * @param $user_owner
+ *   An user object representing The owner of the node or the owner of
+ *   the profile page.
+ * @return
+ *   A string with the contents.
+ */
+function friendlist_blocks_contents_2($user_owner) {
+
+  global $user;
+
+  $rtid = variable_get('friendlist_blocks_2_rtid', 0);
+
+  // Limits the number of results that will show.
+  $limit = 10;
+
+  $results = db_query_range("
+
+SELECT u.uid FROM
+  (SELECT u.uid FROM {users} AS u
+  LEFT JOIN {friendlist_relations} AS fr ON (u.uid = fr.requester_id OR u.uid = fr.requestee_id)
+  LEFT JOIN {friendlist_statuses} AS fs ON (fr.requester_id = fs.requester_id AND fr.requestee_id = fs.requestee_id)
+  WHERE (fr.requester_id = %d OR fr.requestee_id = %d)
+    AND (fs.status = 'TW_BOTH')
+    AND (fr.rtid = %d)
+  GROUP BY (u.uid))
+AS u
+LEFT JOIN {friendlist_relations} AS fr ON (u.uid = fr.requester_id OR u.uid = fr.requestee_id)
+LEFT JOIN {friendlist_statuses} AS fs ON (fr.requester_id = fs.requester_id AND fr.requestee_id = fs.requestee_id)
+WHERE (fr.requester_id = %d OR fr.requestee_id = %d)
+  AND (fs.status = 'TW_BOTH')
+  AND (fr.rtid = %d)
+GROUP BY (u.uid)
+ORDER BY RAND()
+  ",
+  $user_owner->uid,
+  $user_owner->uid,
+  $rtid,
+
+  $user->uid,
+  $user->uid,
+  $rtid,
+
+  0,
+  $limit
+
+  );
+
+  return friendlist_blocks_display_user_list($results, 'relation-common');
+
+}
+
+
+
+/**
+ * Displays a list of users taking them from the previous query.
+ *
+ * @param $results
+ *   A query $result.
+ * @param $list_class
+ *   The class used for the list.
+ * @return
+ *   A themed list.
+ */
+function friendlist_blocks_display_user_list($results, $list_class) {
+
+  while ($row = db_fetch_array($results)) {
+    $account = user_load(array('uid' => $row['uid']));
+    $picture = theme_get_setting('toggle_node_user_picture') ? theme('user_picture', $account) : '';
+
+    $list[] = $picture .' '. theme('username', $account);
+    $something_there = TRUE;
+  }
+
+  if (!$something_there) {
+    return '';
+  }
+
+  return theme('item_list', $list, NULL, 'ul', array('class' => $list_class));
+
+}
+

@@ -1,0 +1,99 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * file_description
+ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function mc_client_menu() {
+  $items['admin/settings/mc_client'] = array(
+    'title' => 'MissionControl Client',
+    'description' => 'Configure this site as a MissionControl client.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mc_client_admin_settings'),
+    'access arguments' => array('administer site configuration'),
+  );
+  return $items;  
+}
+
+/**
+ * admin settings
+ */
+function mc_client_admin_settings() {
+  $form['mc_client_host'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Host URL'),
+    '#description' => t('Full URL of the MissionControl host to use. Do not include the trailing slash.  Ex: http://www.example.com'),
+    '#default_value' => variable_get('mc_client_host', ''),
+  );
+  $form['mc_client_public_key'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Public Key'),
+    '#max_length' => 32,
+    '#default_value' => variable_get('mc_client_public_key', ''),
+  );
+  $form['mc_client_private_key'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Private Key'),
+    '#max_length' => 32,
+    '#default_value' => variable_get('mc_client_private_key', ''),
+  );
+  return system_settings_form($form);
+}
+
+/**
+ * Call a remote procedure at the MissionControl server.  This function will
+ * automatically add the information required to authenticate against
+ * MissionControl.
+ */
+function mc_client_call($method, $args = array()) {
+  $host = variable_get('mc_client_host', '');
+
+  if ($host) {
+    // add the xmlrpc bit to the host
+    $url = $host .'/xmlrpc.php';
+    
+    // get the keys
+    $public_key = variable_get('mc_client_public_key', '');
+    $private_key = variable_get('mc_client_private_key', '');
+    
+    // generate the signature
+    $sig = xmlrpc_hmac_generate_signature($private_key, $public_key, $method, $args);
+    
+    // xmlrpc expects a list of arguments, not an array of args so we must add the 
+    // url, method, public_key and sig onto the $args array
+    array_unshift($args, $url, $method, $public_key, $sig);
+    $result = call_user_func_array('xmlrpc', $args);
+
+    // check for xmlrpc errors
+    if ($errno = xmlrpc_errno()) {
+      watchdog('mc_client', 'Error @errno: %server - %message - %method - <pre>@data</pre>', array('@errno' => xmlrpc_errno(), '%server' => $host, '%message' => xmlrpc_error_msg(), '%method' => $method, '@data' => print_r($data, TRUE)), WATCHDOG_ERROR);
+      drupal_set_message(t('Error @errno: %message', array('@errno' => xmlrpc_errno(), '%message' => xmlrpc_error_msg())), 'error');
+      
+      // Reset the XMLRPC error:
+      xmlrpc_error(0);  // FIXME: this is crazy.
+    }
+    else {
+      return $result;
+    }
+  }
+
+  // Report this error:
+  watchdog('mc_client', 'No MissionControl servers could be reached or all servers returned an error.', array(), WATCHDOG_ERROR);
+}
+
+function mc_client_verify() {
+  return mc_client_call('missioncontrol.hmac.verify');
+}
+
+function mc_client_report_variable($name) {
+  $data = array(
+    'name' => $name,
+    'value' => variable_get($name, 'not set'),
+  );
+  return mc_client_call('missioncontrol.variable_set', $data);
+}

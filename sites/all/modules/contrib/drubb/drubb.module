@@ -1,0 +1,198 @@
+<?php
+// $Id: drubb.module,v 1.16 2009/07/14 15:02:59 neclimdul Exp $
+
+/**
+ * Implementation of hook_views_api()
+ */
+function drubb_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'drubb'),
+  );
+}
+
+/**
+ * @file
+ * A phpBB-like forum for Drupal.
+ */
+function drubb_init() {
+  drupal_add_css(drupal_get_path('module', 'drubb') .'/drubb.css');
+}
+
+/**
+ * Implementation of hook_menu_alter().
+ */
+function drubb_menu_alter(&$items) {
+  // Set the 'forum' path to a normal item so that it appears in navigation.
+  $items['forum']['type'] = MENU_NORMAL_ITEM;
+}
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function drubb_form_alter(&$form, $form_state, $form_id) {
+  // Allows the profile to alter the site-configuration form. This is called
+  // through custom invocation, so $form_state is not populated.
+  if ($form_id == 'install_configure') {
+    // Set default for site name field.
+    $form['site_information']['site_name']['#default_value'] = $_SERVER['SERVER_NAME'];
+
+  }
+
+  // Hide the forum selection from node forms.
+  if ((isset($form['#theme']) && $form['#theme'] == 'upload_form_new') || (isset($form['#id']) && $form['#id'] == 'node-form')) {
+    if ($form['#id'] == 'node-form') {
+      $location = &$form['attachments']['wrapper']['files'];
+    }
+    else {
+      $location = &$form['files'];
+    }
+
+    // Add a special bueditor button to file attachments if they are images.
+    if (!empty($location)) {
+      foreach(element_children($location) as $key) {
+        if (substr($location[$key]['filemime']['#value'], 0, 5) == 'image') {
+          // Move the description to make room for our attach button.
+          $location[$key]['description'] = array(
+            'description' => $location[$key]['description'],
+            'attach' => array(
+              '#type' => 'button',
+              '#value' => t('Insert image'),
+              '#attributes' => array('class' => 'drubb-attach-image'),
+              '#parents' => array('files', $key, 'attach'),
+            ),
+          );
+
+          // Make sure the name parameter on the description doesn't change.
+          $location[$key]['description']['description']['#parents'] = array('files', $key, 'description');
+        }
+      }
+    }
+  }
+
+  if (isset($form['#id']) && $form['#id'] == 'node-form') {
+    drupal_add_js(drupal_get_path('module', 'drubb') . '/drubb.js');
+
+    // remove 'Body:' text from node comments.
+    if (isset($form['#node']->comment_target_nid)) {
+      $form['body_field']['body']['#title'] = '';
+      // Remove ugly fieldset around smileys block.
+      $form['body_field']['smileys']['#collapsible'] = FALSE;
+      return;
+    }
+
+    $forum_vid = variable_get('forum_nav_vocabulary', '');
+    $forum_vocabulary = taxonomy_vocabulary_load($forum_vid);
+    $types = array_values($forum_vocabulary->nodes);
+    if (!in_array($form['type']['#value'], $types)) {
+      return;
+    }
+    
+    // Add identifier that can be used in css to target forum posts.
+    $form['#prefix'] = '<div class="forum">';
+    $form['#suffix'] = '</div>';
+
+    // Remove the teaser splitter.
+    $teaser_js_build = array_search('node_teaser_js', $form['body_field']['#after_build']);
+    unset($form['body_field']['#after_build'][$teaser_js_build]);
+    $form['body_field']['teaser_js']['#access'] = FALSE;
+    $form['body_field']['teaser_include']['#access'] = FALSE;
+    // Hide the title.
+    $form['body_field']['body']['#title'] = '';
+    
+    if (!$form['vid']['#value']) {
+      // Node add form. Hide this value rather than using #type 'value'
+      // so the Draft module javascript can still manipulate it.
+       
+      // Hide the forum value for drafts. We won't have a value
+      // for arg(3) when using drafts. The value will get added 
+      // by the Draft module js.
+      if ($_GET['draft_id']) {
+        $form['taxonomy'][$forum_vid] = array(
+          '#type' => 'hidden',
+        );
+      }
+      // Always hide the forum selection when adding a new topic
+      // that has a target forum specified.
+      else {
+        $forum_tid = arg(3);
+        if ($forum = forum_term_load($forum_tid) && isset($form['taxonomy'][$forum_vid])) {
+          $form['taxonomy'][$forum_vid] = array(
+            '#type' => 'hidden',
+            '#value' => $forum_tid,
+          );
+        }
+
+        // Set the breadcrumb so we can get back to the forum properly.
+        $breadcrumb[] = l(t('Home'), NULL);
+        $breadcrumb[] = l($forum_vocabulary->name, 'forum');
+        if ($parents = taxonomy_get_parents_all($forum_tid)) {
+          $parents = array_reverse($parents);
+          foreach ($parents as $p) {
+            $breadcrumb[] = l($p->name, 'forum/'. $p->tid);
+          }
+        }
+        drupal_set_breadcrumb($breadcrumb);
+      }
+    }
+    else {
+      // Node edit form. Only show forum selection to administrative users.
+      if (!user_access('administer nodes')) {
+        $forum_tid = $form['taxonomy'][$forum_vid]['#default_value'][0];
+        $form['taxonomy'][$forum_vid] = array(
+          '#type' => 'hidden',
+          '#value' => $forum_tid,
+        );
+        $form['shadow']['#type'] = 'value';
+      }
+    }
+
+    // Remove ugly fieldset around smileys block.
+    $form['body_field']['smileys']['#collapsible'] = FALSE;
+  }
+  elseif ($form_id == 'comment_form') {
+    
+    // Add a method to identify forum comments. 
+    $forum_vid = variable_get('forum_nav_vocabulary', '');
+    $forum_vocabulary = taxonomy_vocabulary_load($forum_vid);
+    $types = array_values($forum_vocabulary->nodes);
+    $node = node_load($form['nid']['#value']);
+    if (!in_array($node->type, $types)) {
+      return;
+    }
+
+    // Add identifier that can be used in css to target forum posts.
+    $form['#prefix'] = '<div class="forum">';
+    $form['#suffix'] = '</div>';
+            
+    // Remove ugly fieldset around smileys block.
+    $form['comment_filter']['smileys']['#collapsible'] = FALSE;
+  }
+}
+
+/**
+ * Theme a quote with its content and author, rework the default 
+ * to use blockquote instead of div for the quote itself, to take
+ * advantage of themes that provide quote mark gifs.
+ * 
+ * @param $quote_content
+ *   The quote's string content.
+ * @param $quote_author
+ *   The quote author's name.
+ *
+ * @return $output_quote
+ *   Themed quote.
+ */
+function drubb_quote($quote_content, $quote_author) {
+  $quote_output = '<div class="quote-msg">';
+  if ($quote_author != '') {
+    $quote_output .= '<div class="quote-author">'. t('%name wrote:', array('%name' => $quote_author)) .'</div>';
+  }
+  else {
+    $quote_output .= '<div class="quote-author">XXX'. t('Quote:') .'</div>';
+  }
+  $quote_output .= '<blockquote>'. $quote_content .'</blockquote>';
+  $quote_output .= '</div>';
+
+  return $quote_output;
+}

@@ -1,0 +1,55 @@
+# Switzerland (German) translation of userpoints_throttle (all releases)
+# Copyright (c) 2010 by the Switzerland (German) translation team
+# Generated from files:
+#  userpoints_throttle/userpoints_throttle.module: n/a
+#  userpoints_throttle/userpoints_throttle.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: userpoints_throttle (all releases)\n"
+"POT-Creation-Date: 2010-04-12 15:15-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Switzerland (German)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: userpoints_throttle.module:16
+msgid "Limit !points in a time period"
+msgstr ""
+
+#: userpoints_throttle.module:20
+msgid ""
+"Before settting the configuration here you need to set up all the "
+"other user points configuration above and associate each with a "
+"different category. Setting any of these values to zero will disable "
+"the throttling - !points will be unlimited"
+msgstr ""
+
+#: userpoints_throttle.module:30
+msgid "Maximum for @category"
+msgstr ""
+
+#: userpoints_throttle.module:39
+msgid "Throttle Period"
+msgstr ""
+
+#: userpoints_throttle.module:42
+msgid "The period that the above maximums are for"
+msgstr ""
+
+#: userpoints_throttle.info:0
+msgid "Userpoints Throttle"
+msgstr ""
+
+#: userpoints_throttle.info:0
+msgid ""
+"Admins can limit the number of userpoints earned in a particular time "
+"period"
+msgstr ""
+
+#: userpoints_throttle.info:0
+msgid "Userpoints"
+msgstr ""
+

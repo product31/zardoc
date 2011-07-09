@@ -1,0 +1,23 @@
+name = Pluto
+package = Sony BMG
+description = User rewards system for Sony Artist Sites
+core = 6.x
+
+//removing hard dependency from pluto module.
+//dependencies[] = activity
+//dependencies[] = userpoints
+//dependencies[] = nodeactivity
+//dependencies[] = useractivity
+/dependencies[] = friendlist_api
+dependencies[] = service_links
+dependencies[] = userpoints_login
+dependencies[] = userpoints_first_comment
+dependencies[] = userpoints_friendlist
+dependencies[] = userpoints_nc
+dependencies[] = userpoints_register
+dependencies[] = userpoints_service_links
+dependencies[] = userpoints_throttle
+
+l10n server = translate.gdb-dev.com
+project = "pluto"
+version = "6.x-2.x"

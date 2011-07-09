@@ -1,0 +1,21 @@
+# Denmark translation of sonybmg_events (all releases)
+# Copyright (c) 2010 by the Denmark translation team
+# Generated from files:
+#  sonybmg_events/sonybmg_events.info: n/a
+#  sonybmg_events/sonybmg_events_map/sonybmg_events_map.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sonybmg_events (all releases)\n"
+"POT-Creation-Date: 2010-04-05 16:11-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Denmark\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: sonybmg_events.info:0; sonybmg_events_map/sonybmg_events_map.info:0
+msgid "Sony BMG"
+msgstr ""
+

@@ -1,0 +1,216 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Base module for M2 interactivity
+ */
+define('M2_DEBUG', FALSE);
+
+define('M2_ENDPOINT', 'http://admin:b3g00d@ec2-174-129-193-78.compute-1.amazonaws.com/');
+define('M2_ENDPOINT_NOAUTH', 'http://ec2-174-129-193-78.compute-1.amazonaws.com/');
+
+include_once dirname(__FILE__) .'/m2.field.inc';
+
+
+/**
+ * Implementation of hook_menu().
+ */
+function m2_menu() {
+  $items = array();
+
+  $items['m2/autocomplete'] = array(
+    'title' => 'M2 autocomplete',
+    'page callback' => 'm2_autocomplete',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK
+  );
+
+  return $items;
+}
+
+function m2_load_plugins($plugin_name = NULL, $reset = FALSE) {
+  static $plugins;
+
+  if (!isset($plugins) || $reset) {
+    $plugins = array();
+    $files = file_scan_directory(drupal_get_path('module', 'm2') .'/plugins', '.*\.inc$');
+    foreach ($files as $file) {
+      include "./{$file->filename}";
+      $function = 'm2_'. $file->name .'_info';
+      if (function_exists($function)) {
+        $plugins[$file->name] = $function();
+      }
+    }
+  }
+
+  if (isset($plugin_name) && isset($plugins[$plugin_name])) {
+    return $plugins[$plugin_name];
+  }
+
+  return $plugins;
+}
+
+function m2_document_load($id) {
+  static $documents = array();
+
+  if (!isset($documents[$id])) {
+    $url = M2_ENDPOINT . "documents/{$id}.json";
+
+    $cid = $url;
+    if (($cache = cache_get($cid, 'cache')) && $cache->data) {
+      $result = $cache;
+      if (M2_DEBUG) dsm('M2 document cache hit.');
+    }
+    else {
+      $start = microtime(TRUE);
+      $result = drupal_http_request($url);
+      if (M2_DEBUG) dsm(microtime(TRUE) - $start, 'M2 document cache miss. JSON fetch');
+
+      if ($result->data) {
+        cache_set($cid, $result->data, 'cache', time() + 60 * 60 * 24);
+      }
+    }
+
+    $start = microtime(TRUE);
+    $documents[$id] = m2_document_parse($result->data);
+    if (M2_DEBUG) dsm(microtime(TRUE) - $start, 'JSON decode');
+  }
+
+  return $documents[$id];
+}
+
+function m2_document_parse($json) {
+  if (is_string($json)) {
+    $json = json_decode($json);
+  }
+
+  // Placeholder to do additional processing
+
+  return $json;
+}
+
+/**
+ * Menu callback; Retrieve a pipe delimited string of autocomplete suggestions
+ */
+function m2_autocomplete($field_name, $string = '') {
+  $fields = content_fields();
+  $field = $fields[$field_name];
+
+  $references = _m2_potential_references($field, $string, array(), 10);
+  $matches = array();
+  foreach ($references as $id => $row) {
+    // Add a class wrapper for a few required CSS overrides.
+    $matches[$row['title'] ." [m2id:$id]"] = '<div class="reference-autocomplete">'. $row['rendered'] . '</div>';
+  }
+  drupal_json($matches);
+}
+
+function _m2_potential_references($field, $string = '', $ids = array(), $limit = NULL) {
+  static $results = array();
+
+  // Create unique id for static cache.
+  $cid = $field['field_name'] .':'. ($string !== '' ? $string : implode('-', $ids)) .':'. $limit;
+  if (!isset($results[$cid])) {
+    //$references = _nodereference_potential_references_standard($field, $string, $ids, $limit);
+
+    list($plugin_name, $search_index) = explode('-', $field['document_type']);
+    $plugin = m2_load_plugins($plugin_name);
+
+
+    if ($string !== '') {
+      $items = m2_query($plugin_name, $search_index, $string);
+    }
+    elseif ($ids) {
+      $items = array();
+      foreach ($ids as $id) {
+        $items[] = m2_document_load($id);
+      }
+    }
+
+    $references = array();
+    foreach ($items as $item) {
+      $references[$item->id] = array(
+        'title' => $item->title,
+        'rendered' => $item->title,
+      );
+      if ($plugin['autocomplete_render'] && function_exists($plugin['autocomplete_render'])) {
+        $function = $plugin['autocomplete_render'];
+        $references[$item->id]['rendered'] = $function($item);
+      }
+    }
+
+    // Store the results.
+    $results[$cid] = $references;
+  }
+
+  return $results[$cid];
+}
+
+/**
+ * Query m2
+ */
+function m2_query($doc_type, $index, $string = NULL, $page = 0) {
+  $plugin = m2_load_plugins($doc_type);
+  $url = M2_ENDPOINT ."documents/list/{$plugin['class']}.json?";
+  $params = array();
+  if ($string) {
+    $params['q'] = $index .':'. $string;
+  }
+  if ($page) {
+    $params['page'] = $page;
+  }
+  $url .= drupal_query_string_encode($params);
+  $result = drupal_http_request($url);
+
+  $items = array();
+  $json = json_decode($result->data);
+  foreach ($json->items as $item) {
+    $items[] = m2_document_parse($item);
+  }
+
+  return $items;
+}
+
+/**
+ * Validate an autocomplete element.
+ *
+ * Remove the wrapper layer and set the right element's value.
+ * This will move the nested value at 'field-name-0-nid-nid'
+ * back to its original location, 'field-name-0-nid'.
+ */
+function m2_autocomplete_validate($element, &$form_state) {
+  $field_name = $element['#field_name'];
+  $type_name = $element['#type_name'];
+  $field = content_fields($field_name, $type_name);
+  $field_key  = $element['#columns'][0];
+  $delta = $element['#delta'];
+  $value = $element['#value'];
+  $m2id = NULL;
+  if (!empty($value)) {
+    preg_match('/^(?:\s*|(.*) )?\[\s*m2id\s*:\s*(\d+)\s*\]$/', $value, $matches);
+    if (!empty($matches)) {
+      // Explicit [nid:n].
+      list(, $title, $m2id) = $matches;
+      if (!empty($title) && ($doc = m2_document_load($m2id)) && $title != $doc->title) {
+        form_error($element[$field_key], t('%name: title mismatch. Please check your selection.', array('%name' => t($field['widget']['label']))));
+      }
+    }
+    else {
+      // No explicit nid.
+      $reference = _m2_potential_references($field, $value, NULL, 1);
+      if (empty($reference)) {
+        form_error($element[$field_key], t('%name: found no valid post with that title.', array('%name' => t($field['widget']['label']))));
+      }
+      else {
+        // TODO:
+        // the best thing would be to present the user with an additional form,
+        // allowing the user to choose between valid candidates with the same title
+        // ATM, we pick the first matching candidate...
+        $m2id = key($reference);
+      }
+    }
+  }
+  form_set_value($element, $m2id, $form_state);
+}
+

@@ -1,0 +1,154 @@
+@CHARSET "UTF-8";
+
+#grid_builder {
+  width: 1200px;
+  margin: 0 auto;
+}
+
+#grid_palette {
+  xxbackground: #444;
+  float: left;
+  width: 200px;
+  overflow: hidden;
+  min-height: 600px;
+}
+#grid_palette .button {
+  display: block;
+  float: none;
+  margin: 10px;
+  padding: 5px 10px;
+  width: 160px;
+}
+
+#grid_canvas {
+  min-width: 1000px;
+  float: left;
+  min-height: 600px;
+}
+ 
+#grid_canvas .slice {
+  xxbackground: #eee;
+  border-bottom: solid 3px #FFF;
+}
+
+#grid_canvas .container {
+  xxbackground: #ddd;
+  min-height: 100px;
+  padding: 0 0 10px 0;
+}
+
+#grid_canvas .column {
+  min-height: 50px;
+}
+
+#grid_builder .ui-widget-header a {
+  float: right;
+  margin: 2px 2px 2px 0;
+  padding: 3px;
+  height: 16px;
+  line-height: 16px;
+  cursor: pointer;
+}
+
+#grid_builder .ui-sortable .column > .buttons {
+	cursor: move;
+}
+
+.container .ui-state-disabled {
+  opacity: 1.0;
+}
+
+.sortable-placeholder {
+  border: dashed 3px #444;
+}
+
+.grid-template-element {
+  xxbackground: #EEFFFF;
+  padding: 5px;
+  margin: 5px;
+  border: dashed #444 1px;
+}
+
+.grid-region {
+	xxbackground: #ffff33;
+}
+
+.ui-sortable .grid-template-element {
+	cursor: move;
+}
+
+.column.ui-state-highlight {
+  border: 0px;
+}
+
+.container .empty {
+  text-align: center;
+  padding: 1em;
+}
+
+.grid-container {
+	width: 952px;
+}
+.grid-container > .ui-widget-content {
+	padding: 1em 0;
+}
+.grid-container .ui-widget-header .ui-widget-title {
+  float: left;
+  margin: 2px 2px 2px 0;
+  padding: 2px 4px;
+  line-height: 130%;
+	float: left;
+} 
+.grid-container .ui-widget-header a {
+  float: right;
+} 
+
+.ui-sortable-placeholder {
+  border: dashed 1px #999;
+  margin: 1em auto;
+}
+
+.column.ui-sortable-placeholder {
+	margin: 0 10px 0 0;
+}
+
+.ui-widget-content {
+  min-height: 50px;
+}
+
+.grid-element {
+  margin: 10px 3px;
+}
+.grid-element > .ui-widget-header {
+	background: #FFDDFF;
+	color: #777;
+}
+
+#grid_builder .ui-widget-header,
+.grid-container > .ui-widget-header,
+.grid-column > .ui-widget-header,
+.grid-element > .ui-widget-header {
+	position: relative;
+	overflow: hidden;
+}
+#grid_builder .ui-widget-header > .ui-widget-title,
+.grid-container > .ui-widget-header > .ui-widget-title,
+.grid-column > .ui-widget-header > .ui-widget-title,
+.grid-element > .ui-widget-header > .ui-widget-title {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: 1;
+  font-weight: normal;
+}
+#grid_builder .ui-widget-header > a,
+.grid-container > .ui-widget-header > a,
+.grid-column > .ui-widget-header > a,
+.grid-element > .ui-widget-header > a {
+  position: relative;
+  z-index: 2;
+}
+
+#grid_form {
+  display: none;
+}

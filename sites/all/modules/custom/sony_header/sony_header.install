@@ -1,0 +1,190 @@
+<?php
+// $Id: feedapi.install,v 1.5.2.21.2.11 2008/10/10 09:58:24 aronnovak Exp $
+
+/**
+ * Implementation of hook_install().
+ */
+function sony_header_install() {
+  drupal_install_schema('sony_header');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function sony_header_uninstall() {
+  // Drop database schema.
+  drupal_uninstall_schema('sony_header');
+}
+
+/**
+ * Implementation of hook_schema().
+ */
+function sony_header_schema() {
+  $schema['sony_header'] = array(
+    'description' => 'Flash header item infomation storage.',
+    'fields' => array(
+      'header_id' => array(
+        'type' => 'serial',
+        'description' => 'The primary identifier for the header.',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'name' => array(
+        'type' => 'varchar',
+        'description' => 'Descriptive name of the flash header.',
+        'not null' => TRUE,
+        'default' => '',
+        'length' => '255',
+      ),
+      'title' => array(
+        'type' => 'varchar',
+        'description' => 'Value used for the header.',
+        'not null' => TRUE,
+        'default' => '',
+        'length' => '255',
+      ),
+      'language' => array(
+        'type' => 'varchar',
+        'description' => 'Language code used for the header.',
+        'not null' => TRUE,
+        'default' => '',
+        'length' => '255',
+      ),
+
+      'params' => array(
+        'type' => 'text',
+        'description' => 'Serialized values used for the flash params.',
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'config_css' => array(
+        'type' => 'varchar',
+        'description' => 'Path to css file.',
+        'not null' => TRUE,
+        'default' => '',
+        'length' => '255',
+      ),
+      'config_font' => array(
+        'type' => 'varchar',
+        'description' => 'Path to font swf.',
+        'not null' => TRUE,
+        'default' => '',
+        'length' => '255',
+      ),
+      'embed_fonts' => array(
+        'type' => 'int',
+        'description' => 'Embed fonts.',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'check_policy' => array(
+        'type' => 'int',
+        'description' => 'Check local image policy.',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'alternate_content' => array(
+        'type' => 'text',
+        'description' => 'Content to be replaced by the flash',
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('header_id'),
+  );
+
+  $schema['sony_header_item'] = array(
+    'description' => 'Flash header item infomation storage.',
+    'fields' => array(
+      'tag_id' => array(
+        'type' => 'serial',
+        'description' => 'unique field identifier.',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'header_id' => array(
+        'type' => 'int',
+        'description' => 'The primary identifier for the header.',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'type' => array(
+        'type' => 'varchar',
+        'description' => 'Tag type',
+        'not null' => TRUE,
+        'default' => '',
+        'length' => '50',
+      ),
+      'id' => array(
+        'type' => 'varchar',
+        'description' => 'The html id of the header item.',
+        'not null' => TRUE,
+        'default' => '',
+        'length' => '255',
+      ),
+      'content' => array(
+        'type' => 'text',
+        'decsription' => 'Tag conetnt.',
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'attributes' => array(
+        'type' => 'text',
+        'description' => 'Tag attributes.',
+        'not null' => TRUE,
+        'default' => '',
+        'serialize' => TRUE,
+      ),
+      'weight' => array(
+        'description' => 'Weight of the element. Lighter weights are higher up, heavier weights go down.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'parent_id' => array(
+        'description' => 'The grouping id.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'publish_item' => array(
+        'description' => 'Is Published.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 1,
+      ),
+
+    ),
+    'primary key' => array('tag_id'),
+    'indexes' => array(
+      'id_parent_weight' => array('header_id', 'parent_id', 'weight'),
+      
+    ),
+  );
+
+  return $schema;
+}
+
+/**
+ * Create sony_header language schema.
+ * Add a field to track the language of the flash header.
+ */
+function sony_header_update_6001() {
+  $ret = array();
+    db_add_field($ret, 'sony_header', 'language', array('type' => 'varchar', 'not null' => TRUE, 'default' => '', 'length' => 255));
+  return $ret;
+}
+/**
+ * Create sony_header_item displayitem schema.
+ * Indicates whether or not an item should be displayed.
+ */
+function sony_header_update_6002() {
+  $ret = array();
+    db_add_field($ret, 'sony_header_item', 'publish_item', array('type' => 'int', 'description' => 'Is Published.',  'unsigned' => TRUE, 'not null' => TRUE, 'default' => 1));
+  return $ret;
+}
+

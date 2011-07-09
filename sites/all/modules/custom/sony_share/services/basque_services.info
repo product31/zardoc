@@ -1,0 +1,8 @@
+; $Id$
+name = "Basque Services"
+description = "Provide the Basque Services: Zabaldu, Bildu, Aupatu"
+core = 6.x
+package = Sony Share
+dependencies[] = sony_share
+
+

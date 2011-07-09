@@ -1,0 +1,9 @@
+name = Sony Thickbox
+description = Thickbox implementation for Sony multisite
+package = Sony BMG
+core = 6.x
+dependencies[] = block
+
+l10n server = translate.gdb-dev.com
+project = "sony_thickbox"
+version = "6.x-2.x"

@@ -1,0 +1,28 @@
+<?php
+// $Id: ut_user_stats.module,v 1.1.2.1 2010/02/02 11:20:15 agileware Exp $
+
+/**
+ * @file
+ * Allows user titles to be based on a users user stats.
+ */
+
+/**
+ * Implementation of hook_user_titles().
+ */
+function ut_user_stats_user_titles($op, $uid = NULL) {
+  switch ($op) {
+    case 'register':
+      return 'ut_user_stats';
+    case 'name':
+      return t('User Stats');
+    case 'description':
+      return t('Count of post and/or comments');
+    case 'units':
+      return t('Posts');
+    case 'url':
+      return 'admin/help/user_stats';
+    case 'get':
+      return user_stats_get_stats('post_count', $uid);
+  }
+}
+

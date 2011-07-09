@@ -1,0 +1,90 @@
+# Korea translation of sonybmg_services (all releases)
+# Copyright (c) 2010 by the Korea translation team
+# Generated from files:
+#  sonybmg_services/sonybmg_services.info: n/a
+#  sonybmg_services/sonybmg_services.module: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sonybmg_services (all releases)\n"
+"POT-Creation-Date: 2010-04-12 11:04-0500\n"
+"PO-Revision-Date: 2010-03-25 21:12-0500\n"
+"Language-Team: Korea\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: sonybmg_services.info:0
+msgid "Sony BMG"
+msgstr ""
+
+#: sonybmg_services.module:96
+msgid "Further instructions have been sent to your e-mail address."
+msgstr "이후의 안내는 당신의 이메일 주소로 보냈습니다."
+
+#: sonybmg_services.module:153,152
+msgid "Detected malicious attempt to alter protected user fields."
+msgstr ""
+"보호되는 사용자 필드를 변경시키려는 악의적인 "
+"시도를 감지했습니다."
+
+#: sonybmg_services.module:168
+msgid "Error saving user account."
+msgstr "유저 어카운트 저장에 에러가 발생했습니다."
+
+#: sonybmg_services.module:173
+msgid "edit"
+msgstr "편집"
+
+#: sonybmg_services.module:182
+msgid "Registration successful. You are now logged in."
+msgstr ""
+"정상적으로 등록되었습니다.  당신은 현재 "
+"로그인하고 있습니다."
+
+#: sonybmg_services.module:184
+msgid "Registration successful."
+msgstr ""
+
+#: sonybmg_services.module:191
+msgid ""
+"Password and further instructions have been e-mailed to the new user "
+"<a href=\"@url\">%name</a>."
+msgstr ""
+
+#: sonybmg_services.module:194
+msgid ""
+"Your password and further instructions have been sent to your e-mail "
+"address."
+msgstr ""
+"암호와 이후 안내 사항을 새 사용자 %user에게 "
+"이메일로 보냈습니다.."
+
+#: sonybmg_services.module:200
+msgid ""
+"Thank you for applying for an account. Your account is currently "
+"pending approval by the site administrator.<br />In the meantime, a "
+"welcome message with further instructions has been sent to your e-mail "
+"address."
+msgstr ""
+
+#: sonybmg_services.module:152
+msgid "security"
+msgstr "보안"
+
+#: sonybmg_services.module:173
+msgid "user"
+msgstr "사용자"
+
+#: sonybmg_services.module:173
+msgid "New user: %name (%email)."
+msgstr ""
+
+#: sonybmg_services.info:0
+msgid "Sony BMG Services"
+msgstr ""
+
+#: sonybmg_services.info:0
+msgid "Exposes some Sony specific services."
+msgstr ""
+

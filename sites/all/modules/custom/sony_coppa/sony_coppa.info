@@ -1,0 +1,8 @@
+name = Sony COPPA Cabana
+description = COPPA Compliance module for Sony Multisites
+package = Sony BMG
+core = 6.x
+
+l10n server = translate.gdb-dev.com
+project = "sony_coppa"
+version = "6.x-2.x"

@@ -1,0 +1,16 @@
+<?php
+
+// Tells datasync about this job type
+function datasync_feedapi_datasync_jobs() {
+  return array(
+    'datasync_feedapi' => array(
+      'name' => t('FeedAPI'),
+      'description' => t('Allows DataSync to be used by FeedAPI as its scheduler instead of cron.'),
+      'parent' => 'datasync_job',
+    ),
+  );
+}
+
+function datasync_feedapi_menu() {
+  
+}

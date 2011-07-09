@@ -1,0 +1,320 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * file_description
+ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function sony_tumblr_menu() {
+  $items = array();
+
+  $items['admin/sony/tumblr'] = array(
+    'title' => 'Tumblr integration',
+    'description' => 'Tumblr integration setup utilities.',
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+  );
+  $items['admin/sony/tumblr/blog'] = array(
+    'title' => 'Tumblr blog setup',
+    'description' => 'Quick configuration for integration of a Tumblr feed into a blog.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_tumblr_admin_blog_form'),
+    'access arguments' => array('administer site configuration'),
+  );
+  $items['admin/sony/tumblr/photos'] = array(
+    'title' => 'Tumblr photos setup',
+    'description' => 'Quick configuration for integration of a Tumblr photos feed into a photo gallery.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_tumblr_admin_photos_form'),
+    'access arguments' => array('administer site configuration'),
+  );
+  $items['admin/sony/tumblr/videos'] = array(
+    'title' => 'Tumblr videos setup',
+    'description' => 'Quick configuration for integration of a Tumblr videos feed.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_tumblr_admin_videos_form'),
+    'access arguments' => array('administer site configuration'),
+  );
+
+  return $items;
+}
+
+/**
+ * Quick Tumblr feed creation for blogs.
+ * Stolen from feedapi :)
+ */
+function sony_tumblr_admin_blog_form($form_state) {
+  $form['url'] = array(
+    '#title' => t('Tumblr URL'),
+    '#type' => 'textfield',
+    '#required' => TRUE,
+    '#maxlength' => 2048,
+    '#description' => t('Example: http://demo.tumblr.com'),
+  );
+  $form['tumblr'] = module_invoke('tumblr', 'feedapi_settings_form', 'parsers');
+  $form['tumblr']['#tree'] = 1;
+  $form['tumblr']['type']['#default_value'] = 'text';
+  $form['node']['#tree'] = TRUE;
+  $form['node']['type'] = array(
+    '#type' => 'hidden',
+    '#value' => 'tumblr_feed',
+  );
+
+  $form['author'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Authored by'),
+    '#maxlength' => 60,
+    '#autocomplete_path' => 'user/autocomplete',
+    '#default_value' => $GLOBALS['user']->name,
+    '#description' => t('Leave blank for %anonymous.', array('%anonymous' => variable_get('anonymous', t('Anonymous')))),
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Create feed'),
+  );
+
+  return $form;
+}
+
+/**
+ * Create the node object and save blog feed
+ * Stolen from feedapi :)
+ */
+function sony_tumblr_admin_blog_form_submit($form, &$form_state) {
+  $node_template = (object)$form_state['values']['node'];
+  $feed_type = (string)$_POST['node']['type'];
+
+  if ($node = feedapi_create_node($node_template, $form_state['values']['url'])) {
+    // feedapi_create_node() uses the content-type settings as default
+    $node->feedapi['parsers']['tumblr'] = array_merge($node->feedapi['parsers']['tumblr'], $form_state['values']['tumblr']);
+
+    // feedapi_create_node() uses the current user as default
+    if ($account = user_load(array('name' => $form_state['values']['name']))) {
+      $node->uid = $account->uid;
+    }
+    else {
+      $node->uid = 0;
+    }
+
+    // re-save node.
+    node_save($node);
+
+    drupal_set_message(t('Tumblr feed successfully created.'));
+    $form_state['redirect'] = 'node/'. $node->nid;
+  }
+  else {
+    drupal_set_message(t('Could not retrieve title from feed.'), 'error');
+    $form_state['redirect'] = array('node/add/'. $node_template->type, 'feedapi_url='. urlencode($form_state['values']['url']));
+  }
+}
+
+
+/**
+ * Quick Tumblr feed creation for photo.
+ * Stolen from feedapi :)
+ */
+function sony_tumblr_admin_photos_form($form_state) {
+  $form['url'] = array(
+    '#title' => t('Tumblr URL'),
+    '#type' => 'textfield',
+    '#required' => TRUE,
+    '#maxlength' => 2048,
+    '#description' => t('Example: http://demo.tumblr.com'),
+  );
+  $form['tumblr'] = module_invoke('tumblr', 'feedapi_settings_form', 'parsers');
+  $form['tumblr']['#tree'] = 1;
+  $form['tumblr']['type']['#default_value'] = 'photo';
+  $form['node']['#tree'] = TRUE;
+  $form['node']['type'] = array(
+    '#type' => 'hidden',
+    '#value' => 'tumblr_feed',
+  );
+
+  $form['author'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Authored by'),
+    '#maxlength' => 60,
+    '#autocomplete_path' => 'user/autocomplete',
+    '#default_value' => $GLOBALS['user']->name,
+    '#description' => t('Leave blank for %anonymous.', array('%anonymous' => variable_get('anonymous', t('Anonymous')))),
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Create feed'),
+  );
+  return $form;
+}
+
+/**
+ * Create the node object and save photo feed
+ * Stolen from feedapi :)
+ */
+function sony_tumblr_admin_photos_form_submit($form, &$form_state) {
+  $node_template = (object)$form_state['values']['node'];
+  $feed_type = (string)$_POST['node']['type'];
+
+  if ($node = feedapi_create_node($node_template, $form_state['values']['url'])) {
+    // feedapi_create_node() uses the content-type settings as default
+    $node->feedapi['parsers']['tumblr'] = array_merge($node->feedapi['parsers']['tumblr'], $form_state['values']['tumblr']);
+
+    // change the default feed content type if necessary
+    $node->feedapi['processors']['feedapi_node']['content_type'] = 'official_photo';
+
+    // feedapi_create_node() uses the current user as default
+    if ($account = user_load(array('name' => $form_state['values']['name']))) {
+      $node->uid = $account->uid;
+    }
+    else {
+      $node->uid = 0;
+    }
+
+    // re-save node.
+    node_save($node);
+
+    drupal_set_message(t('Tumblr feed successfully created.'));
+    drupal_set_message(t('You now need to <a href="@link">map</a> the options->photo_url to field_photo original file name.  Also map the caption to the body field.', array('@link' => url('node/' . $node->nid . '/map'))));
+    $form_state['redirect'] = 'node/'. $node->nid;
+
+    // save a new term for mobile photos if not already saved
+    $photo_term = t('Mobile uploads');
+    $possibilities = taxonomy_get_term_by_name($photo_term);
+    if (!isset($possibilities[0])) {
+      // get vocabulary for "Official Gallery"
+      $vocabularies = taxonomy_get_vocabularies();
+      foreach ($vocabularies as $vocabulary) {
+        if ($vocabulary->name == 'Official Gallery') {
+          $vid = $vocabulary->vid;
+        }
+      }
+      if (isset($vid)) {
+        $term = array('name' => $photo_term, 'vid' => $vid);
+        taxonomy_save_term($term);
+        drupal_set_message(t('New term saved for "Mobile uploads" gallery'));
+        // Save the new tid in variables incase the name is changed in the future
+        $possibilities = taxonomy_get_term_by_name($photo_term);
+        variable_set('sony_tumblr_photo_tid', $possibilities[0]->tid);
+      } else {
+        drupal_set_message(t('Unable to load the vocabulary for "Official Gallery"'));
+      }
+    }
+  }
+  else {
+    drupal_set_message(t('Could not retrieve title from feed.'), 'error');
+    $form_state['redirect'] = array('node/add/'. $node_template->type, 'feedapi_url='. urlencode($form_state['values']['url']));
+  }
+}
+
+
+/**
+ * Quick Tumblr feed creation for video.
+ * Stolen from feedapi :)
+ */
+function sony_tumblr_admin_videos_form($form_state) {
+  // first check if there's a video content type, set a message if not
+  $content_types = content_types();
+  foreach ($content_types as $key => $content_type) {
+    if (strpos($key, 'video') !== false) {
+      $video_content_type = $key;
+    }
+  }
+
+  if ($video_content_type > '') {
+    $form['video_content_type'] = array(
+      '#type' => 'hidden',
+      '#value' => $video_content_type,
+    );
+  } else {
+    drupal_set_message(t('No content type exists for video. Bug Andrew or Thomas to create a module that contains this.'));
+  }
+
+  $form['url'] = array(
+    '#title' => t('Tumblr URL'),
+    '#type' => 'textfield',
+    '#required' => TRUE,
+    '#maxlength' => 2048,
+    '#description' => t('Example: http://demo.tumblr.com'),
+  );
+  $form['tumblr'] = module_invoke('tumblr', 'feedapi_settings_form', 'parsers');
+  $form['tumblr']['#tree'] = 1;
+  $form['tumblr']['type']['#default_value'] = 'video';
+  $form['node']['#tree'] = TRUE;
+  $form['node']['type'] = array(
+    '#type' => 'hidden',
+    '#value' => 'tumblr_feed',
+  );
+
+  $form['author'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Authored by'),
+    '#maxlength' => 60,
+    '#autocomplete_path' => 'user/autocomplete',
+    '#default_value' => $GLOBALS['user']->name,
+    '#description' => t('Leave blank for %anonymous.', array('%anonymous' => variable_get('anonymous', t('Anonymous')))),
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Create feed'),
+  );
+
+  return $form;
+}
+
+/**
+ * Create the node object and save video feed
+ * Stolen from feedapi :)
+ */
+function sony_tumblr_admin_videos_form_submit($form, &$form_state) {
+  $node_template = (object)$form_state['values']['node'];
+  $feed_type = (string)$_POST['node']['type'];
+  $video_content_type = (string)$form_state['values']['video_content_type'];
+
+  if ($node = feedapi_create_node($node_template, $form_state['values']['url'])) {
+    // feedapi_create_node() uses the content-type settings as default
+    $node->feedapi['parsers']['tumblr'] = array_merge($node->feedapi['parsers']['tumblr'], $form_state['values']['tumblr']);
+
+    // change the default feed content type if necessary
+    $node->feedapi['processors']['feedapi_node']['content_type'] = $video_content_type;
+
+    // feedapi_create_node() uses the current user as default
+    if ($account = user_load(array('name' => $form_state['values']['name']))) {
+      $node->uid = $account->uid;
+    }
+    else {
+      $node->uid = 0;
+    }
+
+    // re-save node.
+    node_save($node);
+
+    drupal_set_message(t('Tumblr feed successfully created.'));
+    drupal_set_message(t('You now need to <a href="@link">map</a> the options->video_source to video field. Also map the caption to the body field.', array('@link' => url('node/' . $node->nid . '/map'))));
+    $form_state['redirect'] = 'node/'. $node->nid;
+
+  }
+  else {
+    drupal_set_message(t('Could not retrieve title from feed.'), 'error');
+    $form_state['redirect'] = array('node/add/'. $node_template->type, 'feedapi_url='. urlencode($form_state['values']['url']));
+  }
+}
+
+/*
+ * Implementation of hook_nodeapi().
+ * Add appropriate taxonomy to photos coming from Tumblr.
+ */
+function sony_tumblr_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  if ($op == 'presave' && $node->type == 'official_photo' && !isset($node->taxonomy)) {
+    if (isset($node->feedapi_node->feed_nids) && $tid = variable_get('sony_tumblr_photo_tid', NULL)) {
+      $term = array('3' => $tid);
+      $node->taxonomy = $term;
+    }
+  }
+}

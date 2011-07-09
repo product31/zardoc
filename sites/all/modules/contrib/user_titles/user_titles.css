@@ -1,0 +1,14 @@
+/* $Id: user_titles.css,v 1.1.2.1 2010/02/02 11:20:15 agileware Exp $ */
+
+/**
+ * My title block
+ */
+#block-user_titles-1 td.label {
+  font-weight: bold;
+  text-align: right;
+  padding: 0 10px 0 0;
+}
+
+#block-user_titles-1 td.value {
+  padding: 0 0 0 10px;
+}

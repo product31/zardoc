@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flashheader>
+
+	<!-- config node will have all the paths to media, css, images and assets and will have global parameters that govern all content (loaded or not) -->
+	<!-- cssPath and fontPath are empty because then they will be populated with our default values. -->
+	<config
+		cssPath=""
+		fontPath=""
+		embedFonts="false"
+		checkPolicy="false"
+	/>
+
+	<textArea id="headline" x="480" y="15" z="4" transition="alpha" delay="1" width="500" multiline="true" dropshadow="true"><![CDATA[<h1>おんだをど　かり</h1>]]></textArea>
+
+	<carousel id="albumCarousel" x="875" y="130" z="3" delay="1" transition="alpha" autoRotate="true" defaultTimer="9" useControls="false">
+		<item tracking="" id="carnival">
+			<image tracking="" id="albumCover" x="0" y="45" z="0" dropshadow="true" src="{images}/albumcover.jpg" transition="alpha" delay="1" href="http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewAlbum?id=265826568&amp;s=143441" target="_blank"/>
+			<textArea id="carnival" x="0" y="0" z="1" transition="alpha" delay="1.25" width="500" multiline="true" dropshadow="true"><![CDATA[<h2>Carnival Ride</hr><br/><body><a href="http://www.google.com" target="_blank">Buy now</a> on iTunes!</body>]]></textArea>
+		</item>
+
+		<item tracking="" id="somehearts">
+			<image tracking="" id="albumCover" x="0" y="45" z="0" dropshadow="true" src="{images}/somehearts.jpg" transition="alpha" delay="1" href="http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewAlbum?id=265826568&amp;s=143441" target="_blank"/>
+			<textArea id="carnival" x="0" y="0" z="1" transition="alpha" delay="1.25" width="500" multiline="true" dropshadow="true"><![CDATA[<h2>Some Hearts</hr><br/><body><a href="http://www.google.com" target="_blank">Buy now</a> on iTunes!</body>]]></textArea>
+		</item>
+
+		<item tracking="" id="homesweethome">
+			<image tracking="" id="albumCover" x="0" y="45" z="0" dropshadow="true" src="{images}/homesweethome.jpg" transition="alpha" delay="1" href="http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewAlbum?id=265826568&amp;s=143441" target="_blank"/>
+			<textArea id="carnival" x="0" y="0" z="1" transition="alpha" delay="1.25" width="500" multiline="true" dropshadow="true"><![CDATA[<h2>New Single</hr><br/><body><a href="http://www.google.com" target="_blank">Buy now</a> on iTunes!</body>]]></textArea>
+		</item>
+
+	</carousel>
+
+
+	<!-- this would be an example of a background image -->
+	<image id="background" x="0" y="0" z="0" src="{images}/background.jpg" transition="alpha" delay="0"/>
+
+
+	<carousel id="mainCarousel" x="0" y="0" z="1" delay="0" transition="alpha" autoRotate="true" defaultTimer="7" useControls="true">
+	<!--you can change the type to swf or img and load dynamic content for the next and prev buttons
+		<control id="next" type="swf" src="{images}/ui/nextButton.swf" x="998" y="200" transition="alpha"/>
+		<control id="prev" type="image" src="{images}/ui/prev.png" x="0" y="200" transition="alpha"/>-->
+	<!--using type="default" will result in using the directional buttons in the video/audio player that can be formatted -->
+		<control id="next" type="default" x="998" y="200" transition="alpha"/>
+		<control id="prev" type="default" x="0" y="200" transition="alpha"/>
+	<!--	<format
+			buttonColor="FF00000"
+			buttonRollColor="00FF00"
+			symbolColor="CCCCCC"
+			symbolRollColor="000000"
+		/>-->
+
+	<!-- each dynamically loaded carousel item will represented by an <item> node
+		node order denotes carousel position. commenting out will stop the content from being
+		recognized or loaded by the carousel -->
+
+		<item tracking="" id="homeSweetHome">
+			<!-- this is an example of the most minimal type of content loading and external swf animation. all that"s needed for the carousel is to know where it exists -->
+			<swf id="homeTout" x="10" y="235" z="1" src="{swfs}/swfExample.swf" delay=".5"/>
+			<image id="background" x="-70" y="-200" z="0" src="{images}/bg-interior.jpg" transition="alpha" delay="0"/>
+		</item>
+
+		<item tracking="" id="ConcertSchedule" overrideTimer="12">
+			<!--  this is an example of a image item with a styled headline and bodyCopy-->
+			<!-- transition attributes denotes the type of transition to use in bringing in the item, delay will delay the transition in seconds-->
+			<image id="carrieConcertImg" x="0" y="0" z="0" src="{images}/sample.jpg" transition="alpha" delay=".5"/>
+			<textArea id="concertHeadline" x="45" y="80" z="1" width="500" dropShadow="true" transition="alpha" delay="1"><![CDATA[<span class="concertHeadline">Carrie　おんだをど　かり　Underwood</span>
+<span class="concertHeadlineLG">IN CONCERT</span>]]></textArea>
+			<textArea id="concertCopy" x="45" y= "130" z="2" width="500" multiline="true" transition="alpha" delay="1.25"><![CDATA[<span class = "concert">8/20/2009	RAVINA	Highland Park, IL
+8/21/2009	RAVINA	Highland Park, IL
+8/22/2009	RAVINA	Highland Park, IL
+8/28/2009	RAVINA	Highland Park, IL
+8/29/2009	RAVINA	Highland Park, IL
+9/01/2009	RAVINA	Highland Park, IL]]></textArea>
+
+		</item>
+
+		<!-- video player -->
+		<item tracking="" id="video" show="true" overrideTimer="videoEvent">
+			<textArea id="videoTitleOverlay" x="105" y="90" z="3" width="300" dropShadow="true" transition="alpha" delay="0"><![CDATA[<span class="videoTitleOverlay">Ricky Martin</span>]]></textArea>
+			<textArea id="CallToAction" x="65" y="150" z="2" width="150" multiline="true" dropShadow="true" transition="alpha" delay="0.25"><![CDATA[<span class="buyDVD">From his latest release<br/>Ricky Martin Live:<br/>Black and White Tour<br/>Available today on<br/>Blu-Ray and DVD<br/>from <a href="http://www.amazon.com/Ricky-Martin-Live-Black-Blu-ray/dp/B001GU04K4/ref=sr_1_1?ie=UTF8&s=dvd&qid=1255116395&sr=1-1" target="_blank">Amazon.com</span>]]></textArea>
+			<image tracking="" id="dvdCover" x="226" y="130" z="1" scale=".6" dropshadow="true" src="{images}/ricky-martin-live-black-white-tour-blu-ray-cover-art.jpg" transition="alpha" delay=".5" href="http://www.amazon.com/Ricky-Martin-Live-Black-Blu-ray/dp/B001GU04K4/ref=sr_1_1?ie=UTF8&amp;s=dvd&amp;qid=1255116395&amp;sr=1-1" target="_blank"/>
+
+			<vidPlayer x="285" y="40" z="0" transition="alpha" delay= "1" autoPlay="true" showControls="true" controlsPosition="overlayCenter" width="423.5" stroke="true">
+
+				<!--format node contains all the same formatting as the audio player controls
+				plus the stroke around the video.  set stroke alpha to 0 to defeat the stroke -->
+				<format
+					strokeColor="999999"
+					strokeThickness=".25"
+					strokeAlpha=".15"
+				/>
+
+
+				<track src="rtmp://cp32740.edgefcs.net/ondemand/cache01/US_Latin/14/657/RickyMartinFeaturingLaMariDeCh_TuRecuerdo_G010000931684Q_TotalVideo.flv"><![CDATA[Tu Recuerdo]]></track>
+
+				<track src="rtmp://cp32740.edgefcs.net/ondemand/cache01/US_Latin/14/193/RickyMartin_LaCopaDeLaVida_G010001737436S_TotalVideo.flv"><![CDATA[La Copa De La Vida]]></track>
+
+				<track src="rtmp://cp32740.edgefcs.net/ondemand/cache01/US_Latin/15/593/RickyMartin_DejateLlevarItsAlright_G0100017374311_TotalVideo.flv"><![CDATA[Dejate Llevar - Its Alright]]></track>
+
+				<track src="rtmp://cp32740.edgefcs.net/ondemand/cache01/US_Latin/17/529/RickyMartin_BellaShesAllIEverHad_G010001737454O_TotalVideo.flv"><![CDATA[She's All I Ever Had]]></track>
+			</vidPlayer>
+		</item>
+
+		<!-- just a single large image -->
+		<item tracking="" id="hero" show="true">
+			<image id="heroImg" x="0" y="0" z="0" src="{images}/sample3.jpg" transition="alpha" delay=".5"/>
+		</item>
+	</carousel>
+
+
+
+	<audioPlayer id="audio" autoPlay="true"  x="786" y="325" z="2" showControls="true" volume=".5"><!--state="random">-->
+		<!--  format colorizes button backgrounds, icons and ui bars
+		<format
+			buttonColor="FF00000"
+			buttonRollColor="00FF00"
+			symbolColor="CCCCCC"
+			symbolRollColor="000000"
+			progressBarColor="0000FF"
+			barColor="00FF00"
+		/>
+		-->
+		<track startTime ="10000" endTime="31000" rtmp ="rtmp://cp52733.edgefcs.net/ondemand/" src="myplay/000/000/000/000/207/946/46/c4d4b6d1e871605b3004c04b4ed905c2/00000000000020794646-64K_22S_2C_cbr1x.mp3" img="http://myplay.com/files/imagecache/audio_player_album_cover/files/platform_album_art/458007_1057863843.jpg"><![CDATA[Home Sweet Home]]></track>
+
+		<track rtmp ="rtmp://cp52733.edgefcs.net/ondemand/" src="myplay/000/000/000/000/128/648/25/ef1217513a3729e3555b8eca0523778a/00000000000012864825-64K_22S_2C_cbr1x.mp3" img="http://myplay.com/files/imagecache/audio_player_album_cover/files/platform_album_art/295828_813221098.jpg"><![CDATA[Crazy Dreams]]></track>
+
+		<track rtmp ="rtmp://cp52733.edgefcs.net/ondemand/" src="myplay/000/000/000/000/126/258/50/791f626dfed69001582ef1cbc085e003/00000000000012625850-64K_22S_2C_cbr1x.mp3" img="http://myplay.com/files/imagecache/audio_player_album_cover/files/platform_album_art/298485_813893276.jpg"><![CDATA[So Small’]]></track>
+
+		<track rtmp ="rtmp://cp52733.edgefcs.net/ondemand/" src="myplay/000/000/000/000/207/943/26/55ddbf83b6e9232f78bf78ca3c54eac0/00000000000020794326-64K_22S_2C_cbr1x.mp3" img="http://myplay.com/files/imagecache/audio_player_album_cover/files/platform_album_art/458158_1058668273.jpg"><![CDATA[I Told You So]]></track>
+
+		<track rtmp ="rtmp://cp26115.edgefcs.net/ondemand/" src="Columbia/1-08_Golden_Ticket.flv" img="http://myplay.com/files/imagecache/audio_player_album_cover/files/platform_album_art/458158_1058668273.jpg"><![CDATA[Golden Ticket]]></track>
+	</audioPlayer>
+
+	<contextMenuItem>The Official Carrie Underwood Site</contextMenuItem>
+	<contextMenuItem href="http://www.sonymusic.com">Copyright © 2009 Sony Music Entertainment. All Rights Reserved.</contextMenuItem>
+
+</flashheader>
+
+
+
+
+<!--><videoPlayer autoPlay="true"  x="50" y="70" z="1" transition="alpha" delay= "0.5" showControls="false">
+	<textArea x="50" y="50" z="1" transition="alpha" delay="1"><![CDATA[<span class = "videoTitleOverlay">In Concert</span>]]></textArea>
+	<track src="http://release.sonybmg.com/content.select?pid=SUEf9A58TynIf_C6PJV4d2pQXImFV1rZ&UserName=Unknown"><![CDATA[Natasha Bedingfield Unwritten live]]></track>
+</videoPlayer>
+<image id="videoBackground" x="0" y="0" z="0" src="{images}/sample2.jpg" transition="alpha" delay="0"/>	-->

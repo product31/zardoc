@@ -1,0 +1,391 @@
+<?php
+
+// Add in support for Pub-side files.
+include(drupal_get_path('module', 'sony_ads') . '/pubsidefiles/pubsidefiles.inc');
+
+/**
+ * Implementation of hook_menu().
+ */
+function sony_ads_menu() {
+  $items = array();
+  $items['admin/sony/ad_settings'] = array(
+    'title' => 'Ad Settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_ads_settings_form'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'sony_ads_admin.inc',
+  );
+
+  // Add pubside ad files to the menu.
+  $items += sony_ads_pubsidefiles('hook_menu');
+
+
+  return $items;
+}
+
+/**
+ * Get the ad zone that maps to a string the url.
+ */
+function sony_ads_get_path_zone($full_path){
+  $path_zone_map =  array(
+    'home' => array(
+      'home',
+    ),
+    'mobile' => array(
+      'mobile',
+    ),
+    'fanclub' =>array(
+      'fanclub',
+      'forum',
+      'community',
+      'store',
+      'theband',
+      'tour',
+      'contact',
+      'mechandise',
+      'shop',
+      'contest',
+      'newsletter',
+      'fan',
+      'buy',
+      'fashion',
+      'merch',
+      'about',
+    ),
+    'bio' => array(
+      'bio',
+    ),
+    'extras' => array(
+      'extra',
+      'ringtone',
+    ),
+    'events' => array(
+      'event',
+    ),
+    'photos' => array(
+      'photo',
+      'art',
+    ),
+    'videos' => array(
+      'video',
+      'media',
+      'film',
+      'tv',
+    ),
+    'lyrics' => array(
+      'lyric',
+    ),
+    'music' => array(
+      'music',
+      'discography',
+      'recording',
+    ),
+    'news' => array(
+      'news',
+      'blog',
+      'press',
+      'link',
+    ),
+    'other' => array(
+      'faq',
+      'timesline',
+      'award',
+      'other',
+      'help',
+      'playground',
+      'podcast',
+      'media'
+    ),
+  );
+
+  foreach($path_zone_map as $zone => $paths) {
+    foreach($paths as $path) {
+      if(strpos($full_path, $path) !== FALSE) {
+        return $found_zone = $zone;
+      }
+    }
+  }
+  return $found_zone = FALSE;
+}
+/**
+ * Get the zone that maps to a node_type to zones;
+ */
+function sony_ads_get_node_zone($node_type) {
+  // This is map of ad zones and what node types are in each.
+  $node_zone_map = array(
+      'home' => array(
+        'home',
+      ),
+      'photos' => array(
+        'photo',
+        'official_photo',
+      ),
+      'music' => array(
+        'album',
+        'review',
+      ),
+      'lyrics' => array(
+        'track'
+      ),
+      'news' => array(
+        'blog',
+        'news',
+      ),
+      'events' => array(
+        'date',
+      ),
+      'extras' => array(
+        'wallpaper',
+        'buddy_icon',
+      ),
+      'fanclub' => array(
+        'poll',
+        'fan',
+        'forum',
+        'forum_reply',
+      ),
+    );
+  foreach($node_zone_map as $zone => $types) {
+    foreach($types as $type) {
+      if($node_type == $type) {
+        return $found_zone = $zone;
+      }
+    }
+  }
+  return $found_zone = FALSE;
+}
+
+/**
+ * Return a "zone" for ad code
+ */
+function sony_ads_zone() {
+  static $zone = FALSE;
+
+  // Only need to run this once per page call.
+  if ($zone === FALSE) {
+    // First let's just check if this is the first page.
+    if (drupal_is_front_page()) {
+      $zone = 'home';
+    }
+    // Not the front page, so maybe it's a node?
+    if ($zone === FALSE) {
+      $menu = menu_get_item();
+      if ($menu['path'] == 'node/%' && isset($menu['page_arguments'][0]->type)) {
+        $zone = sony_ads_get_node_zone($menu['page_arguments'][0]->type);
+      }
+    }
+    // Not a node, so maybe a match with the path map?
+    if ($zone === FALSE) {
+      $zone = sony_ads_get_path_zone(drupal_get_path_alias($_GET['q']));
+    }
+    // Not a path either, guess we have to just make it an 'other' zone.
+    if ($zone === FALSE) {
+      $zone = 'other';
+    }
+  }
+  return $zone;
+}
+/**
+ * Implementation of hook_init().
+ */
+function sony_ads_init() {
+  // Don't include any of the ad JS if there's no site name
+  $site_name = trim(variable_get('sony_ads_sitename', ''));
+  if (empty($site_name)) {
+    return;
+  }
+  // Don't include any of the ad JS if it's a 404
+  if (!menu_get_item()) {
+    return;
+  }
+  $fw_network_id = trim(variable_get('sony_ads_fw_network_id', '61017'));
+  $fw_server_hex = trim(variable_get('sony_ads_fw_server_hex', 'ee59'));
+  $fw_network_root = trim(variable_get('sony_ads_fw_network_root', 'sonymusic_live'));
+  $fw_string = $site_name . '/' . sony_ads_zone();
+  $add_ham = sony_ads_add_ham() ? 'true' : 'false';
+  $path_to_swfobject = base_path() . drupal_get_path('module', 'sony_ads') . '/swfobject.js';
+  $path_to_expressinstall = base_path() . drupal_get_path('module', 'sony_ads') . '/expressInstall.swf';
+  $inline_js = <<<END
+<script type="text/javascript" src="$path_to_swfobject"></script>
+<script type="text/javascript">
+var ham = null;
+var fwNetworkId = $fw_network_id;
+var fwServerHex = "$fw_server_hex";
+var fwNetworkRoot = "$fw_network_root";
+var fwSiteSection = "$fw_string";
+var fwConfigHasRun = false;
+var fwAddHam = $add_ham;
+var fwHamId = 'HeadlessAdManager';
+
+var fwParams = {
+  AllowScriptAccess: 'always'
+};
+var fwFlashvars = {
+  adManagerURL: 'http://adm.fwmrm.net/p/' + fwNetworkRoot + '/AdManager.swf',
+  adServerURL:  'http://' + fwServerHex + '.v.fwmrm.net/ad/p/1',
+  networkID: fwNetworkId,
+  siteSectionCustomID: fwSiteSection,
+  playerprofile: fwNetworkRoot + '_companionable'
+};
+var fwAttributes = {};
+var fwCallback = function() {
+  try {
+    if (hamConditional()){
+      ham = swfobject.getObjectById(fwHamId);
+      var hamSuccess = ham.start();
+      if (!hamSuccess) {
+        throw new Error("ham.start() did not return true.");
+      }
+    }
+  }
+  catch (ex) {
+    fwConfigHasRun = false;
+    setTimeout(arguments.callee, 1000);
+  }
+};
+swfobject.embedSWF('http://adm.fwmrm.net/p/' + fwNetworkRoot + '/HeadlessAdManager.swf', fwHamId, '1', '1', "9.0.0", "$path_to_expressinstall", fwFlashvars, fwParams, fwAttributes, fwCallback);
+
+function fw_config() {
+  if (!fwConfigHasRun) {
+    fwConfigHasRun = true;
+    return{networkId:fwNetworkId,cb_profile:fwNetworkRoot + "_companionable",siteSectionNetworkId:fwNetworkId,videoAssetNetworkId:fwNetworkId,fw_server:"http://" + fwServerHex + ".v.fwmrm.net/ad/p/1",siteSection:fwSiteSection,autoplay:false,amLocation:"http://adm.fwmrm.net/p/" + fwNetworkRoot + "/AdManager.swf"};
+  }
+  else {
+    return{networkId:fwNetworkId,cb_profile:fwNetworkRoot,siteSectionNetworkId:fwNetworkId,videoAssetNetworkId:fwNetworkId,fw_server:"http://" + fwServerHex + ".v.fwmrm.net/ad/p/1",siteSection:fwSiteSection,autoplay:false,amLocation:"http://adm.fwmrm.net/p/" + fwNetworkRoot + "/AdManager.swf"};
+  }
+}
+function hamConditional() {
+  if (fwAddHam && !fwConfigHasRun) {
+    fwConfigHasRun = true;
+    return true;
+  }
+  return false;
+}
+</script>
+END;
+  drupal_set_html_head($inline_js);
+}
+
+/**
+ * Implementation of hook_footer().
+ */
+function sony_ads_footer($main) {
+  // We want to add or DIV to be accessed by swfobject to the footer
+  return '<div id="HeadlessAdManager" style="width:1px;height:1px"></div>';
+}
+
+function sony_ads_add_ham() {
+  static $add_ham = NULL;
+
+  if ($add_ham === NULL) {
+    $add_ham = TRUE;
+    $exclude = trim(variable_get('sony_ads_ham_exclude', "videos\nvideos/*\nvideo/*"));
+    if (!empty($exclude)) {
+      // Copied from block_list() in block.module and modified
+      $path = drupal_get_path_alias($_GET['q']);
+      // Compare with the internal and path alias (if any).
+      $page_match = drupal_match_path($path, $exclude);
+      if ($path != $_GET['q']) {
+        $page_match = $page_match || drupal_match_path($_GET['q'], $exclude);
+      }
+      if ($page_match) {
+        $add_ham = FALSE;
+      }
+    }
+    drupal_alter('sony_ads_add_ham', $add_ham);
+  }
+
+  return $add_ham;
+}
+
+function sony_ads_print($width, $height, $id = NULL) {
+  /*
+   * This was implemented for hybrid tags, but we're reverting to passive tags so we'll comment out what we don't need.
+  //get the generic settings across the whoel site.
+  //$config = sony_ads_config();
+  //setup the ad specific data.
+  $ad_name = (!empty($id) ? $id : "{$width}x{$height}");
+  $slau = (!empty($id) ? "$id" : "");
+  $data = array(
+    'slid' => $ad_name,
+    'slau' => $slau,
+    'w' => $width,
+    'h' => $height,
+  );
+  */
+  //freewheel passive tags are printed in place, so just print it.
+  print sony_ads_fw_passive_tag($width, $height, $id);
+}
+
+function sony_ads_fw_passive_tag($width, $height, $id = NULL) {
+  $ad_name = (!empty($id) ? $id : "{$width}x{$height}");
+  $slau = (!empty($id) ? "slau=$id&" : "");
+  $output = <<<END
+<!-- begin $ad_name -->
+<div class="fwas fwas{$ad_name}" style="width:{$width}px; height:{$height}px;" >
+  <span id="$ad_name" class="_fwph">
+      <form id="_fw_form_$ad_name" style="display:none">
+          <input type="hidden" name="_fw_input_$ad_name" id="_fw_input_$ad_name"
+  value="{$slau}slid=$ad_name&ptgt=s&w=$width&h=$height">
+      </form>
+      <span id="_fw_container_$ad_name" class="_fwac"></span>
+  </span>
+</div>
+<!-- end $ad_name -->
+END;
+  drupal_alter('sony_ads_html', $output);
+  return $output;
+}
+
+
+/*
+ * Implementation of hook_theme_registry_alter().
+ * This function is implemented to override the actual theme_emvideo_brightcove3_flash() to allowscriptaccess to freewheel ads and other sponsor's ads.
+ *
+ */
+
+function sony_ads_theme_registry_alter(&$theme_registry) {
+	if (!empty($theme_registry['emvideo_brightcove3_flash'])) {
+		$theme_registry['emvideo_brightcove3_flash']['function'] = 'sony_ads_emvideo_brightcove3_flash';
+  }
+}
+
+/**
+ * The Override function for embedded flash displaying the brightcove3 video.
+ * allowscriptaccess=always is added to allow access to freewheel ads.
+ */
+function sony_ads_emvideo_brightcove3_flash($item, $width, $height, $autoplay) {
+  $output = '';
+
+	if ($item['embed']) {
+    $publisher_id = variable_get('brightcove3_publisher_id', '');
+    $player_id = variable_get('brightcove3_player_id', '');
+
+    if (!empty($publisher_id) && !empty($player_id)) {
+      // If SWFObject API is available, use it.
+      if (function_exists('theme_swfobject_api')) {
+        $url = 'http://c.brightcove.com/services/viewer/federated_f9/' . $player_id . '?isVid=1&publisherID=' . $publisher_id;
+        $params = array(
+          'base' => 'http://admin.brightcove.com',
+          'name' => 'flashObj',
+          'width' => $width,
+          'height' => $height,
+					'allowScriptAccess' => 'always',
+          'seamlesstabbing' => 'false',
+          'type' => 'application/x-shockwave-flash',
+          'allowFullScreen' => 'true',
+          'swLiveConnect' => 'true',
+        );
+        $vars = array(
+          'videoId' => $item['value'],
+          'playerId' => $player_id,
+        );
+			  return theme('swfobject_api', $url, $params, $vars);
+      }
+      $autostart = $autoplay ? 'autoStart=true' : 'autoStart=false';
+			return sprintf('<embed src="http://c.brightcove.com/services/viewer/federated_f9/%3$s?isVid=1&publisherID=%2$s" bgcolor="#FFFFFF" allowScriptAccess="always" flashVars="videoId=%1$s&playerID=%3$s&domain=embed&" base="http://admin.brightcove.com" name="flashObj" width="%4$d" height="%5$d" seamlesstabbing="false" type="application/x-shockwave-flash" allowFullScreen="true" swLiveConnect="true" pluginspage="http://www.macromedia.com/shockwave/download/index.cgi?P1_Prod_Version=ShockwaveFlash"></embed>',
+        $item['value'], $publisher_id, $player_id, $width, $height, $autoplay
+      );
+    }
+  }
+}

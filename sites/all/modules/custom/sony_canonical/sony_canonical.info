@@ -1,0 +1,3 @@
+name = Sony Canonical
+description = Creates proper canonical url for global sites
+core = 6.x

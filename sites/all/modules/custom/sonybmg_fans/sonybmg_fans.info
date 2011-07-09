@@ -1,0 +1,12 @@
+; $Id$
+name = Sony BMG Why I'm a Fan
+description = Configuration, blocks, and form alters for Why I'm a Fan functionality.
+dependencies[] = content
+dependencies[] = nodequeue
+dependencies[] = usernodes
+package = Sony BMG
+core = 6.x
+
+l10n server = translate.gdb-dev.com
+project = "sonybmg_fans"
+version = "6.x-2.x"

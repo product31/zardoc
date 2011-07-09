@@ -1,0 +1,6 @@
+; $Id$
+name = Blockregion
+description = Enable the configuration of blocks for all themes at once.
+package = Other
+core = 6.x
+

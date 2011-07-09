@@ -1,0 +1,36 @@
+# Colombia translation of missioncontrol (all releases)
+# Copyright (c) 2010 by the Colombia translation team
+# Generated from files:
+#  missioncontrol/mc_client.module: n/a
+#  missioncontrol/missioncontrol.module: n/a
+#  missioncontrol/missioncontrol.install: n/a
+#  missioncontrol/mc_client.info: n/a
+#  missioncontrol/missioncontrol.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: missioncontrol (all releases)\n"
+"POT-Creation-Date: 2010-04-05 15:40-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Colombia\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: mc_client.module:35; missioncontrol.module:138; missioncontrol.install:49
+msgid "Public Key"
+msgstr ""
+
+#: mc_client.module:41; missioncontrol.module:143; missioncontrol.install:56
+msgid "Private Key"
+msgstr ""
+
+#: mc_client.module:14; mc_client.info:0
+msgid "MissionControl Client"
+msgstr ""
+
+#: missioncontrol.module:14; mc_client.info:0; missioncontrol.info:0
+msgid "MissionControl"
+msgstr ""
+

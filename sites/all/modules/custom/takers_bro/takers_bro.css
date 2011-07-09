@@ -1,0 +1,218 @@
+#bro-overlay {
+  height: 100%;
+  width: 100%;
+  position: fixed;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+  background: #000;
+  opacity: 0.8;
+  -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=80)";
+  filter:alpha(opacity=80);
+  z-index: 999;
+}
+
+#bro-main {
+  background: transparent url(./img/takers/background.png) no-repeat 0 0;
+  xxheight: 60px;
+  width: 960px;
+  z-index: 1000;
+  position: fixed;
+  bottom: 0px;
+  left: 50%;
+  margin-left: -480px;
+  text-align: left;  
+}
+
+.bro-exposed {
+  height: 60px;
+  padding-left: 5px;
+  padding-right: 5px;
+  width: 100%;
+}
+.bro-artist-logo,
+.bro-countdown,
+.bro-online-users,
+.bro-sponsor-1,
+.bro-toggle {
+  display: inline;
+  float: left;
+  height: 60px;
+}
+.bro-artist-logo {
+  width: 580px;
+  margin: 5px 50px 0 0;
+}
+.bro-countdown {
+  width: 203px;
+}
+.bro-online-users {
+  width: 103px;
+}
+.bro-sponsor-1 {
+  width: 270px;
+  margin: 10px auto 0;
+}
+.bro-toggle {
+  width: 46px;
+  margin: 10px 0 0 0;
+}
+.bro-toggle-link {
+  background: url(./img/takers/open.png) no-repeat 0 0;
+  display: block;
+  height: 23px;
+  width: 38px;
+  text-align: left;
+  text-indent: -9999px;
+}
+.expanded .bro-toggle-link {
+  background: url(./img/takers/close.png) no-repeat 0 0;
+}
+
+
+.bro-content {
+  display: none;
+  height: 485px;
+  padding: 3px 5px;
+  margin-top: 20px;
+}
+.bro-left {
+  float: left;
+  width: 640px;
+}
+
+.bro-right {
+  float: right;
+  width: 300px;
+}
+
+.bro-media {
+  visibility: hidden;
+  height: 360px;
+  width: 640px;
+}
+
+.bro-share {
+  background: url(./img/takers/socialnetworking-bg.png) repeat-x;
+  width: 299px;
+  height: 44px;
+  display: block;
+  margin-top: 10px;
+  padding: 8px 0;
+}
+
+.bro-share a {
+  display: block;
+  float: left;
+  background: url(./img/takers/socialnetworking.png) no-repeat;
+  text-indent: -9999px;
+  overflow: hidden;
+  width: 141px;
+  margin-left: 5px;
+  height: 27px;
+}
+
+.bro-share a#bro-twitter {
+  background-position: -147px 0;
+}
+
+.bro-social {
+  float: right; 
+  height: 82px;
+  width: 475px;
+  position: relative;
+}
+.bro-social ul.links,
+.bro-social ul.links li {
+  list-style: none;
+  margin: 0px;
+  padding: 0px;
+}
+.bro-social ul.links li img {
+  border: none;
+}
+.bro-social li {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+.bro-social li.facebook { top: 13px; left: 8px; }
+.bro-social li.twitter { top: 23px; left: 273px; }
+.bro-social li.myspace { top: 48px; left: 273px; }
+.bro-social li.delicious { top: 23px; left: 368px; }
+.bro-social li.digg { top: 48px; left: 368px; }
+
+.bro-sponsor-2 {
+/*  float: right;
+  margin: 12px 2px 0;
+  width: 468px;
+  height: 60px;
+  border: solid 1px #333;*/
+}
+
+
+.bro-sponsor-4 {
+  margin: 25px 0 0 10px;
+}
+
+.bro-countdown .countdown {
+/*  background: url(./img/countdown.png) no-repeat 0 0;*/
+  height: 33px;
+  width: 175px;
+  margin: 10px auto 0px;
+  position: relative;
+}
+
+.bro-countdown .countdown span {
+  display: block;
+  /*position: absolute;*/
+  float: left;
+  width: auto;
+  height: 33px;
+  font-size: 30px;
+  line-height: 33px;
+  font-family: arial, sans-serif;
+  top: 0px;
+  text-align: center;
+  color: #afafaf;
+  font-weight: bold;
+}
+
+.bro-countdown .countdown span.colon {
+ width: 10px;
+}
+
+/*.bro-countdown .countdown span.d1 { left: 0px; }
+.bro-countdown .countdown span.d2 { left: 20px; }
+.bro-countdown .countdown span.colon-1 { left: 30px; }
+.bro-countdown .countdown span.h1 { left: 43px; }
+.bro-countdown .countdown span.h2 { left: 58px; }
+.bro-countdown .countdown span.m1 { left: 126px; }
+.bro-countdown .countdown span.m2 { left: 151px; }*/
+
+.bro-countdown .description {
+  color: #999;
+  font-size: 8px;
+  font-weight: bold;
+  line-height: 1;
+  text-transform: uppercase;
+  width: 175px;
+  margin: 0 auto;
+  height: 10px;
+  position: relative;
+}
+.bro-countdown .description span {
+  display: block;
+  position: absolute;
+  height: 10px;
+  /*width: 49px;*/
+  top: 0px;
+  text-align: center;
+  color: #ffffff;
+}
+.bro-countdown .description span.days { left: 0px;  }
+.bro-countdown .description span.hours { left: 46px; }
+.bro-countdown .description span.minutes { left: 88px; }
+.bro-countdown .description span.seconds { left: 132px; }
+

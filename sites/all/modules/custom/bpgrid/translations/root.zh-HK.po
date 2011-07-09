@@ -1,0 +1,168 @@
+# Hong Kong translation of bpgrid (all releases)
+# Copyright (c) 2010 by the Hong Kong translation team
+# Generated from files:
+#  bpgrid/bpgrid.module: n/a
+#  bpgrid/bpgrid.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: bpgrid (all releases)\n"
+"POT-Creation-Date: 2010-04-08 14:54-0500\n"
+"PO-Revision-Date: 2010-03-26 09:09-0500\n"
+"Language-Team: Hong Kong\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: bpgrid.module:82
+msgid "Operations"
+msgstr "操作"
+
+#: bpgrid.module:307
+msgid "Title"
+msgstr "標題"
+
+#: bpgrid.module:135
+msgid "Name"
+msgstr "名稱"
+
+#: bpgrid.module:157
+msgid "Submit"
+msgstr ""
+
+#: bpgrid.module:314
+msgid "Right sidebar"
+msgstr "右欄"
+
+#: bpgrid.module:313
+msgid "Left sidebar"
+msgstr "左欄"
+
+#: bpgrid.module:143
+msgid "Description"
+msgstr "說明"
+
+#: bpgrid.module:315
+msgid "Content"
+msgstr "內容"
+
+#: bpgrid.module:79
+msgid "No themes created yet."
+msgstr ""
+
+#: bpgrid.module:82,125
+msgid "Theme"
+msgstr ""
+
+#: bpgrid.module:126
+msgid ""
+"This is the machine-readable name of your theme.  Only alpha-numeric "
+"and underscore characters allowed."
+msgstr ""
+
+#: bpgrid.module:136
+msgid "The human-readable name of the theme."
+msgstr ""
+
+#: bpgrid.module:144
+msgid "The description of the theme."
+msgstr ""
+
+#: bpgrid.module:171
+msgid "Theme can only contain alpha-numeric and underscore characters."
+msgstr ""
+
+#: bpgrid.module:176
+msgid ""
+"The theme you specified already exists.  <a href=\"@edit_url\">Click "
+"here</a> to edit the existing theme, or choose a unique name."
+msgstr ""
+
+#: bpgrid.module:255
+msgid "Breadcrumb links"
+msgstr ""
+
+#: bpgrid.module:256
+msgid "HTML for displaying the breadcrumbs at the top of the page."
+msgstr ""
+
+#: bpgrid.module:259
+msgid "Feed icons"
+msgstr ""
+
+#: bpgrid.module:260
+msgid "A string of all feed icons for the current page."
+msgstr ""
+
+#: bpgrid.module:263
+msgid "Footer message"
+msgstr "頁尾資訊"
+
+#: bpgrid.module:267
+msgid "Help"
+msgstr "說明"
+
+#: bpgrid.module:271
+msgid "Logo"
+msgstr "Logo"
+
+#: bpgrid.module:275
+msgid "Status messages"
+msgstr ""
+
+#: bpgrid.module:279
+msgid "Mission statement"
+msgstr "網站宗旨"
+
+#: bpgrid.module:283
+msgid "Primary links"
+msgstr "主選單"
+
+#: bpgrid.module:287
+msgid "Secondary links"
+msgstr "次選單"
+
+#: bpgrid.module:291
+msgid "Search box"
+msgstr "搜尋框"
+
+#: bpgrid.module:295
+msgid "Site name"
+msgstr "網站名稱"
+
+#: bpgrid.module:299
+msgid "Site slogan"
+msgstr "網站口號"
+
+#: bpgrid.module:303
+msgid "Tabs"
+msgstr ""
+
+#: bpgrid.module:316
+msgid "Header"
+msgstr "頁首"
+
+#: bpgrid.module:317
+msgid "Footer"
+msgstr "頁尾"
+
+#: bpgrid.module:17,42
+msgid "Grid builder"
+msgstr ""
+
+#: bpgrid.module:26
+msgid "List"
+msgstr "列表"
+
+#: bpgrid.module:33
+msgid "Add"
+msgstr ""
+
+#: bpgrid.info:0
+msgid "Blueprint theme builder"
+msgstr ""
+
+#: bpgrid.info:0
+msgid "Build grid based themes using a WYSIWYG layout editor."
+msgstr ""
+

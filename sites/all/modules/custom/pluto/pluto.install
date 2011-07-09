@@ -1,0 +1,232 @@
+<?php
+// $Id$
+
+/**
+ * Drupal 5 port by Trevor Grayson
+ * @file
+ */
+
+function pluto_schema() {
+  $schema['pluto_achievement'] = array(
+    'fields' => array(
+      'aid' => array('type' => 'serial', 'unsigned' => TRUE, 'not_null' => TRUE),
+      'name' => array('type' => 'varchar', 'length' => 128, 'not_null' => TRUE, 'default' => ''),
+      'description' => array('type' => 'text', 'not_null' => TRUE, 'default' => ''),
+      'weight' => array('type' => 'int', 'not_null' => TRUE, 'default' => '0'),
+      'badge' => array('type' => 'varchar', 'length' => 255, 'not_null' => TRUE, 'default' => ''),
+      'placeholder' => array('type' => 'varchar', 'length' => 255, 'not_null' => TRUE, 'default' => ''),
+      'fullsize' => array('type' => 'varchar', 'length' => 255, 'not_null' => TRUE, 'default' => ''),
+    ),
+    'primary key' => array('aid')
+  );
+
+  $schema['pluto_achievement_task'] = array(
+    'fields' => array(
+      'tid' => array('type' => 'serial', 'unsigned' => TRUE, 'not_null' => TRUE),
+      'aid' => array('type' => 'int', 'unsigned' => TRUE, 'not_null' => TRUE, 'default' => '0'),
+      'method' => array('type' => 'varchar', 'length' => 128, 'not_null' => TRUE, 'default' => ''),
+      'value' => array('type' => 'varchar', 'length' => 128, 'not_null' => TRUE, 'default' => ''),
+      'weight' => array('type' => 'int', 'not_null' => TRUE, 'default' => '0'),
+    ),
+    'primary key' => array('tid')
+  );
+
+  $schema['pluto_reward'] = array(
+    'fields' => array(
+      'rid' => array('type' => 'serial', 'unsigned' => TRUE, 'not_null' => TRUE),
+      'name' => array('type' => 'varchar', 'length' => 128, 'not_null' => TRUE, 'default' => ''),
+      'description' => array('type' => 'text', 'not_null' => TRUE, 'default' => ''),
+      'type' => array('type' => 'varchar', 'length' => 32, 'not_null' => TRUE, 'default' => ''),
+      'data' => array('type' => 'text', 'not_null' => TRUE, 'default' => ''),
+    ),
+    'primary key' => array('rid')
+  );
+
+  $schema['pluto_achievement_reward'] = array(
+    'fields' => array(
+      'aid' => array('type' => 'int', 'unsigned' => TRUE, 'not_null' => TRUE),
+      'rid' => array('type' => 'int', 'unsigned' => TRUE, 'not_null' => TRUE),
+    ),
+    'primary key' => array('aid', 'rid')
+  );
+
+  $schema['pluto_reward_node'] = array(
+    'fields' => array(
+      'rid' => array('type' => 'int', 'unsigned' => TRUE, 'not_null' => TRUE),
+      'nid' => array('type' => 'int', 'unsigned' => TRUE, 'not_null' => TRUE),
+    ),
+    'primary key' => array('rid', 'nid')
+  );
+
+  $schema['pluto_userpoints'] = array(
+    'fields' => array(
+      'uid' => array(
+        'description' => 'The {users}.uid that who is earning these points.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0),
+      'date' => array(
+        'description' => 'The Unix timestamp when points were last earned.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0),
+      'monthly_points' => array(
+        'description' => t('Monthly points total'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,),
+      'total_points' => array(
+        'description' => t('Total points'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,), 
+      'rank_badge' => array(
+        'description' => 'The id of the rank badge earned by the user.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0), // store their best badge - cache the html? Or just the id?
+      'badges' => array(
+        'description' => 'Serialized array of badge ids earned by a user, exluding the rank badge',
+        'type' => 'text',
+        'not_null' => TRUE,
+        'default' => ''), // store all other badges - cache html? Or just the id?
+    ),
+    'primary key' => array('uid'),
+    'indexes' => array(
+      'pluto_userpoints_monthly_points' => array('monthly_points'),
+      'pluto_userpoints_total_points' => array('total_points'),
+    ),
+  );
+  
+  // Schema for cache
+  $schema['cache_pluto'] = drupal_get_schema_unprocessed('system', 'cache');
+
+  return $schema;
+}
+
+function pluto_install() {
+  drupal_install_schema('pluto');
+  pluto_create_subscribed_page();
+}
+
+function pluto_enable() {
+  pluto_load_userpoints_values();
+}
+
+function pluto_uninstall() {
+  drupal_uninstall_schema('pluto');
+}
+
+function pluto_update_6100() {
+  $ret = array();
+  db_add_field($ret, 'pluto_achievement', 'fullsize', array('type' => 'varchar', 'length' => 255, 'not_null' => TRUE, 'default' => ''));
+  return $ret;
+}
+
+function pluto_update_6101() {
+  $ret = array();
+  pluto_create_subscribed_page();   
+  return $ret;
+}
+
+function pluto_update_6102() {
+  $ret = array();
+  $schema['pluto_userpoints'] = array(
+    'fields' => array(
+      'uid' => array(
+        'description' => 'The {users}.uid that who is earning these points.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0),
+      'date' => array(
+        'description' => 'The Unix timestamp when points were last earned.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0),
+      'monthly_points' => array(
+        'description' => t('Monthly points total'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,),
+      'total_points' => array(
+        'description' => t('Total points'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,), 
+      'rank_badge' => array(
+        'description' => 'The id of the rank badge earned by the user.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0), // store their best badge - cache the html? Or just the id?
+      'badges' => array(
+        'description' => 'Serialized array of badge ids earned by a user, exluding the rank badge',
+        'type' => 'text',
+        'not_null' => TRUE,
+        'default' => ''), // store all other badges - cache html? Or just the id?
+    ),
+    'primary key' => array('uid'),
+    'indexes' => array(
+      'pluto_userpoints_monthly_points' => array('monthly_points'),
+      'pluto_userpoints_total_points' => array('total_points'),
+    ),
+  );
+  db_create_table($ret, 'pluto_userpoints', $schema['pluto_userpoints']);
+  return $ret;
+}
+
+function pluto_update_6103() {
+  $ret = array();
+  pluto_load_userpoints_values();
+  return $ret;
+}
+
+// Update for cache table
+function pluto_update_6104() {
+  $ret = array();
+  $schema['cache_pluto'] = drupal_get_schema_unprocessed('system', 'cache');
+  db_create_table($ret, 'cache_pluto', $schema['cache_pluto']);
+  return $ret;
+}
+
+/**
+* Create a page that users see after subscribing to newsletter
+*/
+
+function pluto_create_subscribed_page() {
+  $body = <<<EOD
+<h3>Badges</h3>
+
+Are you a dedicated fan? Bold enough to be the first to comment on a photo or share an image from the show? Badges are rewards that members get for participating on the site. They show the other fans how dedicated you really are!
+
+<h3>Connect with real Fans</h3>
+
+This is the place for all true fans. Connect with other fans in your area or around the world. Share stories, swap photos and meet other people just as dedicated as you.
+
+EOD;
+  
+  $edit = array();
+  $edit['type'] = 'page';
+  $edit['uid'] = 1;
+  $edit['status'] = 1;
+  $edit['title'] = t('Membership Benefits');
+  $edit['body'] = $body;
+  $edit['teaser'] = node_teaser(stripslashes($body));
+  $edit['format'] = 4;
+
+  // convert to object
+  $node = (object)$edit;
+  node_save($node);
+  variable_set('pluto_about_nid',$node->nid); // store nid for the about page
+}
+
+/*
+ * Inserts all users and their current points into the pluto_userpoints table.
+ */
+
+function pluto_load_userpoints_values() {
+  $result = db_query("SELECT u.uid FROM {users} u LEFT JOIN {pluto_userpoints} p ON u.uid = p.uid WHERE u.uid > 0 and p.uid IS NULL");
+  while ($uid = db_result($result)) {
+    db_query("INSERT INTO {pluto_userpoints} (date, monthly_points, total_points, uid) VALUES (%d, 0, %d, %d)", time(), userpoints_get_current_points($uid, 'all'), $uid);
+  }
+  // @todo - insert their badges into database
+}

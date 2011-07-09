@@ -1,0 +1,9 @@
+<?php
+// $Id$
+
+/**
+ * Implementation of hook_install().
+ */
+function emfield_generic_audio_install() {
+  //
+}

@@ -1,0 +1,616 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * file_description
+ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function sony_newsletter_menu() {
+  // @TODO: Move these callback functions into an include file.
+  $items['newsletter/signup'] = array(
+    'title' => 'Newsletter Signup',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_newsletter_signup_form'),
+    'access arguments' => array('access content'),
+    'type' => MENU_SUGGESTED_ITEM,
+  );
+  $items['newsletter/subscribed'] = array(
+    'title' => 'Welcome to the mailing list',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_newsletter_subscribed_form'),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['admin/settings/sony_newsletter'] = array(
+    'title' => 'Sony Newsletters',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_newsletter_admin_settings_form'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'sony_newsletter.admin.inc',
+  );
+  $items['admin/settings/sony_newsletter/list'] = array(
+    'title' => 'List',
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -1,
+  );
+  $items['admin/settings/sony_newsletter/add'] = array(
+    'title' => 'Add',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_newsletter_add_form'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'sony_newsletter.admin.inc',
+  );
+  $items['admin/settings/sony_newsletter/delete/%sony_newsletter'] = array(
+    'title' => 'Delete',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_newsletter_delete_confirm_form', 4),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_CALLBACK,
+    'file' => 'sony_newsletter.admin.inc',
+  );
+  $items['admin/settings/sony_newsletter/artist_search'] = array(
+    'title' => 'Import',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_newsletter_artist_search_form'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'sony_newsletter.admin.inc',
+  );
+  $items['admin/settings/sony_newsletter/artist_lists/%'] = array(
+    'title' => "Artist's Newsletters",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_newsletter_artist_list_form', 4),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_CALLBACK,
+    'file' => 'sony_newsletter.admin.inc',
+  );
+
+  $items['admin/settings/sony_newsletter/debug'] = array(
+    'title' => 'Debug',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_newsletter_test_form'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'sony_newsletter.debug.inc',
+    'weight' => 10,
+  );
+  return $items;
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function sony_newsletter_theme($existing, $type, $theme, $path) {
+  return array(
+    'sony_newsletter_artist_list_form' => array(
+      'arguments' => array('form'),
+      'file' => 'sony_newsletter.admin.inc',
+    ),
+    'sony_newsletter_admin_list_form' => array(
+      'arguments' => array('form'),
+      'file' => 'sony_newsletter.admin.inc',
+    ),
+    'sony_newsletter_block_link' => array(
+      'arguments' => array('path'),
+    ),
+    'sony_newsletter_block_email_only' => array(
+      'arguments' => array(),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_block().
+ */
+function sony_newsletter_block($op = 'list', $delta = NULL, $edit = array()) {
+  switch ($op) {
+    case 'list':
+      return array(
+        'simple' => array(
+          'info' => t('Newsletter: Simple form'),
+        ),
+        'email_only' => array(
+          'info' => t('Newsletter: Email only, prefills form on signup page'),
+        ),
+        'link' => array(
+          'info' => t('Newsletter: link to signup page'),
+        ),
+      );
+
+    case 'view':
+      if ($delta == 'simple') {
+        $options = array(
+          'list_code' => variable_get("sony_newsletter_block_{$delta}_list_code", sony_newsletter_get_default()),
+          'mobile' => variable_get('sony_newsletter_mobile_on_block_'. $delta, FALSE),
+        );
+        return array(
+          'subject' => t('Signup'),
+          'content' => drupal_get_form('sony_newsletter_signup_simple_form', $options),
+        );
+      }
+      elseif ($delta == 'email_only') {
+        return array(
+          'subject' => t('Signup'),
+          'content' => theme('sony_newsletter_block_email_only'),
+        );
+      }
+      elseif ($delta == 'link') {
+        return array(
+          'subject' => t('Signup'),
+          'content' => theme('sony_newsletter_block_link', variable_get('sony_newsletter_signup_path', 'newsletter/signup'))
+        );
+      }
+      break;
+
+    case 'configure':
+      $form = array();
+      if ($delta == 'simple') {
+        $form['list_code'] = array(
+          '#type' => 'select',
+          '#title' => t('Which List'),
+          '#options' => sony_newsletter_get_names(),
+          '#default_value' => variable_get("sony_newsletter_block_{$delta}_list_code", sony_newsletter_get_default()),
+        );
+        $form['mobile'] = array(
+          '#type' => 'checkbox',
+          '#title' => t('Include mobile list on signup form?'),
+          '#default_value' => variable_get('sony_newsletter_mobile_on_block_'. $delta, FALSE),
+        );
+      }
+      return $form;
+
+    case 'save':
+      if ($delta == 'link') {
+        variable_set("sony_newsletter_block_{$delta}_list_code", $edit['list_code']);
+        variable_set('sony_newsletter_mobile_on_block_'. $delta, $edit['mobile']);
+      }
+      break;
+  }
+}
+
+function theme_sony_newsletter_block_link($path) {
+  return l(t('Sign-up for the @artist_name newsletter', array('@artist_name' => variable_get('artist_name', "artist's"))), $path);
+}
+
+function theme_sony_newsletter_block_email_only() {
+  return drupal_get_form('sony_newsletter_email_only_form');
+}
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function sony_newsletter_form_alter(&$form, $form_state, $form_id) {
+  if ($form_id != 'user_register') {
+    return;
+  }
+
+  module_load_include('inc', 'sony_newsletter', 'sony_newsletter.helpers');
+
+  // Make sure we've actually got list codes and the admin has requested
+  // the lists be added to the form.
+  $register = variable_get('sony_newsletter_newsletter_on_register', 1) && sony_newsletter_load_all();
+  $mobile = variable_get('sony_newsletter_mobile_id', NULL) && variable_get('sony_newsletter_mobile_on_register', 0);
+  if ($register || $mobile) {
+    $form['newsletter_subscriptions'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Subscriptions'),
+      '#weight' => 5,
+    );
+
+    // Check if we can get the country and zip from the profile fields or if
+    // we need to bring our own.
+    if (isset($form['Personal information']['profile_country'])) {
+      // Make the country required and use an element validator to get the
+      // values copied into the demographics element were we expect them.
+      $form['Personal information']['profile_country']['#required'] = TRUE;
+      $form['Personal information']['profile_country']['#element_validate'][] = 'sony_newsletter_copy_profile_country_value';
+
+      // Try to auto set the country code to make Tom Koshe happy.
+      if (module_exists('geoip') && ($country_code = geoip_country_code())) {
+        $countries = _sony_newsletter_country_lookup();
+        if (isset($countries[$country_code])) {
+          $form['Personal information']['profile_country']['#default_value'] = $countries[$country_code];
+        }
+      }
+      if (isset($form['Personal information']['profile_zip_code'])) {
+        $form['Personal information']['profile_zip_code']['#element_validate'][] = 'sony_newsletter_copy_profile_zip_value';
+      }
+      $form['demographics']['#tree'] = 1;
+    }
+    else {
+      sony_newsletter_build_demographic_fields($form['newsletter_subscriptions'], TRUE);
+    }
+
+    if ($mobile) {
+      sony_newsletter_build_mobile_fields($form['newsletter_subscriptions']);
+    }
+    if ($register) {
+      sony_newsletter_build_list_fields($form['newsletter_subscriptions']);
+    }
+
+    // Add a callback to copy the birthday fields into demographic data.
+    if (isset($form['coppa_dob'])) {
+      $form['coppa_dob']['#element_validate'][] = 'sony_newsletter_copy_coppa_dob_value';
+    }
+
+    $form['#submit'][] = 'sony_newsletter_user_register_submit';
+  }
+}
+
+function sony_newsletter_user_register_submit($form, &$form_state) {
+  $lists = array_filter($form_state['values']['list']);
+  if (!empty($lists)) {
+    $request = sony_newsletter_request_instance($form_state['values']['mail']);
+    $demographics = (array) $form_state['values']['demographics'];
+    $result = $request->subscribe($lists, $demographics);
+    if ($result == 1) {
+      drupal_set_message(t('You have been subscribed to the newsletter.'));
+    }
+    else {
+      watchdog('sony_newsletter', 'Error subscribing a new user to a newsletter. Sony CRM error: %error_message', array('%error_message' => $request->error_message));
+    }
+  }
+}
+
+/**
+ * Email only form that redirects to the full signup.
+ */
+function sony_newsletter_email_only_form(&$form_state) {
+  $form['mail'] = array(
+    '#type' => 'textfield',
+    '#title' => t('E-mail address'),
+    '#required' => TRUE,
+    '#size' => 30,
+    '#attributes' => array('title' => 'your.email@domain.com'),
+  );
+  $form['subscribe'] = array(
+    '#type' => 'submit',
+    '#value' => t('Subscribe'),
+    '#weight' => 20,
+  );
+
+  return $form;
+}
+
+function sony_newsletter_email_only_form_submit($form, &$form_state) {
+  $form_state['redirect'] = array(variable_get('sony_newsletter_signup_path', 'newsletter/signup'), array('mail' => $form_state['values']['mail']));
+}
+
+/**
+ * Short sign-up form.
+ */
+function sony_newsletter_signup_simple_form(&$form_state, $options = array()) {
+  // Needed for _sony_newsletter_country_lookup() below.
+  module_load_include('inc', 'sony_newsletter', 'sony_newsletter.helpers');
+
+  $options += array(
+    'list_code' => sony_newsletter_get_default(),
+    'mobile' => FALSE,
+  );
+
+  $form['mail'] = array(
+    '#type' => 'textfield',
+    '#title' => t('E-mail address'),
+    '#required' => TRUE,
+    '#size' => 30,
+    '#element_validate' => array('sony_newsletter_mail_validate'),
+    '#attributes' => array('title' => 'your.email@domain.com'),
+  );
+
+  $form['demographics']['#tree'] = 1;
+  $form['demographics']['country'] = array(
+    '#type' => 'select',
+    '#title' => t('Country'),
+    '#required' => TRUE,
+    '#options' => array(NULL => '--') + _sony_newsletter_country_lookup(),
+  );
+
+  if (!empty($options['mobile'])) {
+    sony_newsletter_build_mobile_fields($form);
+  }
+  sony_newsletter_build_coppa_fields($form);
+
+  $form['list'] = array(
+    '#type' => 'value',
+    '#value' => $options['list_code'],
+  );
+
+  // Use the full form's submit handler.
+  $form['#submit'][] = 'sony_newsletter_signup_form_submit';
+
+  $form['subscribe'] = array(
+    '#type' => 'submit',
+    '#value' => t('Subscribe'),
+    '#weight' => 20,
+    '#attributes' => !empty($form_state['ajax']) ? array('class' => 'ctools-dialog-button') : array(),
+  );
+
+  return $form;
+}
+
+function sony_newsletter_signup_form(&$form_state) {
+  module_load_include('inc', 'sony_newsletter', 'sony_newsletter.helpers');
+
+  $form['mail'] = array(
+    '#type' => 'textfield',
+    '#title' => t('E-mail address'),
+    '#required' => TRUE,
+    '#size' => 30,
+    '#default_value' => empty($_GET['mail']) ? '' : $_GET['mail'],
+    '#element_validate' => array('sony_newsletter_mail_validate'),
+    '#attributes' => array('title' => 'your.email@domain.com'),
+  );
+
+  sony_newsletter_build_coppa_fields($form);
+  sony_newsletter_build_demographic_fields($form);
+  if (variable_get('sony_newsletter_mobile_on_full_form', 0)) {
+    sony_newsletter_build_mobile_fields($form);
+  }
+  sony_newsletter_build_list_fields($form, TRUE);
+
+  // Select a default list.
+  $form['list']['#default_value'] = array(sony_newsletter_get_default());
+
+  $form['subscribe'] = array(
+    '#type' => 'submit',
+    '#value' => t('Subscribe'),
+    '#weight' => 20,
+    '#attributes' => !empty($form_state['ajax']) ? array('class' => 'ctools-dialog-button') : array(),
+  );
+
+  return $form;
+}
+
+/**
+ * submit signup form
+ */
+function sony_newsletter_signup_form_submit($form_id, &$form_state) {
+  $lists = array_filter((array) $form_state['values']['list']);
+  if (empty($lists)) {
+    return;
+  }
+
+  $request = sony_newsletter_request_instance($form_state['values']['mail']);
+  $result = $request->subscribe($lists, $form_state['values']['demographics']);
+  if ($result) {
+    drupal_set_message(t('You have been subscribed to the mailing list.'));
+  }
+  else {
+    drupal_set_message(t('Sorry, there was a problem adding you to the mailing list. !error', array('!error' => $request->error_message)), 'error');
+  }
+
+  if ($result) {
+    $form_state['redirect'] = variable_get('sony_newsletter_subscribed_path', 'newsletter/subscribed');
+  }
+}
+
+
+/**
+ * Form thanking the user for signing up for a mailinglist.
+ *
+ * @param $form_state
+ */
+function sony_newsletter_subscribed_form($form_state) {
+  $form['welcome_message'] = array(
+    '#type' => 'markup',
+    '#value' => '<p>'. t("Thanks for signing up. You will receive occasional Email updates with news, appearances and tour dates, ring tones, videos and more! To make sure you always receive Emails in your inbox, please take a moment to add our email address to your address book or safe list.") .'</p>'
+      .'<p>'. t("If you offered your mobile phone number at signup, you will occasionally receive text messages with news.") .'</p>',
+  );
+  return $form;
+}
+
+/**
+ * Build form elements for selecting mailing lists.
+ *
+ * @param $form
+ *   Form array.
+ * @param $skip_opt_in
+ *   Boolean indicating that we can skip the opt-in. So if there's only a
+ *   single list on the site that we can just assume that's the one they want
+ *   to select. Do not use this on the registration form.
+ */
+function sony_newsletter_build_list_fields(&$form, $skip_opt_in = FALSE) {
+  $lists = sony_newsletter_load_all();
+  if (empty($lists)) {
+    return;
+  }
+
+  // Special case if there's only one list and we can skip the opt-in.
+  if ($skip_opt_in && count($lists) == 1) {
+    $list = reset($lists);
+    $form['list'] = array(
+      '#type' => 'value',
+      '#value' => array($list['code'] => $list['code']),
+    );
+  }
+  else {
+    $options = $defaults = array();
+    foreach ($lists AS $code => $list) {
+      $options[$code] = $list['description'];
+      if (!empty($list['default'])) {
+        $defaults[] = $code;
+      }
+    }
+    $form['list'] = array(
+      '#type' => 'checkboxes',
+      '#title' => variable_get('sony_newsletter_title', t('Newsletters')),
+      '#default_value' => $defaults,
+      '#options' => $options,
+      '#attributes' => array('class' => 'newsletter-checkboxes'),
+    );
+  }
+}
+
+/**
+ * Build demographic elements for
+ * @param $form
+ *   Form array
+ * @param $use_geoip
+ *   Boolean indicating that the GeoIP module should be used to provide a
+ *   default country.
+ */
+function sony_newsletter_build_demographic_fields(&$form, $use_geoip = FALSE) {
+  // Needed for _sony_newsletter_country_lookup() below.
+  module_load_include('inc', 'sony_newsletter', 'sony_newsletter.helpers');
+
+  $country_code = ($use_geoip && module_exists('geoip')) ? geoip_country_code() : NULL;
+  $form['demographics']['#tree'] = 1;
+  $form['demographics']['country'] = array(
+    '#type' => 'select',
+    '#title' => t('Country'),
+    '#required' => TRUE,
+    '#options' => array(NULL => '--') + _sony_newsletter_country_lookup(),
+    '#default_value' => $country_code,
+    '#attributes' => array('title' => t('Country')),
+  );
+  $form['demographics']['zip_postal_code'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Postal Code'),
+    '#attributes' => array('title' => t('Postal code')),
+    '#size' => 10,
+  );
+}
+
+/**
+ * This function adds the mobile fields to another form.
+ *
+ * @param $form array the form to have the mobile fields added to it
+ */
+function sony_newsletter_build_mobile_fields(&$form) {
+  // Get the mobile ID, return form unchanged if not set.
+  if (!$sony_newsletter_mobile_id = variable_get('sony_newsletter_mobile_id', NULL)) {
+    return;
+  }
+  $form['demographics']['#tree'] = 1;
+  $form['demographics']['mobile_list'] = array(
+    '#value' => $sony_newsletter_mobile_id,
+    '#type' => 'value',
+  );
+  $form['demographics']['phone_mobile'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Mobile number'),
+    '#element_validate' => array('sony_newsletter_phone_validate'),
+    '#size' => 15,
+    '#attributes' => array('title' => t('Mobile number')),
+    '#description' => t("You'll receive text and voice updates. You'll never be spammed.
+      Standard carrier rates apply. <a href='!toslink' target='_blank'>Terms of
+      Service.</a> <a href='!privacylink' target='_blank'>Privacy Policy</a>", array('!toslink' => url('http://www.mozes.com/go/tos/commercial'), '!privacylink' => url('http://www.mozes.com/go/privacy'))),
+  );
+  $form['demographics']['#element_validate'][] = 'sony_newsletter_clean_phone_fields';
+}
+
+function sony_newsletter_build_coppa_fields(&$form) {
+  // Add the COPPA Stuff if necessary.
+  if ((sony_coppa_audience() != SONY_COPPA_GENERAL_AUDIENCE) && !isset($form['coppa_dob'])) {
+    // Add the date of birth field and an validation handler to copy the values
+    // to the names SonyCRM expects.
+    $form = sony_coppa_dob_form($form, 'coppa_dob');
+    $form['coppa_dob']['#element_validate'][] = 'sony_newsletter_copy_coppa_dob_value';
+  }
+  else {
+    $form = sony_coppa_u13_form($form);
+  }
+}
+
+
+/**
+ * Convenience function for returning a SonyCRM_Request object.
+ *
+ * @param $mail
+ *   Email address.
+ *
+ * @return
+ *   SonyCRM_Request object.
+ */
+function sony_newsletter_request_instance($mail = NULL) {
+  module_load_include('inc', 'sony_newsletter', 'SonyCRM_Request.class');
+
+  $base_url = variable_get('sony_newsletter_api_url', 'http://subs.sonymusic.com/app/rs/1.0/');
+  $login = variable_get('sony_newsletter_api_login', 'aws-r2');
+  $secret = variable_get('sony_newsletter_api_secret', 'rtw0$753');
+
+  return new SonyCRM_Request($base_url, $login, $secret, $mail);
+}
+
+/**
+ * Get an array of newsletter names.
+ *
+ * @return
+ *   Array of newsletter names keyed by newsletter code.
+ */
+function sony_newsletter_get_names() {
+  $options = array();
+  foreach (sony_newsletter_load_all() as $code => $nl) {
+    $options[$code] = $nl['description'];
+  }
+  return $options;
+}
+
+/*
+ * Load all newsletters.
+ *
+ * @return
+ *   Array keyed by newsletter code or newsletter arrays.
+ */
+function sony_newsletter_load_all() {
+  return variable_get('sony_newsletter_lists', array());
+}
+
+/**
+ * Menu wildcard loader for %sony_newsletter objects.
+ */
+function sony_newsletter_load($code) {
+  $lists = sony_newsletter_load_all();
+  return isset($lists[$code]) ? $lists[$code] : FALSE;
+}
+
+/**
+ * Return the code of the default (first in the list) newsletter.
+ */
+function sony_newsletter_get_default() {
+  $lists = sony_newsletter_load_all();
+  if (!empty($lists)) {
+    $first = reset($lists);
+    if (!empty($first['code'])) {
+       return $first['code'];
+    }
+  }
+  return FALSE;
+}
+
+/**
+ * Save a newsletter.
+ *
+ * @param $list
+ *   Array with 'code', 'description' and 'default' values.
+ */
+function sony_newsletter_save($list) {
+  if (isset($list['code'])) {
+    $lists = variable_get('sony_newsletter_lists', array());
+    $lists[$list['code']] = array(
+      'code' => $list['code'],
+      'description' => $list['description'],
+      'default' => $list['default'],
+    );
+    variable_set('sony_newsletter_lists', $lists);
+  }
+}
+/**
+ * Delete a newsletter.
+ *
+ * @param $code
+ *   Newsletter code.
+ */
+function sony_newsletter_delete($code) {
+  $lists = variable_get('sony_newsletter_lists', array());
+  unset($lists[$code]);
+  variable_set('sony_newsletter_lists', $lists);
+}
+

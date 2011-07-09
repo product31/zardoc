@@ -1,0 +1,28 @@
+<?php
+// $Id: ut_user_karma.module,v 1.1.2.1 2010/02/02 11:20:15 agileware Exp $
+
+/**
+ * @file
+ * Allows user titles to be based on a users karma.
+ */
+
+/**
+ * Implementation of hook_user_titles().
+ */
+function ut_user_karma_user_titles($op, $uid = NULL) {
+  switch ($op) {
+    case 'register':
+      return 'ut_user_karma';
+    case 'name':
+      return t('User karma');
+    case 'description':
+      return t('Different karma values are assigned to user actions and votes of user content');
+    case 'units':
+      return t('Karma');
+    case 'url':
+      return 'admin/settings/user_karma';
+    case 'get':
+      return user_karma_user_karma($uid);
+  }
+}
+

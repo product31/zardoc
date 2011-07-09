@@ -1,0 +1,8 @@
+; $Id$
+name = Sony BMG Multisite Upgrade
+description = Automated upgrades between major Drupal versions.
+core = 6.x
+
+l10n server = translate.gdb-dev.com
+project = "sonybmg_upgrade"
+version = "6.x-2.x"

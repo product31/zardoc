@@ -1,0 +1,20 @@
+#bro-main {
+  background-image: url(bg-countdown.png);
+}
+#bro-main.bro-state-watch-now {
+  background-image: url(bg-watch-now.png);
+}
+#bro-main.bro-state-watch-tonite {
+  background-image: url(bg-rebroadcast-tonite.png);
+}
+#bro-main.bro-state-watch-tomorrow {
+  background-image: url(bg-rebroadcast-tomorrow.png);
+}
+
+.bro-countdown .countdown {
+  background-image: url(countdown.png);
+}
+.bro-countdown .countdown span {
+  color: #f9971f;
+}
+

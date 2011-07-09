@@ -1,0 +1,8 @@
+; $Id$
+name = "Russian Services"
+description = "Provide the Russian Services (12+3): 100zakladok, Ruspace, Mister Wong, Memori, Moemesto, MyScoop, Vaau, Yandex, LinkStore, Bobrdobr, Lopas, Communizm, Newsland, News2, Smi2"
+core = "6.x"
+package = Sony Share
+dependencies[] = sony_share
+
+

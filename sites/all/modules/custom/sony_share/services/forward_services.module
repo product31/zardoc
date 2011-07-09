@@ -1,0 +1,22 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Add the support for Forward module
+ */
+
+/**
+ * Implementation of hook_sony_share().
+ **/
+function forward_services_sony_share() {
+  $links = array();
+
+  $links['forward'] = array(
+    'name' => 'Forward',
+    'link' => url('forward', array('absolute' => TRUE, 'query' => 'path=<encoded-query>')),
+    'description' => t('Send to a friend'),
+  );
+  
+  return $links;
+}

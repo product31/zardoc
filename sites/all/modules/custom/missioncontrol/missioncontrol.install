@@ -1,0 +1,105 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * file_description
+ */
+
+function missioncontrol_schema() {
+  $schema = array();
+  $schema['missioncontrol_sites'] = array(
+    'description'       => t('Site information for MissionControl clients.'),
+    'fields'        => array(
+      'mcid' => array(
+        'description' => t('Unique ID of the site.'),
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE
+      ),
+      'title' => array(
+        'description' => t('Human-readable title of the site.'),
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'url' => array(
+        'description' => t('Public URL of the site.'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'image' => array(
+        'description' => t('Filepath of the image preview for the site.'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'nid' => array(
+        'description' => t('Node ID of the associated project.'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+        'default' => '0',
+      ),
+      'public_key'    => array(
+        'description'   => t('Public Key'),
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'private_key'    => array(
+        'description'   => t('Private Key'),
+        'type'          => 'varchar',
+        'length'          => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'timestamp'     => array(
+        'description'   => t('Last timestamp used'),
+        'type'          => 'int',
+        'not null'      => TRUE,
+        'unsigned'      => TRUE,
+      ),
+    ),
+    'primary key'     => array('mcid'),
+  );
+  
+  $schema['missioncontrol_variable'] = array(
+    'description' => t('Similar to the core variable table, this table maintains variables from other sites.'),
+    'fields' => array(
+      'mcid' => array(
+        'description' => t('Unique ID of the site.'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE
+      ),
+      'name' => array(
+        'description' => t('The name of the variable.'),
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => ''),
+      'value' => array(
+        'description' => t('The value of the variable.'),
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'big'),
+      ),
+    'primary key' => array('mcid', 'name'),
+  );
+
+  return $schema;
+}
+
+function missioncontrol_install() {
+  drupal_install_schema('missioncontrol');
+}
+
+function missioncontrol_uninstall() {
+  drupal_uninstall_schema('missioncontrol');
+}

@@ -1,0 +1,4 @@
+; $Id: styleswitcher.info,v 1.1 2009/02/20 22:45:49 rz Exp $
+name = Style Switcher
+description = Framework for themes to easily add stylesheet switching functionality.
+core = 6.x

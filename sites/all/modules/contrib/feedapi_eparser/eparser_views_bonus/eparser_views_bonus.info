@@ -1,0 +1,6 @@
+; $Id: eparser_views_bonus.info,v 1.1 2009/09/02 22:45:56 neclimdul Exp $
+name = Views Bonus Eparser
+description = FeedAPI Parser for Views Bonus XML feeds based on EParser.
+package = FeedAPI Add On
+core = 6.x
+dependencies[] = feedapi_eparser

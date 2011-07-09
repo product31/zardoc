@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="949.54">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; text-align: center; font: 18.0px Times}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; text-align: center; font: 18.0px Times; min-height: 23.0px}
+    p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times}
+    p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; min-height: 14.0px}
+    p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times New Roman; min-height: 15.0px}
+    p.p6 {margin: 0.0px 0.0px 0.0px 18.0px; font: 12.0px Times}
+    p.p7 {margin: 0.0px 0.0px 0.0px 18.0px; font: 12.0px Times; color: #0000ff}
+    p.p8 {margin: 0.0px 0.0px 0.0px 18.0px; font: 12.0px Times New Roman; min-height: 15.0px}
+    p.p9 {margin: 0.0px 0.0px 0.0px 18.0px; font: 12.0px Times New Roman; color: #0000ff}
+    span.s1 {text-decoration: underline ; color: #0000ff}
+    span.s2 {color: #000000}
+    span.s3 {text-decoration: underline}
+    span.s4 {font: 12.0px Times; color: #000000}
+    span.s5 {font: 12.0px Times New Roman; text-decoration: underline}
+    span.Apple-tab-span {white-space:pre}
+    ol.ol1 {list-style-type: decimal}
+  </style>
+</head>
+<body>
+<p class="p1"><b>Expanding Rich Media Ads and Iframes</b></p>
+<p class="p2"><b></b><br></p>
+<p class="p3"><b>BACKGROUND</b></p>
+<p class="p4"><br></p>
+<p class="p3">AdMeld employs iframes in its ad tags (unless the publisher itself already uses them on its site(s)) to provide a layer of protection for publishers from issues that may arise from ad networks.<span class="Apple-converted-space">  </span>If an ad network is delayed in responding or there are other technical issues with the ad, by serving it through an iframe the rest of the page can load properly, preserving the end-user experience.<span class="Apple-converted-space">  </span>The content of the page also loads faster, as it does not have to wait for ads to complete loading.</p>
+<p class="p5"><br></p>
+<p class="p3">Iframes however, do present an issue for expanding rich media ads, since iframes themselves are effectively self-contained boxes on a web page, preventing interaction between what is in the iframe and the web page it sits on.<span class="Apple-converted-space">  </span>In order to expand out of the iframe, the rich media vendor needs something else outside the iframe to latch on to, essentially, so they can break out of the box and render the expanding portion of the ad.<span class="Apple-converted-space">  </span>The hook for these expanding ads is a file the rich media vendors provide (a “pub-side file”) that needs to be placed on each site’s servers where the ads will run.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>IMPLEMENTATION</b></p>
+<p class="p5"><br></p>
+<p class="p3">For each of the rich media vendors (listed below), a single file needs to be installed on each domain and sub-domain on which the ads can run.</p>
+<p class="p4"><br></p>
+<p class="p3">For example, if your site is <a href="http://www.publisherx.com"><span class="s1">www.publisherx.com</span></a> but you also have ads on <a href="http://news.publisherx.com"><span class="s1">news.publisherx.com</span></a> and <a href="http://video.publisherx.com"><span class="s1">video.publisherx.com</span></a>, you need to install the respective files on each of these (so 12 total files would need to be installed: 3 domains x 4 vendors’ files).</p>
+<p class="p4"><br></p>
+<p class="p3">The following provides all the information necessary to get the files installed for each rich media vendor.</p>
+<p class="p4"><br></p>
+<p class="p6"><b>POINTROLL</b></p>
+<p class="p6">FILE NAME: PointRollAds.htm (case-sensitive)</p>
+<p class="p6">LOCATION: Place on root directory for each domain</p>
+<p class="p7"><span class="s2">EXAMPLE(S): <a href="http://www.nbc.com/PointRollAds.htm"><span class="s3">http://www.nbc.com/PointRollAds.htm</span></a></span></p>
+<p class="p7"><span class="s2">MORE INFO: <a href="%22http://www.pointroll.com/iframedelivery.a"><span class="s3">http://www.pointroll.com/iframedelivery.aspx</span></a></span></p>
+<p class="p8"><br></p>
+<p class="p6"><b>DART MOTIF</b></p>
+<p class="p6">FILE NAME: DARTIframe.html</p>
+<p class="p6">LOCATION: Place in doubleclick folder on root directory for each domain</p>
+<p class="p7"><span class="s2">EXAMPLE(S): <a href="http://www.webmd.com/doubleclick/DARTIframe.html"><span class="s3">http://www.webmd.com/doubleclick/DARTIframe.html</span></a></span></p>
+<p class="p7"><span class="s2">MORE INFO: <a href="http://%22"><span class="s3">http://www.google.com/support/richmedia/bin/answer.py?answer=117857</span></a></span></p>
+<p class="p8"><b></b><br></p>
+<p class="p6"><b>EYEBLASTER</b></p>
+<p class="p6">FILE NAME: addineyeV2.html</p>
+<p class="p6">LOCATION: Place in eyeblaster folder on root directory for each domain</p>
+<p class="p7"><span class="s2">EXAMPLE(S): <a href="http://www.webmd.com/eyeblaster/addineyeV2.html"><span class="s3">http://www.webmd.com/eyeblaster/addineyeV2.html</span></a></span></p>
+<p class="p7"><span class="s2">MORE INFO: <a href="%22http://www.eyeblasterwiz.com/onlinehelp/wwhelp/wwhimpl/js/ht"><span class="s3">http://www.eyeblasterwiz.com/onlinehelp/wwhelp/wwhimpl/js/html/wwhelp.htm?href=Expandable_Banner.htm</span></a></span></p>
+<p class="p8"><br></p>
+<p class="p6"><b>EYEWONDER</b></p>
+<p class="p6">FILE NAME: interim.html</p>
+<p class="p6">LOCATION: Place in eyewonder folder on root directory for each domain</p>
+<p class="p7"><span class="s2">EXAMPLE(S): <a href="http://www.nbc.com/eyewonder/interim.html"><span class="s3">http://www.nbc.com/eyewonder/interim.html</span></a></span></p>
+<p class="p6">MORE INFO: contact Eyewonder at <a href="%22mailto:"><span class="s1">support@eyewonder.com</span></a></p>
+<p class="p8"><br></p>
+<p class="p6"><b>VIDEOEGG</b></p>
+<p class="p6">FILE NAME: ad.html</p>
+<p class="p6">LOCATION: Place in videoegg folder on root directory for each domain</p>
+<p class="p7"><span class="s2">EXAMPLE(S): <a href="%22http://www.nbc.com"><span class="s3">http://www.nbc.com/videoegg/ad.html</span></a></span></p>
+<p class="p7"><span class="s2">MORE INFO:<span class="Apple-converted-space">  </span><a href="http://%22"><span class="s3">http://developer.videoegg.com/mediawiki/index.php/VideoEgg_Ad_Platform_Integration_Guide_-_Website#Step_8._Upload_Iframe_Busting_File</span></a></span></p>
+<p class="p8"><br></p>
+<p class="p6"><b>EYENGAGE (TRAFFIC MARKETPLACE PROPRIETARY UNIT)</b></p>
+<p class="p6">FILE NAME: eyengage.html</p>
+<p class="p6">LOCATION: Please in trafficmp folder on root directory for each domain</p>
+<p class="p9"><span class="s4">EXAMPLE(S): <a href="http://%22"><span class="s5">http://www.nbc.com/trafficmp/eyengage.html</span></a></span></p>
+<p class="p7"><span class="s2">MORE INFO: <a href="http://www.eyengage.com/index.html"><span class="s3">http://www.eyengage.com/index.html</span></a></span></p>
+<p class="p8"><br></p>
+<p class="p5"><br></p>
+<p class="p3"><b>IMPORTANT POINTS</b></p>
+<p class="p5"><br></p>
+<ol class="ol1">
+  <li style="margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times">1)<span class="Apple-tab-span">	</span>Ensure each file is named exactly as it appears here, including case (e.g. PointRollAds.htm, not pointrollads.htm)</li>
+  <li style="margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times">2)<span class="Apple-tab-span">	</span>Each rich media file needs to sit by itself, in its own location.<span class="Apple-converted-space">  </span>There should be no other code on the page, including your metrics trackers like Omniture, Hitbox, Google Analytics.<span class="Apple-converted-space">  </span>It should not be pasted into your CMS system, as that will usually include a lot of other javascript and HTML</li>
+  <li style="margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times">3)<span class="Apple-tab-span">	</span>Each domain and sub-domain where the ads could appear needs to have its own version of the files installed.<span class="Apple-converted-space">  </span>For example, <a href="%22http://"><span class="s1">news.yahoo.com</span></a> and <a href="http://www.yahoo.com"><span class="s1">www.yahoo.com</span></a> and <a href="http://www.yahoo.com"><span class="s1">movies.yahoo.com</span></a> would each need their own versions of each set of pub-side files in place.</li>
+  <li style="margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times">4)<span class="Apple-tab-span">	</span>By default the rich media vendors will assume the file sits in the above locations (e.g. in the /eyewonder/ folder on root directory).<span class="Apple-converted-space">  </span>In most cases there are workarounds if the files cannot be named and placed as desired, but in general they present additional coordination and so should be avoided if possible.</li>
+  <li style="margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times"><b>5)<span class="Apple-tab-span">	</span>IMPACT on site metrics data</b>: if you do not remove the site tracking pixels from the pubside files’ pages, or you do not have them in place properly (which often results in additional hits against whichever page a 404 gets redirected to) you will see activity with tag.admeld.com listed as the referring URL.<span class="Apple-converted-space">  </span>These data points should be removed.<span class="Apple-converted-space">  </span>AdMeld shows up as the referring URL since our iframe calls the network, which calls the rich media vendor, who attempts to call your pubside file location (whether it is in place properly or not).<span class="Apple-converted-space">  </span>Putting the files in place properly and without any data tracking pixels on those pages will ensure you have no data anomalies or records of AdMeld as a top referring URL.</li>
+</ol>
+</body>
+</html>

@@ -1,0 +1,55 @@
+# Finland translation of sonybmg_fans (all releases)
+# Copyright (c) 2010 by the Finland translation team
+# Generated from files:
+#  sonybmg_fans/sonybmg_fans.info: n/a
+#  sonybmg_fans/sonybmg_fans.module: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sonybmg_fans (all releases)\n"
+"POT-Creation-Date: 2010-04-06 23:02-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Finland\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: sonybmg_fans.info:0
+msgid "Sony BMG"
+msgstr ""
+
+#: sonybmg_fans.module:39
+msgid "I'm a fan (and you should be too) because..."
+msgstr ""
+
+#: sonybmg_fans.module:82,92
+msgid "Why I'm A Fan"
+msgstr ""
+
+#: sonybmg_fans.module:197
+msgid "Fans online: @count in the last @time minutes"
+msgstr ""
+
+#: sonybmg_fans.module:198
+msgid "Total Fans: @count"
+msgstr ""
+
+#: sonybmg_fans.module:22
+msgid "User Counts"
+msgstr ""
+
+#: sonybmg_fans.module:23
+msgid "Online users and total users."
+msgstr ""
+
+#: sonybmg_fans.info:0
+msgid "Sony BMG Why I'm a Fan"
+msgstr ""
+
+#: sonybmg_fans.info:0
+msgid ""
+"Configuration, blocks, and form alters for Why I'm a Fan "
+"functionality."
+msgstr ""
+

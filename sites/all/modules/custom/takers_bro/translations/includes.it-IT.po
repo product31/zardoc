@@ -1,0 +1,55 @@
+# Italy translation of sony_bro (all releases)
+# Copyright (c) 2010 by the Italy translation team
+# Generated from file: sony_bro/includes/admin.inc: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sony_bro (all releases)\n"
+"POT-Creation-Date: 2010-04-08 16:53-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Italy\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: includes/admin.inc:8
+msgid "Artist logo"
+msgstr ""
+
+#: includes/admin.inc:9
+msgid ""
+"Enter the path to the artist logo here.  The size of this is 425px x "
+"60px."
+msgstr ""
+
+#: includes/admin.inc:15
+msgid "Sponsor area 1"
+msgstr ""
+
+#: includes/admin.inc:16
+msgid ""
+"Enter the ad server code for the first sponsor block here.  This area "
+"is visible in both expanded and collapsed states.  The size of this "
+"block is 168px x 60px."
+msgstr ""
+
+#: includes/admin.inc:22
+msgid "Sponsor area 2"
+msgstr ""
+
+#: includes/admin.inc:23
+msgid ""
+"Enter the ad server code for the second sponsor block here.  This area "
+"is only visible in the expanded state.  The size of this block is "
+"468px x 60px."
+msgstr ""
+
+#: includes/admin.inc:29
+msgid "Media player"
+msgstr ""
+
+#: includes/admin.inc:30
+msgid "Enter the media player embed code here."
+msgstr ""
+

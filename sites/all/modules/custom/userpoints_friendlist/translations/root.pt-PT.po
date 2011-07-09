@@ -1,0 +1,46 @@
+# Portugal translation of userpoints_friendlist (all releases)
+# Copyright (c) 2010 by the Portugal translation team
+# Generated from files:
+#  userpoints_friendlist/userpoints_friendlist.info: n/a
+#  userpoints_friendlist/userpoints_friendlist.module: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: userpoints_friendlist (all releases)\n"
+"POT-Creation-Date: 2010-04-12 13:48-0500\n"
+"PO-Revision-Date: 2010-03-26 09:22-0500\n"
+"Language-Team: Portugal\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: userpoints_friendlist.info:0
+msgid "Userpoints"
+msgstr ""
+
+#: userpoints_friendlist.module:23,28
+msgid "!Points for friending"
+msgstr ""
+
+#: userpoints_friendlist.module:36
+msgid "Category"
+msgstr "Categoria"
+
+#: userpoints_friendlist.module:39
+msgid ""
+"Friending will be assigned to this category. You can modify what "
+"categories are available by modifying the <a href=\"!url\">Userpoints "
+"taxonomy</a>."
+msgstr ""
+
+#: userpoints_friendlist.info:0
+msgid "Userpoints Friendlist"
+msgstr ""
+
+#: userpoints_friendlist.info:0
+msgid ""
+"Integrates with friendlist module to allow users earn points for "
+"friending another user"
+msgstr ""
+

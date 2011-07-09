@@ -1,0 +1,10 @@
+name = Takers BRO
+description = Browser Overlay (BRO) advertising product for Takers.
+core = 6.x
+dependencies[] = ctools
+dependencies[] = jquery_update
+dependencies[] = jquery_ui
+
+l10n server = translate.gdb-dev.com
+project = "takers_bro"
+version = "6.x-2.x"

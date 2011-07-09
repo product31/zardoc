@@ -1,0 +1,103 @@
+<?php
+// $Id: views_natural_sort.module,v 1.2 2009/05/12 18:47:40 neclimdul Exp $
+/**
+ * @file
+ * Provides a views filter that sorts titles by a more natural manner by
+ * ignoring articles like "The" and "A."
+ *
+ * Normal sort:
+ * A Chorus Line
+ * All American
+ * Fiddler on the Roof
+ * Oklahoma!
+ * The King And I
+ *
+ * Natural sort:
+ * All American
+ * A Chorus Line
+ * Fiddler on the Roof
+ * The King And I
+ * Oklahoma!
+ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function views_natural_sort_menu() {
+  //
+  $items = array();
+
+  $items['admin/settings/views_natural_sort'] = array(
+    'title' => 'Views Natural Sort',
+    'description' => 'Provides options for what should be indexed for sorting.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('views_natural_sort_settings_form'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer views'),
+    'file' => 'views_natural_sort.admin.inc',
+    'type' => MENU_NORMAL_ITEM
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_views_api().
+ */
+function views_natural_sort_views_api() {
+  return array(
+    'api' => 2.0,
+  );
+}
+
+/**
+ * Implementation of hook_nodeapi().
+ *
+ * This keeps our natural sort index up to date.
+ */
+function views_natural_sort_nodeapi(&$node, $op) {
+  //
+  switch ($op) {
+    case 'update':
+    case 'insert':
+      _views_natural_sort_store_node($node);
+      break;
+  }
+}
+
+/**
+ * Helper function for writing node data to our sort index.
+ *
+ * @param $node
+ * A drupal node object containing at least a nid and title.
+ */
+function _views_natural_sort_store_node($node) {
+  $record = new stdClass();
+  $record->nid = $node->nid;
+  $record->field = 'title';
+  $record->content = _views_natural_sort_filter_content($node->title);
+  // Try to update. On fail, try inserting.
+  $return = drupal_write_record('views_natural_sort', $record, array('nid', 'field'));
+  if (!db_affected_rows()) {
+    $return = drupal_write_record('views_natural_sort', $record);
+  }
+
+  return $return;
+}
+
+/**
+ * Helper function for filtering out what the value we should sort on is.
+ * @param $content
+ * Original content.
+ * @return
+ * Filtered value.
+ */
+function _views_natural_sort_filter_content($content) {
+  return preg_replace(array(
+    '/^(The|A)\s/i',
+    '/\s(and|of|or)\s/i',
+  ), array(
+    '',
+    ' ',
+  ), $content);
+}

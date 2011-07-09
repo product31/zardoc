@@ -1,0 +1,14 @@
+name = Sony Global Utilities
+description = Utilities for internationalization specific to the Sony Multisite install.
+package = Sony BMG
+core = 6.x
+dependencies[] = locale
+dependencies[] = translation
+dependencies[] = menu
+dependencies[] = geoip
+dependencies[] = geoip_language
+dependencies[] = i18nmenu
+
+l10n server = translate.gdb-dev.com
+project = "sony_global"
+version = "6.x-2.x"

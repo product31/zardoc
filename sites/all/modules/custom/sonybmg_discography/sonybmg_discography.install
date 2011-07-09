@@ -1,0 +1,542 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * file_description
+ */
+
+/**
+ * Task to complete in order to activate this segment of code
+ */
+function sonybmg_discography_install_task_list() {
+  return array(
+    'sonybmg_discography_content_types' => array(
+      'message' => st('Created content types.'),
+      'weight' => 0,
+    ),
+    'sonybmg_discography_init_content_type_settings' => array(
+      'message' => st('Initialized content type settings.'),
+      'weight' => 0,
+    ),
+    'sonybmg_discography_init_pathauto_variables' => array(
+      'message' => st('Initialized pathauto variables.'),
+      'weight' => 0,
+    ),
+    'sonybmg_discography_init_custom_flags' => array(
+      'message' => st('Initialized custom flags.'),
+      'weight' => 0,
+    ),
+    'sonybmg_discography_init_roles' => array(
+      'message'   => st('Initialized roles'),
+      'weight' => 51,
+    ),
+    'sonybmg_discography_init_menu' => array(
+      'name' => st('Initialized menu.'),
+      'weight' => 53,
+    ),
+    'sonybmg_discography_init_blocks' => array(
+      'message' => st('Initialized block placement.'),
+      'weight' => 1000,
+    ),
+    'sonybmg_discography_fivestar_default' => array(
+      'message' => st('Set the default fivestar widget display.'),
+      'weight' => 0,
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function sonybmg_discography_install() {
+  // This bit is really weird. drupal_execute() cannot be used in batch
+  // operations (it should apparently, but doesn't). So we unset the current
+  // batch and then restore it after the task is done.
+  $previous_batch = batch_get();
+  $batch = &batch_get();
+  $batch = array();
+
+  foreach (sonybmg_discography_install_task_list() as $task => $details) {
+    $task('install');
+  }
+
+  // Restore the batch state;
+  $batch = $previous_batch;
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function sonybmg_discography_uninstall() {
+  foreach (sonybmg_discography_install_task_list() as $task => $details) {
+    $task('uninstall');
+  }
+}
+
+/**
+ * Implementation of hook_enable().
+ */
+function sonybmg_discography_enable() {
+  foreach (sonybmg_discography_install_task_list() as $task => $details) {
+    $task('enable');
+  }
+}
+
+/**
+ * Implementation of hook_disable().
+ */
+function sonybmg_discography_disable() {
+  foreach (sonybmg_discography_install_task_list() as $task => $details) {
+    $task('disable');
+  }
+}
+
+/**
+ * Migrate download links and release date fields to Drupal 6.
+ *
+ * This upgrade migrates the DRUPAL 5 download_links which were stored in a
+ * text field, to the DRUPAL6 download_links which are stored in a link field.
+ *
+ * Date fields may be one of several types (timestamp or date) in Drupal 5, so
+ * we recreate the release date field as a type "date" to ensure consistency.
+ */
+function sonybmg_discography_update_6000() {
+  if ($abort = content_check_update('sonybmg_discography')) {
+    return $abort;
+  }
+
+  // Date fields will not update properly unless Date module has updated.
+  if (drupal_get_installed_schema_version('date') < 6000) {
+    return array(
+      '#abort' => array('success' => FALSE, 'query' => t('Date module must be updated before discography can be updated.')),
+    );
+  }
+
+  $ret = array();
+
+  // Load necessary modules and files need for this operation.
+  module_enable(array('content', 'content_copy', 'install_profile_api', 'link'));
+  include_once drupal_get_path('module', 'content') .'/includes/content.crud.inc';
+  include_once drupal_get_path('module', 'install_profile_api') .'/contrib/content_copy.inc';
+
+  // Copy content_field_album_download_links before we whack it.
+  // TODO: look into db_query_temporary()
+  $ret[] = update_sql("CREATE TABLE {tmp_album_links} LIKE {content_field_album_download_links}");
+  $ret[] = update_sql("INSERT INTO {tmp_album_links} SELECT * FROM {content_field_album_download_links}");
+
+  // Copy the entire album table over to preserve dates.
+  $ret[] = update_sql("CREATE TABLE {tmp_album} LIKE {content_type_album}");
+  $ret[] = update_sql("INSERT INTO {tmp_album} SELECT * FROM {content_type_album}");
+
+  // Delete the original album_download_links field.
+  content_field_instance_delete('field_album_download_links', 'album');
+  content_field_instance_delete('field_release_date', 'album');
+
+  // Create the new fields for the album type (download links and release date).
+  $file = drupal_get_path('module', 'sonybmg_discography') .'/node.album.inc';
+  install_content_copy_import_from_file($file, 'album');
+
+  // Move data from temp table into the new link field
+  $result = db_query('SELECT * FROM {tmp_album_links}');
+  while ($row = db_fetch_array($result)) {
+    db_query('INSERT INTO {content_field_album_download_links} (vid, nid, delta, field_album_download_links_url, field_album_download_links_title, field_album_download_links_attributes)
+      VALUES (%d, %d, %d, "%s", "%s", "%s")',
+      $row['vid'],
+      $row['nid'],
+      $row['delta'],
+      $row['field_album_download_links_value'],
+      musiclookup_match_link($row['field_album_download_links_value']),
+      'N;');
+  }
+
+  // Move data from the the temp album table into the new release date field.
+  $result = db_query('SELECT vid, nid, field_release_date_value FROM {tmp_album}');
+  while ($row = db_fetch_array($result)) {
+    db_query("UPDATE {content_type_album} SET field_release_date_value = '%s' WHERE nid = %d AND vid = %d", date('Y-m-d', $row['field_release_date_value']) .'T00:00:00', $row['nid'], $row['vid']);
+  }
+
+  // Remove our temporary tables.
+  db_drop_table($ret, 'tmp_album_links');
+  db_drop_table($ret, 'tmp_album');
+
+  // Copy content_field_song_download_links before we whack it.
+  $ret[] = update_sql("CREATE TABLE {tmp_song_links} LIKE {content_field_song_download_links}");
+  $ret[] = update_sql("INSERT INTO {tmp_song_links} SELECT * FROM {content_field_song_download_links}");
+
+  // Delete the original song_download_links field.
+  content_field_instance_delete('field_song_download_links', 'track');
+
+  // Create the new field.
+  $file = drupal_get_path('module', 'sonybmg_discography') .'/node.track.inc';
+  install_content_copy_import_from_file($file, 'track');
+
+  // Move data from temp table into the new link field.
+  $result = db_query('SELECT * FROM {tmp_song_links}');
+  while ($row = db_fetch_array($result)) {
+    db_query('INSERT INTO {content_field_song_download_links} (vid, nid, delta, field_song_download_links_url, field_song_download_links_title, field_song_download_links_attributes)
+      VALUES (%d, %d, %d, "%s", "%s", "%s")',
+      $row['vid'],
+      $row['nid'],
+      $row['delta'],
+      $row['field_song_download_links_value'],
+      musiclookup_match_link($row['field_song_download_links_value']),
+      'N;');
+  }
+
+  // Drop the temporary song links table.
+  db_drop_table($ret, 'tmp_song_links');
+
+  drupal_set_installed_schema_version('discography', SCHEMA_UNINSTALLED);
+
+  return $ret;
+}
+
+/**
+ * Default content type and field definitions
+ */
+function sonybmg_discography_content_types($task) {
+  $path = drupal_get_path('module', 'sonybmg_discography');
+  install_include(array('node', 'content', 'content_copy'));
+
+  switch ($task) {
+    case 'install':
+      module_enable(array("m2","m2_gracenote"));
+      // Conditionally install the review type, if it's not already added by events.
+      // TODO: Move reviews into another location? They shouldn't be tied to discography.
+      if (!node_get_types('type', 'review')) {
+        install_content_copy_import_from_file($path .'/node.review.inc');
+      }
+      ini_set("max_execution_time", "300");
+      install_content_copy_import_from_file($path .'/node.album.inc');
+      install_content_copy_import_from_file($path .'/node.track.inc');
+
+      break;
+    case 'uninstall':
+      // Delete all content and nodes.
+      $result = db_query("SELECT nid FROM {node} WHERE type IN ('track', 'album')");
+      while ($node = db_fetch_object($result)) {
+        node_delete($node->nid);
+      }
+      node_type_delete('track');
+      node_type_delete('album');
+      break;
+    case 'enable':
+      // Nothing to do here.
+      break;
+    case 'disable':
+      drupal_set_message(t('Discography content is still enabled on the site. <a href="!uninstall">Uninstall the Discography section</a> to remove album and track content entirely.'), array('!uninstall' => 'admin/build/modules/uninstall'));
+      break;
+  }
+}
+
+/**
+ * Initialize the pathauto variables.
+ */
+function sonybmg_discography_init_pathauto_variables($task) {
+
+  switch ($task) {
+    case 'install':
+      variable_set('pathauto_node_review_pattern', 'reviews/[title-raw]');
+      variable_set('pathauto_node_album_pattern', 'music/[title-raw]');
+      variable_set('pathauto_node_track_pattern', 'music/[field_album-title-raw]/[title-raw]');
+      break;
+    case 'uninstall':
+      variable_del('pathauto_node_review_pattern');
+      variable_del('pathauto_node_album_pattern');
+      variable_del('pathauto_node_track_pattern');
+      break;
+  }
+}
+
+/**
+ * Define custom flags.
+ */
+function sonybmg_discography_init_custom_flags($task) {
+  if ($task == 'install') {
+    // Disable the default view for the favorites flag.
+    // The "favorites" flag is defined in hook_flag_default_flags().
+    $views_status = variable_get('views_defaults', array());
+    $views_status['flag_favorites'] = TRUE;
+    variable_set('views_defaults', $views_status);
+  }
+}
+
+/**
+ * Initialize the custom content type settings.
+ */
+function sonybmg_discography_init_content_type_settings($task) {
+  // Content types are only added on install. Deletion of settings should
+  // be handled by node_type_delete().
+  if ($task != 'install') {
+    return;
+  }
+
+  // Initiate content type settings.
+  // Modules that provide content type settings will overwrite the settings
+  // added by content_copy, so we have to set them all manually again.
+
+  $variable_settings = array();
+
+  // Populate variable settings.
+  $variable_settings['album'] = array(
+    'fivestar' => 1,
+    'fivestar_feedback' => 0,
+    'fivestar_labels' => array('Cancel rating', 'Poor', 'Okay', 'Good', 'Great', 'Awesome', 'Give it @star/@count', 'Give it @star/@count', 'Give it @star/@count', 'Give it @star/@count', 'Give it @star/@count'),
+    'fivestar_labels_enable' => 1,
+    'fivestar_position' => 'below',
+    'fivestar_position_teaser' => 'hidden',
+    'fivestar_stars' => 5,
+    'fivestar_style' => 'average',
+    'fivestar_text' => 'dual',
+    'fivestar_title' => 1,
+    'fivestar_unvote' => 0,
+    'language_content_type_album' => 1,
+    'comment' => 2,
+    'comment_type' => 'review',
+    'comment_view' => 'nodecomments',
+  );
+
+  $variable_settings['track'] = array(
+    'fivestar' => 1,
+    'fivestar_feedback' => 0,
+    'fivestar_labels' => array('Cancel rating', 'Poor', 'Okay', 'Good', 'Great', 'Awesome', 'Give it @star/@count', 'Give it @star/@count', 'Give it @star/@count', 'Give it @star/@count', 'Give it @star/@count'),
+    'fivestar_labels_enable' => 1,
+    'fivestar_position' => 'below',
+    'fivestar_position_teaser' => 'hidden',
+    'fivestar_stars' => 5,
+    'fivestar_style' => 'average',
+    'fivestar_text' => 'dual',
+    'fivestar_title' => 1,
+    'fivestar_unvote' => 0,
+    'comment' => 2,
+    'comment_type' => 'review',
+    'comment_view' => 'nodecomments',
+  );
+
+  $variable_settings['review'] = array(
+    'comment' => 0,
+    'comment_type' => 'comment',
+    'comment_view' => 'nodecomments',
+  );
+
+  // Rotate through our settings and populate the db.
+  foreach ($variable_settings as $ct => $data) {
+    foreach ($data as $var => $val) {
+      variable_set($var .'_'. $ct, $val);
+    }
+  }
+}
+
+/**
+ * Initialize discography roles.
+ */
+function sonybmg_discography_init_roles($task) {
+  if ($task != 'install') {
+    return;
+  }
+
+  // Accessible by all.
+  $perms_all = array('access comments', 'rate content');
+
+  // Accessible by all but anonymous users.
+  $perms_anon = array('flag content', 'post comments', 'post comments without approval', 'create comment content', 'create review content', 'edit own comment content', 'edit own review content');
+
+  // Accessible by only site maintainers (administrator, artist, moderator).
+  $perms_main = array('create album content', 'create track content', 'edit album content', 'edit comment content', 'edit own album content', 'edit own track content', 'edit review content', 'edit track content', 'administer comments');
+
+  // Accessible by only site admins.
+  $perms_admin = array('view ratings');
+
+  $roles = array(
+    'anonymous user'     => $perms_all,
+    'authenticated user' => array_merge($perms_all, $perms_anon),
+    'artist'             => array_merge($perms_all, $perms_anon, $perms_main),
+    'moderator'          => array_merge($perms_all, $perms_anon, $perms_main),
+    'administrator'      => array_merge($perms_all, $perms_anon, $perms_main, $perms_admin),
+  );
+  variable_set('sonybmg_supress_mail_alert', TRUE);
+  foreach ($roles as $role => $perms) {
+    $rid = install_add_role($role);
+    install_add_permissions($rid, $perms);
+  }
+  variable_del('sonybmg_supress_mail_alert');
+}
+
+/**
+ * Set up the positioning of the blocks.
+ */
+function sonybmg_discography_init_blocks($task) {
+  global $theme_key;
+
+  if (!isset($theme_key)) {
+    init_theme();
+  }
+  $theme = $theme_key;
+
+  $module = 'sonybmg_discography';
+  $theme = variable_get('artist_key', '_starter');
+  $status = TRUE;
+  $region = 'right';
+  $visibility = 1; //0 = show on every page except ; 1 = show only on these pages
+  $pages = 'music*';
+
+  switch ($task) {
+    case 'install':
+      install_add_block($module, 0, $theme, $status, -2, $region, $visibility, $pages); //album buy it
+      // album cover disabled since it is now inline with the node content
+      //install_add_block($module, 1, $theme, $status, -1, $region, $visibility, $pages); //album cover
+      install_add_block($module, 2, $theme, $status, 0, $region, $visibility, $pages); //album discography
+      install_add_block($module, 3, $theme, $status, 1, 'ad_top'); //album sitewide buy it top
+      install_add_block($module, 4, $theme, $status, -1, 'ad_bottom'); //album sitewide buy it top
+      install_add_block('views', 'favorite_tracks-block_1', $theme, $status, 1, $region); //favorite tracks
+      break;
+    case 'uninstall':
+      db_query("DELETE FROM {blocks} WHERE module = 'sonybmg_discography' OR (module = 'views' AND delta LIKE 'favorite_tracks%')");
+      variable_del('sonybmg_discography_blocks');
+      break;
+    case 'enable':
+      // Re-enable blocks.
+      $blocks = variable_get('sonybmg_discography_blocks', array());
+      foreach ($blocks as $block) {
+        install_add_block($block['moudle'], $block['delta'], $theme, $status, $block['weight'], $block['region'], $block['visbility'], $blocks['pages']);
+      }
+      variable_del('sonybmg_discography_blocks');
+      break;
+    case 'disable':
+      // Make a record of blocks that are disabled.
+      $result = db_query('SELECT * FROM {blocks} WHERE module = "sonybmg_discography"');
+      while ($block = db_fetch_array($result)) {
+        $blocks[] = $block;
+      }
+      variable_set('sonybmg_discography_blocks', $blocks);
+      break;
+  }
+}
+
+/**
+ * Initialize the menu.
+ */
+function sonybmg_discography_init_menu($task) {
+  install_include(array('menu'));
+
+  if ($task == 'install') {
+    // Install the default primary menu link.
+    $path = drupal_get_normal_path('music');
+    $mlid = install_menu_create_menu_item($path, 'Music', '', 'Primary Links');
+  }
+  elseif ($task == 'enable') {
+    // Show the menu link.
+    if ($items = install_menu_get_items(NULL, 'Music')) {
+      install_menu_disable_item($items[0]['mlid'], TRUE);
+    }
+  }
+  elseif ($task == 'disable') {
+    // Disable the default primary menu link.
+    if ($items = install_menu_get_items(NULL, 'Music')) {
+      install_menu_disable_item($items[0]['mlid']);
+    }
+  }
+}
+
+/**
+ * Set the default Widget display for the fivestar module.
+ */
+function sonybmg_discography_fivestar_default($task) {
+  if ($task == 'install') {
+    variable_set('fivestar_widget', 'sites/all/modules/contrib/fivestar/widgets/basic/basic.css');
+  }
+}
+
+/**
+ * The musiclookup_match_link function was used in Drupal 5 to take a URL an
+ * supply a title for it.  In Drupal 6, this functionality is deprecated.  Each
+ * download link is now a link field (provided by link.module) which has an
+ * input for title as well as url.  This function is only used now for the
+ * migration of those url fields into the new link fields.
+ */
+if (!function_exists('musiclookup_match_link')) {
+  function musiclookup_match_link($url) {
+    if (strpos($url, 'www.amazon.com')) {
+      return 'Amazon.com';
+    }
+    if (strpos($url, 'www.sonymusicstore.com')) {
+      return 'MyPlay Store';
+    }
+    if (strpos($url, 'www.sonybmgstore.com')) {
+      return 'MyPlay Store';
+    }
+    if (strpos($url, 'www.sonybmgdigital.com')) {
+      return 'SonyBMG Digital';
+    }
+    if (strpos($url, 'shop.myplay.com')) {
+      return 'MyPlay Store';
+    }
+    if (strpos($url, 'www.walmart.com')) {
+      return 'Wal-Mart';
+    }
+    if (strpos($url, 'www.target.com')) {
+      return 'Target';
+    }
+    if (strpos($url, 'www.rhapsody.com/')) {
+      return 'Rhapsody';
+    }
+    if (strpos($url, 'click.linksynergy')) {
+      return 'iTunes';
+    }
+    if (strpos($url, 'www.bestbuy.com')) {
+      return 'Best Buy';
+    }
+    if (strpos($url, 'www.bluecollardistro.com')) {
+      return 'Blue Collar Distro';
+    }
+    if (strpos($url, 'skyroo.com')) {
+      if (strpos($url, 'MP3')) {
+        return 'MP3s';
+      }
+      elseif (strpos($url, 'CDDVD')) {
+        return 'CD + DVD';
+      }
+      elseif (strpos($url, 'CD')) {
+        return 'CD';
+      }
+      else {
+        return 'Skyroo';
+      }
+    }
+    if (strpos($url, 'phobos.apple.com')) {
+      return 'iTunes';
+    }
+    else {
+      return '';
+    }
+  }
+}
+
+
+function sonybmg_discography_update_6001() {
+  $ret = array();
+
+  // For some reason, the field_rating field gives us hell when upgrading.
+  // Manually set this the module and active fields.
+  $global_settings = unserialize(db_result(db_query('SELECT global_settings from {content_node_field} WHERE field_name = "field_rating"')));
+  $global_settings['dynamic_target'] = 'comment_target_nid';
+  $global_settings['php_target'] = '';
+  db_query('UPDATE {content_node_field} SET global_settings = "%s", module = "fivestar", active = 1 WHERE field_name = "field_rating"', db_escape_string(serialize($global_settings)));
+  $ret[] = update_sql('UPDATE {content_node_field_instance} SET widget_module = "fivestar", widget_active = 1 WHERE field_name = "field_rating"');
+
+  return $ret;
+}
+
+/**
+ * Added fields to the track content type.  Update from the node type export.
+ */
+function sonybmg_discography_update_6002() {
+  drupal_install_modules(array('m2', 'm2_gracenote'));
+
+  $path = drupal_get_path('module', 'sonybmg_discography');
+  install_include(array('node', 'content', 'content_copy'));
+  install_content_copy_import_from_file($path .'/node.track.inc', 'track');
+
+  return array();
+}

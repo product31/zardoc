@@ -1,0 +1,17 @@
+<?php
+// $Id: 
+
+/**
+ * @file
+ * Installation file for sony share module.
+ */
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function sony_share_uninstall() {
+  $result = db_query('SELECT name FROM {variable} v WHERE LOCATE("sony_share_",v.name) > 0');
+  while ($row = db_fetch_object($result)) {
+    variable_del($row->name);
+  }
+}

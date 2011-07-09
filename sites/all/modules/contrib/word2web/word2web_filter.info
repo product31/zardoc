@@ -1,0 +1,4 @@
+; $Id$
+name = MS Word Filter
+description = Removes pesky Word tags added from "HTML" code pasted from MS Word.
+core = 6.x

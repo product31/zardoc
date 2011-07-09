@@ -1,0 +1,93 @@
+<?php
+// $Id: userpoints_retroactive.module,v 1.5 2009/01/13 04:54:30 kbahey Exp $
+
+// Based on a script by Miguel Figueiredo <elmig@debianpt.org>, 2006
+
+define(USERPOINTS_PERM_RETROACTIVE, 'retroactive userpoints');
+
+function userpoints_retroactive_help($path, $arg) {
+  switch ($path) {
+    case 'admin/settings/userpoints/retroactive':
+      $output = t('Calculate !points for nodes and comments created in the past.', userpoints_translation());
+      break;
+  }
+  return $output;
+}
+
+function userpoints_retroactive_menu() {
+  $items['admin/settings/userpoints/retroactive'] = array(
+    'page callback'    => 'userpoints_retroactive_page',
+    'title'            => t('Retroactive'),
+    'access arguments' => array(USERPOINTS_PERM_RETROACTIVE),
+    'type'             => MENU_NORMAL_ITEM
+  );
+
+  return $items;
+}
+
+function userpoints_retroactive_perm() {
+  return array (USERPOINTS_PERM_RETROACTIVE);
+}
+
+function userpoints_retroactive_page() {
+  return drupal_get_form('userpoints_retroactive', $form);
+}
+
+function userpoints_retroactive() {
+  $form = array();
+  
+  $form['confirm'] = array(
+    '#type'          => 'textfield',
+    '#title'         => t('Give users !points for nodes and comments they created in the past. Enter YES to reset', userpoints_translation()),
+    '#size'          => 3,
+    '#maxlength'     => 3,
+    '#default_value' => t('NO'));
+
+  $form['submit'] = array(
+    '#type'  => 'submit',
+    '#value' => t('Submit'));
+
+  return $form;
+}
+
+function userpoints_retroactive_submit($form, &$form_state) {
+  if ($form_state['values']['confirm'] == t('YES')) {
+    userpoints_retroactive_do();
+    drupal_set_message(t('!points awarded for past nodes and comments.', userpoints_translation()));
+  }
+}
+
+function userpoints_retroactive_do() {
+  userpoints_retroactive_nodes();
+  userpoints_retroactive_comments();
+  drupal_set_message(t('!points updated with node and comment values', userpoints_translation()));
+  drupal_goto('admin/settings/userpoints');
+}
+
+function userpoints_retroactive_nodes() {
+  $n_result = db_query("SELECT uid, type, COUNT(uid) AS val FROM {node} WHERE uid > 0 GROUP BY uid, type");
+  while($node = db_fetch_object($n_result)) {
+    $weight = variable_get(USERPOINTS_POST . $node->type, 0);
+    $params = array(
+      'uid' => $node->uid,
+      'points' => ($node->val * $weight),
+      'moderate' => false,
+      'operation' => 'Retroactive node',
+    );
+    userpoints_userpointsapi($params);
+  }
+}
+
+function userpoints_retroactive_comments() {
+  $weight = variable_get(USERPOINTS_POST_COMMENT, 0);
+  $c_result = db_query('SELECT uid, COUNT(uid) AS val FROM {comments} WHERE uid > 0 GROUP BY uid');
+  while($comment = db_fetch_object($c_result)) {
+    $params = array(
+      'uid' => $comment->uid,
+      'points' => ($comment->val * $weight),
+      'moderate' => false,
+      'operation' => 'Retroactive comments',
+    );
+    userpoints_userpointsapi($params);
+  }
+}

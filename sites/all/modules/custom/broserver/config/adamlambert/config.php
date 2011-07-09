@@ -1,0 +1,93 @@
+<?php
+$base_url = $GLOBALS['base_url'];
+
+$bro = new stdClass;
+
+// The id used to reference this config.
+$bro->id = 'adamlambert';
+
+// Always v1 for now.
+$bro->version = 'v1';
+
+// An administrative description.
+$bro->description = 'Adam Lambert';
+
+// The chat domain to use.
+$bro->domain = 'j.sonymusicdigital.com';
+
+// The chatroom base name to use
+$bro->chatroom = 'adamlambert';
+$bro->guest_chat = FALSE;
+$bro->drupal = TRUE;
+
+// The secret key to hash on
+$bro->secret_key = 'SECRET_KEY';
+
+$bro->forbidden_names = array(
+													'tgrayson',
+													'zroger',
+													'gtaylor',
+													'admin',
+													'administrator',
+													'adamlambert'
+													);
+
+// Is this a REAC artist? TRUE|FALSE
+$bro->REAC = TRUE;
+
+$bro->css = 'adam.css';
+
+// The ad code for the upper sponsorship spot.
+$bro->ad1 = '<a href="http://www.donorschoose.org/" target="_blank"><img src="'. $base_url .'/sites/all/modules/custom/broserver/config/adamlambert/adbox300x50.png" /></a>';
+
+// The ad code for the lower sponsorship spot.bor:0
+$bro->ad2 = '<a href="http://www.donorschoose.org/" target="_blank"><img src="'. $base_url .'/sites/all/modules/custom/broserver/config/adamlambert/adbottom468x60.jpg" /></a>';
+
+// The embed code for the media player.
+$bro->media = <<<EOD
+<!-- Start of Brightcove Player -->
+
+<div style="display:none">
+
+</div>
+
+<!--
+By use of this code snippet, I agree to the Brightcove Publisher T and C 
+found at http://corp.brightcove.com/legal/terms_publisher.cfm. 
+-->
+
+<script language="JavaScript" type="text/javascript" src="http://admin.brightcove.com/js/BrightcoveExperiences.js"></script>
+
+<object id="myExperience" class="BrightcoveExperience">
+  <param name="bgcolor" value="#FFFFFF" />
+  <param name="width" value="475" />
+  <param name="height" value="475" />
+  <param name="playerID" value="57165213001" />
+  <param name="publisherID" value="59121"/>
+  <param name="isVid" value="true" />
+  <param name="isUI" value="true" />
+  <param name="wmode" value="transparent" />
+</object>
+
+<!-- End of Brightcove Player -->
+EOD;
+
+// Timestamp for the countdown.
+$bro->countdown = mktime(15, 0, 0, 2, 11, 2010);
+
+// Or an image
+//$bro->countdown_image = 'wycleftop175x45.png';
+
+// Location of the logo, relative to this file.
+$bro->artist_logo = 'top425x45.png';
+
+$url = urlencode('http://www.wyclef.com/#auto-open');
+$title = urlencode('Wyclef Jean Live Sets');
+$bro->links = array(
+  'facebook' => "http://www.facebook.com/sharer.php?u=$url&t=$title",
+  'myspace' => "http://www.myspace.com/index.cfm?fuseaction=postto&t=$title&u=$url",
+  'twitter' => "http://twitter.com/home?status=$title - $url",
+  'digg' => "http://digg.com/submit?phase=2&url=$url&title=$title",
+  'delicious' => "http://del.icio.us/post?url=$url&title=$title",
+);
+

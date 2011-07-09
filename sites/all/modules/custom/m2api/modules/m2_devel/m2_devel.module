@@ -1,0 +1,102 @@
+<?php
+
+/**
+ * Implementation of hook_menu().
+ */
+function m2_devel_menu() {
+  $items = array();
+
+  $items['node/%node/m2'] = array(
+    'title' => 'M2',
+    'page callback' => 'm2_devel_node_page',
+    'page arguments' => array(1),
+    'access callback' => 'm2_devel_node_access',
+    'access arguments' => array(1),
+    'file' => 'm2_devel.pages.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 99,
+  );
+
+  $items['m2_devel'] = array(
+    'title' => 'M2 Devel',
+    'page callback' => 'm2_devel_view_manifest',
+    'access arguments' => array('access m2 devel pages'),
+    'file' => 'm2_devel.pages.inc',
+   );
+  $items['m2_devel/manifest'] = array(
+    'title' => 'Manifest',
+    'page callback' => 'm2_devel_view_manifest',
+    'access arguments' => array('access m2 devel pages'),
+    'file' => 'm2_devel.pages.inc',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+  $items['m2_devel/stores'] = array(
+    'title' => 'Stores',
+    'page callback' => 'm2_devel_view_stores',
+    'access arguments' => array('access m2 devel pages'),
+    'file' => 'm2_devel.pages.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['m2_devel/albums'] = array(
+    'title' => 'Albums',
+    'page callback' => 'm2_devel_view_type',
+    'page arguments' => array('albums'),
+    'access arguments' => array('access m2 devel pages'),
+    'file' => 'm2_devel.pages.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['m2_devel/tracks'] = array(
+    'title' => 'Tracks',
+    'page callback' => 'm2_devel_view_type',
+    'page arguments' => array('tracks'),
+    'access arguments' => array('access m2 devel pages'),
+    'file' => 'm2_devel.pages.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['m2_devel/products'] = array(
+    'title' => 'Products',
+    'page callback' => 'm2_devel_view_type',
+    'page arguments' => array('products'),
+    'access arguments' => array('access m2 devel pages'),
+    'file' => 'm2_devel.pages.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  $items['m2_devel/details/%/%'] = array(
+    'title' => 'Details',
+    'page callback' => 'm2_devel_item_details',
+    'page arguments' => array(2, 3),
+    'access arguments' => array('access m2 devel pages'),
+    'file' => 'm2_devel.pages.inc',
+  );
+  $items['m2_devel/details/%/%/view'] = array(
+    'title' => 'View',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -1,
+  );
+  $items['m2_devel/details/%/%/refresh'] = array(
+    'title' => 'Refresh',
+    'page callback' => 'm2_devel_item_invalidate',
+    'page arguments' => array(2, 3),
+    'access arguments' => array('access m2 devel pages'),
+    'file' => 'm2_devel.pages.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_perm().
+ */
+function m2_devel_perm() {
+  return array('access m2 devel pages');
+}
+
+/**
+ * Menu access callback for node/%node/m2 so we only show it on nodes with
+ * M2 info to users with the correct permissions.
+ */
+function m2_devel_node_access($node) {
+  return !empty($node->m2api_document->type) && !empty($node->m2api_document->id) && user_access('access m2 devel pages');
+}

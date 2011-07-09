@@ -1,0 +1,154 @@
+# Taiwan translation of sonybmg_discography (all releases)
+# Copyright (c) 2010 by the Taiwan translation team
+# Generated from files:
+#  sonybmg_discography/sonybmg_discography.theme.inc: n/a
+#  sonybmg_discography/sonybmg_discography.views_default.inc: n/a
+#  sonybmg_discography/sonybmg_discography.module: n/a
+#  sonybmg_discography/sonybmg_discography.install: n/a
+#  sonybmg_discography/sonybmg_discography.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sonybmg_discography (all releases)\n"
+"POT-Creation-Date: 2010-04-12 15:23-0500\n"
+"PO-Revision-Date: 2010-03-30 14:46-0500\n"
+"Language-Team: Taiwan\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: sonybmg_discography.theme.inc:77
+msgid "Buy It"
+msgstr ""
+
+#: sonybmg_discography.views_default.inc:13
+msgid "Displays artist discography"
+msgstr ""
+
+#: sonybmg_discography.views_default.inc:376
+msgid "Favorite Tracks"
+msgstr ""
+
+#: sonybmg_discography.views_default.inc:393
+msgid "A simple search for albums geared for easy use for the user."
+msgstr ""
+
+#: sonybmg_discography.views_default.inc:563
+msgid "Artists in alphabetical order."
+msgstr ""
+
+#: sonybmg_discography.module:71
+msgid "Track Listing"
+msgstr ""
+
+#: sonybmg_discography.module:108
+msgid "Home"
+msgstr "首頁"
+
+#: sonybmg_discography.module:109,15
+msgid "Music"
+msgstr "音樂"
+
+#: sonybmg_discography.module:138
+msgid "Album Buy It"
+msgstr ""
+
+#: sonybmg_discography.module:139
+msgid "Album Cover"
+msgstr ""
+
+#: sonybmg_discography.module:140
+msgid "Album Discography"
+msgstr ""
+
+#: sonybmg_discography.module:141
+msgid "Album Sitewide Buy It - Top"
+msgstr ""
+
+#: sonybmg_discography.module:142
+msgid "Album Sitewide Buy It - Bottom"
+msgstr ""
+
+#: sonybmg_discography.module:150
+msgid "Display Album"
+msgstr ""
+
+#: sonybmg_discography.module:152
+msgid "Latest album by release date (default)"
+msgstr ""
+
+#: sonybmg_discography.module:153
+msgid ""
+"The selected album will be displayed in this block, usually in page "
+"header and footer."
+msgstr ""
+
+#: sonybmg_discography.module:157
+msgid "No albums have been created for this language, or with no language."
+msgstr ""
+
+#: sonybmg_discography.module:213
+msgid "Discography"
+msgstr ""
+
+#: sonybmg_discography.module:426
+msgid "Add new track"
+msgstr ""
+
+#: sonybmg_discography.module:469
+msgid "Favorites"
+msgstr ""
+
+#: sonybmg_discography.module:470
+msgid "Add to Favorites"
+msgstr ""
+
+#: sonybmg_discography.module:471
+msgid "Add this item to My Favorites"
+msgstr ""
+
+#: sonybmg_discography.module:472
+msgid "Remove from Favorites"
+msgstr ""
+
+#: sonybmg_discography.module:473
+msgid "Remove this item from My Favorites"
+msgstr ""
+
+#: sonybmg_discography.module:520
+msgid "Save changes"
+msgstr ""
+
+#: sonybmg_discography.module:536
+msgid "Updated lyrics for track %track_title."
+msgstr ""
+
+#: sonybmg_discography.module:22
+msgid "Administer lyrics"
+msgstr ""
+
+#: sonybmg_discography.install:112
+msgid "Date module must be updated before discography can be updated."
+msgstr ""
+
+#: sonybmg_discography.install:228
+msgid ""
+"Discography content is still enabled on the site. <a "
+"href=\"!uninstall\">Uninstall the Discography section</a> to remove "
+"album and track content entirely."
+msgstr ""
+
+#: sonybmg_discography.info:0
+msgid "Discography Section"
+msgstr ""
+
+#: sonybmg_discography.info:0
+msgid ""
+"Implements an artist discography. Disabling this module will hide the "
+"Discography section. Uninstall to remove entirely."
+msgstr ""
+
+#: sonybmg_discography.info:0
+msgid "Sony BMG Site Features"
+msgstr ""
+

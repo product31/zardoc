@@ -1,0 +1,273 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Installation file for sonybmg_events_map.
+ * Provides a message to administrator telling them to add a google API key and enable the blocks.
+ */
+
+/*
+ * Implementation of hook_install().
+ * Using this to try to get blocks to load properly
+ */
+function sonybmg_events_map_install() {
+  _block_rehash();
+  menu_rebuild();
+}
+
+/**
+ * Implementation of hook_enable().
+ */
+function sonybmg_events_map_enable() {
+  $modules = array('system');
+  install_include($modules);
+  // If this is somesubdomain.rs.gdb-dev.com add the google API key for that, otherwise set a message telling user to do that.
+  global $base_url;
+  if(strpos($base_url, 'gdb-dev.com')) {
+    $key = 'ABQIAAAA1P6vBz0CKnLVelm4sfu7shQJ3_X3PqVPmRXBOzkK51RAq99HfBTk_UYL88V45TMMo6JSutaUGSp2Nw';
+    variable_set('googlemap_api_key', $key);
+    variable_set('location_geocode_google_apikey', $key);
+    drupal_set_message(t('The Google Maps API key has been set for the dev site. You will need to get a new key when moving to the live server.'));
+    // While we are here, enable the blocks in their default location 
+    _block_rehash();
+    // Have to use a db_query to set visibility for overview map
+    install_set_block('views', 'tour_map-block_1', variable_get('theme_default', '_starter'), 'content_top', 0);
+    db_query("UPDATE {blocks} SET region = '%s', status = 1, visibility = %d, pages = '%s' WHERE module = '%s' AND delta = '%s' AND theme = '%s'", 'content_top', 1, 'events', 'views', 'tour_map-block_1', variable_get('theme_default', '_starter'));
+    install_set_block('gmap_location', 0, variable_get('theme_default', '_starter'), 'content_top', 0);
+  }
+  else {
+    drupal_set_message(t('To set up maps for events, you now need to get an API key from Google and then enable the map blocks. Full instructions are at the <a href="@help-link">event map help page</a>', array('@help-link' => url('admin/settings/eventmap'))));
+  }
+  // Enable the map defaults and location fields for date content type
+  sonybmg_events_set_map_defaults();
+  // Set the permissions
+  sonybmg_events_map_set_permissions();
+
+  // Delete unecessary menu items
+  menu_rebuild();
+  $menu_items = array(
+    'map/node', 'map/user'
+  );
+  foreach ($menu_items as $path) {
+    db_query("UPDATE {menu_links} SET hidden = 1 WHERE menu_name = 'navigation' AND link_path = '%s'", $path);
+    if (db_affected_rows()) {
+      drupal_set_message(t('Disabled the %path menu item.', array('%path' => $path)));
+    } else {
+      drupal_set_message(t('Could not disable the %path menu item.', array('%path' => $path)));
+    }
+  }
+  menu_cache_clear('navigation');
+}
+
+/*
+ * Set Permissions for mapping
+ */
+function sonybmg_events_map_set_permissions() {
+  $admin_rid = variable_get('multisite_administrator_rid', FALSE);
+  $moderator_rid = variable_get('multisite_moderator_rid', FALSE);
+  $artist_rid = variable_get('multisite_artist_rid', FALSE);
+  $permissions = array(
+    'submit latitude/longitude',
+  );
+  if ($admin_rid) { install_add_permissions($admin_rid, $permissions); }
+  else { drupal_set_message(t('Could not enable admin permissions for Events Map. Please set permissions manually')); }
+  if ($moderator_rid) { install_add_permissions($moderator_rid, $permissions); }
+  else { drupal_set_message(t('Could not enable moderator permissions for Events Map. Please set permissions manually')); }
+  if ($artist_rid) { install_add_permissions($artist_rid, $permissions); }
+  else { drupal_set_message(t('Could not enable artist permissions for Events Map. Please set permissions manually')); }
+  install_add_permissions(1, array('view node map'));
+  install_add_permissions(2, array('view node map'));
+}
+
+/*
+ * Set up mapping defaults
+ */
+function sonybmg_events_set_map_defaults() {
+  $location_settings_node_date = array (
+    'multiple' => 
+    array (
+      'min' => '0',
+      'max' => '1',
+      'add' => '1',
+    ),
+    'form' => 
+    array (
+      'weight' => 0,
+      'collapsible' => 0,
+      'collapsed' => 0,
+      'fields' => 
+      array (
+        'name' => 
+        array (
+          'collect' => '0',
+          'default' => '',
+          'weight' => '2',
+        ),
+        'street' => 
+        array (
+          'collect' => '1',
+          'default' => '',
+          'weight' => '4',
+        ),
+        'additional' => 
+        array (
+          'collect' => '0',
+          'default' => '',
+          'weight' => '6',
+        ),
+        'city' => 
+        array (
+          'collect' => '1',
+          'default' => '',
+          'weight' => '8',
+        ),
+        'province' => 
+        array (
+          'collect' => '1',
+          'default' => '',
+          'weight' => '10',
+        ),
+        'postal_code' => 
+        array (
+          'collect' => '1',
+          'default' => '',
+          'weight' => '12',
+        ),
+        'country' => 
+        array (
+          'collect' => '1',
+          'default' => 'us',
+          'weight' => '14',
+        ),
+        'locpick' => 
+        array (
+          'collect' => '0',
+          'weight' => '20',
+        ),
+      ),
+    ),
+    'display' => 
+    array (
+      'weight' => 0,
+      'hide' => 
+      array (
+        'name' => 0,
+        'street' => 0,
+        'additional' => 0,
+        'city' => 0,
+        'province' => 0,
+        'postal_code' => 0,
+        'country' => 0,
+        'locpick' => 0,
+        'province_name' => 0,
+        'country_name' => 0,
+        'map_link' => 0,
+        'coords' => 0,
+      ),
+      'teaser' => 0,
+      'full' => 0,
+    ),
+    'rss' => 
+    array (
+      'mode' => 'simple',
+    ),
+  );
+  variable_set('location_settings_node_date', $location_settings_node_date);
+  variable_set('location_maxnum_date', '1');
+  variable_set('location_geocode_us', 'google');
+  variable_set('location_general_geocoders_in_use', 'google');
+  variable_set('location_display_location', '1');
+  variable_set('location_default_country', 'us');
+  variable_set('location_defaultnum_date', '1');
+  $gmap_node_markers = array (
+    'poll' => 'drupal',
+    'album' => 'drupal',
+    'blog' => 'drupal',
+    'buddy_icon' => 'drupal',
+    'comment' => 'drupal',
+    'date' => 'gray',
+    'fan' => 'drupal',
+    'forum' => 'drupal',
+    'forum_reply' => 'drupal',
+    'landingpage' => 'drupal',
+    'news' => 'drupal',
+    'official_photo' => 'drupal',
+    'page' => 'drupal',
+    'photo' => 'drupal',
+    'review' => 'drupal',
+    'track' => 'drupal',
+    'wallpaper' => 'drupal',
+    'feed' => 'drupal',
+    'keshot' => 'drupal',
+  );
+  variable_set('gmap_node_markers', $gmap_node_markers);
+  $gmap_node_map = array (
+    'macro' => '[gmap |id=nodemap|center=40,0|zoom=3|width=100%|height=400px]',
+    'header' => 'This map illustrates the locations of the nodes on this website. Each marker indicates a node associated with a specific location.',
+    'footer' => '',
+    'markermode' => '1',
+  );
+  variable_set('gmap_node_map', $gmap_node_map);
+  variable_set('gmap_mm_type', 'gmap');
+  variable_set('gmap_location_block_macro', '[gmap |width=100% |height=330px |control=Small |behavior=+autozoom +notype]');
+  $gmap_default = array (
+    'width' => '300px',
+    'height' => '200px',
+    'latlong' => '39.50404070558415,-101.25',
+    'zoom' => '3',
+    'maxzoom' => '14',
+    'styles' => 
+    array (
+      'line_default' => 
+      array (
+        0 => '0000ff',
+        1 => '5',
+        2 => '45',
+        3 => '',
+        4 => '',
+      ),
+      'poly_default' => 
+      array (
+        0 => '000000',
+        1 => '3',
+        2 => '25',
+        3 => 'ff0000',
+        4 => '45',
+      ),
+    ),
+    'controltype' => 'Small',
+    'mtc' => 'standard',
+    'maptype' => 'Map',
+    'baselayers' => 
+    array (
+      'Map' => 1,
+      'Satellite' => 1,
+      'Hybrid' => 1,
+      'Physical' => 0,
+    ),
+    'behavior' => 
+    array (
+      'locpick' => false,
+      'nodrag' => 0,
+      'nokeyboard' => 1,
+      'nomousezoom' => 0,
+      'nocontzoom' => 0,
+      'autozoom' => 1,
+      'dynmarkers' => 0,
+      'overview' => 0,
+      'collapsehack' => 0,
+      'scale' => 0,
+      'extramarkerevents' => false,
+      'clickableshapes' => false,
+    ),
+    'markermode' => '0',
+    'line_colors' => 
+    array (
+      0 => '#00cc00',
+      1 => '#ff0000',
+      2 => '#0000ff',
+    ),
+  );
+  variable_set('gmap_default', $gmap_default);
+}

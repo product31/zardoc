@@ -1,0 +1,335 @@
+<?php
+/**
+ * M2 API Stuff...
+ * Ingest all item details for every album or track.
+ *   - Updateable. we need updated prices.
+ *
+ * To use there may be a couple things that need to be done.
+ * 1) the store name needs to be set. This is stored in the
+ *   "m2api_default_store" variable so it can be set in settings.php or through
+ *   and other variable setting methods.
+ * 2) Set the API key. If the store has a API key, this should be set as well.
+ *
+ * TODO Import/update should probably look for nodes of the correct type that match new imports rather than blindly making new nodes.
+ * TODO Several more fine grained mappings of data. These should all be marked inline with todo tags.
+ * TODO Theme function for album/track add to cart buttons.
+ * TODO There should probably be nodeapi hooks to integrate publishing our data to nodes for use by other systems.
+ */
+
+define('M2API_DOCUMENT_STATUS_NEW', 1);
+define('M2API_DOCUMENT_STATUS_CHANGED', 2);
+define('M2API_DOCUMENT_STATUS_UNCHANGED', 3);
+
+
+function m2api_debug() {
+  if (variable_get('m2api_debug_mode', TRUE)) {
+    $args = func_get_args();
+    call_user_func_array('dpm', $args);
+  }
+}
+
+function m2api_admin_message($message, $args = array(), $type = 'status') {
+  if (user_access('administer site configuration')) {
+    drupal_set_message(t($message, $args), $type);
+  }
+}
+
+/**
+ * Implementation of hook_ctools_plugin_directory().
+ */
+function m2api_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'm2api') {
+    return 'plugins/' . $plugin;
+  }
+}
+
+function m2api_ctools_plugin_product() {
+  return array(
+    'cache' => variable_get('m2api_debug_mode', TRUE) == FALSE,
+    'defaults' => 'm2api_product_plugin_defaults',
+  );
+}
+
+/**
+ * Apply default values to product plugins.
+ */
+function m2api_product_plugin_defaults($info, &$plugin) {
+  $defaults = array(
+    'cache_ttl' => 60 * 60,
+    'plural' => $plugin['name'] . 's',
+    'default_settings' => array(),
+  );
+
+  // Apply defaults. Array addition will not overwrite pre-existing keys.
+  $plugin += $defaults;
+}
+
+/**
+ * Implementation of hook_perm().
+ */
+function m2api_perm() {
+  return array('administer m2');
+}
+
+/**
+ * Implementation of hook_menu().
+ *
+ * This just contains some methods I used for testing things against the API.
+ * I wouldn't not enable this on a live site but it can be handy for development.
+ */
+function m2api_menu() {
+  $items = array();
+
+  $items['admin/content/m2api'] = array(
+    'title' => 'M2',
+    'description' => 'Manage content from M2.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('m2api_album_id_match_form'),
+    'file' => 'includes/id_matching.inc',
+    'access arguments' => array('administer m2'),
+  );
+  $items['admin/content/m2api/id_matcher'] = array(
+    'title' => 'Associate IDs',
+    'description' => 'Associate existing albums and tracks with M2.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('m2api_album_id_match_form'),
+    'file' => 'includes/id_matching.inc',
+    'access arguments' => array('administer m2'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+  $items['admin/content/m2api/id_matcher/albums'] = array(
+    'title' => 'Albums',
+    'access arguments' => array('administer m2'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' =>'-2',
+  );
+  $items['admin/content/m2api/id_matcher/tracks'] = array(
+    'title' => 'Tracks',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('m2api_track_id_match_form'),
+    'access arguments' => array('administer m2'),
+    'file' => 'includes/id_matching.inc',
+    'weight' =>'-1',
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  $items['admin/content/m2api/sync'] = array(
+    'title' => 'Sync',
+    'description' => 'Import albums and tracks from M2.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('m2api_batch_content_import_form'),
+    'file' => 'includes/batch.inc',
+    'access arguments' => array('administer m2'),
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['admin/content/m2api/sync/music'] = array(
+    'title' => 'Music',
+    'access arguments' => array('administer m2'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+
+  $items['admin/settings/m2'] = array(
+    'title' => 'M2 Settings',
+    'description' => 'Configure settings for accessing M2 API.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('m2api_admin_settings'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'm2api.admin.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function m2api_theme() {
+  return array(
+    'm2api_album_id_match_form' => array(
+      'arguments' => array('form' => NULL),
+      'file' => 'includes/id_matching.inc',
+    ),
+    'm2api_track_id_match_form' => array(
+      'arguments' => array('form' => NULL),
+      'file' => 'includes/id_matching.inc',
+    ),
+  );
+}
+
+function m2api_get_store() {
+  return variable_get('m2api_default_store', '');
+}
+
+/**
+ * Alias to ctools include.
+ *
+ * @param string $file
+ * Include file to include. api => api.inc
+ * @return unknown_type
+ */
+function m2api_include($file) {
+  ctools_include('plugins');
+
+  if (ctools_api_version('1.3')) {
+    ctools_include($file, 'm2api');
+  }
+  else {
+    $module = 'm2api';
+    $dir = 'includes';
+
+    // Straight implementation of the newer ctools_include function until we get the newer version installed.
+    static $used = array();
+    if (!isset($used[$module][$dir][$file])) {
+      require_once './' . drupal_get_path('module', $module) . "/$dir/$file.inc";
+    }
+
+    $used[$file] = TRUE;
+  }
+}
+
+/**
+ * List of node type that can be associated with M2 type.
+ *
+ * @param $reset
+ *   Boolean indicating that the list should be reloaded.
+ * @return
+ *   Array with node types as keys and array of M2 document types as values.
+ */
+function m2api_node_types($reset = FALSE) {
+  static $types;
+
+  if (!isset($types) || $reset) {
+    $types = array(
+      'album' => array('album'),
+      'track' => array('track'),
+    );
+    drupal_alter('m2api_node_types', $types);
+  }
+
+  return $types;
+}
+
+function m2api_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  // Verify that it's one of our types.
+  $types = m2api_node_types();
+  if (!isset($types[$node->type])) {
+    return;
+  }
+
+  switch ($op) {
+    case 'load':
+      m2api_include('api');
+      $tnid = empty($node->tnid) ? $node->nid : $node->tnid;
+      $node->m2api_document = db_fetch_object(db_query('SELECT m2id AS id, type FROM {m2api_nodes} WHERE nid = %d', $tnid));
+      $node->m2api_products = m2api_product_load_references($tnid);
+      break;
+
+    case 'insert':
+    case 'update':
+      // Make changes if this is untranslated or the source translation.
+      if (empty($node->tnid) || $node->tnid == $node->nid) {
+        m2api_include('api');
+
+        // Make sure it's structured as an object.
+        if (isset($node->m2api_document)) {
+          $node->m2api_document = (object) $node->m2api_document;
+        }
+
+        if (isset($node->m2api_document->id)) {
+          if (empty($node->m2api_document->id) && empty($node->m2api_document->type)) {
+            db_query('DELETE FROM {m2api_nodes} WHERE nid = %d', $node->nid);
+            m2api_product_remove_all_references($node->nid);
+          }
+          else {
+            db_query("REPLACE INTO {m2api_nodes} (nid, m2id, type) VALUES (%d, %d, '%s')", $node->nid, $node->m2api_document->id, $node->m2api_document->type);
+          }
+        }
+
+        // Add all instances as products, and update references for it.
+        if (isset($node->m2api_document->instances)) {
+          m2api_product_remove_all_references($node->nid);
+
+          // Add all instances as products, and update references for it.
+          foreach ($node->m2api_document->instances as $product) {
+            // Depending on how the document was requested, the instances
+            // property may may not have been expanded. If not, we need to fetch
+            // the full document so we can record the type.
+            if (!is_object($product)) {
+              $product = m2api_document_load($product);
+            }
+            m2api_product_create_reference($node->nid, $product->id, $product->type);
+          }
+        }
+      }
+      break;
+
+    case 'delete':
+      // Only remove the ids if this is untranslated.
+      if (empty($node->tnid)) {
+        m2api_include('api');
+        db_query('DELETE FROM {m2api_nodes} WHERE nid = %d', $node->nid);
+        m2api_include('api');
+        m2api_product_remove_all_references($node->nid);
+      }
+      break;
+
+    case 'prepare translation':
+      $node->m2api_document = $node->translation_source->m2api_document;
+      $node->m2api_products = array();
+      foreach ($node->translation_source->m2api_products as $product) {
+        $node->m2api_document->instances[] = $product;
+      }
+      break;
+  }
+}
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function m2api_form_alter(&$form, $form_state, $form_id) {
+  $types = m2api_node_types();
+  if (isset($form['type']['#value']) && isset($form['#node'])
+    && $form['type']['#value'] .'_node_form' == $form_id
+    // Check for supported type.
+    && isset($types[$form['#node']->type])
+    // Only allow editing of untranslated nodes or source translations.
+    && (empty($form['#node']->tnid) || $form['#node']->tnid == $form['#node']->nid)
+  ) {
+    m2api_include('api');
+
+    // TODO: Should limit the drop down to those in $types[$node->type]
+    $doc_types = array(NULL => t('- Not Specified -'));
+    foreach (ctools_get_plugins('m2api', 'product') as $type => $info) {
+      $doc_types[$type] = $info['name'];
+    }
+    $m2api_document = ((array) $form['#node']->m2api_document) + array('id' => NULL, 'type' => NULL);
+
+    $form['m2api_document'] = array(
+      '#title' => t('M2 Info'),
+      '#type' => 'fieldset',
+      '#tree' => TRUE,
+      '#access' => user_access('administer m2'),
+    );
+    $form['m2api_document']['id'] = array(
+      '#title' => t('Id'),
+      '#type' => 'textfield',
+      '#default_value' => $m2api_document['id'],
+    );
+    $form['m2api_document']['type'] = array(
+      '#title' => t('Type'),
+      '#type' => 'select',
+      '#default_value' => $m2api_document['type'],
+      '#options' => $doc_types,
+    );
+  }
+}
+
+/**
+ * Implementation of hook_views_api().
+ */
+function m2api_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'm2api') . '/views',
+  );
+}

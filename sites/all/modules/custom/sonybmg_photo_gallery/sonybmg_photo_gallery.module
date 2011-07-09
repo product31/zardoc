@@ -1,0 +1,846 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Photo galleries custom for the artist platform.
+ *
+ * These functions implement standard Drupal hooks to
+ * accomplish various integration tasks, like breadcrumbing and so on.
+ */
+
+// Strip Site Title to only show Artist Name
+define('PHOTO_ARTIST_NAME', str_replace(array('The Official', 'Site'), '', variable_get('site_name', '')));
+
+/**
+ * Implementation of hook_term_path().
+ */
+function sonybmg_photo_gallery_term_path($term) {
+  return "photos/latest/$term->tid";
+}
+
+/**
+ * Implementation of hook_block().
+ */
+function sonybmg_photo_gallery_block($op = 'list', $delta = 0, $edit = array()) {
+  if ($op == 'list') {
+    $blocks['galleries']['info'] = t("Photo galleries");
+    $blocks['galleries_compact']['info'] = t("Photo galleries (Compact)");
+    $blocks['official_featured']['info'] = t("Photos official (featured)");
+    $blocks['official_latest']['info'] = t("Photos official (latest)");
+    $blocks['user_featured']['info'] = t("Photos user (featured)");
+    $blocks['photos_pager'] = array(
+      'info' => t("Photos Pager"),
+      'cache' => BLOCK_CACHE_PER_PAGE,
+    );
+
+    // Get gallery vocabularies and generate a latest block for each one
+    $ovid = variable_get('sonybmg_photo_gallery_official_vocabulary', 0);
+    $terms = taxonomy_get_tree($ovid);
+    foreach ($terms as $term) {
+      $blocks['official_latest_'. $term->tid]['info'] = t("Photos official (latest @name)", array('@name' => $term->name));
+      $blocks['official_featured_'. $term->tid]['info'] = t("Photos official (featured @name)", array('@name' => $term->name));
+    }
+
+    return $blocks;
+  }
+  elseif ($op == 'configure') {
+    $form = array();
+    if ($delta == 'user_featured' || strstr($delta, 'official_latest') || strstr($delta, 'official_featured')) {
+      $options = array();
+      foreach(imagecache_presets() as $id => $preset) {
+        $options[$preset['presetname']] = $preset['presetname'];
+      }
+      $form['preset'] = array(
+        '#type' => 'select',
+        '#options' => $options,
+        '#title' => t('Image display'),
+        '#default_value' => variable_get('sonybmg_photo_gallery_'. $delta .'_preset', 'preview'),
+        '#description' => t('The individual image will be displayed using this preset. To configure your presets, visit the <a href="!path">imagecache settings page</a>.', array('!path' => url('admin/settings/imagecache'))),
+      );
+    }
+    return $form;
+  }
+  elseif ($op == 'save') {
+    if ($delta == 'user_featured' || strstr($delta, 'official_latest') || strstr($delta, 'official_featured')) {
+      variable_set('sonybmg_photo_gallery_'. $delta .'_preset', $edit['preset']);
+    }
+    return;
+  }
+  elseif ($op == 'view' && user_access('access content')) {
+    switch ($delta) {
+      case 'galleries':
+        $block['subject'] = t('Fan Photos');
+        //$block['content'] = theme('sonybmg_photo_gallery_categories');
+        $block['content'] = sonybmg_photo_gallery_categories();
+      break;
+      case 'galleries_compact':
+        $block['subject'] = t('Fan Photos');
+        $block['content'] = theme('sonybmg_photo_gallery_categories_compact');
+        break;
+      case 'official_featured':
+        $preset = variable_get('sonybmg_photo_gallery_'. $delta .'_preset', 'preview');
+        $block['subject'] = t('Official @artist Photos', array('@artist' => PHOTO_ARTIST_NAME));
+        $block['content'] = theme('sonybmg_photo_gallery_block', 'photos_random', array('official_photo', 'all', 'promo'), 'photos_official', array('all'), $preset);
+        break;
+      case 'official_latest':
+        $tid = variable_get('sonybmg_photo_gallery_latest_term', 'all');
+        $preset = variable_get('sonybmg_photo_gallery_'. $delta .'_preset', 'preview');
+        $block['subject'] = t('Official @artist Photos', array('@artist' => PHOTO_ARTIST_NAME));
+        $block['content'] = theme('sonybmg_photo_gallery_block', 'photos_official', array($tid), 'photos_official', array($tid), $preset);
+        break;
+      case 'user_featured':
+        $preset = variable_get('sonybmg_photo_gallery_'. $delta .'_preset', 'preview');
+        $block['subject'] = t('Featured @artist Fan Photo', array('@artist' => PHOTO_ARTIST_NAME));
+        $block['content'] = theme('sonybmg_photo_gallery_block', 'photos_random', array('photo', 'all', 'promo'), NULL, NULL, $preset);
+        break;
+      case 'photos_pager':
+        if (arg(0) == 'node' && is_numeric(arg(1))) {
+          $count = variable_get('sonybmg_photo_gallery_pager_count', 5);
+          $block['content'] = sonybmg_photo_gallery_pager(arg(1), $count);
+        }
+        break;
+    }
+
+    // Dynamic block deltas
+    if (strstr($delta, 'official_latest_') || strstr($delta, 'official_featured_')) {
+      // Get gallery vocabularies and generate a latest block for each one
+      $ovid = variable_get('sonybmg_photo_gallery_official_vocabulary', 0);
+      $terms = taxonomy_get_tree($ovid);
+      foreach ($terms as $term) {
+        if ($delta == 'official_latest_'. $term->tid) {
+          $block['subject'] = t("Latest @name", array('@name' => $term->name));
+          $block['content'] = theme('sonybmg_photo_gallery_block', 'photos_official', array($term->tid), 'photos_official', array($term->tid), variable_get('sonybmg_photo_gallery_'. $delta .'_preset', 'preview'));
+          break;
+        }
+        elseif ($delta == 'official_featured_'. $term->tid) {
+          $block['subject'] = check_plain($term->name);
+          $block['content'] = theme('sonybmg_photo_gallery_block', 'photos_random', array('official_photo', $term->tid, 'promo'), 'photos_official', array($term->tid), variable_get('sonybmg_photo_gallery_'. $delta .'_preset', 'preview'));
+          break;
+        }
+      }
+    }
+
+    return $block;
+  }
+}
+
+function sonybmg_photo_gallery_block_visibility($delta) {
+  switch($delta) {
+    case 'photos_pager':
+      if($node = menu_get_object('node', 1)) {
+        if ($node->type == "photo" || $node->type == "official_photo") {
+          return TRUE;
+        }
+      }
+      break;
+
+    case 'photos_user-block_1':
+      if (arg(0) == 'user') {
+        return TRUE;
+      }
+      break;
+
+  }
+  return false;
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+
+function sonybmg_photo_gallery_menu() {
+  $items = array();
+
+  $items['photos'] = array(
+    'title' => t('Photos'),
+    'page callback' => 'sonybmg_photo_gallery_main_page',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'sonybmg_photo_gallery.pages.inc',
+  );
+  $items['photos/latest/%'] = array(
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('access content'),
+    'page callback' => 'sonybmg_term_goto',
+    'file' => 'sonybmg.pages.inc',
+    'file path' => drupal_get_path('module', 'sonybmg'),
+    'page arguments' => array(2),
+  );
+  $items['supersize'] = array(
+    'page callback' => 'sonybmg_photo_gallery_supersize_page',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'sonybmg_photo_gallery.pages.inc',
+  );
+  $items['photo_gallery/pager'] = array(
+    'page callback' => 'sonybmg_photo_gallery_pager_ajax',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'file' => 'sonybmg_photo_gallery.pages.inc',
+  );
+  $items['admin/settings/photo_gallery'] = array(
+    'title' => 'Photo gallery',
+    'description' => 'Configure the taxonomy vocabularies and settings for the online photo gallery.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sonybmg_photo_gallery_settings_form'),
+    'access arguments' => array('administer photo gallery'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'sonybmg_photo_gallery.admin.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_perm().
+ */
+function sonybmg_photo_gallery_perm() {
+  return array('administer photo gallery');
+}
+
+/**
+ * Implementation of hook_views_api().
+ */
+function sonybmg_photo_gallery_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'sonybmg_photo_gallery'),
+  );
+}
+
+/**
+ * Implementation of hook_form_alter().
+ */
+//function sonybmg_photo_gallery_form_photo_node_form_alter(&$form, &$form_state) {
+function sonybmg_photo_gallery_form_alter(&$form, &$form_state, $form_id) {
+  if($form_id != 'photo_node_form') {
+    return;
+  }
+  // turn the photo gallery into radio buttons
+  $vid = variable_get('sonybmg_photo_gallery_user_vocabulary', 0);
+
+  $form['taxonomy'][$vid]['#type'] = 'radios';
+
+  $new_opts = array();
+  if (is_array($form['taxonomy'][$vid]['#options'])) {
+    // create a list of choices formatted for radios
+    foreach ($form['taxonomy'][$vid]['#options'] as $option) {
+      if (is_array($option->option)) {
+        $new_opts[array_shift(array_keys($option->option))] = array_shift($option->option);
+      }
+    }
+
+    // update the current choices with the new format
+    $form['taxonomy'][$vid]['#options'] = $new_opts;
+
+    // set the default option
+    if (is_array($form['taxonomy'][$vid]['#default_value'])) {
+      $form['taxonomy'][$vid]['#default_value'] = $form['taxonomy'][$vid]['#default_value'][0];
+    }
+    // or remove the default option altogether
+    else {
+      $form['taxonomy'][$vid]['#default_value'] = FALSE;
+    }
+  }
+
+  // remove the default theming and change the title to Gallery
+  unset($form['taxonomy'][$vid]['#theme']);
+
+  // unset the preview, delete, and upload buttons
+  unset($form['buttons']['preview']);
+
+//  unset($form['field_photo']['upload']);
+//  foreach ($form['field_photo'] as $key => $field) {
+//    if (is_numeric($key)) {
+//      unset($form['field_photo'][$key]['flags']['delete']);
+//    }
+//  }
+
+  // remove the field set around the upload form field
+  unset($form['field_photo']['#title']);
+  // add some directions to the upload text field now
+  foreach ($form['field_photo'] as $key => $field) {
+    if (is_numeric($key)) {
+      //unset($form['field_photo'][$key]['flags']['delete']);
+      $form['field_photo'][$key]['#size'] = 30;
+      $form['field_photo'][$key]['#title'] = t('Photo');
+    }
+  }
+//  // add extra validation to check filetype
+//  $form['field_photo']['#validate']['sonybmg_photo_gallery_upload_validate'] = array('field_photo_upload');
+//
+//  // add a custom theme function for the form
+  $form['#theme'] = 'gallery_photo_form';
+
+  // TODO: Implement event/photo association? I believe this feature has been
+  // cut from the multisite project --Nate
+  //$djs = drupal_get_path('module', 'photo_gallery') . '/photo_gallery.js';
+  //drupal_add_js($djs);
+
+}
+
+function sonybmg_photo_gallery_upload_validate($form_element, $field_name) {
+  foreach (element_children($form_element) as $delta) {
+    // Check existence
+    if ($type = $form_element[$delta]['filemime']['#value']) {
+      // Check type
+      switch ($type) {
+        case 'image/png':
+        case 'image/gif':
+        case 'image/jpeg':
+        case 'image/pjpeg': // IE for jpegs
+          break;
+        default:
+          form_set_error($field_name, t('Only jpg, png, and gif format images may be uploaded.'));
+      }
+    }
+  }
+}
+
+/**
+ * Custom theme function for photo edit form. Can be overriden by theme layer
+ */
+function theme_gallery_photo_form($form) {
+  $output = '';
+  foreach (element_children($form) as $child) {
+    switch ($form[$child]['#type']) {
+      case 'value':
+      case 'hidden':
+      case 'token':
+      case 'fieldset':
+        $output .= drupal_render($form[$child]);
+        break;
+      case 'button':
+      case 'submit':
+        if ($form[$child]['#value'] == 'Preview') {
+          // we must do a drupal_render anyways, just dont add it to the output
+          drupal_render($form[$child]);
+        }
+        else {
+          $output .= drupal_render($form[$child]);
+        }
+        break;
+      default:
+        $output .= '<div class = "photo-form-block">';
+        $output .= '<div class = "photo-form-content">'. drupal_render($form[$child]) .'</div>';
+        $output .= '</div>';
+        break;
+    }
+  }
+
+  return $output . drupal_render($form);
+}
+
+//============================================
+// Theming code goes here.
+//============================================
+
+/**
+ * Implementation of hook_theme.
+ */
+function sonybmg_photo_gallery_theme() {
+  return array(
+    'sonybmg_photo_gallery_main_page' => array(),
+    'sonybmg_photo_gallery_categories' => array('arguments' => array('terms' => array())),
+    'sonybmg_photo_gallery_categories_compact' => array(),
+    'sonybmg_photo_gallery_block' => array(
+      'arguments' => array(
+        'view_name' => NULL,
+        'args' => NULL,
+        'count_view_name' => NULL,
+        'count_args' => array(),
+        'imagecache_preset' => 'preview',
+      ),
+    ),
+    'sonybmg_photo_gallery_pager' => array(
+      'arguments' => array(
+        'nid' => NULL,
+        'pager_nodes' => NULL,
+        'count' => 7,
+        'page' => NULL,
+        'event_id' => NULL,
+      ),
+    ),
+    'sonybmg_photo_gallery_supersize_page' => array(
+      'arguments' => array(
+        'photo' => NULL,
+        'title' => NULL,
+        'ad1' => NULL,
+        'ad2' => NULL,
+      ),
+    ),
+    'gallery_photo_form' => array(
+      'arguments' => array('form' => array()),
+    ),
+  );
+}
+
+/**
+ * Get an array of all terms within a vocabulary, localizing the name and
+ * description if i18ntaxonomy is available
+ */
+function sonybmg_photo_gallery_get_terms($vid) {
+  static $vocs = array();
+
+  if(!isset($vocs[$vid])) {
+    $terms = array();
+    $result = db_query('SELECT t.* FROM {term_data} t WHERE t.vid = %d ORDER BY t.vid ASC, t.weight ASC', $vid);
+    while($term = db_fetch_object($result)) {
+      $terms[] = $term;
+    }
+    if(function_exists('i18ntaxonomy_localize_terms')) {
+      $terms = i18ntaxonomy_localize_terms($terms, array('name', 'description'));
+    }
+
+    $vocs[$vid] = $terms;
+  }
+
+  return $vocs[$vid];
+}
+
+function sonybmg_photo_gallery_categories() {
+  // The vocabulary we're using for photo galleries
+  $uvid = variable_get('sonybmg_photo_gallery_user_vocabulary', 0);
+  $terms = sonybmg_photo_gallery_get_terms($uvid);
+
+  foreach($terms as $i => $term) {
+    //$view_nodes = views_build_view('items', $view, array('all', $term->tid), FALSE, 1);
+    $view = views_get_view('photos_rated');
+    $view->args = array('all', $term->tid);
+    $view->execute();
+    $view_nodes = $view->result;
+    $term->node = $view_nodes[0];
+
+    if ($term->node->node_data_field_photo_field_photo_fid) {
+      $term->photo = db_fetch_array(db_query('SELECT * FROM {files} WHERE fid = %d', $term->node->node_data_field_photo_field_photo_fid));
+    }
+
+    $term->count = db_result(db_query("SELECT count(*) as count FROM {node} n INNER JOIN {term_node} tn ON tn.nid = n.nid WHERE tn.tid = %d AND (n.type = 'photo' OR n.type = 'official_photo') AND moderate = 0 AND status = 1", $term->tid));
+
+    // foreach doesn't reference, so manually overwrite the original term
+    $terms[$i] = $term;
+  }
+
+  return theme('sonybmg_photo_gallery_categories', $terms);
+}
+
+/**
+ * Theme Hot Photos Block
+ */
+function theme_sonybmg_photo_gallery_categories($terms) {
+  $output = '<div class="gallery clear-block">';
+  $output .= variable_get('sonybmg_photo_gallery_additional_user_markup', '');
+
+  foreach($terms as $term) {
+    $output .= '<div class="gallery-box clear-block">';
+    if ($term->photo) {
+      $output .= l(theme('imagecache', 'icon_large', $term->photo['filepath']), "node/". $term->node->nid, array('attributes' => array('class' => 'gallery-thumb'), 'html' => TRUE));
+    }
+
+    if(empty($term->node)) {
+      $path = 'node/add/photo';
+      $text = t('<strong>Upload your images</strong>');
+    }
+    else {
+      $path = 'node/'. $term->node->nid;
+      $text = format_plural($term->count, '<strong>1</strong> image', '<strong>@count</strong> images');
+    }
+
+    $output .= '<div class="gallery-item clear-block">';
+    $output .= '<h3>'. l($term->name, $path) .'</h3>';
+    $output .= "<p>$term->description</p>";
+    $output .= '<div class="more">'. l($text, $path, array('html' => TRUE)) .'</div>';
+    $output .= '</div></div>';
+  }
+
+  $output .= '</div>';
+
+  $output .= theme('sonybmg_upload', 'photo');
+
+  return $output;
+}
+
+/**
+ * Theme Photo categories sidebar
+ */
+function theme_sonybmg_photo_gallery_categories_compact() {
+  // The vocabulary we're using for photo galleries
+  $uvid = variable_get('sonybmg_photo_gallery_user_vocabulary', 0);
+
+  $result = db_query('SELECT * FROM {term_data} WHERE vid = %d ORDER BY vid ASC, weight ASC', $uvid);
+  $tlist = array();
+
+  $custom_links = variable_get('sonybmg_photo_gallery_additional_user_links', '');
+  $custom_links = $custom_links ? explode("\n", $custom_links) : array();
+  foreach ($custom_links as $link) {
+    $tlist[] = $link;
+  }
+
+  while ($term = db_fetch_object($result)) {
+    $tlist[] = l($term->name, 'photos/latest/'. $term->tid);
+  }
+
+  $output = theme('item_list', $tlist);
+  $output .= theme('sonybmg_upload', 'photo');
+  return $output;
+}
+
+/**
+ * Theme the display of a photo block, such as 'promoted official photo',
+ * 'random user photo', 'highest rated photo', etc. Shows exactly one photo with
+ * a link to additional images of that type.
+ * @param $view_name
+ *   The name of the view to be used to select the photo, the first result
+ *   will  be used.
+ * @param $args
+ *   Any arguments that need to be passed to the view.
+ * @param $count_view_name
+ *   If you'd like to include a count of how many photos are on the follow page
+ *   enter a different view here. If none specified the link will read 'View'.
+ * @param $count_args
+ *   Any arguments that need to be passed to the count view.
+ * @param $imagecache_preset
+ *   The preset which will be used to display the resulting image.
+ */
+function theme_sonybmg_photo_gallery_block($view_name, $args, $count_view_name = NULL, $count_args = array(), $imagecache_preset = 'preview') {
+  // In this function, we'll use one view to get the latest image from a gallery.
+  // Then, we'll use the general view to get a count of all images in the gallery.
+
+  $view = views_get_view($view_name);
+  $view->args = $args;
+  $view->execute();
+  $items = $view->result;
+
+  if (!empty($items)) {
+    $node = node_load($items[0]->nid);
+
+    if ($count_args[0] == 'all') {
+      if (is_array($node->taxonomy)) {
+        foreach ($node->taxonomy as $tid => $term) {
+          $count_args = array($tid);
+          break;
+        }
+      }
+      else {
+        $count_args = array();
+      }
+    }
+
+    if ($count_view_name) {
+      $count_view = views_get_view($count_view_name);
+      $count_view->args = $count_args;
+      $count_view->execute();
+      $count = $count_view->total_rows;
+      $count--;
+      $more_text = format_plural($count, '1 more', '@count more');
+    }
+    else {
+      $more_text = t('View');
+    }
+
+    $photo = theme('imagecache', $imagecache_preset, $node->field_photo[0]['filepath'], NULL, NULL, array('class' => 'reflected'));
+
+    $output = '';
+    // Weird bug in reflection.js that eats the link if it wrapped directly arount the image tag, link around the entire div
+    $output .= l('<div class="featured-photo">'. $photo .'</div>', 'node/'. $node->nid, array('html' => TRUE));
+    if ($node->field_photographer_first[0]['value'] || $node->field_photographer_last[0]['value']) {
+      $output .= '<div class="caption">';
+      $output .= ' by '. drupal_strtoupper($node->field_photographer_first[0]['value'] .' '. $node->field_photographer_last[0]['value']);
+      $output .= '</div>';
+    }
+    $output .= '<div class="more">'. l($more_text, 'node/'. $node->nid) .'</div>';
+  }
+  else {
+    $output .= $view->block_empty ? $view->block_empty : t('Currently no featured photos.');
+  }
+  return $output;
+}
+
+/**
+ * Implementation of hook_link().
+ * Add supersize link to photos and official_photos
+ */
+function sonybmg_photo_gallery_link($type, $node = NULL, $teaser = FALSE) {
+  if ($type == 'node' && is_object($node) && in_array($node->type, array('photo', 'official_photo'))) {
+    $links['supersize'] = array(
+      'title' => t('Supersize!'),
+      'href' => "supersize/$node->nid", //$node->field_photo[0]['filepath'],
+      'attributes' => array('title' => t('Show a full sized version of this photo')),
+    );
+    return $links;
+  }
+}
+
+/**
+ * Implementation of hook_nodeapi().
+ * Set a custom breadcrumb for photos and official_photos
+ */
+function sonybmg_photo_gallery_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  switch ($op) {
+    case 'view':
+      // replacement for custom_breadcrumbs
+      if($a4 && ($node->type == 'photo' || $node->type == 'official_photo')) { // $a4 is $page for the view operation
+        $breadcrumb = array();
+        $breadcrumb[] = l(t('Home'), NULL);
+        $breadcrumb[] = l(t('Photos'), 'photos');
+        foreach ($node->taxonomy as $term) {
+          $breadcrumb[] = l(t($term->name), 'photos/latest/'. $term->tid);
+          break;
+        }
+        drupal_set_breadcrumb($breadcrumb);
+
+        $pager_location = variable_get('sonybmg_photo_gallery_pager_location', 'top');
+        if($pager_location != 'none') {
+          $node->content['photos_pager'] = array(
+            '#value' => sonybmg_photo_gallery_pager($node->nid, variable_get('sonybmg_photo_gallery_pager_count', 5)),
+            '#weight' => ($pager_location == 'top' ? -10 : 10),
+          );
+        }
+      }
+      break;
+ }
+}
+
+/**
+ * Load data necessary for the a photo pager and return the theme output
+ * @param $nid
+ *   The nid this pager should be centered at
+ * @param $page
+ *   A positive or negative number of the page to be displayed, relative to the
+ *   centered nid. Also may be 'first' or 'last'
+ * @param $event_id
+ *   An event node to use as a gallery.
+ */
+function sonybmg_photo_gallery_pager($nid, $count = NULL, $page = NULL, $event_id = NULL) {
+  if (!$count) {
+    $count = variable_get('sonybmg_photo_gallery_pager_count', 5);
+  }
+  $node = node_load($nid);
+  if ($event_id == NULL && isset($_GET['eid'])) {
+    $event_id = $_GET['eid'];
+  }
+
+  if (strpos(referer_uri(), 'concert-photos') || $event_id) {
+    $view = views_get_view('event_photos');
+  }
+  elseif ($node->type == 'photo') {
+    $view = views_get_view('photos_galleries');
+  }
+  elseif ($node->type == 'official_photo') {
+    $view = views_get_view('photos_official');
+  }
+
+  if (isset($view)) {
+    if ($view->name == 'event_photos') {
+      if ($event_id) {
+        $tid = $event_id;
+      }
+      else {
+        $split = explode('/', referer_uri());
+        $tid = $split[4];
+        $event_id = $tid;
+      }
+    }
+    else {
+      // Find which gallery this belongs to
+      foreach ($node->taxonomy as $term) {
+        if ($term->vid == variable_get('sonybmg_photo_gallery_user_vocabulary', 0) || $term->vid == variable_get('sonybmg_photo_gallery_official_vocabulary', 0)) {
+          $tid = $term->tid;
+          break;
+        }
+      }
+    }
+
+    $view->args[] = $tid;
+    // set items per page to 0 so we get all items from the view
+    $view->pager['items_per_page'] = 0;
+    $view->execute();
+  }
+  return theme('sonybmg_photo_gallery_pager', $node->nid, $view->result, $count, isset($_GET['page']) ? $_GET['page'] : 0, $event_id);
+}
+
+/**
+ * Theme the custom pager at the top of a photo page
+ * @param $node
+ *   The current node being viewed
+ * @param $pager_nodes
+ *   The complete list of all nodes in this gallery
+ * @param $count
+ *   The maximium number of thumbnails to show total
+ * @param $page
+ *   The page to begin the pager, relative to the $nid
+ */
+function theme_sonybmg_photo_gallery_pager($nid, $pager_nodes, $count = 7, $page = NULL, $event_id = NULL) {
+  drupal_add_js(drupal_get_path('module', 'sonybmg_photo_gallery') .'/sonybmg_photo_gallery.js');
+  drupal_add_css(drupal_get_path('module', 'sonybmg_photo_gallery') .'/sonybmg_photo_gallery.css');
+
+  // Find the current page if none is set
+  if (!isset($page)) {
+    foreach ($pager_nodes as $key => $n) {
+      if ($n->nid == $nid) {
+        $page = floor($key / $count);
+        break;
+      }
+    }
+  }
+
+  // Taking the entire list of nodes, trim the list to the current page
+  $total = count($pager_nodes);
+  $total_pages = ceil($total / $count);
+  $offset = $page * $count;
+  $remainder = (($count + $offset) > $total) ? $total - $offset : $count;
+
+  $pager_nodes = array_slice($pager_nodes, $offset, $remainder);
+
+  // Create a list of fids to load
+  $fids = array();
+  foreach ($pager_nodes as $n) {
+    $fid = $n->node_data_field_photo_field_photo_fid;
+    if ($fid && is_numeric($fid)) {
+      $fids[] = $fid;
+      $fid_nid_map[$fid] = $n->nid;
+    }
+  }
+
+  // Load all the necessary files
+  $files = array();
+  if (!empty($fids)) {
+    $result = db_query("SELECT * FROM {files} WHERE fid IN (%s)", implode(',', $fids));
+    while ($file = db_fetch_array($result)) {
+      $nid = $fid_nid_map[$file['fid']];
+      $files[$nid] = $file;
+    }
+  }
+
+  // Generate the list
+  $query = empty($event_id) ? array() : array('eid' => $event_id);
+  $items = array();
+  foreach ($pager_nodes as $n) {
+    $image = theme('imagecache', 'icon_medium', $files[$n->nid]['filepath']);
+    $items[] = l($image, 'node/'. $n->nid, array('query' => $query, 'html' => TRUE));
+  }
+
+  if (!empty($event_id)) {
+    $title = db_result(db_query("SELECT title FROM {node} WHERE nid = %d", $event_id));
+    if ($title) {
+      drupal_set_title(t('Concert Photos from @title', array('@title' => $title)));
+    }
+  }
+
+  // Previous Pager
+  if ($page > 0) {
+    $prev_page = $page - 1;
+    $query['page'] = $prev_page;
+    $pager_url = url('photo_gallery/pager/'. $nid .'/'. $count);
+    $link_options = array(
+      'attributes' => array(
+        'class' => 'pager-previous',
+        'onclick' => "changePhotoPage('$pager_url', 'node/$nid', '$page', '$prev_page', '$event_id'); return false;",
+      ),
+      'query' => $query,
+    );
+    $pager_prev = l(t('Previous'), isset($_GET['pagerUrl']) ? $_GET['pagerUrl'] : $_GET['q'], $link_options);
+  }
+  else {
+    $pager_prev = '<span class="pager-previous">'. t("Previous") .'</span>';
+  }
+
+  // Next pager
+  if ($total_pages > ($page + 1)) {
+    $next_page = $page + 1;
+    $query['page'] = $next_page;
+    $pager_url = url('photo_gallery/pager/'. $nid .'/'. $count);
+    $link_options = array(
+      'attributes' => array(
+        'class' => 'pager-next',
+        'onclick' => "changePhotoPage('$pager_url', 'node/$nid', '$page', '$next_page', '$event_id'); return false;",
+      ),
+      'query' => $query,
+    );
+    $pager_next = l(t('Next'), isset($_GET['pagerUrl']) ? $_GET['pagerUrl'] : $_GET['q'], $link_options);
+  }
+  else {
+    $pager_next = '<span class="pager-next">'. t("Next") .'</span>';
+  }
+
+  $output = '';
+  $output .= '<div id="photos-pager-previous">'. $pager_prev .'</div>';
+  $output .= '<div class="photos-pager-icons">';
+  $output .= theme('item_list', $items, NULL, 'ul', array('class' => 'photos-pager photos-page-'. $page));
+  $output .= '</div>';
+  $output .= '<div id="photos-pager-next">'. $pager_next .'</div>';
+
+  return $output;
+}
+
+/**
+ * Implementation of hook_preprocess_views_view().
+ * Conditionally append the create news article link to the empty text of the
+ * news_blog view.
+ */
+function sonybmg_photo_gallery_preprocess_views_view(&$variables) {
+  if (in_array($variables['name'], array('photos_galleries', 'photos_random', 'photos_official'))) {
+    if (node_access('create', 'photo')) {
+      $upload = t('Want to share your pictures with other fans? <a href="@photo_url">Click here!</a>', array('@photo_url' => url('node/add/photo', array('query' => drupal_get_destination()))));
+    }
+    else {
+      $upload = t('Want to share your pictures with other fans? <a href="@login_url">Login or create an account!</a>', array('@login_url' => url('user/register', array('query' => drupal_get_destination()))));
+    }
+
+    $variables['footer'] .= '<div class="upload-yours">'. $upload .'</div>';
+  }
+}
+
+  $flag = array(
+
+  );
+function sonybmg_photo_gallery_flag_default_flags() {
+  $roles = array_flip(user_roles());
+  $artist_rid = $roles['artist'];
+  $moderator_rid = $roles['moderator'];
+  $administrator_rid = $roles['administrator'];
+  $flags = array();
+  $flags[] = array(
+    'content_type' => 'node',
+    'name'         => 'promote',
+    'title'        => 'promote',
+    'flag_short'   => 'Promote to Featured Photo',
+    'flag_long'    => 'Include this image in the pool of photos on the Photos main page',
+    'flag_confirmation' => 'Are you sure you want to promoto this photo?',
+    'unflag_short' => 'Demote from Featured Photo',
+    'unflag_long'  => 'Remove this image from the pool of photos on the Photos main page',
+    'unflag_confirmation'=> 'Are you sure you want to demote this photo?',
+    'roles'        => array($artist_rid, $moderator_rid, $administrator_rid),
+    'types'        => array('official_photo', 'photo'),
+    'global'       => 1,
+    'show_on_teaser' => 1,
+    'show_on_page' => 1,
+    'show_on_form' => 0,
+    'locked' => array('name', 'global'),
+  );
+
+  return $flags;
+}
+
+/**
+ * Implementation of hook_sony_metatags_alter().
+ */
+function sonybmg_photo_gallery_sony_metatags_alter(&$meta_tags, $object_type = NULL, $object = NULL) {
+  if ($object_type == 'node' && ($object->type == 'official_photo' || $object->type == 'photo')) {
+    if ($object->type == 'official_photo') {
+      $title = check_plain($object->title);
+      }
+    else {
+      $title = t('@username Fan Photo', array('@username' => $object->name));
+    }
+    $site_name = variable_get('site_name', '');
+    $meta_tags['og:type'] = array('property' => 'og:type', 'content' => 'article');
+    $meta_tags['og:title'] = array('property' => 'og:title', 'content' => $title);
+    $meta_tags['og:url'] = array('property' => 'og:url', 'content' => url('node/'. $object->nid, array('absolute' => TRUE)));
+    $meta_tags['og:description'] = array('property' => 'og:description', 'content' => t('From @site_name', array('@site_name' => $site_name)));
+    if (!empty($object->field_photo[0]['filepath'])) {
+      $meta_tags['og:image'] = array('property' => 'og:image', 'content' => imagecache_create_url('300x300', $object->field_photo[0]['filepath']));
+    }
+  }
+}

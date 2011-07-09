@@ -1,0 +1,222 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * description
+ */
+
+/**
+ * Implementation of hook_views_api().
+ */
+function azuki_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'azuki') . '/views',
+  );
+}
+
+/**
+ * Format and add variables for the azuki rss style plugin.
+ */
+function template_preprocess_azuki_rss(&$vars) {
+  // We want to use the views template function so proxy.
+  template_preprocess_views_view_rss($vars);
+}
+
+/**
+ * Implementation of hook_nodeapi().
+ */
+function azuki_nodeapi(&$node, $op, $arg1, $arg2) {
+  $extra = array();
+
+  switch ($op) {
+    case 'rss item':
+      $extra = array(
+        array(
+          'key' => 'author',
+          'value' => check_plain($node->name),
+        ),
+        array(
+          'key' => 'category',
+          'value' => '',
+        ),
+      );
+
+      switch ($node->type) {
+        case 'photo':
+        case 'official_photo':
+          $path = $node->field_photo[0]['filepath'];
+          list($width, $height, $type, $image_attributes) = @getimagesize($path);
+          
+          // Build the giant media group rss xml array.
+          $extra[] = array(
+            'key' => 'media:group',
+            'namespace' => array('xmlns:media' => 'http://search.yahoo.com/mrss/'),
+            'value' => array(
+              array(
+                'key' => 'media:content',
+                'namespace' => array('xmlns:media' => 'http://search.yahoo.com/mrss/'),
+                'attributes' => array(
+                  'url' => file_create_url($path),
+                  'fileSize' => $node->field_photo[0]['filesize'],
+                  'type' => $node->field_photo[0]['filemime'],
+                  'medium' => 'image',
+                  'isDefault' => 'true',
+                  'expression' => 'full',
+                  'height' => $height,
+                  'width' => $width,
+                  'lang' => 'en',
+                ),
+              ), // </media:content>
+              array(
+                'key' => 'media:hash',
+                'namespace' => array('xmlns:media' => 'http://search.yahoo.com/mrss/'),
+                'value' => md5_file($path),
+                'attributes' => array(
+                  'algo' => 'md5',
+                ),
+              ), // </media:hash>
+              array(
+                'key' => 'media:title',
+                'namespace' => array('xmlns:media' => 'http://search.yahoo.com/mrss/'),
+                'value' => check_plain($node->title),
+                'attributes' => array(
+                  'type' => 'plain',
+                ),
+              ), // </media:title>
+              array(
+                'key' => 'media:description',
+                'namespace' => array('xmlns:media' => 'http://search.yahoo.com/mrss/'),
+                'value' => $node->body,
+                'attributes' => array(
+                  'type' => 'plain',
+                ),
+              ), // </media:description>
+            ), // </media:group>
+          );
+          break;
+        case 'video':
+          if (!is_array($node->field_progressive_url) || !is_array($node->field_progressive_url[0]) 
+          || !strlen(!is_array($node->field_progressive_url[0]['value']))) {
+            break;
+          }
+          else {
+            $video_url = $node->field_progressive_url[0]['value'];
+          }
+          $thumb_path = $node->field_video_thumb[0]['filepath'];
+          list($width, $height, $type, $image_attributes) = @getimagesize($thumb_path);
+          
+          // Build the giant media group rss xml array.
+          $extra[] = array(
+            'key' => 'media:group',
+            'namespace' => array('xmlns:media' => 'http://search.yahoo.com/mrss/'),
+            'value' => array(
+              array(
+                'key' => 'media:content',
+                'namespace' => array('xmlns:media' => 'http://search.yahoo.com/mrss/'),
+                'attributes' => array(
+                  'url' => $video_url,
+                  'type' => (substr($video_url, -4, 4) == '.mp4') ? 'video/mp4' : 'video/x-flv',
+                  'medium' => 'video',
+                  'duration' => $node->field_video['0']['data']['length'],
+                  'isDefault' => 'true',
+                  'expression' => 'full',
+                  'lang' => 'en',
+                ),
+              ), // </media:content>
+              /* NO HASH FOR NOW
+              array(
+                'key' => 'media:hash',
+                'namespace' => array('xmlns:media' => 'http://search.yahoo.com/mrss/'),
+                'value' => md5_file($path),
+                'attributes' => array(
+                  'algo' => 'md5',
+                ),
+              ), // </media:hash> */
+              array(
+                'key' => 'media:title',
+                'namespace' => array('xmlns:media' => 'http://search.yahoo.com/mrss/'),
+                'value' => check_plain($node->title),
+                'attributes' => array(
+                  'type' => 'plain',
+                ),
+              ), // </media:title>
+              array(
+                'key' => 'media:description',
+                'namespace' => array('xmlns:media' => 'http://search.yahoo.com/mrss/'),
+                'value' => $node->body,
+                'attributes' => array(
+                  'type' => 'plain',
+                ),
+              ), // </media:description>
+              array(
+                'key' => 'media:thumbnail',
+                'namespace' => array('xmlns:media' => 'http://search.yahoo.com/mrss/'),
+                'attributes' => array(
+                  'url' => url($thumb_path, array('absolute' => TRUE,)),
+                  'width' => $width,
+                  'height' => $height,
+                ),
+              ), // </media:thumbnail>
+            ), // </media:group>
+          );
+          break;  
+          
+          case 'date':
+          case 'event':
+            // <azuki:event name=”Event Name”>
+            //   <azuki:time>[time when event occurs]</azuki:time>     
+            //   <azuki:date>[date of the event</azuki:date>
+            //   <azuki:venue> [venue] </azuki:venue>
+            //   <azuki:location>[location]</azuki:location>
+            // </azuki:event>
+            $azuki_namespace = array('xmlns:azuki' => 'http://azukisystems.com/azuki_rss/');
+            $extra[] = array(
+              'key' => 'azuki:event',
+              'namespace' => $azuki_namespace,
+              'attributes' => array('title' => $node->title),
+              'value' => array(
+                array(
+                  'key' => 'azuki:time',
+                  'namespace' => $azuki_namespace,
+                  'value' => format_date(strtotime($node->field_date[0]['value']), 'custom', 'g:i a'),
+                ),
+                array(
+                  'key' => 'azuki:date',
+                  'namespace' => $azuki_namespace,
+                  'value' => format_date(strtotime($node->field_date[0]['value']), 'custom', 'm/d/Y'),
+                ),
+                array(
+                  'key' => 'azuki:venue',
+                  'namespace' => $azuki_namespace,
+                  'value' => $node->field_venue[0]['value'],
+                ),
+                array(
+                  'key' => 'azuki:location',
+                  'namespace' => $azuki_namespace,
+                  'value' => $node->field_location[0]['value'],
+                ),
+              ), // </azuki:event>
+            );
+            break;  
+      }
+
+      break;
+  }
+
+  return $extra;
+}
+
+/**
+ * Format and add variables for the azuki rss row plugin.
+ */
+function template_preprocess_azuki_node_rss(&$vars) {
+  // We want to use the views template function so proxy. Make sure function exists too.
+  require_once drupal_get_path('module', 'views') . '/theme/theme.inc';
+  template_preprocess_views_view_row_rss($vars);
+
+  // TODO - Clean up name so there are no underscores.
+  // TODO - We don't actually have a node here... so its hard to do this.
+  // $vars['template_files'][] = 'azuki-node-' . $node->type;
+}

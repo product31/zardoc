@@ -1,0 +1,272 @@
+@CHARSET "UTF-8";
+
+.modal-throbber-wrapper {
+  background: url(./loading.gif) no-repeat 0 0;
+  height: 19px;
+  margin: 50px auto;
+  width: 220px;
+}
+.modal-throbber-wrapper img {
+  display: none;
+}
+
+#modalBackdrop {
+  background: #000 !important;
+  opacity: 0.8 !important;
+}
+
+div.ctools-modal-content {
+  background: #fff url(bg.png) repeat-x bottom left;
+  border: 1px solid #333;
+  border-radius: 10px 10px 10px 10px;
+  -moz-border-radius: 10px 10px 10px 10px;
+  -webkit-border-radius: 10px 10px 10px 10px;
+  max-width: 660px;
+  width: 660px;
+}
+div.ctools-modal-content .modal-content {
+  max-width: 635px;
+  width: 635px;
+  padding: 20px 20px 20px 20px;
+}
+div.ctools-modal-content .modal-header {
+  /* background: url(logo.png) no-repeat 0 0; */
+  margin: 10px;
+  padding-top: 42px; /* height of logo */
+  position: relative;
+}
+div.ctools-modal-content a.close {
+  background: url(close.png) no-repeat 0 0;
+  cursor: pointer;
+  height: 37px;
+  outline: 0;
+  position: absolute;
+  right: 0px;
+  text-indent: -9999px;
+  top: 0px;
+  width: 37px;
+}
+div.ctools-modal-content .modal-title,
+div.ctools-modal-content div.messages {
+  color: #666;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1.1em;
+  margin: 1em 20px;
+}
+
+/* Content in the popup
+----------------------------------------*/
+div.ctools-modal-content {
+  font: 12px arial, sans-serif;
+  color: #666666;
+}
+div.ctools-modal-content label {
+  font-weight: bold; 
+}
+div.ctools-modal-content .form-submit,
+div.ctools-modal-content a.button {
+  background: transparent url(button.png) repeat-x 0 0;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-size: 24px;
+  height: 39px;
+  line-height: 39px;
+  padding: 0px 25px;
+  outline: 0;
+  margin-right: 10px;
+  
+  border-radius: 15px;
+  -moz-border-radius: 15px;
+  -webkit-border-radius: 15px;
+}
+div.ctools-modal-content a.button,
+div.ctools-modal-content a.button:hover {
+  text-decoration: none;
+  padding: 6px 25px;
+}
+
+/* Forms
+----------------------------------------*/
+div.ctools-modal-content .form-item label {
+  width: 200px;
+  float: left;
+  text-align: right;
+  line-height: 35px;
+}
+div.ctools-modal-content .form-item label.option {
+  float: none;
+  display: block;
+  margin-left: 220px;
+  line-height: 1.4;
+  text-align: left;
+  width: 250px;
+}
+div.ctools-modal-content .form-text {
+  font-size: 16px;
+  font-weight: bold;
+  color: #666666;
+  
+  display: block;
+  margin-left: 220px;
+  width: 226px; /* 250 - margins - border */
+  border: solid 2px #ccc;
+  border-radius: 10px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  line-height: 1em;
+  padding: 8px 10px;
+  vertical-align: middle;
+  outline: 0px;
+}
+div.ctools-modal-content .form-item .description {
+  display: block;
+  margin-left: 220px;
+  width: 250px;
+}
+div.ctools-modal-content select {
+  border: solid 2px #ccc;
+  padding: 10px 5px 10px 10px;
+  line-height: 15px;
+  vertical-align: middle;
+  color: #8a8a8a;
+  display: block;
+  margin-left: 220px;
+}
+div.ctools-modal-content .container-inline .form-text {
+  margin-left: 0;
+  width: auto;
+  display: inline;
+}
+
+div.ctools-modal-content .form-item { clear: both; margin: 0 0 5px; position: relative; }
+div.ctools-modal-content .form-item .form-item,
+div.ctools-modal-content .container-inline .form-item { clear: none; height: auto; margin: 0px; }
+
+div.ctools-modal-content .form-buttons,
+div.ctools-modal-content #edit-submit {
+  margin: 10px 0 10px 220px;
+}
+div.ctools-modal-content .form-buttons #edit-submit {
+  margin: 0;
+}
+
+/* jquery validation messages
+----------------------------------------*/
+div.ctools-modal-content .form-item .validation-message,
+div.ctools-modal-content .form-item span.password-strength,
+div.ctools-modal-content .form-item span.password-confirm {
+  position: absolute;
+  top: 3px;
+  left: 485px;
+  width: 100px;
+  font: bold 10px arial, serif;
+  background: transparent;
+  border: 0px;
+  float: none;
+  margin: 0;
+  line-height: 1.3em;
+  text-align: left;
+}
+div.ctools-modal-content .password-description { display: none !important; }
+div.ctools-modal-content div.ok,
+div.ctools-modal-content div.error { background: transparent; border: 0; padding: 0; }
+
+div.ctools-modal-content div.ok .validation-message { color: #049c07;}
+div.ctools-modal-content div.error .validation-message { color: #a40505; }
+div.ctools-modal-content div.ok label,
+div.ctools-modal-content div.error label { color: #666666; }
+
+div.ctools-modal-content .error input {
+  background: #ffc0c0;
+  border-color: #a40505;
+  color: #a40505;
+}
+div.ctools-modal-content .ok input {
+  background: #DDFFDD;
+  border-color: #049c07;
+  color: #049c07;
+}
+
+/* sony-register-user-register form
+----------------------------------------*/
+#sony-register-user-register #edit-country {
+  float: left;
+  margin-left: 20px;
+  width: 125px;
+}
+#sony-register-user-register #edit-zip {
+  float: left;
+  margin-left: 20px;
+  width: 80px;
+}
+
+/* country and zip
+----------------------------------------*/
+#sony-register-user-register #edit-profile-zip-code,
+#sony-register-user-register #edit-profile-country {
+  width: 110px;
+  display: inline;
+  margin-left: 20px;
+}
+#sony-register-user-register #edit-profile-country {
+  margin-left: 3px;
+}
+#sony-register-user-register #edit-profile-country-wrapper {
+  display: inline;
+}
+
+/* COPPA date of birth
+----------------------------------------*/
+#sony-register-user-register #edit-coppa-dob-wrapper {
+  height: 40px;
+}
+#sony-register-user-register #edit-coppa-dob-wrapper .container-inline {
+  padding-left: 13px;
+}
+#sony-register-user-register #edit-coppa-dob-wrapper select {
+  width: 80px;
+  margin-left: 0;
+}
+#sony-register-user-register #edit-coppa-dob-month-wrapper select {
+  margin-left: 13px;
+}
+#sony-register-user-register #edit-coppa-dob-month-wrapper select {
+  width: 76px;
+}
+#sony-register-user-register #edit-coppa-dob-day-wrapper select {
+  width: 76px;
+}
+#sony-register-user-register #edit-coppa-dob-wrapper .form-item {
+  position: relative; /* bug in jquery.select requires the parent of the select to be positioned */
+  float: left;
+  margin: 0 0 0 7px;
+}
+#sony-register-user-register #edit-coppa-dob-year-wrapper.form-item {
+  margin-right: 0;
+}
+
+#sony-register-user-register #edit-mollom-captcha-wrapper {
+  padding-top: 20px;
+}
+#sony-register-user-register #captcha {
+  display: inline;
+  float: left;
+  margin-left: 20px;
+}
+#sony-register-user-register #captcha img {
+  display: block;
+}
+#sony-register-user-register #edit-mollom-captcha-wrapper .form-text {
+  display: inline;
+  float: left;
+  margin-left: 0px;
+  margin-top: 4px;
+  width: 100px;
+}
+#sony-register-user-register #edit-mollom-captcha-wrapper .description {
+  left: 0px;
+  position: absolute;
+  top: 0px;
+}

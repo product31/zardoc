@@ -1,0 +1,70 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Test suite for sony_coppa.module
+ */
+
+class SonyCoppaTestCase extends DrupalWebTestCase {
+  /**
+   * Implementation of getInfo().
+   */
+  function getInfo() {
+    return array(
+      'name' => t('Sony COPPA functionality'),
+      'description' => t('Test forms for COPPA compliance.'),
+      'group' => t('Sony'),
+    );
+  }
+
+  /**
+   * Implementation of setUp().
+   */
+  function setUp() {
+    parent::setUp('sony_coppa');
+
+    // Set user registration to "Visitors can create accounts and no administrator approval is required."
+    variable_set('user_register', 1);
+  }
+
+  /**
+   * Test the user registration for a REAC site.
+   * - 13+ are allowed to register
+   * - Under 13 are not, and get redirected to sonymusic sorry page
+   */
+  function testREACUserRegistration() {
+    variable_set('sony_coppa_reac', 1);
+
+    $registered = t('Your password and further instructions have been sent to your e-mail address.');
+
+    $edit = array();
+    $edit['name'] = 'coppa_test_user';
+    $edit['mail'] = 'coppa_test_user@example.com';
+    $edit['coppa_dob[month]'] = date('n');
+    $edit['coppa_dob[day]'] = date('j');
+    $edit['coppa_dob[year]'] = (int)date('Y') - 13;
+
+    $this->drupalPost('user/register', $edit, t('Create new account'));
+    $this->assertText($registered, t('13 year-old user allowed to register.'));
+
+    $edit = array();
+    $edit['name'] = 'coppa_test_user';
+    $edit['mail'] = 'coppa_test_user@example.com';
+    $edit['coppa_dob[month]'] = date('n');
+    $edit['coppa_dob[day]'] = date('j');
+    $edit['coppa_dob[year]'] = (int)date('Y') - 12;
+
+    $this->drupalPost('user/register', $edit, t('Create new account'));
+    $this->assertTrue($this->getUrl() == 'http://subs.sonymusic.com/app/messages/sorry', 
+      t('Underage user is redirected to sonymusic.com sorry page.'));
+  }
+
+  /**
+   * Test the user registration for a non-REAC site.
+   */
+  function testNonREACUserRegistration() {
+    variable_set('sony_coppa_reac', 0);
+  }
+
+}

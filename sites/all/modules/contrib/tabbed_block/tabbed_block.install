@@ -1,0 +1,36 @@
+<?php
+// $Id: tabbed_block.install,v 1.2.2.1 2008/07/01 11:03:08 joetsuihk Exp $
+
+/**
+ * @file
+ *
+ * this is a installation file of tabbed block module
+ *
+ */
+/**
+ * hook_uninstall
+ *
+ */
+function tabbed_block_uninstall() {
+  $list = variable_get( 'tabbed_block_list' , NULL );
+  if ( $list ) {
+    foreach ( $list as $block_key => $block_name ) {
+      variable_del( 'tabbed_block_settings'. $block );
+    }
+    variable_del( 'tabbed_block_list' );
+  }
+}
+
+/**
+ *
+ *
+ */
+function tabbed_block_install() {
+  $list = variable_get( 'tabbed_block_list' , NULL );
+  if ( $list ) {
+    foreach ( $list as $block_key => $block_name ) {
+      variable_del( 'tabbed_block_settings'. $block );
+    }
+    variable_del( 'tabbed_block_list' );
+  }
+}

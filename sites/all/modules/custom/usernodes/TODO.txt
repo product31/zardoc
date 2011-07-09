@@ -1,0 +1,20 @@
+// $Id: TODO.txt,v 1.1 2006/02/23 04:29:07 coyote Exp $
+
+
+-- Resolve "Create Content" menu items issues
+
+  Must find a good way to determine whether users are allowed to create a node of a certain type, so that menu items for "create node" are not made visible unless the user can create that sort of node.
+  
+  Currently, there is a setting that allows an admin to choose whether or not a "create content" link appears in the user's profile.
+
+  While this module can determine whether a user has reached their content limit (if any) for a certain node type, it cannot easily tell, beforehand, whether they have sufficient privileges to create that node, as each node type seems to have its own setting for whether users can create, edit, etc. Flexinode is nice, and has access rules for create, edit own, and edit any, but other node types do not, or handle such permissions differently.
+
+  Also, the main Create Content links might appear, when the user has already created as many nodes of that type as they are allowed. This might cause the user to click a link for Create Content, only to be presented with a page that tells them they cannot create more nodes of that type. If anyone knows enough about the menu system to fix this, or help me do so, that would be appreciated.
+
+-- Create blocks to display user's nodes when on their user profile page.
+
+-- consider adding role-based permissions for each possible setting.
+
+-- Determine if there is a better way to display link to user's profile on node, or place it in a different location, without resorting to template alteration.
+
+-- since Flexinodes have certain capabilities that can easily be relied upon, consider adding some features specific to flexinodes to this module.

@@ -1,0 +1,37 @@
+# Belgium translation of sonybmg_views_shuffle (all releases)
+# Copyright (c) 2010 by the Belgium translation team
+# Generated from files:
+#  sonybmg_views_shuffle/sonybmg_views_shuffle.info: n/a
+#  sonybmg_views_shuffle/sonybmg_views_shuffle.views.inc: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sonybmg_views_shuffle (all releases)\n"
+"POT-Creation-Date: 2010-04-05 13:25-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Belgium\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: sonybmg_views_shuffle.info:0
+msgid "Sony BMG"
+msgstr ""
+
+#: sonybmg_views_shuffle.views.inc:12
+msgid "Sony Shuffle"
+msgstr ""
+
+#: sonybmg_views_shuffle.views.inc:13
+msgid "Displays rows as a shuffleable HTML list."
+msgstr ""
+
+#: sonybmg_views_shuffle.info:0
+msgid "Sony BMG Views Shuffle"
+msgstr ""
+
+#: sonybmg_views_shuffle.info:0
+msgid "Provides a shuffling view row style plugin"
+msgstr ""
+

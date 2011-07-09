@@ -1,0 +1,130 @@
+/* Caution! Ensure accessibility in print and other media types... */
+@media projection, screen { /* Use class for showing/hiding tab content, so that visibility can be better controlled in different media types... */
+    .block-tabbed_block .tabbed_block-hide {
+        display: none;
+    }
+}
+
+/* Hide useless elements in print layouts... */
+@media print {
+    .block-tabbed_block .tabs-nav {
+        display: none;
+    }
+}
+
+/* Skin */
+.block-tabbed_block .tabbed_block-nav {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0 0px;
+    display:block;
+}
+.block-tabbed_block .tabbed_block-nav:after { /* clearing without presentational markup, IE gets extra treatment */
+    display: block;
+    clear: both;
+    content: " ";
+}
+.block-tabbed_block .tabbed_block-nav li {
+    float: left;
+    margin: 0 0 0 1px;
+    padding:0px;
+    background:none;
+    color: #027AC6;
+    display:block;
+}
+
+.block-tabbed_block .tabbed_block-nav a {
+    display: block;
+    top: 1px;
+    z-index: 2;
+    padding: 0px 5px 0;
+    width: 60px;
+    height:25px;
+    color: #27537a;
+    font-size: 10px;
+    font-weight: bold;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    background-color:#C7ECFD;
+    border:1px solid #999999;
+}
+
+/*use this and DO NOT USE the above css in case you use image as tabs background.*/
+/*
+.block-tabbed_block .tabs-nav a {
+  display: block;
+  z-index: 2;
+  padding: 0px 5px 0;
+  width: 74px;
+  height:25px;
+  font-size: 10px;
+  font-weight: bold;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  background: url(tab.png) no-repeat;
+}
+.block-tabbed_block .tabs-nav a:hover{
+  background-position:0 67%;
+}
+*/
+
+.block-tabbed_block .tabbed_block-nav .tabbed_block-selected a {
+    color: #000;
+}
+.block-tabbed_block .tabbed_block-nav .tabbed_block-selected a, 
+.block-tabbed_block .tabbed_block-nav a:hover, 
+.block-tabbed_block .tabbed_block-nav a:focus, 
+.block-tabbed_block .tabbed_block-nav a:active {
+    /*background-position: 0 -50px;*/
+    background-color:#ffffff;
+    outline: 0; /* @ Firefox, switch off dotted border */
+}
+.block-tabbed_block .tabbed_block-nav .tabbed_block-disabled a:hover,
+.block-tabbed_block .tabbed_block-nav .tabbed_block-disabled a:focus, 
+.block-tabbed_block .tabbed_block-nav .tabbed_block-disabled a:active 
+{
+    background-position: 0 0;
+}
+.block-tabbed_block .tabbed_block-nav .tabbed_block-selected a:link, 
+.block-tabbed_block .tabbed_block-nav .tabbed_block-selected a:visited,
+.block-tabbed_block .tabbed_block-nav .tabbed_block-disabled a:link, 
+.block-tabbed_block .tabbed_block-nav .tabbed_block-disabled a:visited 
+{ /* @ Opera, use pseudo classes otherwise it confuses cursor... */
+    cursor: text;
+}
+.block-tabbed_block .tabbed_block-nav a:hover, 
+.tabbed_block-nav a:focus, 
+.tabbed_block-nav a:active 
+{ /* @ Opera, we need to be explicit again here now... */
+    cursor: pointer;
+}
+.block-tabbed_block .tabbed_block-nav .tabbed_block-disabled {
+    opacity: .4;
+}
+.block-tabbed_block .tabbed_block-container {
+  clear:both;  
+  border-top: 1px solid #97a5b0;
+  border-bottom: 1px solid #97a5b0;
+    
+}
+/* Uncomment this if you want a little spinner to be shown next to the tab title while an Ajax tab gets loaded*/
+/*.block-tabbed_block i.description {
+    padding: 0 0 0 20px;
+    background: url(loading.gif) no-repeat 0 50%;
+}
+*/
+.block-tabbed_block .tabbed_block-ajax{
+  font-size:10px;
+  float:right;
+  cursor:pointer;
+  text-decoration:underline;
+  color:#bbbbbb;
+}
+
+.tabbed_block_error {
+  background-color: #fdf5e6;
+  margin:5px;
+  padding:10px;
+}

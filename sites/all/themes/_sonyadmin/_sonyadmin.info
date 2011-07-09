@@ -1,0 +1,18 @@
+name = Sony Admin Theme
+description = The custom administration theme for the Sony Multisite Platform
+core = 6.x
+engine = phptemplate
+
+; Add any new stylesheets as necessary.
+stylesheets[all][] = css/blueprint-screen.css
+stylesheets[all][] = css/style.css
+stylesheets[all][] = css/icons.css
+stylesheets[print][] = css/blueprint-print.css
+
+; Define regions that are available in page.tpl.php.
+regions[default] = Default  
+regions[content] = Content
+regions[flag_region] = Flags
+
+; Sony specific extensions
+scratch[coder] = yes

@@ -1,0 +1,81 @@
+<?php
+// $Id: winners.module,v 1.1.2.1 2010/04/01 19:25:35 andrewlevine Exp $
+
+/**
+ * Implementation of hook_menu().
+ */
+function winners_menu() {
+  $items = array();
+  $items['admin/user/winners'] = array(
+    'title' => 'Winners',
+    'description' => 'Contest Winners',
+    'page callback' => 'winners_pick_wizard',
+    'access arguments' => array('moderate winners'),
+    'weight' => 0,
+    'file' => 'winners.pages.inc',
+  );
+  $items['admin/user/winners/pick'] = array(
+    'title' => 'Pick Contest Winners',
+    'description' => 'Pick Contest Winners',
+    'access arguments' => array('moderate winners'),
+    'weight' => 0,
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+   $items['admin/user/winners/contests'] = array(
+    'title' => 'Contests',
+    'description' => 'List Contests',
+    'page callback' => 'winners_contests_page',
+    'access arguments' => array('moderate winners'),
+    'type' => MENU_LOCAL_TASK,
+     'weight' => 1,
+    'file' => 'winners.pages.inc',
+  );
+  $items['winners/contests_autocomplete'] = array(
+    'title' => 'Autocomplete',
+    'page callback' => 'winners_contests_autocomplete',
+    'access arguments' => array('moderate winners'),
+    'file' => 'winners.pages.inc',
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * Implementation of hook_theme
+ */
+function winners_theme($existing, $type, $theme, $path) {
+  return array(
+    'winners_pick_verify' => array(
+      'arguments' => array(
+        'contest_id' => NULL,
+        'contest_name' => NULL,
+        'view_name' => NULL,
+        'num_winners' => NULL,
+        'winners' => NULL,
+      ),
+      'file' => 'winners.pages.inc',
+    ),
+    'winners_contests_page' => array(
+      'arguments' => array(
+        'contests' => NULL,
+      ),
+      'file' => 'winners.pages.inc',
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_perm
+ */
+function winners_perm() {
+  return array('moderate winners');
+}
+
+
+function winners_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'winners') . '/views',
+  );
+}
+

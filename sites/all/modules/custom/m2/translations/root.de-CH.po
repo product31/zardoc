@@ -1,0 +1,70 @@
+# Switzerland (German) translation of m2 (all releases)
+# Copyright (c) 2010 by the Switzerland (German) translation team
+# Generated from files:
+#  m2/m2.field.inc: n/a
+#  m2/m2.module: n/a
+#  m2/m2.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: m2 (all releases)\n"
+"POT-Creation-Date: 2010-04-12 15:07-0500\n"
+"PO-Revision-Date: 2010-03-30 14:28-0500\n"
+"Language-Team: Switzerland (German)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: m2.field.inc:165
+msgid "Default"
+msgstr "Standard"
+
+#: m2.field.inc:34
+msgid "M2 document"
+msgstr ""
+
+#: m2.field.inc:35
+msgid "Store a reference to an M2 document in the database."
+msgstr ""
+
+#: m2.field.inc:70
+msgid "Document type and search field"
+msgstr ""
+
+#: m2.field.inc:74
+msgid "Select the document type and search field for this field."
+msgstr ""
+
+#: m2.field.inc:108
+msgid "Invalid document type specified in the %field field."
+msgstr ""
+
+#: m2.field.inc:170
+msgid "Devel output"
+msgstr ""
+
+#: m2.module:207
+msgid "%name: title mismatch. Please check your selection."
+msgstr "%name: Der Titel ist ungültig. Bitte die Auswahl überprüfen."
+
+#: m2.module:214
+msgid "%name: found no valid post with that title."
+msgstr "%name: Kein gültiger Beitrag mit diesem Titel gefunden."
+
+#: m2.module:23
+msgid "M2 Settings"
+msgstr ""
+
+#: m2.module:29
+msgid "M2 autocomplete"
+msgstr ""
+
+#: m2.info:0
+msgid "M2 Base"
+msgstr ""
+
+#: m2.info:0
+msgid "Base module for M2 interactivity"
+msgstr ""
+

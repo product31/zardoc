@@ -1,0 +1,61 @@
+.block-locale .content {
+  position: relative;
+}
+
+.block-locale .language-selector {
+  background: #fff url(/misc/arrow-asc.png) no-repeat 98% center;
+  border: solid 1px #bbb;
+  cursor: pointer;
+  padding: 0px 10px;
+  height: 24px;
+  line-height: 24px;
+}
+
+.js .block-locale h2 {
+  display: none;
+}
+.block-locale ul {
+  border-bottom: solid 1px #bbb;
+  border-top: solid 1px #bbb;
+  margin: 0;
+  padding: 0;
+  max-height: 240px;
+  overflow: auto;
+}
+.js .block-locale ul {
+  background: #fff;
+  display: none;
+  position: absolute;
+  top: 25px;
+  left: 0px;
+  width: 100%;
+  z-index: 9999;
+}
+
+.block-locale li {
+  border-left: solid 1px #bbb;
+  border-right: solid 1px #bbb;
+  list-style: none;
+  padding: 0px;
+  margin: 0;
+}
+
+.block-locale li a {
+  display: block;
+  height: 24px;
+  line-height: 24px;
+  padding: 0px 10px;
+  text-decoration: none;
+}
+.block-locale li a:hover {
+  background: #fed;
+  text-decoration: none;
+}
+.block-locale li a.active, .block-locale li a.active:hover {
+  background: #def;
+}
+
+.block-locale li img, .block-locale .language-selector img {
+  margin-right: 10px;
+}
+

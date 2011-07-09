@@ -1,0 +1,77 @@
+<?php
+
+
+define('USERPOINTS_SERVICE_LINKS',                     'userpoints_service_links');
+define('USERPOINTS_SERVICE_LINKS_TID',                 'userpoints_service_links_tid');
+
+/*
+* Implementation of hook_userpoints()
+* Creates points configuration form for awarding points for sharing
+*/
+
+function userpoints_service_links_userpoints($op, $params = array()) {
+  switch($op) {
+    case 'setting':
+      $group = 'service_links';
+      $form[$group] = array(
+        '#type'        => 'fieldset',
+        '#collapsible' => TRUE,
+        '#collapsed'   => TRUE,
+        '#title'       => t('!Points for sharing', userpoints_translation()),
+      );
+
+      $form[$group][USERPOINTS_SERVICE_LINKS] = array(
+        '#type'          => 'textfield',
+        '#title'         => t('!Points for sharing', userpoints_translation()),
+        '#default_value' => variable_get(USERPOINTS_SERVICE_LINKS, 0),
+        '#size'          => 5,
+        '#maxlength'     => 5,
+      );
+
+      $form[$group][USERPOINTS_SERVICE_LINKS_TID] = array(
+        '#type'          => 'select',
+        '#title'         => t('Category'),
+        '#default_value' => variable_get(USERPOINTS_SERVICE_LINKS_TID, 0),
+        '#options'       => userpoints_get_categories(),
+        '#description'   => t('Service link (sharing) !points will be assigned to this category. You can modify what categories are available by modifying the <a href="!url">Userpoints taxonomy</a>.', 
+          array('!points' =>userpoints_translation(), '!url' => url('admin/content/taxonomy/'. variable_get(USERPOINTS_CATEGORY_DEFAULT_VID, '')))),
+      );
+      
+      return $form;
+  }
+}
+
+
+/*
+* Implementation of hook_menu
+*/
+
+function userpoints_service_links_menu() {
+  // create a path to intercept all share links
+  $items['share'] = array(
+    'title' => 'Share',
+    'page callback' => 'userpoints_service_links_share',
+    'access callback' => user_access,
+    'access arguments' => array('access service links'),
+    'type' => MENU_CALLBACK,
+    'file' => 'userpoints_service_links.inc',
+  );
+  return $items;
+}
+
+/**
+* Implementation of hook_link_alter()
+* Alters links for authenticated users to redirect them via the /share url where points are awarded
+*/
+
+function userpoints_service_links_link_alter(&$links, $node) {
+  global $user;
+  if($user->uid) {
+	  foreach ($links as $module => $link) {
+	    if (strstr($module, 'service_links')) {
+	      // Link back to the forum and not the taxonomy term page
+	      $links[$module]['href'] = url('share', array('query' => $link['href'], 'absolute' => TRUE));
+	    }
+	  }
+  }
+}

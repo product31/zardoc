@@ -1,0 +1,63 @@
+sIFR FLASH TEXT REPLACEMENT
+---------------------------
+Version: sIFR 2.0.6
+
+HOW TO ADD sIFR TO A THEME
+--------------------------
+
+1. Create a font .swf file containing the desired font.
+   Open the sifr-template/sifr.fla file in Adobe Flash (version 8 or higher).
+   Double-click in the middle of the file to edit the font used.
+   Select a font to embed in the file.
+
+   Important! Before saving make sure you embed the needed glyphs. Click the
+   "Embed..." button next to the font select list and make sure the following
+   options are selected:
+
+   - Punctuation
+   - Basic Latin (required for English)
+   - Latin I (required for Danish, Dutch, French, German, Portuguese, Spanish, and Swedish)
+
+   Other glyphs will need to be added if supporting Arabic, Greek, or Chinese.
+
+2. Export the .fla file as .swf.
+   Select File > Export > Export Movie...
+   Save the file in this sifr directory, with the name of the font and the extension .swf
+
+3. Turn on sIFR in the theme .info file.
+   Open the theme .info file, and uncomment the lines (remove the leading
+   semi-colon) for sIFR configuration. If the theme does not have lines for
+   sIFR, use these as a template:
+
+sifr[blocks][sFlashSrc] = sifr/stencil.swf
+sifr[blocks][sSelector] = h2.block-title
+sifr[blocks][sColor] = #333333
+sifr[blocks][sLinkColor] = #0066CC
+sifr[blocks][sHoverColor] = #000000
+sifr[blocks][sBgColor] = #FFFFFF
+; Enable wmode only if you must have transparency - loads faster without this
+sifr[blocks][sWmode] = transparent
+
+   The name of the "sFlashSrc" should be updated with the font file created in step 2.
+
+   Note that sIFR does not inherit the colors of links from the site CSS,
+   though other options like text-decoration and font-size are inherited.
+   Also note that sIFR can only use hex style colors.
+
+   (Bad)  sLinkColor = red;
+   (Bad)  sLinkColor = #F00;
+   (Good) sLinkColor = #FF0000;
+
+   Any option supported by sIFR should be supported through the info file.
+   You can find more information about these options at:
+   http://wiki.novemberborn.net/sifr/How+to+use
+
+4. Clear the cache!
+   Visit admin/settings/performance and click the "Clear all caches" button
+   at the bottom of the page. This needs to be cleared whenever making changes
+   to the theme .info file.
+
+5. Style with CSS.
+   All styles except color should be done in the style.css file. Edit as
+   necessary to make the sIFR replacement match the site.
+

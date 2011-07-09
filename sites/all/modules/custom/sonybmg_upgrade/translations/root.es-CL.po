@@ -1,0 +1,67 @@
+# Chile translation of sonybmg_upgrade (all releases)
+# Copyright (c) 2010 by the Chile translation team
+# Generated from files:
+#  sonybmg_upgrade/sonybmg_upgrade.module: n/a
+#  sonybmg_upgrade/sonybmg_upgrade.install: n/a
+#  sonybmg_upgrade/sonybmg_upgrade.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sonybmg_upgrade (all releases)\n"
+"POT-Creation-Date: 2010-04-05 15:23-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Chile\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: sonybmg_upgrade.module:36
+msgid "%old was replaced by %new"
+msgstr ""
+
+#: sonybmg_upgrade.module:43
+msgid "%module is deprecated"
+msgstr ""
+
+#: sonybmg_upgrade.module:50
+msgid "%module was re-installed"
+msgstr ""
+
+#: sonybmg_upgrade.module:57
+msgid "%module was not installed, most likely because it is missing"
+msgstr ""
+
+#: sonybmg_upgrade.module:11
+msgid "Upgrade"
+msgstr ""
+
+#: sonybmg_upgrade.install:77
+msgid ""
+"Drupal core upgrades have been performed and contrib modules are now "
+"ready to be upgraded. Please return to <a "
+"href=\"@update-php\">update.php</a> and run the remaining updates."
+msgstr ""
+
+#: sonybmg_upgrade.install:78
+msgid "Contrib modules ready to be upgraded."
+msgstr ""
+
+#: sonybmg_upgrade.install:258
+msgid ""
+"Sony BMG upgrade process complete.  Check the <a "
+"href=\"!report_url\">report</a> for a list of upgraded modules."
+msgstr ""
+
+#: sonybmg_upgrade.install:442
+msgid "%old renamed to %new. Schema version set to %schema"
+msgstr ""
+
+#: sonybmg_upgrade.info:0
+msgid "Sony BMG Multisite Upgrade"
+msgstr ""
+
+#: sonybmg_upgrade.info:0
+msgid "Automated upgrades between major Drupal versions."
+msgstr ""
+

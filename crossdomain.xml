@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE cross-domain-policy SYSTEM "http://www.adobe.com/xml/dtds/cross-domain-policy.dtd">
+<cross-domain-policy>
+  <allow-access-from domain="*.sonymusic.com" />
+  <allow-access-from domain="sonymusic.com" />
+  <allow-access-from domain="*.columbiarecords.com" />
+  <allow-access-from domain="columbiarecords.com" />
+  <allow-access-from domain="*.brightcove.com" />
+  <allow-access-from domain="*.google-analytics.com" />
+  <allow-access-from domain="*.googlesyndication.com" />
+  <allow-access-from domain="windows.dev.boffswana.com.au" />
+  <allow-access-from domain="*.britneyvideogame.com" />
+</cross-domain-policy>

@@ -1,0 +1,49 @@
+# Taiwan translation of userpoints_service_links (all releases)
+# Copyright (c) 2010 by the Taiwan translation team
+# Generated from files:
+#  userpoints_service_links/userpoints_service_links.info: n/a
+#  userpoints_service_links/userpoints_service_links.module: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: userpoints_service_links (all releases)\n"
+"POT-Creation-Date: 2010-04-12 15:26-0500\n"
+"PO-Revision-Date: 2010-03-26 09:29-0500\n"
+"Language-Team: Taiwan\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: userpoints_service_links.info:0
+msgid "Userpoints"
+msgstr ""
+
+#: userpoints_service_links.module:52
+msgid "Share"
+msgstr ""
+
+#: userpoints_service_links.module:33
+msgid "Category"
+msgstr "分類"
+
+#: userpoints_service_links.module:20,25
+msgid "!Points for sharing"
+msgstr ""
+
+#: userpoints_service_links.module:36
+msgid ""
+"Service link (sharing) !points will be assigned to this category. You "
+"can modify what categories are available by modifying the <a "
+"href=\"!url\">Userpoints taxonomy</a>."
+msgstr ""
+
+#: userpoints_service_links.info:0
+msgid "Userpoints Service Links"
+msgstr ""
+
+#: userpoints_service_links.info:0
+msgid ""
+"Allows users to earn points for clicking the share links from the "
+"service links module"
+msgstr ""
+

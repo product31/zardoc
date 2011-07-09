@@ -1,0 +1,84 @@
+p {   
+	font-family: Arial;
+}
+
+
+h1 {
+    font-family: Creampuff;
+    text-align: left;
+    font-size: 45;
+    color: #FFB24E;
+}
+
+h2 {
+    text-align: left;
+    font-family: Arial;
+    font-size: 16;
+    color: #ee781a;
+
+}
+
+body{
+	text-align: left;
+    font-family: Arial;
+    font-size: 12;
+    color:#FFFFFF;
+}
+
+.concertHeadline{
+	text-align: left;
+	font-family: Arial;
+    font-size: 25;
+    color: #FFFFFF;
+    
+}
+
+.concertHeadlineLG{
+	text-align: left;
+	font-family: Arial;
+    font-size: 12;
+    letter-spacing: 17;
+    color: #FFB24E;
+}
+
+
+.concert{
+	text-align: left;
+	font-family: Arial;
+    font-size: 12;
+    color:#FFFFFF;
+}
+
+.buyDVD{
+	text-align: left;
+	font-family: Arial;
+    font-size: 12;
+    color:#FFFFFF;
+}
+
+.trackName{
+	color:#FF0000;
+}
+
+
+.videoTitleOverlay {
+    font-family: Creampuff;
+    text-align: left;
+    font-size: 30;
+    color: #FFFFFF;
+}
+
+a:link {
+	text-decoration: underline;
+}
+
+a:hover {
+	color: #FFB24E;
+	text-decoration: underline;
+}
+
+a:visited {
+	color: #666666;
+	text-decoration: underline;
+
+}

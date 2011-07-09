@@ -1,0 +1,349 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: sony share\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2006-10-14 23:18+0200\n"
+"Last-Translator: Gil Freund <gilf@sysnet.co.il>\n"
+"Language-Team: SysNet <gilf@sysnet.co.il>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Country: ISRAEL\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: sony_share.module:16
+msgid "Add Digg, del.icio.us, reddit, Technorati etc. links to nodes."
+msgstr "הוספת קישורי Digg, del.icio.us, Reddit, Techorati לנושאים"
+
+#: sony_share.module:19
+#, fuzzy
+msgid "Here you can configure the sony share."
+msgstr "כאן ניתן להגדיר את קישורי השרות"
+
+#: sony_share.module:39
+#, fuzzy
+msgid "Node types"
+msgstr "פריטי תוכן מותרים"
+
+#: sony_share.module:40
+#, fuzzy
+msgid "Set the node types you want to display links for."
+msgstr "קביעת פריטי התוכן עבורם יש להציג קישורי שרות."
+
+#: sony_share.module:44
+#, fuzzy
+msgid "Types"
+msgstr "סוגים"
+
+#: sony_share.module:51
+msgid "What bookmark links to show"
+msgstr "אילו קישורי סימניות להציג"
+
+#: sony_share.module
+msgid "sony share style"
+msgstr "סגנון קישורים"
+
+#: sony_share.module:55
+#, fuzzy
+msgid "Show del.icio.us link"
+msgstr "הצגת קישור ל-del.icio.us"
+
+#: sony_share.module:61
+msgid "Show Mister-Wong link"
+msgstr "הצגת קישור ל-Mister-Wong"
+
+#: sony_share.module:67
+msgid "Show Taggle link"
+msgstr "הצגת קישור ל-Taggle"
+
+#: sony_share.module:73
+msgid "Show Yigg link"
+msgstr "הצגת קישור ל-Yigg "
+
+#: sony_share.module:79
+#, fuzzy
+msgid "Show Digg link"
+msgstr "הצגת קישור ל-Digg"
+
+#: sony_share.module:85
+#, fuzzy
+msgid "Show Reddit link"
+msgstr "הצגת קישור ל-Reddit "
+
+#: sony_share.module:91
+#, fuzzy
+msgid "Show ma.gnolia.com link"
+msgstr "הצגת קישור ל-ma.gnolia.com"
+
+#: sony_share.module:97
+#, fuzzy
+msgid "Show Newsvine link"
+msgstr "הצגת קישור ל-Newsvine"
+
+#: sony_share.module:103
+#, fuzzy
+msgid "Show Furl link"
+msgstr "הצגת קישור ל-Furl"
+
+#: sony_share.module:109
+#, fuzzy
+msgid "Show Google link"
+msgstr "הצגת קישור ל-Google"
+
+#: sony_share.module:115
+#, fuzzy
+msgid "Show Yahoo link"
+msgstr "הצגת קישור ל-Yahoo "
+
+#: sony_share.module:122
+#, fuzzy
+msgid "What search links to show"
+msgstr "אילו קישורי חיפוש להציג"
+
+#: sony_share.module:126
+#, fuzzy
+msgid "Show Technorati link"
+msgstr "הצגת קישור ל-Technorati "
+
+#: sony_share.module:132
+#, fuzzy
+msgid "Show IceRocket link"
+msgstr "הצגת קישור ל-IceRocket"
+
+#: sony_share.module:138
+msgid "Show PubSub link"
+msgstr "הצגת קישור ל-PubSub"
+
+#: sony_share.module:145
+#, fuzzy
+msgid "Where and how to show the links"
+msgstr "מתי וכיצד להציג את הקישורים"
+
+#: sony_share.module:149
+#, fuzzy
+msgid "sony share in links"
+msgstr "הצג קישורי שרות בשורת הקישורים"
+
+#: sony_share.module:151
+#: ;158
+#, fuzzy
+msgid "Disabled"
+msgstr "מבוטל"
+
+#: sony_share.module:151
+#: ;158
+#, fuzzy
+msgid "Teaser view"
+msgstr "תצוגת תקציר"
+
+#: sony_share.module:151
+#: ;158
+#, fuzzy
+msgid "Full-page view"
+msgstr "תצוגת עמוד מלא"
+
+#: sony_share.module:151
+#: ;158
+#, fuzzy
+msgid "Teasers and full-page view"
+msgstr "תצוגת תקציר ועמוד עיקרי"
+
+#: sony_share.module:152
+#, fuzzy
+msgid "When to display the services in the links section."
+msgstr "מתי להציג קישורי שרות באיזור הקישורים שמתחת לפריט התוכן."
+
+#: sony_share.module:152
+#, fuzzy
+msgid "When and how to show the links"
+msgstr "מתי ואיך להציג את הקישורים"
+
+#: sony_share.module:156
+#, fuzzy
+msgid "sony share in nodes"
+msgstr "קישורי שרות בפריטי התוכן"
+	
+#: sony_share.module:159
+#, fuzzy
+msgid "When to display the services after the node text."
+msgstr "מתי להציג קישורי שרות מיד אחרי תוכן הפריט."
+
+#: sony_share.module:163
+#, fuzzy
+msgid "Link style"
+msgstr "סגנון עמוד"
+
+#: sony_share.module:165
+#, fuzzy
+msgid "Text links"
+msgstr "טקסט"
+
+#: sony_share.module:165
+#, fuzzy
+msgid "Image links"
+msgstr "צלמיות"
+
+#: sony_share.module:165
+#, fuzzy
+msgid "Image and text links"
+msgstr "טקסט וצלמיות"
+
+#: sony_share.module:247
+#, fuzzy
+msgid "delicious"
+msgstr "טעים.לי"
+
+#: sony_share.module:247
+msgid "Bookmark this post on del.icio.us."
+msgstr "הוספת סימניה לידיעה זו ב-del.icio.us."
+
+#: sony_share.module:250
+msgid "mrwong"
+msgstr "מר וונג"
+
+#: sony_share.module:250
+msgid "Bookmark this post on mister-wong.de."
+msgstr "הוספת סימניה לידיעה זו ב-mister-wong.de"
+
+#: sony_share.module:253
+msgid "taggle"
+msgstr "טאגל"
+
+#: sony_share.module:253
+msgid "Bookmark this post on taggle.de."
+msgstr "הוספת סימניה לידיעה זו ב-Taggle.de"
+
+#: sony_share.module:256
+msgid "yigg"
+msgstr "ייג"
+
+#: sony_share.module:256
+msgid "Bookmark this post on yigg.de."
+msgstr "הוספת סימניה לידיעה זו ב-Yigg.de"
+
+#: sony_share.module:259
+#, fuzzy
+msgid "digg"
+msgstr "דיג"
+
+#: sony_share.module:259
+#, fuzzy
+msgid "Digg this post on digg.com."
+msgstr "דבר/י על זה ב-Digg."
+
+#: sony_share.module:262
+#, fuzzy
+msgid "reddit"
+msgstr "הצגת קישור ל-reddit "
+
+#: sony_share.module:262
+msgid "Submit this post on reddit.com."
+msgstr "הגשה לפרסום ב-reddit.com"
+
+#: sony_share.module:265
+msgid "magnoliacom"
+msgstr "מגנוליאקום"
+
+#: sony_share.module:265
+msgid "Submit this post on ma.gnolia.com."
+msgstr "הגשה לפרסום ב-ma.gnolia.com"
+
+#: sony_share.module:268
+#, fuzzy
+msgid "newsvine"
+msgstr "הצגת קישור ל-Newsvine"
+
+#: sony_share.module:268
+msgid "Submit this post on newsvine.com."
+msgstr "הגשה לפרסום ב-newsvine.com"
+
+#: sony_share.module:271
+#, fuzzy
+msgid "furl"
+msgstr "הצגת קישור ל-Furl"
+
+#: sony_share.module:271
+msgid "Submit this post on furl.net."
+msgstr "הגשה לפרסום ב-furl.net"
+
+#: sony_share.module:274
+#, fuzzy
+msgid "google"
+msgstr "גוגל"
+
+#: sony_share.module:274
+msgid "Bookmark this post on Google."
+msgstr "הוספת סימניה לידיעה זו ב-Google"
+
+#: sony_share.module:277
+#, fuzzy
+msgid "yahoo"
+msgstr "יאהו"
+
+#: sony_share.module:277
+msgid "Bookmark this post on Yahoo."
+msgstr "הוספת סימניה לידיעה זו ב-Yahoo"
+
+#: sony_share.module:277
+#, fuzzy
+msgid "hadash-hot"
+msgstr "חדש-HOT"
+
+#: sony_share.module
+#, fuzzy
+msgid "Bookmark this post on hadash-hot"
+msgstr "פרסם בחדש-HOT"
+
+#: sony_share.module:277
+#, fuzzy
+msgid "shaveh"
+msgstr "שווה קריאה"
+
+#: sony_share.module
+#, fuzzy
+msgid "Bookmark this post on shaveh"
+msgstr "פרסם ב\"שווה קריאה\""
+
+#: sony_share.module:280
+#, fuzzy
+msgid "technorati"
+msgstr "טכנוראטי"
+
+#: sony_share.module:280
+#, fuzzy
+msgid "Search Technorati for links to this post."
+msgstr "חפש קישורים לידיעה זו ב-Technorati."
+
+#: sony_share.module:283
+#, fuzzy
+msgid "icerocket"
+msgstr "הצגת קישור ל-IceRocket"
+
+#: sony_share.module:283
+msgid "Search IceRocket for links to this post."
+msgstr "חפש קישורים לידיעה זו ב-IceRocket."
+
+#: sony_share.module:286
+#, fuzzy
+msgid "pubsub"
+msgstr "הצג קישור ל-PubSub"
+
+#: sony_share.module:286
+msgid "Search PubSub for links to this post."
+msgstr "חפש קישורים לידיעה זו ב-PubSub."
+
+#: sony_share.module:318
+#, fuzzy
+msgid "Bookmark/Search this post with: "
+msgstr "פרסום/חיפוש לידיעה זאת בעזרת:"
+
+#: sony_share.module:29
+#, fuzzy
+msgid "use sony share"
+msgstr "קשרי שרות בשורת הקישורים"
+
+#: sony_share.module:0
+#, fuzzy
+msgid "sony_share"
+msgstr "קישורי שירות"
+

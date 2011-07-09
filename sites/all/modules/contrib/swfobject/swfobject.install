@@ -1,0 +1,47 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * file_description
+ */
+ 
+/**
+ * Implementation of hook_update_N().
+ * Set all swfobject blocks to BLOCK_NO_CACHE
+ */
+function swfobject_update_6001() {
+  $ret = array();
+  $ret[] = update_sql('UPDATE {blocks} SET cache = -1 WHERE module = "swfobject"');
+  
+  return $ret;
+}
+
+function swfobject_update_6002() {
+  $ret = array();
+  
+  $file_dir = file_directory_path() .'/swfobject';
+  $ret[] = update_sql('UPDATE {files} SET status = 1 WHERE filepath LIKE "'. $file_dir .'%"');
+  $ret[] = array(
+    'success' => TRUE,
+    'query' => t('Updated %num files to permanent status.', array('%num' => db_affected_rows()))
+  );
+  
+  return $ret;
+}
+
+function swfobject_update_6003() {
+  $ret = array();
+  
+  module_enable( array( 'sony_swfblocks' ) );
+  
+  $ret[] = update_sql("UPDATE `variable` SET name = REPLACE( name , 'swfobject', 'sony_swfblocks')");
+  $ret[] = array(
+    'success' => TRUE,
+    'query' => t('Enabled new sony_swfblocks module and renamed old swfobject variables')
+  );
+  
+  module_disable( array( 'swfobject' ) );
+  
+  return $ret;
+}

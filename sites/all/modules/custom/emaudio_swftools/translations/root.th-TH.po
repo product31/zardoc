@@ -1,0 +1,52 @@
+# Thailand translation of emaudio_swftools (all releases)
+# Copyright (c) 2010 by the Thailand translation team
+# Generated from files:
+#  emaudio_swftools/emaudio_swftools.swftools.inc: n/a
+#  emaudio_swftools/emaudio_swftools.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: emaudio_swftools (all releases)\n"
+"POT-Creation-Date: 2010-04-12 15:28-0500\n"
+"PO-Revision-Date: 2010-03-26 09:29-0500\n"
+"Language-Team: Thailand\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: emaudio_swftools.swftools.inc:29
+msgid "Autoplay"
+msgstr ""
+
+#: emaudio_swftools.swftools.inc:29
+msgid "Yes"
+msgstr "ใช่"
+
+#: emaudio_swftools.swftools.inc:30
+msgid "RSS Attachment"
+msgstr ""
+
+#: emaudio_swftools.swftools.inc:30,31
+msgid "No"
+msgstr "ไม่"
+
+#: emaudio_swftools.swftools.inc:31
+msgid "Thumbnails"
+msgstr ""
+
+#: emaudio_swftools.swftools.inc:25
+msgid "SWFTools"
+msgstr ""
+
+#: emaudio_swftools.swftools.inc:27
+msgid "Blah blah"
+msgstr ""
+
+#: emaudio_swftools.info:0
+msgid "Embedded Media Field SWFTools Provider"
+msgstr ""
+
+#: emaudio_swftools.info:0
+msgid "A generic embeded field provider that uses SWFTools to embed media."
+msgstr ""
+

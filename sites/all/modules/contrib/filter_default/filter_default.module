@@ -1,0 +1,192 @@
+<?php
+// $Id: filter_default.module,v 1.8.4.2 2008/08/28 01:29:20 chellman Exp $
+
+/**
+ * @file
+ * Filter Default module - sets the default input format for nodes, comments, and blocks.
+ *
+ * This module sets the default input format in the Drupal UI based on the user's role.
+ * The only exception is the nodeapi hook below that sets the input format directly.
+ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function filter_default_menu() {
+  $items = array();
+  $items['admin/settings/filters/default'] = array(
+    'title' => 'Defaults',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('filter_default_admin_defaults_form'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 5,
+    'access arguments' => array('administer filters'),
+  );
+  return $items;
+}
+
+function filter_default_admin_defaults_form() {
+  $form = array();
+
+  $roles = array(0 => '') + user_roles();
+  $formats = filter_formats();
+  foreach ($formats as $format) {
+    $format_list[$format->format] = $format->name;
+  }
+
+  $form['help'] = array(
+    '#value' => t('<p>You may assign a default input format for each role on your site.  Whenever a text input box with multiple allowed input formats is displayed, the initially selected input format will be set based on the lowest-weighted role (as defined below) that the user posseses.  For a user that does not have any role indicated in this table, the default input format will be the one selected on the !list_link.</p><p>Note that this does <em>not</em> prevent the user from selecting any other input format they are authorized to use; it only sets the initially selected format.</p>',
+      array('!list_link' => l('list tab', 'admin/settings/filters'))));
+
+  for ($i = 1; $i < count($roles); $i++) {
+    list($def_role, $def_format) = variable_get('filter_default_'. $i,
+      array());
+
+    $form['role_'. $i] = array(
+      '#type' => 'select',
+      '#options' => $roles,
+      '#default_value' => $def_role);
+    $form['format_'. $i] = array(
+      '#type' => 'select',
+      '#options' => $format_list,
+      '#default_value' => $def_format);
+  }
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save defaults'));
+
+  return $form;
+}
+
+function filter_default_theme() {
+  return array(
+    'filter_default_admin_defaults_form' => array(
+      'arguments' => array('form'),
+    ),
+  );
+}
+
+function theme_filter_default_admin_defaults_form($form) {
+  $roles = user_roles();
+
+  $header = array(t('Weight'), t('Role'), t('Default input format'));
+
+  $rows = array();
+  for ($i = 1; $i < count($roles)+1; $i++) {
+    $row = array();
+    $row[] = $i;
+    $row[] = drupal_render($form['role_'. $i]);
+    $row[] = drupal_render($form['format_'. $i]);
+    $rows[] = $row;
+  }
+
+  $output .= drupal_render($form['help']);
+  $output .= theme('table', $header, $rows);
+  $output .= drupal_render($form);
+  return $output;
+}
+
+function filter_default_admin_defaults_form_validate($form, &$form_state) {
+  $roles = user_roles();
+  $formats = filter_formats();
+
+  for ($i = 1; $i < count($roles)+1; $i++) {
+    if ($form_state['values']['role_'. $i] > 0 && $form_state['values']['format_'. $i] != 1 &&
+      (strpos($formats[$form_state['values']['format_'. $i]]->roles,
+        ','. $roles[$form_state['values']['role_'. $i]] .',') === FALSE &&
+        strpos($formats[$form_state['values']['format_'. $i]]->roles,
+          ','. $form_state['values']['role_'. $i] .',') === FALSE)) {
+      form_set_error('format_'. $i,
+        t('Role %role is not allowed to use format %format.',
+          array('%role' => $roles[$form_state['values']['role_'. $i]],
+            '%format' => $formats[$form_state['values']['format_'. $i]]->name)));
+    }
+  }
+}
+
+function filter_default_admin_defaults_form_submit($form, &$form_state) {
+  $roles = user_roles();
+  for ($i = 1; $i < count($roles)+1; $i++) {
+    if ($form_state['values']['role_'. $i] > 0) {
+      variable_set('filter_default_'. $i,
+        array($form_state['values']['role_'. $i], $form_state['values']['format_'. $i]));
+    }
+    else {
+      variable_del('filter_default_'. $i);
+    }
+  }
+  drupal_set_message(t('The defaults have been saved.'));
+}
+
+function _filter_default_form_alter_filters($format_new, &$form, &$form_state) {
+  if (isset($form['#element_validate']) && is_array($form['#element_validate']) &&
+    array_search('filter_form_validate', $form['#element_validate']) !== FALSE) {
+
+    foreach (element_children($form) as $el) {
+      // Until admin/settings/filters is submitted,
+      // filter_default_format is not set.  Assume Filtered HTML.
+      $default = variable_get('filter_default_format', 1);
+      if ($form[$el]['#type'] == 'radio' &&
+        $form[$el]['#default_value'] == $default) {
+        $form[$el]['#default_value'] = $format_new;
+      }
+    }
+  }
+  if (is_array($form)) {
+    foreach (element_children($form) as $el) {
+      _filter_default_form_alter_filters($format_new, $form[$el], $form_state);
+    }
+  }
+}
+
+/**
+ * Determines whether the form is creating something new.
+ *
+ */
+function _filter_default_is_new($form_id, $form) {
+  switch ($form['#id']) {
+    case 'comment-form':
+      return empty($form['cid']['#value']);
+    case 'node-form':
+      return empty($form['nid']['#value']);
+    case 'block-box-form':
+      return empty($form['bid']['#value']);
+  }
+  return FALSE;
+}
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function filter_default_form_alter(&$form, &$form_state, $form_id) {
+  if (_filter_default_is_new($form_id, $form)) {
+    global $user;
+    $roles = user_roles();
+    for ($i = 1; $i < count($roles)+1; $i++) {
+      list($role, $format) = variable_get('filter_default_'. $i, array());
+      if (array_key_exists($role, $user->roles)) {
+        _filter_default_form_alter_filters($format, $form, $form_state);
+        break;
+      }
+    }
+  }
+}
+
+/**
+ * Implementation of hook_nodeapi().
+ *
+ * Set the default filter on new blog posts coming in through blogapi module.
+ */
+function filter_default_nodeapi(&$node, $op) {
+  if ($op == "blogapi new") {
+    global $user;
+    $roles = user_roles();
+    for ($i = 1; $i < count($roles)+1; ++$i) {
+      list($role, $format) = variable_get('filter_default_'. $i, array());
+      if (array_key_exists($role, $user->roles)) {
+        $node['format'] = $format;
+        break;
+      }
+    }
+  }
+}

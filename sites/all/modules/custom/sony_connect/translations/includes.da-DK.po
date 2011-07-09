@@ -1,0 +1,173 @@
+# Denmark translation of sony_connect (all releases)
+# Copyright (c) 2010 by the Denmark translation team
+# Generated from files:
+#  sony_connect/includes/pages.inc: n/a
+#  sony_connect/includes/admin.inc: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sony_connect (all releases)\n"
+"POT-Creation-Date: 2010-04-05 16:07-0500\n"
+"PO-Revision-Date: 2010-03-30 11:37-0500\n"
+"Language-Team: Denmark\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: includes/pages.inc:373
+msgid "Username"
+msgstr "Brugernavn"
+
+#: includes/pages.inc:121
+msgid "Operations"
+msgstr "Handlinger"
+
+#: includes/admin.inc:83
+msgid "Enabled"
+msgstr "Aktiveret"
+
+#: includes/pages.inc:189
+msgid "This action cannot be undone."
+msgstr "Denne handling kan ikke fortrydes."
+
+#: includes/pages.inc:191
+msgid "Cancel"
+msgstr "Fortryd"
+
+#: includes/pages.inc:647
+msgid "Continue"
+msgstr "Fortsæt"
+
+#: includes/admin.inc:43
+msgid "Replacement tokens"
+msgstr ""
+
+#: includes/pages.inc:60
+msgid "Connected"
+msgstr ""
+
+#: includes/pages.inc:113,190
+msgid "Disconnect"
+msgstr ""
+
+#: includes/pages.inc:116
+msgid "Connect now"
+msgstr ""
+
+#: includes/pages.inc:121
+msgid "Network"
+msgstr ""
+
+#: includes/pages.inc:171,187
+msgid "Disconnect your %network account?"
+msgstr ""
+
+#: includes/pages.inc:233
+msgid "Return to page"
+msgstr "Tilbage til siden"
+
+#: includes/pages.inc:234
+msgid "Continue to profile"
+msgstr "Fortsæt til din profil"
+
+#: includes/pages.inc:263,268
+msgid "Registration almost complete... just one more step!"
+msgstr "Registreringen er næsten færdig…kun et trin tilbage!"
+
+#: includes/pages.inc:264
+msgid "Already have an account on this site?"
+msgstr "Har du allerede en konto?"
+
+#: includes/pages.inc:269
+msgid "Don't have an account on this site?"
+msgstr "Har du ikke en konto til denne side?"
+
+#: includes/pages.inc:273
+msgid "Registration successful!"
+msgstr "Registering fuldendt!"
+
+#: includes/pages.inc:274
+msgid ""
+"Your %network account has been connected. Logging in, please be "
+"patient."
+msgstr ""
+"Din %network konto er blevet kontaktet. Er ved at logge ind, venligst "
+"vær tålmodig."
+
+#: includes/pages.inc:278
+msgid "Logging in, please be patient."
+msgstr ""
+
+#: includes/pages.inc:301
+msgid "Please pick a username"
+msgstr "Vælg venligst et brugernavn"
+
+#: includes/pages.inc:329
+msgid "Yes, I want to receive the latest news & updates"
+msgstr "Ja tak. Jeg vil gerne modtage de seneste nyheder og opdateringer"
+
+#: includes/pages.inc:336
+msgid "Email"
+msgstr ""
+
+#: includes/pages.inc:343
+msgid "Finish"
+msgstr "Afslut"
+
+#: includes/pages.inc:379
+msgid "Password"
+msgstr "Adgangskode"
+
+#: includes/pages.inc:381
+msgid "Forgot password?"
+msgstr "Glemt din adgangskode?"
+
+#: includes/pages.inc:386
+msgid "Sign in"
+msgstr "Log ind"
+
+#: includes/pages.inc:392
+msgid "Sign in & Complete your profile"
+msgstr "Log ind og færdiggør din brugerprofil"
+
+#: includes/pages.inc:477
+msgid "Save my preferences"
+msgstr ""
+
+#: includes/pages.inc:519
+msgid "Your sharing preferences have been saved."
+msgstr ""
+
+#: includes/pages.inc:530
+msgid "Share with my networks"
+msgstr ""
+
+#: includes/pages.inc:542
+msgid "Connect"
+msgstr ""
+
+#: includes/pages.inc:583
+msgid "Share this with:"
+msgstr ""
+
+#: includes/pages.inc:614
+msgid "For %plural_title, share with"
+msgstr ""
+
+#: includes/pages.inc:652
+msgid "Remember this choice & don't show this message again."
+msgstr ""
+
+#: includes/pages.inc:656
+msgid ""
+"Set your <a href=\"!sharing-url\" target=\"_blank\">sharing "
+"preferences</a> in your profile."
+msgstr ""
+
+#: includes/pages.inc:690
+msgid ""
+"Your sharing preferences have been saved.  You can change them at any "
+"time in your <a href=\"!profile_link\">profile</a>."
+msgstr ""
+

@@ -1,0 +1,17 @@
+<?php
+// $Id:
+
+function tweet_uninstall() {
+	variable_del('tweet_button');
+  variable_del('tweet_tweet_text');
+  variable_del('tweet_tweet_url');
+  variable_del('tweet_language');
+  variable_del('tweet_account');
+  variable_del('tweet_rel_account_name');
+  variable_del('tweet_rel_account_description');
+  variable_del('tweet_node_weight');
+  variable_del('tweet_node_types');
+  variable_del('tweet_node_location');
+  variable_del('tweet_display_teasers');
+    
+}

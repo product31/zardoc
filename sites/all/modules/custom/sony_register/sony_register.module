@@ -1,0 +1,277 @@
+<?php
+/*
+ * @file
+ */
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function sony_register_form_alter(&$form, $form_state, $form_id) {
+  $admin = user_access('administer users');
+  $original_description = 'A valid e-mail address. All e-mails from the system will be sent to this address. The e-mail address is not made public and will only be used if you wish to receive a new password or wish to receive certain news or notifications by e-mail.';
+  $default_legal_link = t('<strong>Accept</strong> !terms of Use', array('!terms' => l('Terms & Conditions', 'http://sonymusic.com/termsandconditions.html')));
+  switch ($form_id) {
+    case 'user_register':
+    case 'sony_connect_user_register_form':
+      $form['account']['mail']['#description'] = t(variable_get('email_description', $original_description));
+      if ((variable_get('sony_legal_enable', FALSE)) && (!$admin)){
+        $form['legal']['legal_accept']['#title'] = t(variable_get('sony_legal_link', $default_legal_link));
+      }
+      if (!empty($form['Subscriptions']['profile_mobile_phone'])) {
+        $form['Subscriptions']['profile_mobile_phone']['#description'] = t('Please review !terms', array('!terms' => l('Terms of Service', 'http://www.mozes.com/go/tos')));
+      }
+      break;
+
+    case 'user_profile_form':
+      if (isset($form['legal'])) {
+        $form['legal']['legal_accept']['#title'] = t(variable_get('sony_legal_link', $default_legal_link));
+      }
+      if (isset($form['Subscriptions']['profile_mobile_phone'])) {
+        $form['Subscriptions']['profile_mobile_phone']['#description'] = t('Please review !terms', array('!terms' => l('Terms of Service', 'http://www.mozes.com/go/tos')));
+      }
+      break;
+
+    case 'user_admin_settings':
+      $form['email']['sony_register']['email_description'] = array(
+        '#type' => 'textarea',
+        '#title' => t('E-mail Description'),
+        '#default_value' => t(variable_get('email_description', $original_description)),
+      );
+      break;
+
+    case 'legal_administration':
+      $form['display']['sony_legal'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Sony Settings'),
+      );
+      $form['display']['sony_legal']['sony_legal_enable'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Enable Sony Settings'),
+        '#default_value' => variable_get('sony_legal_enable', TRUE),
+      );
+      $form['display']['sony_legal']['sony_legal_link'] = array(
+        '#type' => 'textfield',
+        '#size' => 120,
+        '#title' => t('Sony Legal Link'),
+        '#default_value' => variable_get('sony_legal_link', $default_legal_link),
+        '#description' => t('If left empty it will revert to the default link'),
+        );
+       $form['#submit'][]= 'sony_register_legal_form_submit';
+       break;
+
+     case 'legal_login':
+       $form['legal']['legal_accept']['#title'] = variable_get('sony_legal_link', $default_legal_link);
+       break;
+  }
+}
+
+function sony_register_legal_form_submit($form, &$form_state){
+  if ($form_state['values']['sony_legal_link']) {
+    variable_set('sony_legal_link', $form_state['values']['sony_legal_link']);
+  }
+  else {
+    variable_del('sony_legal_link');
+  }
+  variable_set('sony_legal_enable', $form_state['values']['sony_legal_enable']);
+}
+
+/**
+ *
+ */
+function sony_register_form_user_register_alter(&$form, $form_state) {
+  if (!empty($form_state['ajax']) || !empty($_SESSION['page_override']) || arg(0) == 'socialize-login') {
+    if (arg(0) == 'socialize-login') {
+      drupal_add_js(drupal_get_path('module', 'sony_register') .'/sony.gigya.js');
+      unset($form['mollom']);
+    }
+    $form['account']['pass']['#type'] = 'password';
+    $form['#after_build'][] = '_sony_register_form_user_register_after_build';
+    $_REQUEST['destination'] = 'user/register/success';
+  }
+}
+
+/**
+ * #after_build callback
+ */
+function _sony_register_form_user_register_after_build($form, $form_state) {
+  drupal_add_js(drupal_get_path('module', 'sony_register') .'/sony_register.js');
+  drupal_add_css(drupal_get_path('module', 'sony_register') .'/sony_register.css');
+  drupal_set_title('');
+
+  // re-weight elements
+  $form['user_registration_help']['#weight'] = -100;
+  $form['user_registration_help']['#value'] = '<div class="title">'. $form['user_registration_help']['#value'] .'</div>';
+  foreach (array('account', 'coppa_dob', 'Personal information', 'mollom', 'legal', 'Subscriptions', 'newsletter_subscriptions' ) as $i => $key) {
+    if ($form[$key]['#type'] == 'fieldset') {
+      $form[$key]['#type'] = 'markup';
+    }
+    $form[$key]['#weight'] = $i;
+  }
+
+  $form['account']['name']['#title'] = t('Choose a username');
+  $form['account']['name']['#attributes']['title'] = t('Username');
+  unset($form['account']['name']['#description']);
+
+  $form['account']['pass']['#title'] = t('Choose a password');
+  unset($form['account']['pass']['#description']);
+
+  $form['account']['mail']['#title'] = t('Enter your email');
+  $form['account']['mail']['#attributes']['title'] = t('E-mail');
+  unset($form['account']['mail']['#description']);
+
+  if (isset($form['coppa_dob'])) {
+    $form['coppa_dob']['#title'] = t("When's your birthday?");
+  }
+
+  if (isset($form['Personal information']['profile_country'])) {
+    $form['Personal information']['profile_country']['#options'][0] = $form['Personal information']['profile_country']['#title'];
+    unset($form['Personal information']['profile_country']['#description']);
+  }
+
+  if (isset($form['Personal information']['profile_zip_code'])) {
+    $form['Personal information']['profile_zip_code']['#size'] = 10;
+    $form['Personal information']['profile_zip_code']['#attributes']['title'] = $form['Personal information']['profile_zip_code']['#title'];
+    $form['Personal information']['profile_zip_code']['#title'] = t('Where are you?');
+    unset($form['Personal information']['profile_zip_code']['#description']);
+
+    // Zip code and country should be a combined field so tack the country onto
+    // the end of the zip code.
+    if (isset($form['Personal information']['profile_country'])) {
+      unset($form['Personal information']['profile_country']['#title']);
+      $form['Personal information']['profile_zip_code']['#field_suffix'] = drupal_render($form['Personal information']['profile_country']);
+    }
+  }
+
+  if (isset($form['newsletter_subscriptions'])) {
+    unset($form['newsletter_subscriptions'][0]['list']['#title']);
+  }
+
+  if (isset($form['Subscriptions']['profile_newsletter'])) {
+    unset($form['Subscriptions']['profile_newsletter']['#description']);
+  }
+
+  if (isset($form['mollom']['captcha'])) {
+    $form['mollom']['captcha']['#title'] = t('Are you human?');
+    $form['mollom']['captcha']['#description'] = t('Enter the word below, in the space here &darr;');
+    // clear-fix the mollom form-item
+    $form['mollom']['captcha']['#field_suffix'] = '<div style="clear: both;"/>';
+  }
+
+  $form['submit']['#value'] = t('Join the Community');
+
+  return $form;
+}
+
+/**
+ * Implementation of hook_popups().
+ */
+function sony_register_popups() {
+  return array(
+    '*' => array(
+      'a[href*=/user/register]' => array(
+        'updateMethod' => 'reload',
+        'reloadOnError' => TRUE,
+        'hijackDestination' => TRUE,
+      ),
+      'a[href*=/user/login]' => array(
+        'updateMethod' => 'reload',
+        'reloadOnError' => TRUE,
+        'hijackDestination' => TRUE,
+      ),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function sony_register_menu() {
+  $items = array();
+  $items['user/register/success'] = array(
+    'type' => MENU_CALLBACK,
+    'page callback' => 'sony_register_success',
+    'access callback' => 'user_is_logged_in',
+  );
+
+  $items['admin/user/sony_register'] = array(
+    'title' => 'Sony registration',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_register_admin_settings'),
+    'access arguments' => array('adminster site configuration'),
+  );
+
+  $items['user/%ctools_js/login'] = array(
+    'page callback' => 'sony_register_ajax_login',
+    'page arguments' => array(1),
+    'access callback' => 'user_is_anonymous',
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/register.inc',
+  );
+
+  $items['user/%ctools_js/register'] = array(
+    'page callback' => 'sony_register_ajax_register',
+    'page arguments' => array(1),
+    'access callback' => 'user_register_access',
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/register.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function sony_register_theme() {
+  return array(
+    'sony_register_success' => array(
+      'template' => 'sony-register-success',
+    ),
+  );
+}
+
+function sony_register_success() {
+  return theme('sony_register_success');
+}
+
+function template_preprocess_sony_register_success(&$vars) {
+  $vars['left'] = '';
+  if ($left_block = variable_get('sony_register_success_block_left', 'sonybmg_discography:3')) {
+    list($module, $delta) = explode(':', $left_block);
+    $block = (object)module_invoke($module, 'block', 'view', $delta);
+    $vars['left'] = theme('block', $block);
+  }
+
+  $vars['right'] = '';
+  if ($right_block = variable_get('sony_register_success_block_right', '')) {
+    list($module, $delta) = explode(':', $right_block);
+    $block = (object)module_invoke($module, 'block', 'view', $delta);
+    $vars['right'] = theme('block', $block);
+  }
+
+  $default_message = t('Thank you for registering.');
+  $vars['message'] = variable_get('sony_register_success_message', $default_message);
+}
+
+function sony_register_admin_settings() {
+  $form['sony_register_success_block_left'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Left block'),
+    '#default_value' => variable_get('sony_register_success_block_left', 'sonybmg_discography:3'),
+  );
+  $form['sony_register_success_block_right'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Right block'),
+    '#default_value' => variable_get('sony_register_success_block_right', ''),
+  );
+
+  $default_message = t('Thank you for registering. We are committed to protecting your rights and privacy.');
+  $form['sony_register_success_message'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Registration success message'),
+    '#default_value' => variable_get('sony_register_success_message', $default_message),
+  );
+
+  return system_settings_form($form);
+}
+

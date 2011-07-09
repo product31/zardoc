@@ -1,0 +1,20 @@
+name = Sony BMG Multisite
+description = Exposes default content types, views, and utility functions for Sony BMG artist sites.
+package = Sony BMG
+core = 6.x
+dependencies[] = php
+dependencies[] = content
+dependencies[] = views
+dependencies[] = panels 
+dependencies[] = imageapi
+dependencies[] = imageapi_gd
+dependencies[] = imagecache
+dependencies[] = imagefield
+dependencies[] = poll
+dependencies[] = views_bulk_operations
+dependencies[] = errorlog
+dependencies[] = emaillog
+
+l10n server = translate.gdb-dev.com
+project = "sonybmg"
+version = "6.x-2.x"

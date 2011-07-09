@@ -1,0 +1,141 @@
+<?php
+// $Id: rest_server.module,v 1.1.2.1.2.2 2009/03/12 17:21:07 robloach Exp $
+
+/**
+ * Implementation of hook_server_info().
+ */
+function rest_server_server_info() {
+  return array(
+    '#name' => 'REST',
+    '#path' => 'rest',
+  );
+}
+
+/**
+ * Implementation of hook_server()
+ */
+function rest_server_server() {
+  $request = $_REQUEST;
+  $args = array();
+
+  // Check for which service we're calling
+  $method_name = $request['method'];
+  foreach (services_get_all() as $method) {
+    if ($method['#method'] == $request['method']) {
+      // Make sure that include files are indeed included
+      if (isset($method['#file']) && is_array($include = $method['#file'])) {
+        module_load_include($include['file'], $include['module']);
+      }
+      // Special use cases for arguments of certain types
+      foreach ($method['#args'] as $argument) {
+        $argname = $argument['#name'];
+        switch ($argument['#type']) {
+          case 'array' :
+            if (empty($request[$argname])) {
+              $args[] = array();
+            }
+            else {
+              $args[] = explode(',', $request[$argname]);
+            }
+            break;
+          case 'string':
+            if (empty($request[$argname])) {
+              $args[] = '';
+            }
+            else {
+              $args[] = $request[$argname];
+            }
+            break;
+          default:
+            // parameters of other types
+            $args[] = $request[$argname];
+            break;
+        }
+      }
+      break;
+    }
+  }
+
+  try {
+    $response = services_method_call($method_name, $args);
+
+    // If 'status' is set, an error ocurred.
+    if (is_array($response) && isset($response['status'])) {
+      $result = $response;
+    }
+    else {
+      $result = array(
+        'status' => 'success',
+        'response' => $response,
+      );
+    }
+  }
+  catch (Exception $e) {
+    $result = rest_server_server_error($e->getMessage());
+  }
+
+  drupal_set_header('Content-type: text/xml');
+  print rest_server_to_xml($result);
+}
+
+/**
+ * Implementation of hook_server_error
+ *
+ * @param string $message
+ * @return array
+ */
+function rest_server_server_error($message) {
+  return array(
+    'status' => 'error',
+    'message' => $message,
+  );
+}
+
+/**
+ * Convert data array to xml representation.
+ *
+ * @param $data
+ *   Array or object with data to convert.
+ * @param $xml
+ *   SimpleXML object, used in recursive calls.
+ * @param $depth
+ *   Node depth, used in recursive calls.
+ *
+ * @return
+ *   XML string.
+ */
+function rest_server_to_xml($data, $xml = NULL, $depth = 0)  {
+  if (!isset($xml)) {
+    $xml = simplexml_load_string('<?xml version="1.0" encoding="utf-8"?><rest generator="xml_writer" version="1.0" />');
+  }
+
+  foreach ($data as $key => $value) {
+    if (is_array($value)|| is_object($value)) {
+      $child = is_numeric($key) ? _rest_server_item_node($xml, $key) : $xml->addChild($key);
+      rest_server_to_xml($value, $child, $depth + 1);
+    }
+    else {
+      $value = htmlentities($value);
+      if (is_numeric($key)) {
+        _rest_server_item_node($xml, $key, $value);
+      }
+      else {
+        $xml->addChild($key, $value);
+      }
+    }
+  }
+
+  if ($depth == 0) {
+    return $xml->asXML();
+  }
+}
+
+/**
+ * Helper function to generate 'item' nodes for arrays with numeric keys.
+ * E.g. <item id="0">.
+ */
+function _rest_server_item_node($parent, $key, $value = NULL) {
+  $item = isset($value) ? $parent->addChild('item', $value) : $parent->addChild('item');
+  $item->addAttribute('id', $key);
+  return $item;
+}

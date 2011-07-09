@@ -1,0 +1,87 @@
+1	1	Insert/edit image	php:\
+$imce_url = function_exists('imce_access') && imce_access() ? url('imce') : '';\
+\
+return "js:\
+var B = eDefBrowseButton('$imce_url', 'attr_src', 'Browse', 'image');\
+var form = [\
+ {name: 'src', title: 'Image URL', suffix: B},\
+ {name: 'width', title: 'Width x Height', suffix: ' x ', getnext: true, attributes: {size: 3}},\
+ {name: 'height', attributes: {size: 3}},\
+ {name: 'alt', title: 'Alternative text'}\
+];\
+eDefTagDialog('img', form, 'Insert/edit image', 'OK');\
+";	image.png	M	-10
+2	1	Insert/edit link	php:\
+$imce_url = function_exists('imce_access') && imce_access() ? url('imce') : '';\
+\
+return "js:\
+var B = eDefBrowseButton('$imce_url', 'attr_href', 'Browse', 'link');\
+var form = [\
+ {name: 'href', title: 'Link URL', suffix: B},\
+ {name: 'html', title: 'Link text'},\
+ {name: 'title', title: 'Link title'}\
+];\
+eDefTagDialog('a', form, 'Insert/edit link', 'OK');\
+";	link.png	L	-10
+3	1	tpl:		separator.png		-8
+4	1	Bold	<strong>%TEXT%</strong>	bold.png	B	-6
+5	1	Italic	js: eDefTagger('em');/*toggle tag*/	italic.png	I	-6
+6	1	Headers	js: eDefTagChooser([\
+ ['h1', 'Header1'],\
+ ['h2', 'Header2'],\
+ ['h3', 'Header3'],\
+ ['h4', 'Header4']\
+], true, 'li', 'ul', 'slideDown');/*choose among tags*/	headers.png	H	-5
+7	1	tpl:		separator.png		-4
+8	1	Ordered list. Converts selected lines to a numbered list.	js: eDefTagLines('<ol>\\n', ' <li>', '</li>', '\\n</ol>');	ol.png	O	-2
+9	1	Unordered list. Converts selected lines to a bulleted list.	js: eDefTagLines('<ul>\\n', ' <li>', '</li>', '\\n</ul>');	ul.png	U	-2
+10	1	tpl:		separator.png		0
+11	1	Teaser break	<!--break-->	teaserbr.png	T	2
+12	1	Preview	js: eDefPreview();	preview.png	P	6
+13	1	Help	js: eDefHelp('slideDown');	help.png	F	10
+24	1	Quote	<blockquote>%TEXT%</blockquote>	Quote	Q	-1
+25	1	Code	<code>%TEXT%</code>	Code	C	0
+23	2	Code	[code]%TEXT%[/code]	Code	C	0
+22	2	Quote	[quote]%TEXT%[/quote]	Quote	Q	-1
+14	2	Insert/edit image	js:\
+var M = E.getSelection().match(new RegExp('^\\\\[img(?:=(\\\\d+)x(\\\\d+))?](.+)\\\\[/img]$')) || ['', '', '', ''];\
+if (!M[3] && Drupal.DruBB.url) {\
+  M[3] = Drupal.DruBB.url;\
+}\
+\
+var form = [\
+ {name: 'src', title: 'URL', value: M[3]},\
+ {name: 'width', value: M[1]},\
+ {name: 'height', value: M[2]}\
+];\
+eDefTagDialog('img', form, 'Insert/edit image', 'OK', 'bbcImgProcess');\
+\
+bbcImgProcess = function(tag, form) {\
+  var src = form.elements['attr_src'].value;\
+  var width = form.elements['attr_width'].value;\
+  var height = form.elements['attr_height'].value;\
+  var str = '[img' + (width ? ('='+ width +'x'+ height) : '') +']'+ src +'[/img]';\
+  editor.dialog.close();\
+  if (src) editor.active.replaceSelection(str);\
+}	image.png	M	-10
+15	2	Insert/edit link	js:\
+var S = E.getSelection();\
+var M = S.match(new RegExp('^\\\\[url(?:=([^\\\\]]*))?]((?:.|[\\r\\n])*)\\\\[/url]$')) || ['', '', ''];\
+var form = [\
+ {name: 'href', title: 'URL', value: M[1] ? M[1] : M[2]},\
+ {name: 'text', value: M[1] ? M[2] : (M[0] ? '' : S)}\
+];\
+eDefTagDialog('a', form, 'Insert/edit link', 'OK', 'bbcUrlProcess');\
+\
+bbcUrlProcess = function(tag, form) {\
+  var url = form.elements['attr_href'].value;\
+  var text = form.elements['attr_text'].value;\
+  var str = '[url'+ (text ? ('='+ url) : '') +']'+ (text ? text : url) +'[/url]';\
+  editor.dialog.close();\
+  if (url) editor.active.replaceSelection(str);\
+}	link.png	L	-10
+16	2	Bold	[b]%TEXT%[/b]	bold.png	B	-6
+17	2	Italic	[i]%TEXT%[/i]	italic.png	I	-6
+18	2	Ordered list. Converts selected lines to a numbered list.	js: eDefSelProcessLines('[list=1]\\n', ' [*]', '', '\\n[/list]');	ol.png	O	-2
+19	2	Unordered list. Converts selected lines to a bulleted list.	js: eDefSelProcessLines('[list]\\n', ' [*]', '', '\\n[/list]');	ul.png	U	-2
+21	2	Help	js: eDefHelp();	help.png	F	10

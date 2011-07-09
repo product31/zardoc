@@ -1,0 +1,136 @@
+# Israel translation of sony_newsletter (all releases)
+# Copyright (c) 2010 by the Israel translation team
+# Generated from files:
+#  sony_newsletter/sony_newsletter.info: n/a
+#  sony_newsletter/sony_newsletter.edit.inc: n/a
+#  sony_newsletter/sony_newsletter.module: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sony_newsletter (all releases)\n"
+"POT-Creation-Date: 2010-04-08 16:31-0500\n"
+"PO-Revision-Date: 2010-03-26 09:13-0500\n"
+"Language-Team: Israel\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: sony_newsletter.info:0
+msgid "Sony BMG"
+msgstr ""
+
+#: sony_newsletter.edit.inc:121
+msgid "!name field is required."
+msgstr "חובה למלא את השדה !name."
+
+#: sony_newsletter.edit.inc:20
+msgid "Add translation"
+msgstr ""
+
+#: sony_newsletter.edit.inc:24
+msgid "Language"
+msgstr "שפה"
+
+#: sony_newsletter.edit.inc:24
+msgid "Operations"
+msgstr "פעולות אפשריות"
+
+#: sony_newsletter.edit.inc:40
+msgid "Title"
+msgstr "כותרת"
+
+#: sony_newsletter.edit.inc:47
+msgid "Display method"
+msgstr ""
+
+#: sony_newsletter.edit.inc:55
+msgid "Text"
+msgstr ""
+
+#: sony_newsletter.edit.inc:56
+msgid "Redirect"
+msgstr ""
+
+#: sony_newsletter.edit.inc:64
+msgid "Body"
+msgstr "תוכן"
+
+#: sony_newsletter.edit.inc:66
+msgid ""
+"Enter the content of the newsletter signup form.  Full HTML is "
+"accepted."
+msgstr ""
+
+#: sony_newsletter.edit.inc:73
+msgid "Path"
+msgstr "מיקום"
+
+#: sony_newsletter.edit.inc:75
+msgid ""
+"Use this field if there is already an existing newsletter.  This may "
+"be either a relative drupal path or a fully-qualified URL.  If this is "
+"filled out it takes precedence over the body field."
+msgstr ""
+
+#: sony_newsletter.edit.inc:82
+msgid "Other options"
+msgstr ""
+
+#: sony_newsletter.edit.inc:86
+msgid "Other"
+msgstr "אחר"
+
+#: sony_newsletter.edit.inc:95
+msgid "Path alias"
+msgstr ""
+
+#: sony_newsletter.edit.inc:102
+msgid ""
+"Optionally specify an alternative URL by which this node can be "
+"accessed. For example, type \"about\" when writing an about page. Use "
+"a relative path and don't add a trailing slash or the URL alias won't "
+"work."
+msgstr ""
+"ניתן להגדיר גם מיקום חילופי שדרכו ניתן "
+"לגשת לפריט תוכן זה. לדוגמה, רשום \"about\" "
+"כשאתה כותב עמוד אודות האתר. יש להשתמש "
+"במיקום יחסי ולא להוסיף לוכסן בסוף, "
+"אחרת זה לא יעבוד."
+
+#: sony_newsletter.edit.inc:107
+msgid "Save"
+msgstr ""
+
+#: sony_newsletter.edit.inc:137
+msgid "Option name"
+msgstr ""
+
+#: sony_newsletter.module:128
+msgid "Newsletter saved."
+msgstr ""
+
+#: sony_newsletter.module:52
+msgid "edit sony newsletter"
+msgstr ""
+
+#: sony_newsletter.module:14
+msgid "Newsletter Signup"
+msgstr ""
+
+#: sony_newsletter.module:21
+msgid "View"
+msgstr "הצג"
+
+#: sony_newsletter.module:27
+msgid "Translate"
+msgstr "תרגם"
+
+#: sony_newsletter.info:0
+msgid "Sony Newsletter"
+msgstr ""
+
+#: sony_newsletter.info:0
+msgid "Unified newsletter handling for the Sony Platform"
+msgstr ""
+

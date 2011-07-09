@@ -1,0 +1,9 @@
+; $Id$
+name = Blueprint theme builder
+description = Build grid based themes using a WYSIWYG layout editor.
+core = 6.x
+
+l10n server = translate.gdb-dev.com
+project = "bpgrid"
+version = "6.x-2.x"
+

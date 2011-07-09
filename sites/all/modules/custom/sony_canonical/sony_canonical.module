@@ -1,0 +1,175 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Sony Canonical Module
+ */
+
+function sony_canonical_init() {
+  _sony_canonical_set();
+}
+
+function sony_canonical_menu() {
+
+  $items = array();
+
+  $items['admin/settings/sony/canonical'] = array(
+    'title' => 'Canonical links settings',
+    'description' => 'Global settings for displaying canonical links',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_canonical_admin'),
+    'access arguments' => array('access administration pages'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'sony_canonical.admin.inc',
+  );
+
+  return $items;
+}
+
+function _sony_canonical_load_filters($info = FALSE) {
+
+  $filters = array(
+    'slashes' => array(
+      'name' => 'Slashes filter',
+      'description' => 'Removes trailing slashe from URL',
+      'callback' => '_sony_canonical_slashes',
+      'file' => 'filters.inc'
+    ),
+    'country' => array(
+      'name' => 'Country filter',
+      'description' => 'Removes language slug from url',
+      'callback' => '_sony_canonical_country',
+      'file' => 'filters.inc'
+    ),
+    'home' => array(
+      'name' => 'Home filter',
+      'description' => 'Removes home slug from url',
+      'callback' => '_sony_canonical_home',
+      'file' => 'filters.inc'
+    ),
+    'query' => array(
+      'name' => 'Query filter',
+      'description' => 'Removes query string from url',
+      'callback' => '_sony_canonical_query',
+      'file' => 'filters.inc'
+    ),
+  );
+
+  if ($info == TRUE) {
+    return $filters;
+  }
+  return array_keys( $filters );
+}
+
+function _sony_canonical_set() {
+
+  $default = variable_get('sony_canonical_default_filters', array());
+  $filters = $default;
+  if ((arg(0) == 'node') && !(arg(2))) {
+    $node = node_load( arg(1) );
+    $enabled = variable_get( 'sony_canonical_filters_enabled_' . $node->type, 0 );
+    if ($enabled == 1) {
+      $filters = variable_get( 'sony_canonical_filters_' . $node->type, array() );
+    }
+    else {
+      return;
+    }
+  }
+  $_filters = array();
+  if (!empty($filters)) {
+    foreach ($filters as $filter) {
+      if (!is_numeric($filter)) {
+        $_filters[] = $filter;
+      }
+    }
+  }
+  $url = _sony_canonical_rebuild_url(_sony_canonical_get($_filters));
+  drupal_set_html_head('<link rel="canonical" content="' . $url . '" />');
+}
+
+function _sony_canonical_get($filters = array()) {
+  $url = _sony_canonical_full_url($filters);
+  $parsed = parse_url($url);
+
+  return (_sony_canonical_filter_url($parsed, $filters));
+}
+
+function _sony_canonical_full_url() {
+  if (isset($_SERVER['HTTPS'])) {
+    return 'http' . ($_SERVER['HTTPS'] == "on" ? 's' : '') . '://' . $_SERVER['SERVER_NAME'] . request_uri();
+  }
+  return NULL;
+}
+
+function _sony_canonical_filter_url($url, $filters) {
+
+  if (empty($filters)) {
+    return $url;
+  }
+  $full_filters = _sony_canonical_load_filters(TRUE);
+  foreach ($filters as $filter) {
+    if ($full_filters[ $filter ]['file']) {
+      module_load_include('inc', 'sony_canonical', 'filters');
+    }
+    $url = call_user_func($full_filters[ $filter ]['callback'], $url);
+  }
+  return $url;
+}
+
+function _sony_canonical_rebuild_url($parsed) {
+    if (!is_array($parsed)) {
+      return FALSE;
+    }
+    $uri = isset($parsed['scheme']) ? $parsed['scheme'] . ':' . ((strtolower($parsed['scheme']) == 'mailto') ? '':'//'): '';
+    $uri .= isset($parsed['user']) ? $parsed['user'] . ($parsed['pass']? ':' . $parsed['pass']:'') . '@':'';
+    $uri .= isset($parsed['host']) ? $parsed['host'] : '';
+    $uri .= isset($parsed['port']) ? ':' . $parsed['port'] : '';
+    if (isset($parsed['path'])) {
+      $uri .= (substr($parsed['path'], 0, 1) == '/')?$parsed['path']:'/' . $parsed['path'];
+    }
+    $uri .= isset($parsed['query']) ? '?' . $parsed['query'] : '';
+    $uri .= isset($parsed['fragment']) ? '#' . $parsed['fragment'] : '';
+    return $uri;
+}
+
+function sony_canonical_form_node_type_form_alter(&$form, &$form_state) {
+  if (isset($form['#node_type'])) {
+
+    $form['sony_canonical'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Canonical Link Settings'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#group' => 'additional_settings',
+    );
+
+    $filters = _sony_canonical_load_filters(TRUE);
+
+    $options = array();
+    foreach ($filters as $name => $filter) {
+      $options[ $name ] = $filter['name'];
+    }
+
+    $name = 'sony_canonical_filters';
+
+    $form['sony_canonical'][$name . '_enabled'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Enable canonical filter'),
+      '#default_value' => variable_get(
+        $name . '_enabled_' . $form['#node_type']->type,
+        0
+      )
+    );
+
+    $form['sony_canonical'][$name] = array(
+      '#type' => 'checkboxes',
+      '#title' => t('Canonical filter options'),
+      '#options' => $options,
+      '#default_value' => variable_get(
+        $name . '_' . $form['#node_type']->type,
+        variable_get('sony_canonical_default_filters', array())
+      )
+    );
+  }
+}

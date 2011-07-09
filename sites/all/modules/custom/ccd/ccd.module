@@ -1,0 +1,572 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Integration with the Sony ConnectedCD system.
+ */
+
+/**
+ * Implementation of hook_perm().
+ */
+function ccd_perm() {
+  return array('access connectedcd downloads');
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function ccd_menu() {
+  $items = array();
+
+  $items['admin/sony/ccd'] = array(
+    'title' => t('Connected CD'),
+    'page callback' => 'ccd_admin_overview',
+    'access arguments' => array('administer ConnectedCD'),
+    'file' => 'ccd.admin.inc',
+  );
+  $items['admin/sony/ccd/overview'] = array(
+    'title' => t('Overview'),
+    'access arguments' => array('administer ConnectedCD'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -1,
+  );
+  $items['admin/sony/ccd/add'] = array(
+    'title' => t('Add release'),
+    'access arguments' => array('administer ConnectedCD'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('ccd_admin_release_form'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 1,
+    'file' => 'ccd.admin.inc',
+  );
+  $items['admin/sony/ccd/edit/%ccd_release'] = array(
+    'title' => t('Edit release'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('ccd_admin_release_form', 4),
+    'access arguments' => array('administer ConnectedCD'),
+    'type' => MENU_CALLBACK,
+    'file' => 'ccd.admin.inc',
+  );
+  $items['admin/sony/ccd/delete/%ccd_release'] = array(
+    'title' => t('Delete release'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('ccd_admin_release_delete', 4),
+    'access arguments' => array('administer ConnectedCD'),
+    'type' => MENU_CALLBACK,
+    'file' => 'ccd.admin.inc',
+  );
+
+  $items['ccd/verify/%ccd_release'] = array(
+    'title' => t('ConnectedCD'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('ccd_verify_form', 2),
+    'access arguments' => array('access connectedcd downloads'),
+    'file' => 'ccd.pages.inc',
+  );
+
+  $items['ccd/verify/%ccd_release/success'] = array(
+    'page callback' => 'ccd_verify_success',
+    'page arguments' => array(2),
+    'access arguments' => array('access connectedcd downloads'),
+    'type' => MENU_CALLBACK,
+    'file' => 'ccd.pages.inc',
+  );
+
+  $items['ccd/verify/%ccd_release/error'] = array(
+    'page callback' => 'ccd_verify_error',
+    'page arguments' => array(2),
+    'access arguments' => array('access connectedcd downloads'),
+    'type' => MENU_CALLBACK,
+    'file' => 'ccd.pages.inc',
+  );
+
+  $items['ccd/redeem/%ccd_release/%/%'] = array(
+    'page callback' => 'ccd_redeem',
+    'page arguments' => array(2, 3, 4),
+    'access arguments' => array('access connectedcd downloads'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['ccd/redeem/%ccd_release/unauthorized'] = array(
+    'page callback' => 'ccd_redeem_unauthorized',
+    'page arguments' => array(2),
+    'access arguments' => array('access connectedcd downloads'),
+    'type' => MENU_CALLBACK,
+    'file' => 'ccd.pages.inc',
+  );
+
+  $items['ccd/redeem/%ccd_release/redeemed'] = array(
+    'page callback' => 'ccd_redeem_redeemed',
+    'page arguments' => array(2),
+    'access arguments' => array('access connectedcd downloads'),
+    'type' => MENU_CALLBACK,
+    'file' => 'ccd.pages.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * API: Load a release from the DB based on id.
+ *
+ * @param $id
+ *   The ID of the release to be loaded.
+ * @return
+ *   An object representing the release.
+ */
+function ccd_release_load($id) {
+  $release = db_fetch_object(db_query('SELECT * FROM {ccd_release} WHERE id = %d', $id));
+
+  $release->validate_error_path = $release->validate_error_path ? $release->validate_error_path : 'ccd/verify/'. $release->id;
+  return $release;
+}
+
+/**
+ * API: Save a release to the DB.
+ *
+ * @param $release
+ *   Object or array suitable for passing to drupal_write_record.
+ * @param $update
+ *   TRUE to do an update, or FALSE to do an insert.
+ */
+function ccd_release_save(&$release, $update = FALSE) {
+  $array = FALSE;
+
+  // Convert to an object if needed.
+  if (is_array($release)) {
+    $release = (object) $release;
+    $array = TRUE;
+  }
+
+  if ($update) {
+    drupal_write_record('ccd_release', $release, array('id'));
+    watchdog('ConnectedCD', 'Updated release: %release', array('%release' => $release->name));
+    drupal_set_message(t('Release %release has been updated.', array('%release' => $release->name)));
+  }
+  else {
+    drupal_write_record('ccd_release', $release);
+    watchdog('ConnectedCD', 'Created release: %release', array('%release' => $release->name));
+    drupal_set_message(t('Release %release has been created.', array('%release' => $release->name)));
+  }
+
+  // If we began with an array, convert back so we don't surprise the caller.
+  if ($array) {
+    $release = (array) $release;
+  }
+
+}
+
+/**
+ * API: Delete a release from the DB.
+ *
+ * @param $release
+ *   The full release object, as loaded from ccd_release_load.
+ */
+function ccd_release_delete($release) {
+  db_query('DELETE FROM {ccd_release} WHERE id = %d', $release->id);
+  watchdog('ConnectedCD', 'Deleted release: %release', array('%release' => $release->name));
+  drupal_set_message(t('Release %release has been deleted.', array('%release' => $release->name)));
+}
+
+/**
+ * API: Build a ConnectedCD PIN verification url.
+ *
+ * @param $pin
+ *   The user supplied PIN code.  A 15-character alphanumeric string, with any
+ *   number of optional dashes
+ * @param $release_id
+ *   The ID related to the release.  This is supplied by CCD
+ * @return
+ *   A full url to be used to verify the PIN.
+ */
+function ccd_verify_url($pin, $release_id) {
+  $params = array(
+    'coupon' => $pin,
+    'key_id' => $release_id,
+    'error_url' => url('ccd/verify/'. $release_id .'/error', array('absolute' => TRUE)),
+    'success_url' => url('ccd/verify/'. $release_id .'/success', array('absolute' => TRUE)),
+  );
+  $query = http_build_query($params, '', '&');
+  $url = 'http://connectedcd.com/ccd/Verify?'. $query;
+
+  return $url;
+}
+
+/**
+ * API: Build a ConnectedCD PIN verification url.
+ *
+ * @param $pin
+ *   The user supplied PIN code.  A 15-character alphanumeric string, with any
+ *   number of optional dashes
+ * @param $release_id
+ *   The ID related to the release.  This is supplied by CCD
+ */
+function ccd_verify($pin, $release_id, $success = NULL, $error = NULL) {
+  // store the pin in the session.  on error, this will be unset.
+  $_SESSION['ccd'][$release_id]['pin'] = $pin;
+  if (isset($success)) {
+    $_SESSION['ccd'][$release_id]['success'] = $success;
+  }
+  if (isset($error)) {
+    $_SESSION['ccd'][$release_id]['error'] = $error;
+  }
+
+  $url = ccd_verify_url($pin, $release_id);
+
+  ccd_external_redirect($release, $url);
+}
+
+/**
+ * API: Build a ConnectedCD PIN redemption url.
+ *
+ * @param $release_id
+ *   The ID related to the release.  This is supplied by CCD
+ * @param $id
+ *   The download ID from ConnectedCD.
+ * @param $format
+ *   The ID related to the release.  This is supplied by CCD
+ * @param $return
+ *   Return the url or do a drupal_goto?
+ * @return
+ *   A full url to be used to verify the PIN, if the $return parameter is TRUE.
+ *   Otherwise, a drupal_goto() using this URL is issued immediately, resulting
+ *   in a redirect to either ccd/verify/error, or ccd/verify/success.
+ */
+function ccd_redeem_url($release, $id, $format = 0) {
+  $params = array(
+    'id' => $id,
+    'index' => $format,
+    'mode' => 'download',
+    'unauthorized_url' => url('ccd/redeem/'. $release->id .'/unauthorized', array('absolute' => TRUE)),
+    'already_redeemed_url' => url('ccd/redeem/'. $release->id .'/redeemed', array('absolute' => TRUE)),
+  );
+  $query = http_build_query($params, '', '&');
+  $url = 'http://connectedcd.com/ccd/Redeem?'. $query;
+
+  return $url;
+}
+
+/**
+ * API: Redeem an offer from ConnectedCD.  This function results in a browser
+ * redirect to the ConnectedCD system, which will in turn result in on of the
+ * 3 following scenarios
+ *   - If the user has a valid cookie (established by the verify method) and has
+ *     not yet redeemed the offer, then the download begins.
+ *   - The browser is redirected to the unauthorized_url if authorization fails
+ *   - The browser is redirected to the already_redeemed_url if the PIN has
+ *     already been used to redeem this offer.
+ *
+ * @param $release
+ *   The ID related to the release.
+ * @param $id
+ *   The download ID from ConnectedCD.
+ * @param $format
+ *   The ID related to the release.
+ */
+function ccd_redeem($release, $id, $format = 0) {
+  if (!is_object($release)) {
+    $release = ccd_release_load($release);
+  }
+
+  $url = ccd_redeem_url($release, $id, $format);
+  ccd_external_redirect($release, $url);
+}
+
+/**
+ * API: This is a one-time-use (per request) function that will return the
+ * appropriate path for redirection, first looking in the current session, then
+ * falling back to the default paths defined by the release object. This has the
+ * side-effect of clearing all paths from the session, limiting the lifetime of
+ * these session paths to a single request.
+
+ * @param $type
+ *   The type of path to return.
+ *   - validate_error_path
+ *   - validate_success path
+ *   - redeem_unauthorized_path
+ *   - redeem_redeemed_path
+ * @param $release
+ *   The release object associated with the current request.
+ * @return
+ *   The appropriate path.
+ */
+function ccd_get_path($type, $release) {
+  $session = &$_SESSION['ccd'][$release->id];
+  $types = array(
+    'validate_error_path',
+    'validate_success_path',
+    'redeem_unauthorized_path',
+    'redeem_redeemed_path',
+  );
+
+  if ($session['destination']) {
+    $path = $session['destination'];
+    unset($session['destination']);
+  }
+  elseif (isset($session[$type])) {
+    $path = $session[$type];
+  }
+  else {
+    $path = $release->$type;
+  }
+
+  foreach ($types as $type) {
+    if (isset($session[$type])) {
+      unset($session[$type]);
+    }
+  }
+
+  return $path;
+}
+
+function ccd_set_path($type, $release, $path) {
+  $_SESSION['ccd'][$release->id][$type] = $path;
+}
+
+function ccd_redirect($type, $release) {
+  $path = ccd_get_path($type, $release);
+  unset($_REQUEST['destination']);
+  drupal_goto($path);
+}
+
+function ccd_external_redirect($release, $url) {
+  // save the current path, so if unauthorized, we get redirected right back to
+  // the download after the verification.
+  if (isset($_REQUEST['destination'])) {
+    $_SESSION['ccd'][$release->id]['destination'] = $_REQUEST['destination'];
+  }
+  $_SESSION['ccd'][$release->id]['q'] = $_GET['q'];
+
+  // Even though session_write_close() is registered as a shutdown function, we
+  // need all session data written to the database before redirecting.
+  session_write_close();
+
+  header('Location: '. $url, TRUE);
+  exit();
+}
+
+/**
+ * Implementation of hook_field_info().
+ */
+function ccd_field_info() {
+  return array(
+    'ccd' => array(
+      'label' => t('Connected CD Media'),
+      'description' => t('Store a the data necessary to build a Connected CD download link.'),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_field_settings().
+ */
+function ccd_field_settings($op, $field) {
+  switch ($op) {
+    case 'form':
+      $form['link_text'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Link text'),
+        '#default_value' => $field['link_text'] ? $field['link_text'] : t('Download'),
+        '#required' => TRUE,
+      );
+      return $form;
+
+    case 'validate':
+      break;
+
+    case 'save':
+      return array('link_text');
+
+    case 'database columns':
+      return array(
+        'release' => array('type' => 'int', 'not null' => FALSE),
+        'id'      => array('type' => 'int', 'not null' => FALSE),
+        'format'  => array('type' => 'int', 'not null' => FALSE),
+      );
+  }
+}
+
+/**
+ * Implementation of hook_content_is_empty().
+ */
+function ccd_content_is_empty($item, $field) {
+  if (empty($item['id'])) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function ccd_theme() {
+  return array(
+    'ccd_formatter_default' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'ccd' => array(
+      'arguments' => array('element' => NULL),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_field().
+ */
+function ccd_field($op, &$node, $field, &$items, $teaser, $page) {
+  switch ($op) {
+    case 'load':
+      break;
+
+    case 'validate':
+      foreach($items as $delta => $value) {
+        if ($value['id'] != (int)$value['id']) {
+          form_set_error($field['field_name'] .']['. $delta. '][id', t('ID must be numeric.'));
+        }
+      }
+      break;
+
+    case 'presave':
+      break;
+
+    case 'sanitize':
+      if (!user_access('access connectedcd downloads')) {
+        $items = array();
+      }
+      else {
+        foreach ($items as $delta => $value) {
+          $items[$delta]['release'] = ccd_release_load($value['release']);
+          $items[$delta]['link_text'] = $field['link_text'];
+        }
+      }
+      break;
+  }
+}
+
+/**
+ * Implementation of hook_widget_info().
+ */
+function ccd_widget_info() {
+  return array(
+    'ccd' => array(
+      'label' => 'Textfield for Media ID',
+      'field types' => array('ccd'),
+      'multiple values' => CONTENT_HANDLE_CORE,
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_widget().
+ */
+function ccd_widget(&$form, &$form_state, $field, $items, $delta = 0) {
+  $element = array(
+    '#type' => $field['widget']['type'],
+    '#default_value' => isset($items[$delta]) ? $items[$delta] : '',
+    '#title' => $field['widget']['label'],
+    '#weight' => $field['widget']['weight'],
+    '#description' => $field['widget']['description'],
+    '#required' => $field['required'],
+    '#field' => $field,
+  );
+  return $element;
+}
+
+/**
+ * Implementation of hook_elements().
+ */
+function ccd_elements() {
+  $elements = array();
+  $elements['ccd'] =  array(
+    '#input' => TRUE,
+    '#columns' => array('id', 'format', 'release'),
+    '#process' => array('ccd_element_process'),
+  );
+  return $elements;
+}
+
+/**
+ * Process the ccd type element before displaying the field.
+ *
+ * Build the form element. When creating a form using FAPI #process,
+ * note that $element['#value'] is already set.
+ *
+ * The $fields array is in $form['#field_info'][$element['#field_name']].
+ */
+function ccd_element_process($element, $edit, $form_state, $form) {
+  $field = $form['#field_info'][$element['#field_name']];
+  $delta = $element['#delta'];
+  $element['id'] = array(
+    '#type' => 'textfield',
+    '#maxlength' => '10',
+    '#title' => t('Media ID'),
+    '#description' => $element['#description'],
+    '#required' => $element['#required'],
+    '#default_value' => isset($element['#value']['id']) ? $element['#value']['id'] : NULL,
+  );
+  $element['format'] = array(
+    '#type' => 'select',
+    '#title' => t('Media Format'),
+    '#required' => $element['#required'],
+    '#default_value' => isset($element['#value']['format']) ? $element['#value']['format'] : NULL,
+    '#options' => array(
+      0 => t('Default'),
+    ),
+  );
+  $result = db_query('SELECT id, name FROM {ccd_release} ORDER BY name');
+  $options = array();
+  while ($release = db_fetch_object($result)) {
+    $options[$release->id] = $release->name;
+  }
+  $element['release'] = array(
+    '#type' => 'select',
+    '#title' => t('Release'),
+    '#required' => $element['#required'],
+    '#default_value' => isset($element['#value']['release']) ? $element['#value']['release'] : NULL,
+    '#options' => $options,
+  );
+
+  return $element;
+}
+
+/**
+ * FAPI theme for an individual ccd element.
+ */
+function theme_ccd($element) {
+  // theme_fieldset expects #value to contain markup.  our #value is an array.
+  unset($element['#value']);
+  return theme('fieldset', $element);
+}
+
+/**
+ * Implementation of hook_field_formatter_info().
+ */
+function ccd_field_formatter_info() {
+  return array(
+    'default' => array(
+      'label' => t('ConnectedCD Download Link (default)'),
+      'field types' => array('ccd'),
+      'multiple values' => CONTENT_HANDLE_CORE,
+    ),
+  );
+}
+
+/**
+ * Theme function for 'default' ccd field formatter.
+ */
+function theme_ccd_formatter_default($element) {
+  $item = $element['#item'];
+  if ($item['id'] && $item['release']->id) {
+    $path = 'ccd/redeem/'. $item['release']->id .'/'. $item['id'] .'/'. $item['format'];
+    return l($element['#item']['link_text'], $path, array('query' => drupal_get_destination()));
+  }
+}
+
+function ccd_footer() {
+  if ($_SESSION['ccd'][251]['inline_download']) {
+    $url = url($_SESSION['ccd'][251]['inline_download']);
+    unset($_SESSION['ccd'][251]['inline_download']);
+    return '<script type="text/javascript">setTimeout(function() { location.href = "'. $url .'"; }, 1000);</script>';
+  }
+}

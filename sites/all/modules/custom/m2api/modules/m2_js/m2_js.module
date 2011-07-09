@@ -1,0 +1,201 @@
+<?php
+
+/**
+ * Implementation of hook_views_api().
+ */
+function m2_js_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'm2_js') . '/views',
+  );
+}
+
+/**
+ * Implementation of hook_block().
+ */
+function m2_js_block($op = 'list', $delta = 0, $edit = array()) {
+  if ($op == 'list') {
+    $blocks['m2_js_mini_cart'] = array(
+      'info' => t('M2 Mini Cart'),
+      'cache' => BLOCK_NO_CACHE,
+    );
+    return $blocks;
+  }
+  else if ($op == 'view') {
+    switch($delta) {
+      case 'm2_js_mini_cart':
+        return array(
+          // 'subject' => t('Cart'),
+          'content' => m2_js_cart_enabled() ? theme('m2_js_mini_cart') : NULL,
+        );
+
+      default:
+        break;
+    }
+  }
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function m2_js_theme($existing, $type, $theme, $path) {
+  return array(
+    'm2_js_mini_cart' => array(
+      'arguments' => array(),
+      'template' => 'm2-js-mini-cart',
+      // We need m2_js_add_cart_js() called when the cart is displayed. Check
+      // the _m2_js_block_add_cart_js() function comments to see why it is
+      // called instead of m2_js_add_cart_js().
+      'preprocess functions' => array('_m2_js_block_add_cart_js'),
+    ),
+    'm2_js_track_price' => array(
+      'arguments' => array('m2id' => NULL),
+      'file' => 'm2_js.theme.inc',
+    ),
+    'm2_js_track_button' => array(
+      'arguments' => array('m2id' => NULL, 'add' => NULL, 'remove' => NULL),
+      'file' => 'm2_js.theme.inc',
+    ),
+    'm2_js_album_link' => array(
+      'arguments' => array('m2id' => NULL, 'type' => NULL, 'add' => NULL, 'remove' => NULL),
+      'file' => 'm2_js.theme.inc',
+    ),
+    'm2_js_album_links' => array(
+      'arguments' => array('links' => NULL, 'text' => NULL),
+      'file' => 'm2_js.theme.inc',
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_init().
+ *
+ * We use this to inject the javascript settings rather than m2_js_add_cart_js()
+ * because views's render caching was causing the settings to be placed on
+ * the page multiple times and drupal_get_js()'s use of array_merge_recursive()
+ * was causing the settings to be converted from strings to arrays of strings.
+ */
+function m2_js_init() {
+  if (!m2_js_cart_enabled()) {
+    return;
+  }
+
+  drupal_add_js(array(
+    'm2_js' => array(
+      'store' => m2api_get_store(),
+      'key' => variable_get('m2api_api_key', '109177db7055de2e42958238572b4454'),
+      'host' => parse_url(variable_get('m2api_api_url', 'http://api.stage.sonymusicdigital.com/'), PHP_URL_HOST),
+      'checkout_host' => variable_get('m2_js_checkout_host', 'stage.sonymusicdigital.com'),
+      'country' => m2_js_language_country(),
+      'debug' => (boolean) variable_get('m2api_debug_mode', TRUE),
+      'show' => TRUE,
+    )
+  ), 'setting');
+}
+
+/**
+ * Add the required m2 javascript to the page.
+ *
+ * @param $ignore_static
+ *   If true the javascript will always be added. If false, javascript will only
+ *   be added if it has never been added before.
+ */
+function m2_js_add_cart_js($ignore_static = FALSE) {
+  static $added = FALSE;
+
+  if ($ignore_static || !$added) {
+    $added = TRUE;
+    $m2_js_path = drupal_get_path('module', 'm2_js');
+
+    // When debugging send the unminified JS.
+    if (variable_get('m2api_debug_mode', TRUE)) {
+      drupal_add_js('sites/all/libraries/jquery.cookies.2.2.0/jquery.cookies.2.2.0.js');
+      drupal_add_js('sites/all/libraries/jquery.jsonp.2.1.4/jquery.jsonp-2.1.4.js');
+      drupal_add_js($m2_js_path . '/m2-api.js');
+    }
+    else {
+      drupal_add_js('sites/all/libraries/jquery.cookies.2.2.0/jquery.cookies.2.2.0.min.js');
+      drupal_add_js('sites/all/libraries/jquery.jsonp.2.1.4/jquery.jsonp-2.1.4.min.js');
+      drupal_add_js($m2_js_path . '/m2-api.min.js');
+    }
+    drupal_add_js($m2_js_path . '/m2_cart.js');
+  }
+}
+
+/**
+ * The only reason this function exists is that theme() passes variables
+ * into preprocess functions and if we did that to m2_js_add_cart_js(),
+ * $ignore_static would be interpreted as true, and javascript would get double
+ * added. This function ensures no arguments are passed into m2_js_add_cart_js()
+ */
+function _m2_js_block_add_cart_js() {
+  m2_js_add_cart_js();
+}
+
+/**
+ * Check the language and IP combination and only allow the M2 cart to be
+ * displayed in appropriate locations.
+ */
+function m2_js_cart_enabled() {
+  $allowed_countries = variable_get('m2_js_enabled_countries', array('US'));
+
+  $lang_cc = m2_js_language_country();
+
+  return in_array($lang_cc, $allowed_countries);
+}
+
+/**
+ * The country code based on the selected language.
+ */
+function m2_js_language_country() {
+  global $language;
+
+  if ($language->language == 'en') {
+    $lang_cc = "US";
+  }
+  else {
+    list($ignore, $lang_cc) = explode('-', strtoupper($language->language));
+  }
+
+  return $lang_cc;
+}
+
+/**
+ * Implementation of hook_form_FORM_ID_alter().
+ *
+ * Add our settings to M2 API's setting form.
+ */
+function m2_js_form_m2api_admin_settings_alter(&$form, &$form_state) {
+  $form['js'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('JavaScript Cart'),
+    '#weight' => -0.1,
+  );
+  $form['js']['m2_js_checkout_host'] = array(
+    '#type' => 'radios',
+    '#title' => t('Checkout Host'),
+    '#options' => array(
+      'stage.sonymusicdigital.com' => t('Stage - stage.sonymusicdigital.com'),
+      'www.sonymusicdigital.com' => t('Live - www.sonymusicdigital.com'),
+    ),
+    '#default_value' => variable_get('m2_js_checkout_host', 'stage.sonymusicdigital.com'),
+  );
+
+  $options = array();
+  foreach (language_list() as $language) {
+    if ($language->enabled) {
+      $options[strtoupper($language->prefix)] = t($language->name);
+    }
+  }
+  $form['js']['m2_js_enabled_countries'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Enabled Languages/Regions'),
+    '#default_value' => variable_get('m2_js_enabled_countries', array('US')),
+    '#options' => $options,
+    '#description' => t('The JavaScript prices, buy links and cart will only be displayed to visitors viewing the site in these languages.'),
+  );
+
+  // Filter out false checkboxes: http://drupal.org/node/61760#comment-402631
+  $form['array_filter'] = array('#type' => 'value', '#value' => TRUE);
+
+}

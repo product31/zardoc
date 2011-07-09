@@ -1,0 +1,76 @@
+? .svn
+? l10n_client-node-218516-2.patch
+? l10n_client-node-218516.patch
+? l10n_client.module.patch
+? translations/.svn
+Index: l10n_client.js
+===================================================================
+RCS file: /cvs/drupal-contrib/contributions/modules/l10n_client/l10n_client.js,v
+retrieving revision 1.8
+diff -u -p -r1.8 l10n_client.js
+--- l10n_client.js	22 Oct 2008 20:25:33 -0000	1.8
++++ l10n_client.js	30 Jan 2009 21:44:40 -0000
+@@ -59,11 +59,11 @@ jQuery.extend(Drupal, {
+     }
+     // Get a string from the DOM tree
+     this.getString = function(index, type) {
+-      return $('#l10n-client-data div:eq('+index+') .'+type).html();
++      return $('#l10n-client-data div:eq('+index+') .'+type).text();
+     }
+     // Set a string in the DOM tree
+     this.setString = function(index, data) {
+-      $('#l10n-client-data div:eq('+index+') .target').html(data);
++      $('#l10n-client-data div:eq('+index+') .target').text(data);
+     }
+     // Filter the the string list by a search string
+     this.filter = function(search) {
+Index: l10n_client.module
+===================================================================
+RCS file: /cvs/drupal-contrib/contributions/modules/l10n_client/l10n_client.module,v
+retrieving revision 1.19
+diff -u -p -r1.19 l10n_client.module
+--- l10n_client.module	22 Oct 2008 20:25:33 -0000	1.19
++++ l10n_client.module	30 Jan 2009 21:44:40 -0000
+@@ -197,7 +197,9 @@ function l10n_client_footer() {
+     // If we have strings for the page language, restructure the data.
+     $l10n_strings = array();
+     foreach ($page_strings as $string => $translation) {
+-      $l10n_strings[] = array($string, $translation);
++      if (strpos($string, '<?php') === FALSE) {
++        $l10n_strings[] = array($string, $translation);
++      }
+     }
+     array_multisort($l10n_strings);
+     // Include string selector on page.
+@@ -303,8 +305,8 @@ function _l10n_client_page_strings() {
+ function _l10n_client_dom_strings($strings) {
+   $output = '';
+   foreach ($strings as $values) {
+-    $source = $values[0] === TRUE ? '' : $values[0];
+-    $target = $values[1] === TRUE ? '' : $values[1];
++    $source = $values[0] === TRUE ? '' : htmlspecialchars($values[0], ENT_NOQUOTES, 'UTF-8');
++    $target = $values[1] === TRUE ? '' : htmlspecialchars($values[1], ENT_NOQUOTES, 'UTF-8');
+     $output .= "<div><span class='source'>$source</span><span class='target'>$target</span></div>";
+   }
+   return "<div id='l10n-client-data'>$output</div>";
+@@ -328,10 +330,17 @@ function _l10n_client_string_list($strin
+     // so we always have the string displayed on the page in the dropdown.
+     $original = $values[1] === TRUE ? $values[0] : $values[1];
+     // Remove html tags, at least for display
+-    $original = strip_tags($original);
++    $string = strip_tags($original);
++    
++    // Edge case where all text is removed by strip_tags
++    if (empty($string)) {
++      $string = htmlspecialchars($original, ENT_NOQUOTES, 'UTF-8');
++    }
++    
+     // Truncate and add ellipsis if too long.
+-    $string = truncate_utf8($original, 78, TRUE);
+-    $select_list[] = "<li class='$str_class'>". $string . ($original == $string ? '' : '...') .'</li>';
++    $string = truncate_utf8($string, 78, TRUE, TRUE);
++    
++    $select_list[] = "<li class='$str_class'>$string</li>";
+   }
+   $output = implode("\n", $select_list);
+   return "<ul class='string-list'>$output</ul>";

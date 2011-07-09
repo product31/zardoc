@@ -1,0 +1,4 @@
+; $Id: avatar_selection.info,v 1.1.2.2.4.1 2007/09/05 14:08:27 snpower Exp $
+name = Avatar Selection
+description = "Manages configuration of a default list of avatar icons that a user can use instead of uploading a picture."
+core = 6.x

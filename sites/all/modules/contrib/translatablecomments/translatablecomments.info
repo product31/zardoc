@@ -1,0 +1,4 @@
+; $Id: translatablecomments.info,v 1.1 2008/04/15 21:23:05 davetrainer Exp $
+name = Translatable Comments
+description = Gives users the ability to view translated comments via the Google AJAX Language API.
+core = 6.x

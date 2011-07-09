@@ -1,0 +1,4 @@
+; $Id: google_language.info,v 1.1 2009/01/08 21:08:53 rz Exp $
+name = Google Language Tools
+description = Google AJAX Language API Integration
+core = 6.x

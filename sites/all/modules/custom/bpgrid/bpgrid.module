@@ -1,0 +1,330 @@
+<?php
+
+/**
+ * Implementation of hook_menu().
+ */
+function bpgrid_menu() {
+  $items = array();
+  
+//  $items['admin/build/themes/bpgrid'] = array(
+//    'title' => 'Grid builder',
+//    'page callback' => 'bpgrid_builder',
+//    'access arguments' => array('administer site configuration'),
+//    'type' => MENU_LOCAL_TASK,
+//    'weight' => 10,
+//  );
+  $items['admin/build/themes/bpgrid'] = array(
+    'title' => 'Grid builder',
+    'page callback' => 'bpgrid_theme_list',
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 10,
+  );
+
+  
+  $items['admin/build/themes/bpgrid/list'] = array(
+    'title' => 'List',
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -1,
+  );
+
+  $items['admin/build/themes/bpgrid/add'] = array(
+    'title' => 'Add',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('bpgrid_theme_form'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 0,
+  );
+
+  $items['admin/build/themes/bpgrid/%bpgrid_theme'] = array(
+    'title' => 'Grid builder',
+    'page callback' => 'bpgrid_theme_builder',
+    'page arguments' => array(4),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 10,
+    );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function bpgrid_theme() {
+  return array(
+    'bpgrid_theme_form' => array(),
+  );
+}
+
+/**
+ * List all gridbuilder themes
+ */
+function bpgrid_theme_list() {
+  $rows = array();
+  
+  $result = db_query('SELECT * FROM {bpgrid} ORDER BY theme ASC');
+  while ($row = db_fetch_array($result)) {
+    $row['data'] = json_decode($row['data']);
+    
+    $rows[] = array(
+      $row['data']->info->name .'<br/><div class="description">'. $row['data']->info->description .'</div>',
+      l('Edit', 'admin/build/themes/bpgrid/'. $row['theme']),
+    );
+  }
+  
+  if (empty($rows)) {
+    $rows[] = array(array('data' => t('No themes created yet.'), 'colspan' => 2));
+  }
+  
+  return theme('table', array(t('Theme'), t('Operations')), $rows);
+}
+
+/**
+ * Main menu callback
+ *
+ * @param unknown_type $theme
+ * @return unknown
+ */
+function bpgrid_theme_builder($theme = array()) {
+  // print page directly without sidebars
+  print theme('page', drupal_get_form('bpgrid_theme_form', $theme), FALSE);
+  drupal_page_footer();
+  
+  // tell index.php not to print anything
+  return null;
+}
+
+/**
+ * Menu loader callback for %bpgrid_theme
+ */
+function bpgrid_theme_load($id) {
+  $theme = db_fetch_array(db_query('SELECT * FROM {bpgrid} WHERE theme = "%s"', $id));
+  if (isset($theme['data'])) {
+    $theme['data'] = json_decode($theme['data']);
+  }
+  return $theme;
+}
+
+/**
+ * Enter description here...
+ *
+ * @param unknown_type $form_state
+ * @param unknown_type $theme
+ * @return unknown
+ */
+function bpgrid_theme_form(&$form_state, $theme = array()) {
+  $new = !isset($theme['theme']);
+  
+  $form['new'] = array('#type' => 'value', '#value' => $new);
+  
+  $form['theme'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Theme'),
+    '#description' => t('This is the machine-readable name of your theme.  Only alpha-numeric and underscore characters allowed.'),
+    '#required' => TRUE,
+    '#default_value' => isset($theme['theme']) ? $theme['theme'] : '',
+  );
+
+  $form['info'] = array('#tree' => 1);
+
+  $form['info']['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Name'),
+    '#description' => t('The human-readable name of the theme.'),
+    '#required' => TRUE,
+    '#default_value' => isset($theme['data']->info->name) ? $theme['data']->info->name : '',
+  );
+
+  $form['info']['description'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Description'),
+    '#description' => t('The description of the theme.'),
+    '#required' => TRUE,
+    '#default_value' => isset($theme['data']->info->description) ? $theme['data']->info->description : '',
+  );
+
+  $form['data'] = array(
+    '#type' => 'hidden',
+    '#default_value' => isset($theme['data']) ? json_encode($theme['data']) : '',
+  );
+  
+  $form['buttons'] = array('#tree' => 0);
+  $form['buttons']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+  
+  return $form;
+}
+
+/**
+ * Enter description here...
+ *
+ * @param unknown_type $form
+ * @param unknown_type $form_state
+ */
+function bpgrid_theme_form_validate($form, &$form_state) {
+  if (preg_match('/[^a-zA-Z0-9_]/', $form_state['values']['theme'])) {
+    form_set_error('theme', t('Theme can only contain alpha-numeric and underscore characters.'));
+  }
+  
+  if ($form_state['values']['new'] && bpgrid_theme_load($form_state['values']['theme'])) {
+    $url = url('admin/build/themes/bpgrid/'. $form_state['values']['theme']);
+    form_set_error('theme', t('The theme you specified already exists.  <a href="@edit_url">Click here</a> to edit the existing theme, or choose a unique name.', array('@edit_url' => $url)));
+  }
+}
+
+/**
+ * Enter description here...
+ *
+ * @param unknown_type $form
+ * @param unknown_type $form_state
+ * @return unknown
+ */
+function bpgrid_theme_form_submit($form, &$form_state) {
+  $data = json_decode($form_state['values']['data']);
+  $data->info = $form_state['values']['info'];
+  
+  $record = array(
+    'theme' => $form_state['values']['theme'],
+    'data' => json_encode($data),
+  );
+  
+  if ($form_state['values']['new']) {
+    drupal_write_record('bpgrid', $record);
+  }
+  else {
+    drupal_write_record('bpgrid', $record, 'theme');
+  }
+  
+  $form_state['redirect'] = 'admin/build/themes/bpgrid/'. $record['theme'];
+  
+  return $record['theme'];
+}
+
+/**
+ * Enter description here...
+ *
+ * @param unknown_type $form
+ * @return unknown
+ */
+function theme_bpgrid_theme_form($form) {
+  if ($form['new']['#value']) {
+    return drupal_render($form);
+  }
+  
+  $path = drupal_get_path('module', 'bpgrid');
+
+  // we need the newer version of jquery
+  drupal_add_js($path .'/ui/jquery-1.3.1.js', 'core');
+  
+  // jquery ui
+  drupal_add_js($path .'/ui/jquery-ui-personalized-1.6rc6.js');
+  drupal_add_css($path .'/ui/theme/ui.all.css', 'theme', 'screen', FALSE);
+
+  // blueprint and grid-builder styles
+  drupal_add_css($path .'/blueprint/screen.css', 'theme', 'screen', FALSE);
+  drupal_add_css($path .'/blueprint/plugins/buttons/screen.css', 'theme', 'screen', FALSE);
+  //drupal_add_css($path .'/grid-builder.css', 'module', 'screen');
+  drupal_add_css($path .'/bpgrid.css', 'theme', 'screen', FALSE);
+
+  // main grid-builder script
+  drupal_add_js($path .'/js/grid-builder.js', 'module', 'header', FALSE, FALSE, FALSE);
+  drupal_add_js($path .'/js/grid-builder.palette.js', 'module', 'header', FALSE, FALSE, FALSE);
+  
+  // required jquery json plugin
+  drupal_add_js($path .'/js/jquery.json-1.3.min.js', 'module', 'header', FALSE, FALSE, FALSE);
+
+  // grid builder widget scripts
+  drupal_add_js($path .'/js/ui/base.js', 'module', 'header', FALSE, FALSE, FALSE);
+  drupal_add_js($path .'/js/ui/toolbar.js', 'module', 'header', FALSE, FALSE, FALSE);
+  drupal_add_js($path .'/js/ui/canvas.js', 'module', 'header', FALSE, FALSE, FALSE);
+  drupal_add_js($path .'/js/ui/container.js', 'module', 'header', FALSE, FALSE, FALSE);
+  drupal_add_js($path .'/js/ui/column.js', 'module', 'header', FALSE, FALSE, FALSE);
+  drupal_add_js($path .'/js/ui/variable.js', 'module', 'header', FALSE, FALSE, FALSE);
+  drupal_add_js($path .'/js/ui/region.js', 'module', 'header', FALSE, FALSE, FALSE);
+  drupal_add_js($path .'/js/ui/palette.js', 'module', 'header', FALSE, FALSE, FALSE);
+  drupal_add_js($path .'/js/ui/grid.theme.js', 'module', 'header', FALSE, FALSE, FALSE);
+  
+  // build the variables we need
+  $variables = array(
+    'breadcrumb' => array(
+      'title' => t('Breadcrumb links'),
+      'description' => t('HTML for displaying the breadcrumbs at the top of the page.'),
+    ),
+    'feed_icons' => array(
+      'title' => t('Feed icons'),
+      'description' => t('A string of all feed icons for the current page.')
+    ),
+    'footer_message' => array(
+      'title' => t('Footer message'),
+      'description' => 'The footer message as defined in the admin settings.',
+    ),
+    'help' => array(
+      'title' => t('Help'),
+      'description' => 'Dynamic help text, mostly for admin pages.',
+    ),
+    'logo' => array(
+      'title' => t('Logo'),
+      'description' => 'The path to the logo image, as defined in theme configuration.',
+    ),
+    'messages' => array(
+      'title' => t('Status messages'),
+      'description' => 'HTML for status and error messages, to be displayed at the top of the page.',
+    ),
+    'mission' => array(
+      'title' => t('Mission statement'),
+      'description' => 'The text of the site mission, empty when display has been disabled in theme settings.',
+    ),
+    'primary_links' => array(
+      'title' => t('Primary links'),
+      'description' => 'An array containing the links as they have been defined in the phptemplate specific configuration block.',
+    ),
+    'secondary_links' => array(
+      'title' => t('Secondary links'),
+      'description' => 'An array containing the links as they have been defined in the phptemplate specific configuration block.',
+    ),
+    'search_box' => array(
+      'title' => t('Search box'),
+      'description' => '',
+    ),
+    'site_name' => array(
+      'title' => t('Site name'),
+      'description' => 'The name of the site, empty when display has been disabled in theme settings.',
+    ),
+    'site_slogan' => array(
+      'title' => t('Site slogan'),
+      'description' => 'The slogan of the site, empty when display has been disabled in theme settings.',
+    ),
+    'tabs' => array(
+      'title' => t('Tabs'),
+      'description' => 'HTML for displaying tabs at the top of the page.',
+    ),
+    'title' => array(
+      'title' => t('Title'),
+      'description' => 'Title, different from head_title, as this is just the node title most of the time.',
+    ),
+  );
+  
+  $regions = array(
+    'left' => t('Left sidebar'),
+    'right' => t('Right sidebar'),
+    'content' => t('Content'),
+    'header' => t('Header'),
+    'footer' => t('Footer'),
+  );
+  
+  drupal_add_js(array('gridBuilder' => array('variables' => $variables, 'regions' => $regions)), 'setting');
+  
+  $buttons = drupal_render($form['buttons']);
+  $content = '<div id="grid_builder" class="clear-block">
+    <div id="grid_toolbar" class="clear-block"></div>
+    <div id="grid_canvas" class="clear-block"></div>
+    <div id="grid_form">'. drupal_render($form) .'</div>
+    <div id="grid_buttons" class="clear-block">'. $buttons .'</div>
+  </div>';
+  return $content;
+}

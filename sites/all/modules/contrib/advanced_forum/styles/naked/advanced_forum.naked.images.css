@@ -1,0 +1,70 @@
+/* FORUM LIST ICONS *********************************************************/
+.forum-folder {
+  background: transparent url(images/forum-folder.png) no-repeat center center;
+}
+
+
+/* FORUM LIST ICON LEGEND ***************************************************/
+.forum-folder-legend .forum-folder {
+  background: transparent url(images/forum-folder.png) no-repeat top left;
+}
+
+.forum-folder-new-posts {
+  background: transparent url(images/forum-folder-new-posts.png) no-repeat center center;
+}
+
+.forum-folder-legend .forum-folder-new-posts {
+  background: transparent url(images/forum-folder-new-posts.png) no-repeat top left;
+}
+
+
+/* TOPIC LIST ICONS *********************************************************/
+.topic-icon-default {
+  background: transparent url(images/topic-default.png) no-repeat center center;
+}
+
+.topic-icon-new {
+  background: transparent url(images/topic-new.png) no-repeat center center;
+}
+
+.topic-icon-hot {
+  background: transparent url(images/topic-hot.png) no-repeat center center;
+}
+
+.topic-icon-hot-new {
+  background: transparent url(images/topic-hot-new.png) no-repeat center center;
+}
+
+.topic-icon-sticky {
+  background: transparent url(images/topic-sticky.png) no-repeat center center;
+}
+
+.topic-icon-closed {
+  background: transparent url(images/topic-closed.png) no-repeat center center;
+}
+
+
+/* TOPIC LIST ICON LEGEND ***************************************************/
+.topic-icon-default {
+  background: transparent url(images/topic-default.png) no-repeat top left;
+}
+
+.topic-icon-new {
+  background: transparent url(images/topic-new.png) no-repeat top left;
+}
+
+.topic-icon-hot {
+  background: transparent url(images/topic-hot.png) no-repeat top left;
+}
+
+.topic-icon-hot-new {
+  background: transparent url(images/topic-hot-new.png) no-repeat top left;
+}
+
+.topic-icon-sticky {
+  background: transparent url(images/topic-sticky.png) no-repeat top left;
+}
+
+.topic-icon-closed {
+  background: transparent url(images/topic-closed.png) no-repeat top left;
+}

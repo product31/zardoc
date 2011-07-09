@@ -1,0 +1,36 @@
+? .cvsignore
+? LICENSE.txt
+? feedapi-noerrors-676234.patch
+? feedapi_node.input_format.node-247194.patch
+? feedapi_node.patch
+? feedapi_inherit/.svn
+? feedapi_inherit/translations/.svn
+? feedapi_node/.cvsignore
+? feedapi_node/tests/.svn
+? feedapi_node/tests/files/.svn
+? feedapi_node/translations/.svn
+? feedapi_node/views/.svn
+? feedapi_node/views/handlers/.svn
+? parser_common_syndication/.svn
+? parser_common_syndication/translations/.svn
+? parser_simplepie/.svn
+? parser_simplepie/translations/.svn
+? translations/.svn
+? views/.svn
+? views/handlers/.svn
+Index: feedapi.module
+===================================================================
+RCS file: /cvs/drupal-contrib/contributions/modules/feedapi/feedapi.module,v
+retrieving revision 1.23.2.119.2.72
+diff -u -p -r1.23.2.119.2.72 feedapi.module
+--- feedapi.module	11 Aug 2009 06:54:09 -0000	1.23.2.119.2.72
++++ feedapi.module	6 Jan 2010 20:35:29 -0000
+@@ -1421,7 +1421,7 @@ function feedapi_get_settings($node_type
+             drupal_set_message(t('There are no !type defined for this content type. Go to !edit_page and enable at least one.', array('!type' => $type, '!edit_page' => l('admin/content/node-type/'. $node_type, 'admin/content/node-type/'. $node_type))), 'error', FALSE);
+           }
+           else {
+-            drupal_set_message(t('There are no !type defined for this content type. Contact your site administrator.', array('!type' => $type)), 'error', FALSE);
++            watchdog('feedapi', t('There are no !type defined for this content type. Go to !edit_page and enable at least one.', array('!type' => $type, '!edit_page' => l('admin/content/node-type/'. $node_type, 'admin/content/node-type/'. $node_type))), "", WATCHDOG_ERROR);
+           }
+         }
+       }

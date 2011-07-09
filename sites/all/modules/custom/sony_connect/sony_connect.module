@@ -1,0 +1,958 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * description
+ */
+
+define('SONY_CONNECT_REQUIRED_CTOOLS_API', '1.1.0');
+define('SONY_CONNECT_STATUS_NONE', 0);
+define('SONY_CONNECT_STATUS_AUTHORIZED', 1);
+define('SONY_CONNECT_STATUS_CONNECTED', 2);
+
+define('SONY_CONNECT_PREFERENCES_PROMPT', -1);
+define('SONY_CONNECT_PREFERENCES_DISABLED', 0);
+define('SONY_CONNECT_PREFERENCES_ENABLED', 1);
+define('SONY_CONNECT_PREFERENCES_PROMPT_NO', 2);
+define('SONY_CONNECT_PREFERENCES_PROMPT_YES', 3);
+
+
+/**
+ * Include sony_connect .inc files as necessary.
+ */
+function sony_connect_include($file) {
+  static $used = array();
+  if (!isset($used[$file])) {
+    require_once './' . drupal_get_path('module', 'sony_connect') . "/includes/$file.inc";
+  }
+
+  $used[$file] = TRUE;
+}
+
+/**
+ * Implementation of hook_ctools_plugin_directory().
+ */
+function sony_connect_ctools_plugin_directory($module, $plugin) {
+  // Safety: go away if CTools is not at an appropriate version.
+  if (!module_invoke('ctools', 'api_version', SONY_CONNECT_REQUIRED_CTOOLS_API)) {
+    return;
+  }
+  if ($module == 'sony_connect' || $module == 'ctools') {
+    return 'plugins/' . $plugin;
+  }
+}
+
+/**
+ * Implementation of hook_ctools_plugin_*.
+ *
+ * Give information to CTools about the networks plugin.
+ */
+function sony_connect_ctools_plugin_networks() {
+  return array(
+    'cache' => FALSE,
+    'defaults' => 'sony_connect_networks_defaults',
+    // use info files once http://drupal.org/node/564522 gets into ctools
+    //'info file' => TRUE,
+  );
+}
+
+/**
+ * Provide defaults for a network plugin.
+ *
+ * Currently we check for automatically named callbacks to make life a little
+ * easier on the developer.
+ */
+function sony_connect_networks_defaults($info, &$plugin) {
+  $class = ctools_plugin_get_class($plugin, 'network', TRUE);
+
+  $default_settings = array(
+    'authorize' => array(
+      'open_url' => url('connect/'. $plugin['name'] .'/pre_authorize'),
+      'close_url' => url('connect/'. $plugin['name'] .'/nojs/start'),
+      'width' => '400',
+      'height' => '400',
+    ),
+  );
+
+  // Merge the settings with the defaults.
+  if (!is_array($plugin['settings'])) {
+    $plugin['settings'] = array();
+  }
+  $plugin['settings'] = _sony_connect_array_join($default_settings, $plugin['settings']);
+
+  // Load network configuration.
+  $key = 'sony_connect_network_'. $plugin['name'];
+  $plugin['conf'] = variable_get($key, array());
+
+  $plugin['enabled'] = variable_get('sony_connect_network_'. $plugin['name'] .'_enabled', TRUE);
+
+  // Create a new network class object.
+  if ($class) {
+    $plugin['network'] = new $class($plugin);
+  }
+
+  // use the configured icon if set.
+  $plugin['icon'] = variable_get('sony_connect_login_link_icon_'. $plugin['name'], $plugin['icon']);
+}
+
+/**
+ * Joins two or more arrays together recursively; key/value pairs of the first
+ * array are replaced with key/value pairs from the subsequent arrays.  Any
+ * key/value pair not present in the first array is added to the final array.
+ *
+ * From http://us2.php.net/manual/en/function.array-replace-recursive.php#92224
+ */
+function _sony_connect_array_join() {
+  // Get array arguments
+  $arrays = func_get_args();
+
+  // Define the original array
+  $original = array_shift($arrays);
+
+  // Loop through arrays
+  foreach ($arrays as $array) {
+    // Loop through array key/value pairs
+    foreach ($array as $key => $value) {
+      // Value is an array
+      if (is_array($value)) {
+        // Traverse the array; replace or add result to original array
+        $original[$key] = _sony_connect_array_join($original[$key], $array[$key]);
+      }
+
+      // Value is not an array
+      else {
+        // Replace or add current value to original array
+        $original[$key] = $value;
+      }
+    }
+  }
+
+  // Return the joined array
+  return $original;
+}
+
+/**
+ * Fetch metadata on a specific network plugin.
+ *
+ * @param $network
+ *   Name of a sony_connect network.
+ *
+ * @return
+ *   An array with information about the requested sony_connect network.
+ */
+function sony_connect_get_network($network) {
+  ctools_include('plugins');
+  module_load_include('inc', 'sony_connect', 'includes/network');
+  $plugin = ctools_get_plugins('sony_connect', 'networks', $network);
+  return $plugin;
+}
+
+/**
+ * Menu wildcard loader callback for %sony_connect_network.
+ */
+function sony_connect_network_load($network) {
+  return sony_connect_get_network($network);
+}
+
+/**
+ * Fetch metadata for all network plugins.
+ *
+ * @return
+ *   An array of arrays with information about all available sony_connect
+ *   networks.
+ */
+function sony_connect_get_networks() {
+  ctools_include('plugins');
+  module_load_include('inc', 'sony_connect', 'includes/network');
+  $plugins = ctools_get_plugins('sony_connect', 'networks');
+
+  // This is kind of stupid but the themers were always getting them in
+  // descending order and hard-coded positioning based on that. On some sites
+  // it was switching randomly so the plugins always come back in the expected
+  // order.
+  krsort($plugins);
+
+  return $plugins;
+}
+
+/**
+ * Implementation of hook_init().
+ * Allow network plugins to add javascript and such on init.
+ */
+function sony_connect_init() {
+  // Since our JS depends on the CTools Modals we follow sonybmg_init()'s logic
+  // for when to include the JS and CSS.
+  // Avoid admin pages and panels ajax requests.
+  $menu_item = menu_get_item();
+  if (arg(0) != 'admin' && $menu_item['path'] != 'panels/ajax' && variable_get('sonybmg_use_modals', 0)) {
+    $settings = array(
+      'sonyConnect' => array(
+        'networks' => array(),
+        'current' => isset($_SESSION['sony_connect']) ? $_SESSION['sony_connect'] : '',
+      ),
+    );
+
+    foreach (sony_connect_get_networks() as $key => $plugin) {
+      if (is_array($plugin['js'])) {
+        foreach ($plugin['js'] as $js) {
+          drupal_add_js($plugin['path'] .'/'. $js, 'module', 'footer');
+        }
+      }
+      $settings['sonyConnect']['networks'][$key] = $plugin['settings'];
+    }
+
+    drupal_add_js($settings, 'setting');
+    drupal_add_js(drupal_get_path('module', 'sony_connect') .'/sony_connect.js');
+    drupal_add_css(drupal_get_path('module', 'sony_connect') .'/sony_connect.css');
+  }
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function sony_connect_menu() {
+  $items = array ();
+
+  $items['admin/sony/connect'] = array(
+    'title' => 'Sony Connect',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_connect_admin_settings'),
+    'access arguments' => array('administer sony connect'),
+    'file' => 'includes/admin.inc',
+  );
+  $items['admin/sony/connect/settings'] = array(
+    'title' => 'Settings',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -1,
+  );
+  $items['admin/sony/connect/appearance'] = array(
+    'title' => 'Appearance',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_connect_admin_appearance_settings'),
+    'access arguments' => array('administer sony connect'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/admin.inc',
+  );
+
+  foreach (sony_connect_get_networks() as $key => $plugin) {
+    $items['admin/sony/connect/'. $key] = array(
+      'title' => $plugin['title'],
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('sony_connect_admin_plugin_settings', $plugin),
+      'access arguments' => array('administer sony connect'),
+      'type' => MENU_LOCAL_TASK,
+      'file' => 'includes/admin.inc',
+      'weight' => 10,
+    );
+  }
+  $items['connect/%sony_connect_network/%ctools_js/start'] = array(
+    'page callback' => 'sony_connect_connect_redirect',
+    'page arguments' => array(1, 2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/pages.inc',
+  );
+  $items['connect/%sony_connect_network/%ctools_js/prompt'] = array(
+    'page callback' => 'sony_connect_connect_prompt',
+    'page arguments' => array(1, 2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/pages.inc',
+  );
+  $items['connect/%sony_connect_network/pre_authorize'] = array(
+    'page callback' => 'sony_connect_connect_pre_authorize',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/pages.inc',
+  );
+  $items['connect/%sony_connect_network/post_authorize'] = array(
+    'page callback' => 'sony_connect_connect_post_authorize',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/pages.inc',
+  );
+  $items['connect/cancel'] = array (
+    'page callback' => 'sony_connect_connect_cancel',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/pages.inc',
+  );
+
+  $items['connect/%ctools_js/register'] = array(
+    'page callback' => 'sony_connect_modal_user_connect',
+    'page arguments' => array(1, 2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/pages.inc',
+  );
+
+  $items['connect/%ctools_js/login'] = array(
+    'page callback' => 'sony_connect_modal_user_connect',
+    'page arguments' => array(1, 2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/pages.inc',
+  );
+
+  $items['connect/%ctools_js/prefs/%/%'] = array(
+    'page callback' => 'sony_connect_modal_activity_preferences',
+    'page arguments' => array(3, 4, 1),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/pages.inc',
+  );
+
+  $items['user/%user/networks'] = array(
+    'title' => 'Facebook & Twitter',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_connect_user_preferences', 1),
+    'access callback' => 'user_edit_access',
+    'access arguments' => array(1),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 10,
+    'file' => 'includes/pages.inc',
+  );
+
+  $items['user/%user/networks/preferences'] = array(
+    'title' => 'Sharing Preferences',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -1,
+  );
+
+  $items['user/%user/networks/%sony_connect_network/%ctools_js/disconnect'] = array(
+    'title' => t('Disconnect network'),
+    'page callback' => 'sony_connect_disconnect',
+    'page arguments' => array(1, 3, 4),
+    'access callback' => 'sony_connect_network_access',
+    'access arguments' => array(1, 3),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/pages.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_form_user_login_alter().
+ */
+function sony_connect_form_user_login_alter(&$form, $form_state) {
+  $items = array();
+  $plugins = sony_connect_get_networks();
+  foreach ($plugins as $plugin) {
+    if ($plugin['enabled']) {
+      $items[] = sony_connect_login_link($plugin);
+    }
+  }
+  if (!empty($items)) {
+    $form['sony_connect'] = array('#value' => theme('item_list', $items));
+  }
+}
+
+/**
+ * Implementation of hook_form_user_login_block_alter().
+ */
+function sony_connect_form_user_login_block_alter(&$form, $form_state) {
+  sony_connect_form_user_login_alter($form, $form_state);
+
+  $form['name']['#attributes']['class'] .= ' inline-label';
+  $form['pass']['#attributes']['class'] .= ' inline-label';
+  $form['submit']['#value'] = t('go');
+  $form['links']['#access'] = FALSE;
+
+  $form['sign_in'] = array(
+    '#prefix' => '<div class="sign-in">',
+    '#value' => t('Sign In:'),
+    '#suffix' => '</div>',
+    '#weight' => 1,
+  );
+  if (isset($form_state['post']['op'])) {
+    // they've submitted, but still seeing form, so perhaps they've forgotten password
+    $form['password_link'] = array(
+      '#prefix' => '<div class="password-link">',
+      '#value' => l(t('Forgot your password?'), 'user/password'),
+      '#suffix' => '</div>',
+    );
+  }
+  $form['custom_link'] = array(
+    '#prefix' => '<div class="custom-link">',
+    '#value' => t("Don't have an account? <a href='@signup' title='Sign Up' class='popups'>Sign Up</a>.", array('@signup' => url('user/register'))),
+    '#suffix' => '</div>',
+    '#weight' => 20,
+  );
+  $form['sony_connect']['#weight'] = '2';
+
+  $form['#attributes']['class'] = 'sony-connect-login-block';
+  // drupal_set_message('<pre>' . print_r($form, TRUE) . '</pre>');
+}
+
+/**
+ * Output a login link for a given network.
+ *
+ * @param $plugin
+ */
+function sony_connect_login_link($network) {
+  $img = theme('image', $network['path'] .'/'. $network['icon']);
+  $attributes = array(
+    'class' => 'sony-connect-'. $network['name'],
+    'rel' => $network['name'],
+  );
+  return l($img, 'connect/'. $network['name'] .'/pre_authorize', array('attributes' => $attributes, 'html' => TRUE));
+
+}
+
+/**
+ * Return a local user id (uid) given an external network user id.
+ *
+ * @param $network
+ *   The network the user is connecting through.
+ * @param $nuid
+ *   The user id from the external network.
+ */
+function sony_connect_connected_user_load($network, $nuid) {
+  $uid = db_result(db_query('SELECT uid FROM {sony_connect} WHERE network = "%s" AND nuid = "%s"', $network, $nuid));
+  return $uid;
+}
+
+/**
+ * Get the current nuid from a specified network.
+ *
+ * @param $network
+ */
+function sony_connect_get_network_user($network) {
+  $network = sony_connect_get_network($network);
+  if (is_object($network['network'])) {
+    $nuid = $network['network']->user();
+  }
+  return $nuid;
+}
+
+/**
+ * Implementation of hook_user().
+ */
+function sony_connect_user($op, &$edit, &$account, $category = NULL) {
+  switch ($op) {
+    case 'delete':
+      db_query('DELETE FROM {sony_connect} WHERE uid = %d', $account->uid);
+      watchdog('sony_connect', 'Social network connections for user %name deleted.', array('%name' => $account->name));
+      break;
+
+    case 'logout':
+      $result = db_query('SELECT network, nuid FROM {sony_connect} WHERE uid = %d', $account->uid);
+      while ($row = db_fetch_object($result)) {
+        $nuid = sony_connect_get_network_user($row->network);
+        if ($nuid) {
+          $network = $row->network;
+          break;
+        }
+      }
+      if (!empty($network)) {
+        // TODO: do something here to make sure network logout happens.
+      }
+      break;
+  }
+}
+
+/**
+ * Connect the logged in user to the current network account.
+ *
+ * @param $network
+ */
+function sony_connect_connect_user($uid, $network, $nuid) {
+  $data = array();
+
+  if (isset($_SESSION['sony_connect_token_data'])) {
+    $data = $_SESSION['sony_connect_token_data'];
+    unset($_SESSION['sony_connect_token_data']);
+  }
+
+  $new = !db_result(db_query('SELECT nuid FROM {sony_connect} WHERE uid = %d AND network = "%s"', $uid, $network));
+
+  $row = array(
+    'uid' => $uid,
+    'network' => $network,
+    'nuid' => $nuid,
+    'updated' => time(),
+    'data' => $data,
+  );
+  drupal_write_record('sony_connect', $row, ($new ? NULL : array('uid', 'network')));
+
+  $_SESSION['sony_connect']['status'] = SONY_CONNECT_STATUS_CONNECTED;
+  drupal_set_message(t('Your %network account has been connected.', array('%network' => $network)));
+
+  sony_connect_network_invoke($network, 'post connect callback');
+}
+
+function sony_connect_disconnect_user($uid, $network) {
+  global $user;
+  $account = user_load(array('uid' => $uid));
+
+  db_query('DELETE FROM {sony_connect} WHERE uid = %d AND network = "%s"', $uid, $network);
+  watchdog('sony_connect', 'Disconnected %network account for %username.', array('%network' => $network, '%username' => $account->name));
+
+  if ($user->uid == $uid) {
+    if ($_SESSION['sony_connect']['network'] == $network) {
+      unset($_SESSION['sony_connect']);
+    }
+    drupal_set_message(t('Your %network account has been disconnected.', array('%network' => $network)));
+  }
+
+  sony_connect_network_invoke($network, 'disconnect callback');
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function sony_connect_theme() {
+  return array(
+    'sony_connect_admin_publishing_settings' => array(
+      'arguments' => array('form' => array()),
+      'file' => 'includes/admin.inc',
+    ),
+    'sony_connect_user_preferences' => array(
+      'arguments' => array('form' => array()),
+      'file' => 'includes/pages.inc',
+    ),
+    'sony_connect_post_authorize' => array(
+      'arguments' => array(),
+      'template' => 'sony-connect-post-authorize',
+    ),
+    'sony_connect_cancel' => array(
+      'arguments' => array(),
+      'template' => 'sony-connect-cancel',
+    ),
+    'sony_connect_prompt' => array(
+      'arguments' => array(),
+      'template' => 'sony-connect-prompt',
+    ),
+    'sony_connect_profile_picture' => array(
+      'arguments' => array('network' => NULL, 'nuid' => NULL),
+      'file' => 'includes/theme.inc',
+    ),
+      'sony_connect_xml_namespace' => array(
+      'arguments' => array(),
+      'file' => 'includes/theme.inc',
+    ),
+  );
+}
+
+/**
+ * Invoke a callback function on a network.
+ *
+ * @param $network
+ *   Network as a string or loaded network plugin.
+ * @param $hook
+ *   The name of the callback to invoke.  This should be in the big array in
+ *   sony_connect_network_defaults().
+ */
+function sony_connect_network_invoke($network, $hook) {
+  $args = func_get_args();
+  $network = array_shift($args);
+  $hook = array_shift($args);
+
+  if (!is_array($network)) {
+    $network = sony_connect_get_network($network);
+  }
+
+  if (is_object($network['network']) && method_exists($network['network'], $hook)) {
+    $callback = array($network['network'], $hook);
+    return call_user_func_array($callback, $args);
+  }
+}
+
+/**
+ * Load (and cache) a network user's profile.
+ */
+function sony_connect_load_profile($network, $nuid) {
+  $cid = $network .':'. $nuid;
+
+  if (($cache = cache_get($cid, 'cache_sony_connect')) && !empty($cache->data)) {
+    $profile = $cache->data;
+  }
+  else {
+    $profile = sony_connect_network_invoke($network, 'get_profile', $nuid);
+    cache_set($cid, $profile, 'cache_sony_connect', time() + (24 * 60 * 60));
+  }
+
+  return $profile;
+}
+
+/**
+ * Access callback. Returns true if the current user has access to edit the
+ * account specified and the account specified has an existing connection to the
+ * specified network.
+ */
+function sony_connect_network_access($account, $network) {
+  $count = db_result(db_query('SELECT COUNT(nuid) FROM {sony_connect} WHERE network = "%s" AND uid = "%s"', $network['name'], $account->uid));
+
+  return (bool)$count && user_edit_access($account);
+}
+
+function sony_connect_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  if ($op == 'insert') {
+    $account = user_load(array('uid' => $node->uid));
+    sony_connect_publish($account, 'node', $node->type, $node);
+  }
+}
+
+function sony_connect_publish($account, $type = 'node', $subtype = '', $object = NULL) {
+  $info = sony_connect_publish_info();
+  $settings = $info[$type]['subtypes'][$subtype];
+
+  if ($type == 'flag') {
+    $object->token_type = 'node';
+  }
+
+  if ($settings['enabled'] && $settings['message']) {
+    $message = $settings['message'];
+
+    $preferences = sony_connect_publish_preferences($account, $type, $subtype);
+    foreach ($preferences as $network => $pref) {
+      if ($pref == SONY_CONNECT_PREFERENCES_ENABLED) {
+        sony_connect_network_invoke($network, 'publish', $account, $message, $type, $subtype, $object);
+      }
+    }
+  }
+  elseif ($type == 'node' && isset($object->comment_target_nid)) {
+    $node = node_load($object->comment_target_nid);
+    $node->token_type = 'node';
+    sony_connect_publish($account, 'comment', $node->type, $node);
+  }
+}
+
+function sony_connect_publish_preferences($account, $type, $subtype) {
+  static $stored_prefs = array();
+
+  if (!isset($stored_prefs[$account->uid][$type][$subtype])) {
+    $connections = sony_connect_get_connected_networks($account);
+    $preferences = array();
+    foreach ($connections as $network => $connection) {
+      if (isset($connection->preferences[$type][$subtype])) {
+        $preferences[$network] = $connection->preferences[$type][$subtype];
+      }
+      else {
+        $preferences[$network] = SONY_CONNECT_PREFERENCES_PROMPT;
+      }
+    }
+
+    $activity_preferences = isset($_SESSION['sony_connect_activity_preferences']) ? $_SESSION['sony_connect_activity_preferences'] : array();
+    unset($_SESSION['sony_connect_activity_preferences']);
+
+    // Entries in $activity_preferences will not get overwritten.
+    $preferences = $activity_preferences + $preferences;
+
+    $stored_prefs[$account->uid][$type][$subtype] = $preferences;
+  }
+
+  return $stored_prefs[$account->uid][$type][$subtype];
+}
+
+/**
+ * Implementation of hook_token_values().
+ */
+function sony_connect_token_values($type, $object = NULL, $options = array()) {
+  if ($type == 'node') {
+    $node = $object;
+
+    $url = url('node/'. $node->nid, array('absolute' => TRUE));
+    $tiny_url = file_get_contents("http://tinyurl.com/api-create.php?url=". $url);
+    $tokens['node-link-tinyurl'] = $tiny_url;
+
+    return $tokens;
+  }
+  elseif ($type == 'global') {
+    $tokens['global']['site-artist-name'] = variable_get('artist_name', '');
+  }
+}
+
+
+/**
+ * Implementation of hook_token_list().
+ */
+function sony_connect_token_list($type) {
+  if ($type == 'node' || $type == 'all') {
+    $list['node']['node-link-tinyurl'] = t("The TinyURL link to the node page.");
+  }
+  if ($type == 'global' || $type == 'all') {
+    $list['global']['site-artist-name'] = t("The artist name as entered when the site was provisioned.");
+  }
+  return $list;
+}
+
+/**
+ * Return an array of types/subtypes for publishing.
+ */
+function sony_connect_publish_info() {
+  static $types = array();
+
+  if (empty($types)) {
+    $strings = array(
+      'node' => array(
+        'forum' => t('When I create a forum topic'),
+        'blog' => t('When I post a new blog entry'),
+      ),
+      'comment' => array(
+        'news' => t('When I comment on a news entry'),
+        'forum' => t('When I reply to a forum topic'),
+        'photo' => t('When I comment on a photo'),
+        'official_photo' => t('When I comment on a photo'),
+        'blog' => t('When I comment on a blog entry'),
+        'track' => t('When I review music'),
+        'album' => t('When I review music'),
+      ),
+      'flag' => array(
+        'signup' => t('When I\'m attending an event'),
+        'favorites' => t('When I add something to my favorites'),
+      ),
+    );
+
+    // Define our default types.
+    $types = array(
+      'node' => array(
+        'title' => t('Node publishing'),
+        'subtypes' => array(),
+      ),
+      'comment' => array(
+        'title' => t('Comment publishing'),
+        'subtypes' => array(),
+      ),
+    );
+
+    $node_types = array_map('check_plain', node_get_types('names'));
+
+    // Define subtypes for nodes and comments.
+    foreach ($node_types as $name => $title) {
+      $types['node']['subtypes'][$name] = array(
+        'name' => $name,
+        'title' => $title,
+        'preference' => isset($strings['node'][$name]) ? $strings['node'][$name] : t('When I post a @type', array('@type' => drupal_strtolower($title))),
+      );
+      if (variable_get('comment_'. $name, 0) || variable_get('node_comment_'. $name, 0)) {
+        $types['comment']['subtypes'][$name] = array(
+          'name' => $name,
+          'title' => $title,
+          'preference' => isset($strings['comment'][$name]) ? $strings['comment'][$name] : t('When I comment on a @type', array('@type' => drupal_strtolower($title))),
+        );
+      }
+    }
+
+    if (module_exists('flag')) {
+      $flags = flag_get_flags();
+      $types['flag'] = array(
+        'title' => t('Content flagging'),
+        'subtypes' => array(),
+      );
+      foreach ($flags as $id => $flag) {
+        $types['flag']['subtypes'][$flag->name] = array(
+          'name' => $flag->name,
+          'title' => $flag->flag_short,
+          'preference' => isset($strings['flag'][$flag->name]) ? $strings['flag'][$flag->name] : t('When I %flag', array('%flag' => $flag->flag_long)),
+        );
+      }
+    }
+
+    // Now add the settings for each type/subtype into the mix.
+    $values = variable_get('sony_connect_publishing', sony_connect_publish_defaults());
+
+    foreach ($types as $type_name => $type) {
+      foreach ($type['subtypes'] as $subtype_name => $subtype) {
+        if (isset($values[$type_name][$subtype_name])) {
+          $types[$type_name]['subtypes'][$subtype_name] += $values[$type_name][$subtype_name];
+        }
+      }
+    }
+  }
+
+  return $types;
+}
+
+function sony_connect_publish_defaults() {
+  static $defaults;
+
+  if (!isset($defaults)) {
+    $defaults = array();
+    $info = drupal_parse_info_file(drupal_get_path('module', 'sony_connect') .'/sony_connect.info');
+    foreach ($info['messages'] as $type => $type_info) {
+      foreach ($type_info as $subtype => $message) {
+        $defaults[$type][$subtype] = array(
+          'enabled' => TRUE,
+          'message' => $message,
+        );
+      }
+    }
+  }
+
+  return $defaults;
+}
+
+function sony_connect_get_connections($account) {
+  sony_connect_include('connection');
+
+  $networks = array();
+
+  $result = db_query('SELECT network FROM {sony_connect} WHERE uid = %d', $account->uid);
+  while ($row = db_fetch_object($result)) {
+    $networks[$row->network] = new sony_connect_connection($account->uid, $row->network);
+  }
+
+  return $networks;
+}
+
+function sony_connect_get_connected_networks($account) {
+  $networks = array();
+  $result = db_query('SELECT * FROM {sony_connect} WHERE uid = %d', $account->uid);
+  while ($row = db_fetch_object($result)) {
+    if ($row->data) {
+      $row->data = unserialize($row->data);
+    }
+    if ($row->preferences) {
+      $row->preferences = unserialize($row->preferences);
+    }
+    $networks[$row->network] = $row;
+  }
+
+  return $networks;
+}
+
+function sony_connect_get_connected_network($account, $network) {
+  $networks = sony_connect_get_connected_networks($account);
+  return isset($networks[$network]) ? $networks[$network] : NULL;
+}
+
+function sony_connect_connection_load($network, $account = NULL) {
+  if (!isset($account)) {
+    global $user;
+    $account = drupal_clone($user);
+  }
+
+  $network = is_array($network) ? $network['name'] : $network;
+
+  $connection = db_fetch_object(db_query('SELECT * FROM {sony_connect} WHERE uid = %d AND network = "%s"', $account->uid, $network));
+  if ($connection->data) {
+    $connection->data = unserialize($connection->data);
+  }
+  if ($connection->preferences) {
+    $connection->preferences = unserialize($connection->preferences);
+  }
+
+  return $connection;
+}
+
+function sony_connect_form_alter(&$form, $form_state, $form_id) {
+  if (isset($form['type']) && isset($form['#node']) && $form['type']['#value'] .'_node_form' == $form_id) {
+    global $user;
+    $node = $form['#node'];
+
+    // Test for nodecomment nodes.
+    if (isset($node->comment_target_nid)) {
+      $type = 'comment';
+      $target = node_load($node->comment_target_nid);
+      $subtype = $target->type;
+    }
+    else {
+      $type = 'node';
+      $subtype = $node->type;
+    }
+
+    $info = sony_connect_publish_info();
+    $settings = $info[$type]['subtypes'][$subtype];
+
+    // abort if not enabled.
+    if (empty($settings['enabled']) || empty($settings['message'])) {
+      return;
+    }
+
+    // Assume we will show the dialog unless we find a permanent preference.
+    $show_dialog = TRUE;
+    $connections = sony_connect_get_connections($user);
+    foreach ($connections as $network => $connection) {
+      $pref = $connection->get_preference($type, $subtype);
+      if ($pref == SONY_CONNECT_PREFERENCES_DISABLED || $pref == SONY_CONNECT_PREFERENCES_ENABLED) {
+        $show_dialog = FALSE;
+        break;
+      }
+    }
+
+    // Attach dialog js to button.
+    if ($show_dialog) {
+      ctools_include('ajax');
+      ctools_include('modal');
+      ctools_modal_add_js();
+      ctools_ajax_associate_url_to_element($form, $form['buttons']['submit'], url("connect/nojs/prefs/$type/$subtype"), 'ctools-use-modal');
+    }
+  }
+}
+
+/**
+ * Force a table to be restriped.
+ *
+ * This is usually used after a table has been modifed by a replace or append
+ * command.
+ *
+ * @param $selector
+ *   The CSS selector. This can be any selector jquery uses in $().
+ */
+function sony_connect_command_form_submit($selector) {
+  return array(
+    'command' => 'form_submit',
+    'selector' => $selector,
+  );
+}
+
+
+/**
+ * Implementation of hook_flag(). Trigger actions if any are available.
+ */
+function sony_connect_flag($action, $flag, $content_id, $account) {
+  if ($action == 'flag' && $flag->content_type == 'node') {
+    $node = node_load($content_id);
+    sony_connect_publish($account, 'flag', $flag->name, $node);
+  }
+}
+
+function sony_connect_preprocess_flag(&$vars) {
+  //dsm($vars);
+}
+
+function sony_connect_preprocess_page(&$vars) {
+  $vars['sony_connect_login'] = '';
+
+  if (!user_is_logged_in()) {
+    $items = array();
+    $plugins = sony_connect_get_networks();
+    foreach ($plugins as $plugin) {
+      if ($plugin['enabled']) {
+        $items[] = sony_connect_login_link($plugin);
+      }
+    }
+    $vars['sony_connect_login'] = t('<strong>Sign In</strong> !networks or <a class="ctools-use-modal" title="Login" href="@login_url">Login</a> Not a member? <a class="ctools-use-modal" title="Join" href="@register_url">Join</a>',
+      array('!networks' => join(' ', $items), '@login_url' => url('user/nojs/login'), '@register_url' => url('user/nojs/register')));
+  }
+}
+
+/**
+ * Implementation of hook_mail_alter().
+ */
+function sony_connect_mail_alter(&$message) {
+  // Since we allow users to sign up without an email address, and there
+  // is apparently no way to cancel an email, just make sure that there
+  // is a To address even if it goes nowhere.
+  if (empty($message['to'])) {
+    $message['to'] = 'nobody@example.com';
+  }
+}
+
+/**
+ * Implementaion of hook_sony_metatags().
+ */
+function sony_connect_sony_metatags($object_type = NULL, $object = NULL) {
+  if ($plugin = sony_connect_get_network('facebook')) {
+    if (!empty($plugin['conf']['application_id'])) {
+      return array(
+        'fb:app_id' => array('property' => 'fb:app_id', 'content' => $plugin['conf']['application_id']),
+      );
+    }
+  }
+}

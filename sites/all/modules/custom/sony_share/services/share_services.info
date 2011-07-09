@@ -1,0 +1,10 @@
+; $Id$
+name = "Share Services"
+description = "Provide the integration with Share module"
+core = 6.x
+package = Share - tabs
+dependencies[] = sony_share
+dependencies[] = share
+dependencies[] = share_widget
+
+

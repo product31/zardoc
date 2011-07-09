@@ -1,0 +1,64 @@
+# Malaysia (Malay) translation of pluto (all releases)
+# Copyright (c) 2010 by the Malaysia (Malay) translation team
+# Generated from files:
+#  pluto/pluto.admin.achievement.inc: n/a
+#  pluto/pluto.admin.reward.inc: n/a
+#  pluto/pluto.module: n/a
+#  pluto/pluto.views.inc: n/a
+#  pluto/pluto.info: n/a
+#  pluto/pluto.install: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: pluto (all releases)\n"
+"POT-Creation-Date: 2010-04-12 11:10-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Malaysia (Malay)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: pluto.admin.achievement.inc:187,323; pluto.admin.reward.inc:88
+msgid "Save"
+msgstr ""
+
+#: pluto.admin.achievement.inc:244; pluto.admin.reward.inc:63
+msgid "Name"
+msgstr ""
+
+#: pluto.admin.achievement.inc:250; pluto.admin.reward.inc:69
+msgid "Description"
+msgstr ""
+
+#: pluto.admin.achievement.inc:429,456; pluto.admin.reward.inc:111; pluto.module:146,165
+msgid "Delete"
+msgstr ""
+
+#: pluto.admin.achievement.inc:428,455; pluto.admin.reward.inc:110
+msgid "This action cannot be undone."
+msgstr ""
+
+#: pluto.admin.achievement.inc:429,456; pluto.admin.reward.inc:111
+msgid "Cancel"
+msgstr ""
+
+#: pluto.admin.achievement.inc:426; pluto.admin.reward.inc:108
+msgid "Are you sure you want to delete %name"
+msgstr ""
+
+#: pluto.admin.achievement.inc:304; pluto.module:60
+msgid "Rewards"
+msgstr ""
+
+#: pluto.views.inc:12,62; pluto.module:40; pluto.info:0
+msgid "Pluto"
+msgstr ""
+
+#: pluto.views.inc:26; pluto.module:536,540
+msgid "Badges"
+msgstr ""
+
+#: pluto.module:32; pluto.install:211
+msgid "Membership Benefits"
+msgstr ""
+

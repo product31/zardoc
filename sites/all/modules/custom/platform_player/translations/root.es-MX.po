@@ -1,0 +1,93 @@
+# Mexico translation of platform_player (all releases)
+# Copyright (c) 2010 by the Mexico translation team
+# Generated from files:
+#  platform_player/platform_player.info: n/a
+#  platform_player/platform_player.module: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: platform_player (all releases)\n"
+"POT-Creation-Date: 2010-04-12 11:21-0500\n"
+"PO-Revision-Date: 2010-03-30 12:57-0500\n"
+"Language-Team: Mexico\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: platform_player.info:0
+msgid "Sony BMG"
+msgstr ""
+
+#: platform_player.module:130
+msgid "Platform URL"
+msgstr ""
+
+#: platform_player.module:137
+msgid "Audio Player"
+msgstr ""
+
+#: platform_player.module:140
+msgid "Video Player"
+msgstr ""
+
+#: platform_player.module:144
+msgid "Media Format"
+msgstr ""
+
+#: platform_player.module:168
+msgid "Platform Media Player"
+msgstr ""
+
+#: platform_player.module:169
+msgid "Store the data necessary to build a Platform Media Player link."
+msgstr ""
+
+#: platform_player.module:182
+msgid "Audio player settings"
+msgstr ""
+
+#: platform_player.module:187,213
+msgid "Enabled?"
+msgstr ""
+
+#: platform_player.module:192,218,238
+msgid "SWF file path"
+msgstr ""
+
+#: platform_player.module:197,223,241
+msgid "Player width"
+msgstr ""
+
+#: platform_player.module:202,228,244
+msgid "Player height"
+msgstr ""
+
+#: platform_player.module:208
+msgid "Video player settings"
+msgstr ""
+
+#: platform_player.module:238,241,244
+msgid "!name field is required."
+msgstr "Campo !name obligatorio."
+
+#: platform_player.module:278
+msgid "The platform URL provided could not be retrieved."
+msgstr ""
+
+#: platform_player.module:346
+msgid "Platform player popup link (default)"
+msgstr ""
+
+#: platform_player.module:16
+msgid "access platform players"
+msgstr ""
+
+#: platform_player.info:0
+msgid "Platform Player"
+msgstr ""
+
+#: platform_player.info:0
+msgid "Platform Player Link CCK fields."
+msgstr ""
+

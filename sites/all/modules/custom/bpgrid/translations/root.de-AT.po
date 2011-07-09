@@ -1,0 +1,169 @@
+# Austria translation of bpgrid (all releases)
+# Copyright (c) 2010 by the Austria translation team
+# Generated from files:
+#  bpgrid/bpgrid.module: n/a
+#  bpgrid/bpgrid.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: bpgrid (all releases)\n"
+"POT-Creation-Date: 2010-04-02 15:15-0500\n"
+"PO-Revision-Date: 2010-03-30 09:41-0500\n"
+"Language-Team: Austria\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: bpgrid.module:82
+msgid "Operations"
+msgstr "Operationen"
+
+#: bpgrid.module:307
+msgid "Title"
+msgstr "Titel"
+
+#: bpgrid.module:135
+msgid "Name"
+msgstr "Name"
+
+#: bpgrid.module:157
+msgid "Submit"
+msgstr "Senden"
+
+#: bpgrid.module:314
+msgid "Right sidebar"
+msgstr "rechte Seitenleiste"
+
+#: bpgrid.module:313
+msgid "Left sidebar"
+msgstr "linke Seitenleiste"
+
+#: bpgrid.module:143
+msgid "Description"
+msgstr "Beschreibung"
+
+#: bpgrid.module:315
+msgid "Content"
+msgstr "Inhalt"
+
+#: bpgrid.module:79
+msgid "No themes created yet."
+msgstr ""
+
+#: bpgrid.module:82,125
+msgid "Theme"
+msgstr "Theme"
+
+#: bpgrid.module:126
+msgid ""
+"This is the machine-readable name of your theme.  Only alpha-numeric "
+"and underscore characters allowed."
+msgstr ""
+
+#: bpgrid.module:136
+msgid "The human-readable name of the theme."
+msgstr ""
+
+#: bpgrid.module:144
+msgid "The description of the theme."
+msgstr ""
+
+#: bpgrid.module:171
+msgid "Theme can only contain alpha-numeric and underscore characters."
+msgstr ""
+
+#: bpgrid.module:176
+msgid ""
+"The theme you specified already exists.  <a href=\"@edit_url\">Click "
+"here</a> to edit the existing theme, or choose a unique name."
+msgstr ""
+
+#: bpgrid.module:255
+msgid "Breadcrumb links"
+msgstr ""
+
+#: bpgrid.module:256
+msgid "HTML for displaying the breadcrumbs at the top of the page."
+msgstr ""
+
+#: bpgrid.module:259
+msgid "Feed icons"
+msgstr ""
+
+#: bpgrid.module:260
+msgid "A string of all feed icons for the current page."
+msgstr ""
+
+#: bpgrid.module:263
+msgid "Footer message"
+msgstr "Fußzeile"
+
+#: bpgrid.module:267
+msgid "Help"
+msgstr "Hilfe"
+
+#: bpgrid.module:271
+msgid "Logo"
+msgstr "Logo"
+
+#: bpgrid.module:275
+msgid "Status messages"
+msgstr ""
+
+#: bpgrid.module:279
+msgid "Mission statement"
+msgstr "Beschreibung der Website"
+
+#: bpgrid.module:283
+msgid "Primary links"
+msgstr "Hauptlinks"
+
+#: bpgrid.module:287
+msgid "Secondary links"
+msgstr "Sekundärlinks"
+
+#: bpgrid.module:291
+msgid "Search box"
+msgstr "Suchfeld"
+
+#: bpgrid.module:295
+msgid "Site name"
+msgstr "Name der Website"
+
+#: bpgrid.module:299
+msgid "Site slogan"
+msgstr "Slogan der Website"
+
+#: bpgrid.module:303
+msgid "Tabs"
+msgstr ""
+
+#: bpgrid.module:316
+msgid "Header"
+msgstr "Kopfbereich"
+
+#: bpgrid.module:317
+msgid "Footer"
+msgstr "Fußbereich"
+
+#: bpgrid.module:17,42
+msgid "Grid builder"
+msgstr ""
+
+#: bpgrid.module:26
+msgid "List"
+msgstr "Liste"
+
+#: bpgrid.module:33
+msgid "Add"
+msgstr "Hinzufügen"
+
+#: bpgrid.info:0
+msgid "Blueprint theme builder"
+msgstr ""
+
+#: bpgrid.info:0
+msgid "Build grid based themes using a WYSIWYG layout editor."
+msgstr ""
+

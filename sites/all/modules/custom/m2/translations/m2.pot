@@ -1,0 +1,197 @@
+# $Id$
+#
+# LANGUAGE translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  m2.field.inc: n/a
+#  modules/m2_search/m2_search.info: n/a
+#  m2.module: n/a
+#  m2.info: n/a
+#  modules/m2_gracenote/m2_gracenote.info: n/a
+#  modules/m2_gracenote/m2-gracenote-formatter-lyrics.tpl.php: n/a
+#  modules/m2_gracenote/m2_gracenote.module: n/a
+#  modules/m2_search/m2_search.module: n/a
+#  plugins/music_album.inc: n/a
+#  plugins/music_lyrics.inc: n/a
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2010-03-01 14:23-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: m2.field.inc:34
+msgid "M2 document"
+msgstr ""
+
+#: m2.field.inc:35
+msgid "Store a reference to an M2 document in the database."
+msgstr ""
+
+#: m2.field.inc:70
+msgid "Document type and search field"
+msgstr ""
+
+#: m2.field.inc:74
+msgid "Select the document type and search field for this field."
+msgstr ""
+
+#: m2.field.inc:108
+msgid "Invalid document type specified in the %field field."
+msgstr ""
+
+#: m2.field.inc:165
+msgid "Default"
+msgstr ""
+
+#: m2.field.inc:170
+msgid "Devel output"
+msgstr ""
+
+#: m2.field.inc:207 modules/m2_search/m2_search.info:0
+msgid "M2 Search"
+msgstr ""
+
+#: m2.module:207
+msgid "%name: title mismatch. Please check your selection."
+msgstr ""
+
+#: m2.module:214
+msgid "%name: found no valid post with that title."
+msgstr ""
+
+#: m2.module:23
+msgid "M2 Settings"
+msgstr ""
+
+#: m2.module:29
+msgid "M2 autocomplete"
+msgstr ""
+
+#: m2.info:0
+msgid "M2 Base"
+msgstr ""
+
+#: m2.info:0
+msgid "Base module for M2 interactivity"
+msgstr ""
+
+#: m2.info:0 modules/m2_gracenote/m2_gracenote.info:0 modules/m2_search/m2_search.info:0
+msgid "Sony M2"
+msgstr ""
+
+#: modules/m2_gracenote/m2-gracenote-formatter-lyrics.tpl.php:15
+msgid "Songwriter(s)"
+msgstr ""
+
+#: modules/m2_gracenote/m2-gracenote-formatter-lyrics.tpl.php:21
+msgid "Copyright"
+msgstr ""
+
+#: modules/m2_gracenote/m2-gracenote-formatter-lyrics.tpl.php:31
+msgid "Javascript support is required to display lyrics."
+msgstr ""
+
+#: modules/m2_gracenote/m2_gracenote.module:34
+msgid "Gracenote lyrics"
+msgstr ""
+
+#: modules/m2_gracenote/m2_gracenote.module:62
+msgid "Lyrics are only available in the United States."
+msgstr ""
+
+#: modules/m2_gracenote/m2_gracenote.module:101
+msgid "Please visit %url for lyrics."
+msgstr ""
+
+#: modules/m2_gracenote/m2_gracenote.module:176
+msgid "Lyrics terms of service"
+msgstr ""
+
+#: modules/m2_gracenote/m2_gracenote.module:19
+msgid "Lyrics Terms of Use"
+msgstr ""
+
+#: modules/m2_gracenote/m2_gracenote.info:0
+msgid "M2 Gracenote formatter"
+msgstr ""
+
+#: modules/m2_gracenote/m2_gracenote.info:0
+msgid "Provides Gracenote formatting for M2 lyrics fields."
+msgstr ""
+
+#: modules/m2_search/m2_search.module:152
+msgid "Search fields"
+msgstr ""
+
+#: modules/m2_search/m2_search.module:157
+msgid "Query"
+msgstr ""
+
+#: modules/m2_search/m2_search.module:162
+msgid "Search by"
+msgstr ""
+
+#: modules/m2_search/m2_search.module:168;183
+msgid "Search"
+msgstr ""
+
+#: modules/m2_search/m2_search.module:173;189
+msgid "Reset"
+msgstr ""
+
+#: modules/m2_search/m2_search.module:16
+msgid "M2 search"
+msgstr ""
+
+#: modules/m2_search/m2_search.module:22
+msgid "M2 Document"
+msgstr ""
+
+#: modules/m2_search/m2_search.info:0
+msgid "Provides a UI for searching the M2 document database."
+msgstr ""
+
+#: plugins/music_album.inc:9
+msgid "Album title"
+msgstr ""
+
+#: plugins/music_album.inc:10
+msgid "Year"
+msgstr ""
+
+#: plugins/music_album.inc:11
+msgid "Tag"
+msgstr ""
+
+#: plugins/music_lyrics.inc:9
+msgid "Artist name"
+msgstr ""
+
+#: plugins/music_lyrics.inc:10
+msgid "Track title"
+msgstr ""
+
+#: plugins/music_lyrics.inc:11
+msgid "Lyric content"
+msgstr ""
+
+#: plugins/music_lyrics.inc:12
+msgid "Artist name and Track title"
+msgstr ""
+
+#: plugins/music_lyrics.inc:24
+msgid "M2 Lyrics"
+msgstr ""
+
+#: plugins/music_lyrics.inc:25
+msgid "Store a reference to an M2/Gracenote lyrics document in the database."
+msgstr ""
+

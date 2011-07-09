@@ -1,0 +1,154 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Usernode\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2006-10-19 11:51+0100\n"
+"Last-Translator: Uccio <ucciopan@aicomputer.it>\n"
+"Language-Team: drupalitalia.org <matteo@drupalitalia.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Italian\n"
+"X-Poedit-Country: ITALY\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+#: usernodes.module:27
+#: ;30
+msgid "$thetitle: Entry must be an integer."
+msgstr "$thetitle: Deve essere un numero"
+
+#: usernodes.module:34
+msgid "$thetitle: Entry must be at least $min."
+msgstr "$thetitle: deve essere almeno $min."
+
+#: usernodes.module:37
+msgid "$thetitle: Entry must be no higher than $max."
+msgstr "$thetitle: Deve essere minore di $max"
+
+#: usernodes.module:50
+msgid "Allows admin to set a limit, by node type, for how many nodes a user can create of that type."
+msgstr "Consente all'amministratore di limitare il numero di nodi di un certo tipo assegnati agli utenti"
+
+#: usernodes.module:90
+msgid "add"
+msgstr "aggiungi "
+
+#: usernodes.module:105
+msgid "edit"
+msgstr "modifica"
+
+#: usernodes.module:108
+msgid "delete"
+msgstr "elimina"
+
+#: usernodes.module:132
+msgid "User Node Settings"
+msgstr "Impostazioni Nodi Utente"
+
+#: usernodes.module:138
+msgid "User Node Max"
+msgstr "Nodi Utente Max"
+
+#: usernodes.module:142
+msgid "Max number of this type of node, per user. Enter 0 for no limit."
+msgstr "Numero massimo di nodi di questo tipo. Usa 0 per infinito."
+
+#: usernodes.module:149
+msgid "Display Profile Link in nodes?"
+msgstr "Mostra un collegamento al profilo utente nel nodo."
+
+#: usernodes.module:152
+msgid "Display link to user's profile on nodes of this type?"
+msgstr "Mostra un collegamento al profilo utente per i nodi di questo tipo"
+
+#: usernodes.module:157
+msgid "Display Profile Link in teasers?"
+msgstr "Mostra un collegameto alla pagina del profilo nell'anteprima"
+
+#: usernodes.module:160
+msgid "Display link to user's profile on teasers for nodes of this type?"
+msgstr "Mostra un collegamento alla pagina del profilo nell'anteprima."
+
+#: usernodes.module:165
+msgid "# of Nodes to show in Profile"
+msgstr "# numero di nodi mostrati nella pagina del profilo"
+
+#: usernodes.module:169
+msgid "Number of nodes of this type to list in the user's profile. Enter 0 to show none in profile."
+msgstr "Numero di nodi di questo tipo da mostrare nella pagina del profilo. Metti zero per non mostrarli"
+
+#: usernodes.module:176
+msgid "Display of nodes"
+msgstr "Visualizza i nodi"
+
+#: usernodes.module:179
+msgid "Titles only"
+msgstr "Solo titoli"
+
+#: usernodes.module:180
+msgid "Titles plus teasers"
+msgstr "Titoli e anteprime"
+
+#: usernodes.module:181
+msgid "Full texts"
+msgstr "Testo completo"
+
+#: usernodes.module:183
+msgid "Display length of nodes that are listed in the user's profile."
+msgstr "Mostra la lunghezza dei nodi nella lista presente nella pagina del profilo "
+
+#: usernodes.module:189
+msgid "Profile Category"
+msgstr "Profili Categoria"
+
+#: usernodes.module:193
+msgid "Category on user profile that these nodes will be listed under, if \"Nodes to Show\" above, is more than zero."
+msgstr "Le  categorie di nodi verranno listate nel profilo solo se il numero di nodi qui sotto è minore di zero."
+
+#: usernodes.module:199
+msgid "Display Edit/Delete Link in profile?"
+msgstr "Mostra Modifica/elimina nel profilo."
+
+#: usernodes.module:202
+msgid "In user's profile, display links to allow editing/deleting of content? (Links will not be displayed when user lacks node access permissions to edit/delete.)"
+msgstr "Nella pagina del profilo mostra un collegamento per modificare/eliminare  contenuti di questo tipo. (i link non appariranno se l'utente ha già creato il numero massimo di elementi)."
+
+#: usernodes.module:207
+msgid "Display Add Content Link in profile?"
+msgstr "Mostra il collegamento per aggiungere nodi nel profilo"
+
+#: usernodes.module:210
+msgid "In user's profile, display links to allow adding new content of this type? (Link will not be displayed if user has created maximum amount of that content type.)"
+msgstr "Nella pagina del profilo mostra un collegamento per aggiungere contenuti di questo tipo. (il link non apparirà se l'utente ha già creato il numero massimo di elementi)."
+
+#: usernodes.module:218
+msgid "You cannot create another %type, but you can edit your current one."
+msgstr "Non puoi creare altri %type, ma puoi modificare quelli che hai già."
+
+#: usernodes.module:223
+msgid "You cannot create any more %type items."
+msgstr "Non puoi più creare %type "
+
+#: usernodes.module:241
+#: ;242
+msgid "%user's profile"
+msgstr "%user's profilo"
+
+#: usernodes.module:310
+msgid "[edit]"
+msgstr "[modifica]"
+
+#: usernodes.module:310
+msgid "[delete]"
+msgstr "[elimina]"
+
+#: usernodes.module:310
+msgid "1 comment"
+msgid_plural "%count comments"
+msgstr[0] "1 commento"
+msgstr[1] "%count commenti"
+
+#: usernodes.module:0
+msgid "usernodes"
+msgstr "Nodi Utente"
+

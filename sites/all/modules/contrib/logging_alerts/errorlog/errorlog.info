@@ -1,0 +1,4 @@
+name = Web server logging and alerts
+description = Sends logs and alerts to the web server's error log.
+package = Logging and alerts
+core = 6.x

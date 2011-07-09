@@ -1,0 +1,95 @@
+# Russia translation of validate (all releases)
+# Copyright (c) 2010 by the Russia translation team
+# Generated from files:
+#  validate/validate.pages.inc: n/a
+#  validate/validate.module: n/a
+#  validate/validate.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: validate (all releases)\n"
+"POT-Creation-Date: 2010-04-12 14:10-0500\n"
+"PO-Revision-Date: 2010-03-30 14:05-0500\n"
+"Language-Team: Russia\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=((((n%10)==1)&&((n%100)!=11))?(0):(((((n%10)>=2)&&((n%10)<=4))&&(((n%100)<10)||((n%100)>=20)))?(1):2));\n"
+
+#: validate.pages.inc:12
+msgid "Name"
+msgstr "Название"
+
+#: validate.pages.inc:21
+msgid ""
+"This field is required and also requires a minimum length of 2 "
+"characters."
+msgstr ""
+
+#: validate.pages.inc:24
+msgid "Email address"
+msgstr ""
+
+#: validate.pages.inc:32
+msgid "This field is required and must validate as an email address."
+msgstr ""
+
+#: validate.pages.inc:35
+msgid "URL"
+msgstr "Адрес"
+
+#: validate.pages.inc:41
+msgid "This field is not required, but if given must validate as an URL."
+msgstr ""
+
+#: validate.pages.inc:44
+msgid "Favorite number"
+msgstr ""
+
+#: validate.pages.inc:50
+msgid "This field is not required, but if given must validate as a number."
+msgstr ""
+
+#: validate.pages.inc:53
+msgid "Submit"
+msgstr "Отправить"
+
+#: validate.module:216
+msgid "The name %name is already taken."
+msgstr "Имя %name уже используется."
+
+#: validate.module:219
+msgid "The name %name has been denied access."
+msgstr "Доступ для имени %name запрещен."
+
+#: validate.module:237
+msgid ""
+"The e-mail address %email is already registered. <a "
+"href=\"@password\">Have you forgotten your password?</a>"
+msgstr ""
+"Адрес электронной почты %email уже "
+"зарегистрирован. <a href=\"@password\">Забыли "
+"свой пароль?</a>"
+
+#: validate.module:240
+msgid "The e-mail address %email has been denied access."
+msgstr ""
+"Адрес электронной почты %email "
+"недопустим."
+
+#: validate.module:15
+msgid "jQuery Validation Test"
+msgstr ""
+
+#: validate.module:138
+msgid "%rule does not exists"
+msgstr ""
+
+#: validate.info:0
+msgid "Validate"
+msgstr ""
+
+#: validate.info:0
+msgid "Combination client-side and server side validation routines."
+msgstr ""
+

@@ -1,0 +1,13 @@
+; $Id: 
+name = "Sony Share"
+description = "Module engine for add various sony share links about sharing networks to nodes."
+core = 6.x
+php = 5.1
+package = Sony Share
+
+; Information added by drupal.org packaging script on 2010-10-08
+version = "6.x-2.0"
+core = "6.x"
+project = "sony_share"
+datestamp = "1286532364"
+

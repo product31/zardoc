@@ -1,0 +1,70 @@
+/* service links fixes */
+
+div.service_links ul {
+  width: 300px;
+}
+
+div.service_links ul li {
+  width: 100px;
+}
+
+#banner {
+  background-color:#000000;
+}
+
+
+/* Main menu fixes */
+
+#navigation li.expanded>ul { 
+  left: 0px;
+}
+
+#navigation .menu-name-primary-links li.expanded ul li {
+  width:100px;
+}
+
+#navigation .menu-name-primary-links li.expanded ul li a {
+  background:#222222;
+}
+
+/* END Main menu fixes */
+
+/* Pager fix */
+#container ul.pager li.pager-current {
+   display:inline;
+   margin-right:4px;
+}
+
+/* Footer links fix */
+.footer-info .footer-links li {
+  float:left;
+}
+
+.view-alavigne6-events tr.even td, 
+.view-alavigne6-events tr.odd td {
+  border-bottom:1px solid #0f0f0f;
+}
+
+.view-alavigne6-events tr.even.tid-14 td,
+.view-alavigne6-events tr.odd.tid-14 td {
+  background-color:#1a1a1a;
+  border-bottom:1px solid #000000;
+}
+
+.section-forum tr.even td, 
+.section-forum tr.odd td {
+  border-bottom:1px solid #0f0f0f;
+}
+
+
+/* Add to Cart fixes */
+
+.links-dropdown-list ul {
+  width:200px;
+}
+
+/* music album page */
+
+.view-alavigne6-music .view-content li.views-row {
+  margin-right:25px;
+}

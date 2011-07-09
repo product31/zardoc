@@ -1,0 +1,10 @@
+name = Userpoints Friendlist
+description = Integrates with friendlist module to allow users earn points for friending another user
+package = Userpoints
+dependencies[] = userpoints
+dependencies[] = friendlist_api
+core = 6.x
+
+l10n server = translate.gdb-dev.com
+project = "userpoints_friendlist"
+version = "6.x-2.x"

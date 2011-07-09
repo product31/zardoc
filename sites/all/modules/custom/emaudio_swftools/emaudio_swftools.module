@@ -1,0 +1,76 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * This include processes Podomatic audio files for use by emaudio.module.
+ *
+ * @todo
+ * Add support for switching swftools methods for each field.
+ */
+
+/**
+ * Implementation of hook_theme().
+ */
+function emaudio_swftools_theme() {
+  return array(
+    'emaudio_swftools_flash' => array(
+      'arguments' => array('embed' => NULL, 'width' => NULL, 'height' => NULL, 'autoplay' => NULL),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_emfield_providers().
+ */
+function emaudio_swftools_emfield_providers($module, $provider) {
+  //emfield_providers
+  if ($module == 'emaudio' && $provider == NULL) {
+    //
+    $plugin = new StdClass();
+    $plugin->filename = drupal_get_path('module', 'emaudio_swftools') . '/emaudio_swftools.swftools.inc';
+    $plugin->basename = 'emaudio_swftools.swftools.inc';
+    $plugin->name = 'emaudio_swftools';
+
+    return array(
+      'swftools' => $plugin
+    );
+  }
+}
+
+
+/**
+ * hook emaudio_PROVIDER_audio
+ *
+ * Include doesn't get called before this function on cache misses.
+ * this actually displays the full/normal-sized video we want, usually on the default page view
+ *  @param $embed
+ *    the video code for the audio to embed
+ *  @param $width
+ *    the width to display the audio
+ *  @param $height
+ *    the height to display the audio
+ *  @param $field
+ *    the field info from the requesting node
+ *  @param $item
+ *    the actual content from the field
+ *  @return
+ *    the html of the embedded audio
+ */
+function emaudio_emaudio_swftools_audio($embed, $width, $height, $field, $item, $autoplay) {
+  return theme('emaudio_swftools_flash', $embed, $width, $height, $autoplay);
+}
+
+/**
+ * Theme our flash object. 
+ *
+ * @ingroup themeable 
+ * @param $code
+ * @param $width
+ * @param $height
+ * @param $autoplay
+ * @return unknown_type
+ */
+function theme_emaudio_swftools_flash($code, $width, $height, $autoplay) {
+  return swf($code);
+}

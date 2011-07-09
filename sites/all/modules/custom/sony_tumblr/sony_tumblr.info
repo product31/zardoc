@@ -1,0 +1,13 @@
+; $Id$
+name = Sony Tumblr Integration
+description = Sony artist site integration with Tumblr.com
+package = Sony BMG
+core = 6.x
+dependencies[] = tumblr
+dependencies[] = feedapi
+dependencies[] = feedapi_node
+dependencies[] = feedapi_mapper
+
+l10n server = translate.gdb-dev.com
+project = "sony_tumblr"
+version = "6.x-2.x"

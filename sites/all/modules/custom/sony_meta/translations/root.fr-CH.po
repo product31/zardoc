@@ -1,0 +1,197 @@
+# Switzerland (French) translation of sony_meta (all releases)
+# Copyright (c) 2010 by the Switzerland (French) translation team
+# Generated from files:
+#  sony_meta/sony_meta.info: n/a
+#  sony_meta/sony_meta.admin.inc: n/a
+#  sony_meta/sony_meta.pages.inc: n/a
+#  sony_meta/sony_meta.module: n/a
+#  sony_meta/sony_meta.install: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sony_meta (all releases)\n"
+"POT-Creation-Date: 2010-04-12 14:48-0500\n"
+"PO-Revision-Date: 2010-03-26 09:28-0500\n"
+"Language-Team: Switzerland (French)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n>1);\n"
+
+#: sony_meta.info:0
+msgid "Sony BMG"
+msgstr ""
+
+#: sony_meta.admin.inc:19
+msgid "Edit"
+msgstr "Modifier"
+
+#: sony_meta.admin.inc:19
+msgid "Language"
+msgstr "Langue"
+
+#: sony_meta.admin.inc:19
+msgid "Title"
+msgstr "Titre"
+
+#: sony_meta.admin.inc:19
+msgid "Path"
+msgstr "Chemin"
+
+#: sony_meta.admin.inc:19
+msgid "Description"
+msgstr "Description"
+
+#: sony_meta.admin.inc:30
+msgid "Cancel"
+msgstr "Annuler"
+
+#: sony_meta.admin.inc:15
+msgid "View/Edit"
+msgstr ""
+
+#: sony_meta.admin.inc:19
+msgid "Keywords"
+msgstr "Mots-clés"
+
+#: sony_meta.admin.inc:30
+msgid ""
+"Are you sure you want to delete custom meta information from "
+"%meta-path?"
+msgstr ""
+
+#: sony_meta.admin.inc:40
+msgid "Meta deleted"
+msgstr ""
+
+#: sony_meta.pages.inc:19
+msgid "Update Meta Information"
+msgstr ""
+
+#: sony_meta.pages.inc:19
+msgid "Add New Meta Information"
+msgstr ""
+
+#: sony_meta.pages.inc:49
+msgid "HTML Title"
+msgstr ""
+
+#: sony_meta.pages.inc:55
+msgid ""
+"The HTML title does three things: it defines a title in the browser "
+"toolbar; it provides a title for the page when it is added to "
+"favorites; it displays a title for the page in search-engine results. "
+msgstr ""
+
+#: sony_meta.pages.inc:56
+msgid "By default the title is the same as the page title."
+msgstr ""
+
+#: sony_meta.pages.inc:57
+msgid "Recommenation: Keep your title no more than 6 to 10 words long."
+msgstr ""
+
+#: sony_meta.pages.inc:61
+msgid "Meta Keywords"
+msgstr ""
+
+#: sony_meta.pages.inc:68
+msgid ""
+"Add keywords and key phrases separated by commas. Try not to repeat "
+"words as that damages search engine ranking. "
+msgstr ""
+
+#: sony_meta.pages.inc:69
+msgid "Recommendation: limit to between 200 and 500 characters."
+msgstr ""
+
+#: sony_meta.pages.inc:73
+msgid "Meta Description"
+msgstr ""
+
+#: sony_meta.pages.inc:79
+msgid "Add a description. This appears on search engine result pages."
+msgstr ""
+
+#: sony_meta.pages.inc:80
+msgid "Recommendation: limit to 200 characters"
+msgstr ""
+
+#: sony_meta.pages.inc:124
+msgid "The meta information has been saved."
+msgstr ""
+
+#: sony_meta.module:116,126
+msgid "Meta Information"
+msgstr ""
+
+#: sony_meta.module:27
+msgid "add meta"
+msgstr ""
+
+#: sony_meta.module:37
+msgid "Meta Tags"
+msgstr ""
+
+#: sony_meta.module:43
+msgid "Delete custom meta tags"
+msgstr ""
+
+#: sony_meta.install:41
+msgid "Stores Meta Tag content and customized html title"
+msgstr ""
+
+#: sony_meta.install:47
+msgid "Meta ID"
+msgstr ""
+
+#: sony_meta.install:54
+msgid "Path ID in url_alias table"
+msgstr ""
+
+#: sony_meta.install:60
+msgid "Meta keywords"
+msgstr ""
+
+#: sony_meta.install:66
+msgid "Meta description"
+msgstr ""
+
+#: sony_meta.install:73
+msgid "Path for Meta Information"
+msgstr ""
+
+#: sony_meta.install:80
+msgid "Language for Meta Information"
+msgstr ""
+
+#: sony_meta.install:87
+msgid "Custom HTML title"
+msgstr ""
+
+#: sony_meta.install:115
+msgid ""
+"Could not enable admin permissions for Sony Meta. Please set "
+"permissions manually"
+msgstr ""
+
+#: sony_meta.install:117
+msgid ""
+"Could not enable moderator permissions for Sony Meta. Please set "
+"permissions manually"
+msgstr ""
+
+#: sony_meta.install:119
+msgid ""
+"Could not enable artist permissions for Sony Meta. Please set "
+"permissions manually"
+msgstr ""
+
+#: sony_meta.info:0
+msgid "Sony Meta"
+msgstr ""
+
+#: sony_meta.info:0
+msgid "Meta keywords and tags"
+msgstr ""
+

@@ -1,0 +1,10 @@
+<?php
+//$Id$
+
+/**
+ * @file
+ *
+ * Customizations to Node Forum module for SonyBMG forums.
+ */
+
+// Currently all customizations are done on install. See sonybmg_forum.install.

@@ -1,0 +1,6 @@
+name = word2web
+description = Clean and present exported Microsoft Word documents as nodes
+version = "6.x-2.x-dev"
+project = "word2web"
+datestamp = "1217290276"
+core = 6.x

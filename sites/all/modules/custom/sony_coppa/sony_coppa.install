@@ -1,0 +1,90 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * file_description
+ */
+
+/**
+ * Implementation of hook_schema().
+ */
+function sony_coppa_schema() {
+  $schema['sony_coppa_user'] = array(
+    'description' => 'Store COPPA related user registration details.',
+    'fields' => array(
+      'uid' => array(
+        'description' => 'The primary identifier for a user.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'basename' => array(
+        'description' => 'The basename of the generated username.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'number' => array(
+        'description' => 'The random number concatenated with the basename to create the username.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'question1' => array(
+        'description' => 'Privacy question #1.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'answer1' => array(
+        'description' => 'Privacy answer #1.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'question2' => array(
+        'description' => 'Privacy question #2.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'answer2' => array(
+        'description' => 'Privacy answer #2.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('uid'),
+  );
+  return $schema;
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function sony_coppa_install() {
+  drupal_install_schema('sony_coppa');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function sony_coppa_uninstall() {
+  drupal_uninstall_schema('sony_coppa');
+}
+
+/**
+ * Implementation of hook_update_N().
+ *
+ * There was no schema before this, so this should be safe
+ */
+function sony_coppa_update_6000() {
+  return drupal_install_schema('sony_coppa');
+}

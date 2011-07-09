@@ -1,0 +1,9 @@
+; $Id$
+name = Sony BMG Multisite Development Tools
+description = Do not enable on live multisites. This is a tool for managing multisites in development and QA environments.
+package = Sony BMG
+core = 6.x
+
+l10n server = translate.gdb-dev.com
+project = "sonybmg_dev"
+version = "6.x-2.x"

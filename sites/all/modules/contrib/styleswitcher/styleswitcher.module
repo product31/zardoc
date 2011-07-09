@@ -1,0 +1,77 @@
+<?php
+// $Id: styleswitcher.module,v 1.2 2009/02/20 22:45:49 rz Exp $
+
+/**
+ * @file
+ * Framework for themes to easily add stylesheet switching functionality.
+ */
+
+/**
+ * Implementation of hook_block().
+ */
+function styleswitcher_block($op = 'list', $delta = 0, $edit = array()) {
+  if ($op == 'list') {
+    $blocks[0] = array(
+      'info' => t('Style Switcher'),
+      'cache' => BLOCK_NO_CACHE,
+    );
+    return $blocks;
+  }
+  else if ($op == 'view') {
+    switch($delta) {
+      case 0:
+        global $theme_info;
+        if (!empty($theme_info->info['styleswitcher'])) {
+          $links = array();
+          foreach ($theme_info->info['styleswitcher']['css'] as $title => $file) {
+            $links[] = '<a href="#" class="style-switcher" rel="'. $title .'">'. $title .'</a>';
+            _styleswitcher_add_css($file, $title);
+          }
+          drupal_add_js(drupal_get_path('module', 'styleswitcher') .'/styleswitcher.js');
+          drupal_add_js(drupal_get_path('module', 'styleswitcher') .'/jquery.cookie.js');
+          drupal_add_js('Drupal.styleSwitcher.defaultStyle();', 'inline', 'styleswitcher');
+          $default = $theme_info->info['styleswitcher']['default'];
+          drupal_add_js(array('styleSwitcher' => array('defaultStyle' => $default)), 'setting');
+
+          $block['content'] = theme('item_list', $links);
+        }
+        
+        break;
+    }
+    return $block;
+  }
+}
+
+/**
+ * Similar to drupal_add_css.  This function keeps a list of css files for use
+ * as alternate stylesheets.
+ *
+ * @param $path
+ * @param $title
+ */
+function _styleswitcher_add_css($path = NULL, $title = NULL) {
+  static $css = array();
+  global $theme;
+  
+  if (isset($path) && isset($title)) {
+    $attr = array(
+      'href' => base_path() . drupal_get_path('theme', $theme) .'/'. $path, 
+      'title' => $title,
+    );
+    $css[] = '<link type="text/css" rel="alternate stylesheet" '. drupal_attributes($attr) .' />';
+  }
+  
+  return $css;
+}
+
+/**
+ * Implementation of hook_preprocess_page().
+ * Add styles and scripts in the specific way necessary for this to work.
+ */
+function styleswitcher_preprocess_page(&$variables) {
+  // add the alternate stylesheets
+  $variables['styles'] .= join("\n", _styleswitcher_add_css());
+  
+  // append to scripts since this needs to run after the drupal settings object.
+  $variables['scripts'] .= drupal_get_js('styleswitcher');
+}

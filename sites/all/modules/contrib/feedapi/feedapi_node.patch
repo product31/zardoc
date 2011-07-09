@@ -1,0 +1,69 @@
+Index: feedapi_node/feedapi_node.module
+===================================================================
+RCS file: /cvs/drupal-contrib/contributions/modules/feedapi/feedapi_node/Attic/feedapi_node.module,v
+retrieving revision 1.1.2.18.2.22
+diff -u -p -b -r1.1.2.18.2.22 feedapi_node.module
+--- feedapi_node/feedapi_node.module	30 Dec 2008 10:23:06 -0000	1.1.2.18.2.22
++++ feedapi_node/feedapi_node.module	20 Apr 2009 16:28:44 -0000
+@@ -157,6 +157,35 @@ function feedapi_node_feedapi_settings_f
+         '#options' => $ct_options,
+         '#description' => t('Choose the node type for feed item nodes created by this feed.'),
+       );
++      $format_options = array();
++      $formats = filter_formats();
++      foreach ($formats as $format) {
++        $format_options[$format->format] = $format->name;
++      }
++      $form['input_format'] = array(
++        '#type' => 'select',
++        '#title' => t('Input format of feed items'),
++        '#default_value' => FILTER_FORMAT_DEFAULT,
++        '#options' => $format_options,
++        '#description' => t('Choose the input format for feed item nodes created by this feed.'),
++      );
++      $form['author'] = array(
++        '#type' => 'textfield',
++        '#title' => t('Author of feed items'),
++        '#maxlength' => 60,
++        '#autocomplete_path' => 'user/autocomplete',
++        '#default_value' => $GLOBALS['user']->name,
++        '#description' => t('Leave blank for to use the author of the feed node.'),
++      );
++      if (module_exists('locale')) {
++        $form['language'] = array(
++          '#type' => 'select',
++          '#title' => t('Language of feed item'),
++          '#default_value' => '',
++          '#options' => array('' => t('Language neutral')) + locale_language_list('name'),
++          '#description' => t('Choose the language for feed item nodes created by this feed.'),
++        );
++      }
+       $form['node_date'] = array(
+         '#type' => 'radios',
+         '#title' => t('Created date of item nodes'),
+@@ -322,6 +351,7 @@ function _feedapi_node_save($feed_item, 
+   $feed_node = node_load($feed_nid);
+   $node->title = $feed_item->title;
+   $node->body = $feed_item->description;
++  $node->format = isset($settings['input_format']) ? $settings['input_format'] : FILTER_FORMAT_DEFAULT;
+   $node->teaser = node_teaser($feed_item->description);
+   // Stick feed item on node so that add on modules can act on it.
+   // A feed item can come in from more than one feed.
+@@ -338,6 +368,17 @@ function _feedapi_node_save($feed_item, 
+     $node->created = db_result(db_query("SELECT created FROM {node} WHERE nid = %d", $feed_item->nid));
+   }
+   $node->uid = $feed_node->uid;
++  // Override the author of the feed items
++  if (isset($settings['author'])) {
++    $author = user_load(array('name' => $settings['author']));
++    if ($author->uid) {
++      $node->uid = $author->uid;
++    }
++  }
++  // Set the node's language if the setting exists and the node type supports it.
++  if (isset($settings['language']) && variable_get('language_content_type_'. $node->type, 0)) {
++    $node->language = $settings['language'];
++  }
+   
+   // If there are dupes on other feeds, don't create new feed item, but link this feed
+   // to existing feed item.

@@ -1,0 +1,174 @@
+<?php
+// $Id: google_language.module,v 1.1 2009/01/08 21:08:53 rz Exp $
+
+/**
+ * @file
+ * Google AJAX Language API Integration
+ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function google_language_menu() {
+  $items['admin/settings/google-language'] = array(
+    'title' => 'Google Language',
+    'description' => 'Google Language API settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('google_language_admin_settings'),
+    'access arguments' => array('administer site configuration'),
+  );
+
+  $items['google-language/popup'] = array(
+    'page callback' => 'google_language_translate_popup',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function google_language_form_alter(&$form, &$form_state, $form_id) {
+  if (isset($form['type']) && isset($form['#node']) && $form['type']['#value'] .'_node_form' == $form_id) {
+    $node = $form['#node'];
+
+    if(!empty($node->translation_source)) {
+      $tnode = $node->translation_source;
+    }
+    elseif(!empty($node->nid) && !empty($node->tnid) && $node->nid != $node->tnid) {
+      $tnode = node_load($node->tnid);
+    }
+
+    if($tnode) {
+      $settings = array();
+
+      // take just the first 2 chars of a language code.  This will work with
+      // language codes like 'en' and 'en-US'
+      $settings['from'] = substr($tnode->language, 0, 2);
+      $settings['to'] = substr($node->language, 0, 2);
+
+      drupal_add_js(array('googleLanguage' => $settings), 'setting');
+
+      drupal_add_js(drupal_get_path('module', 'google_language') .'/js/jquery.translate-1.2.5.min.js');
+      drupal_add_js(drupal_get_path('module', 'google_language') .'/js/textarea.js');
+      drupal_add_css(drupal_get_path('module', 'google_language') .'/css/translate.css');
+    }
+  }
+}
+
+/**
+ * Implementation of hook_link().
+ */
+function google_language_link($type, $object, $teaser = FALSE) {
+  $links = array();
+
+  if ($type == 'node' && variable_get('google_language_node_link_'. $object->type, 1)) {
+    $links['google_language_translate'] = array(
+      'title' => t('Translate'),
+      'href' => 'google-language/popup',
+      'attributes' => array(
+        'title' => t('Translate'),
+      ),
+    );
+
+    drupal_add_js(drupal_get_path('module', 'google_language') .'/js/jquery.cookie.js');
+    drupal_add_js(drupal_get_path('module', 'google_language') .'/js/jquery.translate-1.2.5.min.js');
+    drupal_add_js(drupal_get_path('module', 'google_language') .'/js/inline.js');
+//    drupal_add_js(drupal_get_path('module', 'google_language') .'/js/jquery.glpopup.js');
+    drupal_add_js(drupal_get_path('module', 'google_language') .'/js/jqModal.js');
+    drupal_add_css(drupal_get_path('module', 'google_language') .'/js/jqModal.css');
+    drupal_add_css(drupal_get_path('module', 'google_language') .'/css/translate.css');
+  }
+
+  return $links;
+}
+
+function google_language_admin_settings() {
+  $form['google_language_languages'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Available languages'),
+    '#default_value' => variable_get('google_language_languages', array()),
+    '#options' => google_language_translatable_languages(),
+  );
+
+  return system_settings_form($form);
+}
+
+function google_language_translate_popup() {
+  print drupal_get_form('google_language_translate_popup_form');
+  exit();
+}
+
+function google_language_translate_popup_form() {
+  global $language;
+
+  $langcode = $_COOKIES['gl_language'] ? $_COOKIES['gl_language'] : substr($language->language, 0, 2);
+  $scope = $_COOKIES['gl_scope'] ? $_COOKIES['gl_scope'] : 'one';
+
+  $form[] = array('#value' => '<h2>Translations <span class="google">powered by Google</span></h2>');
+  $form[] = array('#value' => '<p>This is some descriptive text about what the heck is happening.</p>');
+
+  $form['language'] = array(
+    '#type' => 'select',
+    '#title' => t('Select a language'),
+    '#options' => google_language_translatable_languages(),
+  );
+
+  $form['scope'] = array(
+    '#type' => 'radios',
+    '#title' => t('What to translate'),
+    '#options' => array(
+      'one' => t('Just this post'),
+      'all' => t('All posts on this page'),
+    ),
+  );
+
+  $form[] = array(
+    '#type' => 'submit',
+    '#value' => t('Translate'),
+  );
+
+  return $form;
+}
+
+function google_language_translatable_languages() {
+  return array(
+    'ar' => 'Arabic',
+    'bg' => 'Bulgarian',
+    'ca' => 'Catalan',
+    'zh' => 'Chinese',
+    'zh-CN' => 'Chinese simplified',
+    'zh-TW' => 'Chinese traditional',
+    'hr' => 'Croatian',
+    'cs' => 'Czech',
+    'da' => 'Danish',
+    'nl' => 'Dutch',
+    'en' => 'English',
+    'fi' => 'Finnish',
+    'fr' => 'French',
+    'de' => 'German',
+    'el' => 'Greek',
+    'iw' => 'Hebrew',
+    'hi' => 'Hindi',
+    'id' => 'Indonesian',
+    'it' => 'Italian',
+    'ja' => 'Japanese',
+    'ko' => 'Korean',
+    'lv' => 'Latvian',
+    'lt' => 'Lithuanian',
+    'no' => 'Norwegian',
+    'pl' => 'Polish',
+    'pt-PT' => 'Portuguese',
+    'ro' => 'Romanian',
+    'ru' => 'Russian',
+    'sr' => 'Serbian',
+    'sk' => 'Slovak',
+    'sl' => 'Slovenian',
+    'es' => 'Spanish',
+    'sv' => 'Swedish',
+    'uk' => 'Ukrainian',
+    'vi' => 'Vietnamese',
+  );
+}

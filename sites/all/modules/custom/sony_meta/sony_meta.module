@@ -1,0 +1,231 @@
+<?php
+
+/**
+ * Implementation of hook_init().
+ *
+ * Build a context object and provide that to modules so they can make up
+ * meta tags. Namespaces need to be added via hook_sonybmg_namespaces().
+ */
+function sony_meta_init() {
+  $object_type = $object = NULL;
+  $menu = menu_get_item();
+  if (substr($menu['path'], 0, 6) == 'node/%' && isset($menu['page_arguments'][0]->type)) {
+    $object_type = 'node';
+    $object = $menu['page_arguments'][0];
+  }
+  $meta_tags = module_invoke_all('sony_metatags', $object_type, $object);
+  drupal_alter('sony_metatags', $meta_tags, $object_type, $object);
+
+  // Allow admin specified og:tags meta values to override anything modules have provided.
+  $meta = sony_meta_get();
+  if(empty($meta->ogtoggle) && !empty($meta_tags['og:image'])) {
+    unset($meta_tags['og:image']);
+  }
+  else if(!empty($meta->ogimage) && !empty($meta_tags['og:image'])) {
+    $meta_tags['og:image']['content'] = $meta->ogimage;
+  }
+  if(!empty($meta->ogtitle) && !empty($meta_tags['og:title'])) {
+    $meta_tags['og:title']['content'] = $meta->ogtitle;
+  }
+  if(!empty($meta->ogdescription) && !empty($meta_tags['og:description'])) {
+    $meta_tags['og:description']['content'] = $meta->ogdescription;
+  }
+  foreach ($meta_tags as $tag) {
+    if (!is_array($tag)) {
+      $tag = array('content' => (string) $tag);
+    }
+    drupal_set_html_head('<meta' . drupal_attributes($tag) . "/>");
+  }
+}
+
+/**
+ * Implementation of hook_preprocess_page().
+ * This sets the custom title
+ */
+function sony_meta_preprocess_page(&$vars) {
+  $meta = sony_meta_get();
+  if (isset($meta->mid)) {
+    $vars['head_title'] = check_plain($meta->title) . ' | ' . filter_xss_admin(variable_get('site_name', NULL));
+    $new_head = NULL;
+    if ($meta->description) {
+      $new_head .= '<meta name="description" content="'. check_plain($meta->description) .'" />' . "\n\r" ;
+    }
+    if ($meta->keywords) {
+      $new_head .= '<meta name="keywords" content="'. check_plain($meta->keywords) .'" />' . "\n\r" ;
+    }
+    $vars['head'] .= $new_head;
+  }
+  $google_code = variable_get('sony_meta_google_code', NULL);
+  if (($google_code && drupal_is_front_page())){
+    $vars['head'] .=  '<meta name="google-site-verification" content="' . filter_xss_admin($google_code) . '" />';
+  }
+}
+
+/**
+ * Implementation of hook_perm().
+ */
+
+function sony_meta_perm() {
+  return array('add meta');
+}
+
+/**
+* hook_menu()
+*/
+
+function sony_meta_menu() {
+
+  $items['admin/settings/meta'] = array(
+    'title' => 'Meta Tags',
+    'page callback' => 'sony_meta_admin_page',
+    'access arguments' => array('add meta'),
+    'file' => 'sony_meta.admin.inc',
+  );
+  $items['sony_meta/delete/%mid'] = array(
+    'title' => 'Delete custom meta tags',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_meta_delete', 2),
+    'access arguments' => array('add meta'),
+    'file' => 'sony_meta.admin.inc',
+  );
+  $items['admin/settings/meta/google'] = array(
+    'title' => 'Google Site Verification',
+    'description' => 'The google webmaster site verification code form.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_meta_google_admin_page'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'sony_meta.admin.inc',
+  );
+
+  return $items;
+}
+
+/*
+ * _load() and _to_arg() interact with hook_menu
+ */
+
+function mid_load($mid) {
+  $meta = db_fetch_object(db_query('SELECT * FROM {sony_meta} WHERE mid = %d', $mid));
+  return $meta;
+}
+
+/**
+ * called by sony_meta_init()
+ * returns an array containing meta type as key, meta content as value
+ */
+
+/*
+ * Function to fetch meta info for a path
+ * TODO: improve this function to do something creative if there's no meta information for this path
+ * @param string $path Drupal path
+ * @param string $current_language - short code for language - en, us, etc.
+ * @param bool $readonly Whether to just return any meta data (TRUE) or whether to create default meta data if none currently exists (FALSE) - not in use yet
+ * @return object|false The meta keywords, description, title, alias, pid, mid
+ */
+
+function sony_meta_get($path = NULL, $current_language = NULL, $readonly = TRUE){
+  // get the path alias
+  if(!$path){
+    $path = drupal_get_path_alias($_GET['q']);
+  }
+  if(!$current_language && module_exists('locale')) {
+    global $language;
+    $current_language = $language->language; // basing this on http://api.drupal.org/api/global/language/6
+    // @todo don't base on prefix ***************** do $language->language
+  }
+  // query database to load meta info for path, return it if exists
+  $meta = db_fetch_object(db_query("SELECT mid, pid, keywords, description, path, language, title, ogtoggle, ogimage, ogtitle, ogdescription FROM {sony_meta} WHERE path = '%s' AND language = '%s'", $path, $current_language));
+  // fetch the path id if an alias exists and we don't already have a pid
+  // @todo
+  // commenting out for now
+  /*
+  if(!$meta->pid){
+      $meta->pid = db_result(db_query("SELECT pid FROM {url_alias} WHERE dst = '%s' AND language IN('%s', '') ORDER BY language DESC", $path, $language));
+  } */
+  return $meta;
+
+  // if nothing's found, look up default
+
+  // store default in database for this path
+
+  // add this path in the list of pages missing meta?
+
+}
+
+/**
+ * Implementation of hook_block().
+ *
+ * This hook both declares to Drupal what blocks are provided by the module, and
+ * generates the contents of the blocks themselves.
+ */
+
+function sony_meta_block($op = 'list', $delta = 0, $edit = array()) {
+  switch ($op) {
+    case 'list':
+      $blocks[1] = array(
+        'info' => t('Meta Information'),
+        'region' => 'footer', // put in footer by default
+        'status' => 1,
+        'cache' => BLOCK_NO_CACHE,
+      );
+      return $blocks;
+
+    case 'view':
+      switch ($delta) {
+        case 1:
+          $block['subject'] = t('Meta Information');
+          $block['content'] = sony_meta_block_contents();
+          break;
+      }
+      return $block;
+  }
+}
+
+function sony_meta_block_contents(){
+  if(!user_access('add meta')){
+    return NULL;
+  }
+  module_load_include('inc', 'sony_meta', 'sony_meta.pages');
+  $content = drupal_get_form('sony_meta_add');
+  return $content;
+}
+
+
+/**
+ * Implementation of hook_nodeapi().
+ *
+ * TODO - Allow URL aliases for nodes to be specified at node edit
+ * TODO - all of this function - should copy over the meta information if a path is changed when a node is updated
+ */
+
+/*
+function sony_meta_nodeapi(&$node, $op, $arg) {
+
+}
+*/
+
+
+/**
+ * Implementaion of hook_sony_metatags().
+ */
+function sony_meta_sony_metatags($object_type = NULL, $object = NULL) {
+  global $base_url;
+
+  $theme_settings = theme_get_settings(variable_get('theme_default', ''));
+  if (!empty($theme_settings['logo_path'])) {
+    $image_url = file_create_url($theme_settings['logo_path']);
+  }
+  else {
+    $image_url = 'http://www.sonymusicdigital.com/images/sonymusiclogo.png';
+  }
+
+  // @see http://developers.facebook.com/docs/opengraph#types
+  return array(
+    'og:image' =>       array('property' => 'og:image', 'content' => $image_url),
+    'og:site_name' =>   array('property' => 'og:site_name', 'content' => variable_get('site_name', '')),
+    'og:title' =>       array('property' => 'og:title', 'content' => variable_get('artist_name', '')),
+    'og:type' =>        array('property' => 'og:type', 'content' => variable_get('artist_type', 'band')),
+    'og:url' =>         array('property' => 'og:url', 'content' => $base_url),
+    'og:description' => array('property' => 'og:description', 'content' => t('Check out the official !artist_name site at !url', array('!artist_name' =>variable_get('artist_name', ''), '!url' => $base_url)))
+  );
+}

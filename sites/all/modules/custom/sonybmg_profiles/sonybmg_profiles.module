@@ -1,0 +1,431 @@
+<?php
+// $Id:$
+
+/**
+ * Implementation of hook_menu().
+ */
+function sonybmg_profiles_menu() {
+  $items['sonybmg/autocomplete/track'] = array(
+    'title' => 'Tracks Autocomplete',
+    'page callback' => 'sonybmg_profiles_track_autocomplete',
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_views_api().
+ */
+function sonybmg_profiles_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'sonybmg_profiles'),
+  );
+}
+
+/**
+ * Implementation of hook_block().
+ */
+function sonybmg_profiles_block($op = 'list', $delta = 0, $edit = array()) {
+  global $user;
+
+  if (arg(0) == 'user' && is_numeric(arg(1))) {
+    $account = user_load(array('uid' => arg(1)));
+  }
+  else {
+    $account = $user;
+  }
+
+  if ($op == 'list') {
+    $blocks[0] = array(
+      'info' => t("Profile Favorite Lyric"),
+      'cache' => BLOCK_CACHE_PER_PAGE,
+    );
+    $blocks[1] = array(
+      'info' => t("Profile Fan"),
+      'cache' => BLOCK_CACHE_PER_PAGE,
+    );
+    $blocks[2] = array(
+      'info' => t("Profile Buddylist"),
+      'cache' => BLOCK_CACHE_PER_PAGE,
+    );
+    return $blocks;
+  }
+  if ($op == 'view' && user_access('access content')) {
+    $block = NULL;
+    switch ($delta) {
+      case 0: // Shows Sony BMG Profile Favorite Lyric
+        // Add the nid to profile_lyric_title and/or profile_lyric_artist
+        if (!empty($account->profile_lyric_title)) {
+          if ($nid = db_result(db_query("SELECT nid FROM {node} WHERE title = '%s' AND type = 'track'", $account->profile_lyric_title))) {
+            $account->profile_lyric_title_nid = $nid;
+          }
+        }
+        $block['subject'] = t("Favorite Lyric");
+        $block['content'] = theme('sonybmg_profiles_favorite_lyric_block_content', $account);
+        break;
+      case 1: // Shows Sony BMG Profile Why I'm a Fan
+        if ($account->uid) {
+          $block = array(
+            'subject' => t("Why I'm a Fan"),
+            'content' => theme('sonybmg_profiles_fans_testimonial_block_content', $account),
+          );
+        }
+        break;
+      case 2:
+        if ($account->uid) {
+          $block = array(
+            'subject' => t('Friends'),
+            'content' => theme('sonybmg_profiles_buddylist_block_content', $account->uid, 6),
+          );
+        }
+        break;
+    }
+    return $block;
+  }
+}
+
+/**
+ * Implementation of hook_user().
+ * Add the user's age to the user object.
+ */
+function sonybmg_profiles_user($op, &$edit, &$account, $category = NULL) {
+  // This is explicitly on view because profile_privacy module only
+  // modifies the $account variables on view, not on load.
+  if ($op == 'view') {
+    //$account->age = sonybmg_profiles_age($account->profile_dob['year'], $account->profile_dob['month'], $account->profile_dob['day']);
+  }
+}
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function sonybmg_profiles_form_alter(&$form, $form_state, $form_id) {
+  if ($form_id == 'user_profile_form') {
+# TODO: This is D5 style code. Need to discard or upgrade - drewish 2010/10/06
+#    $form['#validate']['sonybmg_profiles_user_edit_validate'] = array();
+#    $form['#submit']['sonybmg_profiles_user_edit_submit'] = array();
+    $form['Favorite lyric']['profile_lyric_title']['#autocomplete'] = TRUE;
+    $form['Favorite lyric']['profile_lyric_title']['#autocomplete_path'] = 'sonybmg/autocomplete/track';
+  }
+  if ($form_id == 'user_register') {
+# TODO: This is D5 style code. Need to discard or upgrade - drewish 2010/10/06
+#    $form['#submit']['sonybmg_profiles_user_register_submit'] = array();
+#    $form['#validate']['sonybmg_profiles_user_register_validate'] = array();
+    $form['account']['name']['#description'] .= ' '. t('Usernames must be less than 16 characters.');
+  }
+}
+
+/**
+ * Retrieve a pipe delimited string of autocompleted suggestions.
+ */
+function sonybmg_profiles_track_autocomplete($string = '') {
+ $result = db_query("SELECT title FROM {node} WHERE title LIKE '%s%' AND type = 'track' AND status = 1", $string);
+  $matches = array();
+  while ($row = db_fetch_object($result)) {
+    $matches[$row->title] = $row->title;
+  }
+  print drupal_to_js($matches);
+  exit();
+}
+
+/**
+ * Extra submit handler for user registration form.
+ */
+# TODO: This is D5 style code. Need to discard or upgrade - drewish 2010/10/06
+function sonybmg_profiles_user_register_submit($form_id, $form_values) {
+  // Add message to check junk mail folder.
+  drupal_set_message(t('Many services (AOL, Yahoo Main and others) may mistakenly put your confirmation email into JUNK or SPAM. If you do not receive an email, please check there.'));
+}
+
+/**
+ * Validation handler for user name registration form.
+ */
+# TODO: This is D5 style code. Need to discard or upgrade - drewish 2010/10/06
+function sonybmg_profiles_user_register_validate($form_id, $form_values) {
+  // Add message to check user name length.
+  if (strlen($form_values['name']) > 16) {
+    form_set_error('name', t('Please choose a user name that is less than 16 characters.'));
+  }
+}
+
+/**
+ * Additional form validation for the user_edit form
+ */
+# TODO: This is D5 style code. Need to discard or upgrade - drewish 2010/10/06
+function sonybmg_profiles_user_edit_validate($form_id, $form_values) {
+  // Add a minimum size requirement to the image upload form
+  if ($info = file_check_upload('picture_upload')) {
+    $image_info = image_get_info($form_values['picture']);
+    if ($image_info['width'] < 160 || $image_info['height'] < 160) {
+      form_set_error('picture_upload',t('Your profile image must be at least 160 pixels wide and tall (your image was @width x @height pixels).',array('@width' => $image_info['width'], '@height' => $image_info['height'])));
+    }
+  }
+}
+
+/**
+ * Move the default user images from the theme images directory to the site
+ * files directory. This allows imagecache to properly act on the image.
+ */
+function sonybmg_profiles_user_picture_default() {
+  // path_to_theme() can not be trusted
+  $path_to_theme = drupal_get_path('theme', variable_get('theme_default', 'garland'));
+
+  // Setup the pictures directory
+  $pic_path = variable_get('user_picture_path', 'pictures');
+  if (is_file(file_create_path($pic_path))) {
+    // A bit aggressive, but if a file exists where the pictures directory
+    // needs to be, we delete it and put the directory in its place
+    file_delete(file_create_path($pic_path));
+  }
+  file_check_directory(file_create_path($pic_path), 1);
+
+  // Check if default user upload pic is in place
+  if (!is_file(file_create_path($pic_path. '/user-upload.jpg'))) {
+    $src = $path_to_theme .'/images/user-upload.jpg';
+    if (!is_file($src)) {
+      $src = drupal_get_path('module', 'sonybmg_profiles') .'/images/user-upload.jpg';
+    }
+    file_copy($src, file_directory_path() . '/pictures');
+  }
+
+  // Check if default user pic is in place
+  if (!is_file(file_create_path($pic_path. '/user-default.jpg'))) {
+    $src = $path_to_theme .'/images/user-default.jpg';
+    if (!is_file($src)) {
+      $src = drupal_get_path('module', 'sonybmg_profiles') .'/images/user-default.jpg';
+    }
+    file_copy($src, file_directory_path() . '/pictures');
+  }
+}
+
+/**
+ * Purge the user default pictures from the files directory, and re-populate.
+ * Called from theme-settings.php of the _multisite base theme.
+ */
+function sonybmg_profiles_user_picture_default_reset() {
+  // delete user-upload.jpg and user-default.jpg from pictures and all imagecache dirs.
+  $pic_path = variable_get('user_picture_path', 'pictures');
+  foreach (array('user-upload.jpg', 'user-default.jpg') as $filename) {
+    $path = file_create_path($pic_path. '/'. $filename);
+    if (file_exists($path)) {
+      file_delete($path);
+      drupal_set_message(t('%file removed from the files directory.', array('%file' => $filename)));
+      imagecache_image_flush($path);
+      drupal_set_message(t('%file derivatives removed from the imagecache directory.', array('%file' => $filename)));
+    }
+  }
+
+  sonybmg_profiles_user_picture_default();
+  drupal_set_message(t('Default user pictures have been reset.'));
+}
+
+/**
+ * Check for new or deleted uploads and clear the imagecache if necessary
+ */
+function sonybmg_profiles_user_edit_submit($form_id, $form_values) {
+  if (file_check_upload('picture_upload') || $form_values['picture_delete']) {
+    imagecache_image_flush($form_values['picture']);
+  }
+}
+
+/**
+ * Set privacy defaults for profile fields
+ */
+function _sonybmg_profiles_add_profile_privacy() {
+  //profile_privacy_set_field_privacy('profile_dob', 1);
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function sonybmg_profiles_theme() {
+  return array(
+    'sonybmg_profiles_favorite_lyric_block_content' => array(
+      'arguments' => array('account' => NULL),
+    ),
+    'sonybmg_profiles_fans_testimonial_block_content' => array(
+      'account' => NULL,
+    ),
+    'sonybmg_profiles_buddylist_block_content' => array(
+      'uid' => NULL,
+      'count' => 6,
+      'buddies_per_line' => 2,
+      'start' => 0,
+    ),
+  );
+}
+
+function theme_sonybmg_profiles_favorite_lyric_block_content($account) {
+  profile_load_profile($account);
+  if (isset($account->profile_lyric_body) && trim($account->profile_lyric_body)) {
+    $output = '';
+    $output .= '<div class="quote">';
+    $output .= '<blockquote>' . str_replace("\n","<br />\n",htmlspecialchars($account->profile_lyric_body)) . '</blockquote>';
+    $output .= '<div class="attribution">';
+
+    if (!empty($account->profile_lyric_title_nid)) {
+      $output .= '<div class="origin">' . t('From: ') . '<a href="'. url('node/'. $account->profile_lyric_title_nid) .'"><strong>&#147;' . htmlspecialchars($account->profile_lyric_title) . '&#148;</strong></a></div>';
+    }
+    else if (trim($account->profile_lyric_title)) {
+      $output .= '<div class="origin">' . t('From: ') . '<strong>&#147;' . htmlspecialchars($account->profile_lyric_title) . '&#148;</strong></div>';
+    }
+    if ($account->profile_lyric_artist_nid) {
+      $output .= '<div class="author">' . t('By: ') . '<a href="'. url('node/'. $account->profile_lyric_artist_nid) .'"><strong>' . htmlspecialchars($account->profile_lyric_artist) . '&#148;</strong></a></div>';
+    }
+    else if (trim($account->profile_lyric_artist)) {
+      $output .= '<div class="author">' . t('By: ') . ' <strong>' . htmlspecialchars($account->profile_lyric_artist) . '</strong></div>';
+    }
+    $output .= '</div></div>';
+    return $output;
+  }
+}
+
+/**
+ * Given a month, day, and year determine a user's age.
+ */
+function sonybmg_profiles_age($year, $month, $day) {
+  if ($year == 1900 && $month == 1 && $day == 1) {
+    $year_diff = FALSE;
+  }
+  elseif (!$year || !$month || !$day) {
+    $year_diff = FALSE;
+  }
+  else {
+    $year_diff = date("Y") - $year;
+    $month_diff = date("m") - $month;
+    $day_diff = date("d") - $day;
+    if ($month_diff < 0) {
+      $year_diff--;
+    }
+    elseif (($month_diff==0) && ($day_diff < 0)) {
+      $year_diff--;
+    }
+  }
+  return $year_diff;
+}
+
+function theme_sonybmg_profiles_buddylist_block_content($uid, $count = 6, $buddies_per_line = 2, $start = 0) {
+  $buddies_result = db_query('SELECT requestee_id AS buid FROM {friendlist_relations} WHERE requester_id=%d', $uid);
+  $total_buddies = db_result(db_query('SELECT COUNT(requestee_id) FROM {friendlist_relations} WHERE requester_id=%d', $uid));
+  $buddynum = 0;
+
+  $output = '';
+  $output .= '<div class="friends">';
+
+  while ($buddy_row = db_fetch_array($buddies_result)) {
+    $buid = $buddy_row['buid'];
+    $buddy = user_load(array('uid' => $buid));
+    if ($buddynum >= $start && $buddynum < $count) {
+      if ($buddynum % $buddies_per_line == 0) {
+        $first_class = ' first';
+        $output .= '<div class="friend-row clear-block">';
+      }
+      else {
+        $first_class = '';
+      }
+      $output .= '<div class="friend' . $first_class . '">';
+      $output .= theme('user_picture', $buddy);
+      $output .= '<div>' . l($buddy->name,'user/'.$buddy->uid) . '</div>';
+      $output .= '</div>';
+      if ((($buddynum+1) % $buddies_per_line == 0) || ($buddynum+1 == $total_buddies)) {
+        $output .= '</div>';
+      }
+    }
+    $buddynum++;
+  }
+
+  if ($buddynum == 0) {
+    $output .= '<p>'.t('No friends listed').'</p>';
+  }
+
+  if ($total_buddies > $count) {
+    $output .= '<div class="more"><a href="/buddylist/'. $uid .'">'.t('See all @count friends', array('@count' => $total_buddies)).'</a></div>';
+  }
+
+  $output .= '</div>';
+
+
+  return $output;
+}
+
+
+function theme_sonybmg_profiles_fans_testimonial_block_content($account) {
+  // Artist users do not say why they're a fan of themselves
+  if (in_array('artist', $account->roles) !== FALSE) {
+    return;
+  }
+  $result = db_query("SELECT nid FROM {node} WHERE uid = %d AND type = '%s'", $account->uid, 'fan');
+  if ($tmp = db_fetch_object($result)) {
+    $node = node_load($tmp->nid);
+    if ($node->status == 1) {
+
+      $node->teaser = '<span class="dropcap clear-block">' . substr($node->teaser, 0, 1) . '</span>' . substr($node->teaser, 1);
+      $node = node_prepare($node, TRUE);
+      $node->links = module_invoke_all('link', 'node', $node, FALSE);
+      foreach (module_implements('link_alter') AS $modulename) {
+        $function = $modulename .'_link_alter';
+        $function($node->links, $node);
+      }
+      global $user;
+      if ($account->uid == $user->uid) {
+        $node->body .= '<p id="edit_fan">' . l(t('Edit your Why I\'m a fan'), 'node/'. $node->nid . '/edit'). '</p>';
+      }
+      $output = node_view($node, false, false, true);
+      return $output;
+    }
+  }
+  else {
+    global $user;
+    if (arg(1) == $user->uid && arg(0) == 'user') {
+      return l(t('Why are <strong>you</strong> a fan?'), 'node/add/fan', array('html' => TRUE));
+    }
+  }
+}
+
+/**
+ * A bunch of functions to replace sql queries that were being done in template.php
+ */
+
+/**
+ * @param int $uid
+ * @param string $comment_type
+ * @return int a count of the comments of type $comment_type written by user $uid
+ */
+
+function sonybmg_profiles_comment_count($uid, $comment_type = 'comment') {
+  if (!$uid) { return NULL; }
+  return db_result(db_query("SELECT count(*) FROM {node} WHERE uid = %d AND type = '%s'", $uid, $comment_type));
+}
+
+/**
+ * @param int $uid
+ * @return array $vars - contains additional vars for $uid's user page
+ */
+
+function sonybmg_profiles_friendlist_vars($uid) {
+  global $user;
+  if (module_exists('friendlist_ui')) {
+    $vars['buddy_of_others'] = db_result(db_query('SELECT COUNT(*) FROM {friendlist_relations} WHERE requestee_id=%d',
+      $uid));
+    if ($user->uid > 0) {
+      $vars['buddy_of_user'] = db_result(db_query('SELECT count(*) FROM {friendlist_relations} WHERE requestee_id=%d AND requester_id=%d', $uid, $user->uid));
+    }
+  }
+  return $vars;
+}
+
+/**
+ * @param string $title - title of the fave track
+ * @return int - nid of the track
+ */
+
+function sonybmg_profiles_favorite_lyric($title) {
+  $nid = db_result(db_query("SELECT nid FROM {node} WHERE title = '%s' AND type = 'track'", $title));
+  if (is_numeric($nid)) {
+    return $nid;
+  }
+}

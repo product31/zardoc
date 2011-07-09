@@ -1,0 +1,27 @@
+; $Id: drubb.info,v 1.20 2009/06/23 19:42:50 merlinofchaos Exp $
+name = DruBB
+description = A phpBB-like forum for Drupal
+core = 6.x
+dependencies[] = advanced_forum
+dependencies[] = nodecomment
+dependencies[] = bbcode
+dependencies[] = bueditor
+; Install Profile API gives us some nice handy wrappers around core functions
+; to make some of the glue code easier to write.
+dependencies[] = install_profile_api
+dependencies[] = poll
+dependencies[] = privatemsg
+dependencies[] = search
+; Allows signatures on nodes.
+dependencies[] = signature_forum
+dependencies[] = smileys
+dependencies[] = upload
+; Add option to receive email about new comments on a topic.
+dependencies[] = comment_notify
+dependencies[] = nodecomment_notify
+dependencies[] = views
+dependencies[] = statistics
+dependencies[] = draft
+dependencies[] = draft_views
+dependencies[] = quote
+dependencies[] = vertical_tabs

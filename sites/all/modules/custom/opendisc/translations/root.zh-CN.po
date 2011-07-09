@@ -1,0 +1,203 @@
+# China translation of opendisc (all releases)
+# Copyright (c) 2010 by the China translation team
+# Generated from files:
+#  opendisc/opendisc.info: n/a
+#  opendisc/opendisc.module: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: opendisc (all releases)\n"
+"POT-Creation-Date: 2010-04-05 15:29-0500\n"
+"PO-Revision-Date: 2010-03-30 11:10-0500\n"
+"Language-Team: China\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: opendisc.info:0
+msgid "Other"
+msgstr "其它"
+
+#: opendisc.module:141
+msgid "Replacement tokens"
+msgstr ""
+
+#: opendisc.module:41
+msgid ""
+"User email verification is enabled on the <a href=\"@user_link\">User "
+"Settings page</a>. If users have to verify their emails, they may not "
+"be able to directly access the exclusive content without re-inserting "
+"their OpenDisc CD. Disable e-mail verification to hide this warning."
+msgstr ""
+
+#: opendisc.module:48
+msgid "Required Settings"
+msgstr ""
+
+#: opendisc.module:55
+msgid "Redirect URL After Successful Login"
+msgstr ""
+
+#: opendisc.module:56
+msgid ""
+"After logging in, users will be redirected to this page. It should be "
+"in the form of a relative Drupal URL, like <strong>node/5</strong> or "
+"<strong>user/profile</strong>, but not "
+"<strong>http://mysite.com/page</strong>."
+msgstr ""
+
+#: opendisc.module:63
+msgid "Granted Role After Registration"
+msgstr ""
+
+#: opendisc.module:64
+msgid ""
+"Select a role to be assigned to users after they are validated by "
+"OpenDisc and sign on."
+msgstr ""
+
+#: opendisc.module:73
+msgid "Associate OpenDisc data to Profile fields"
+msgstr ""
+
+#: opendisc.module:74
+msgid ""
+"When a user is validated with OpenDisc, either while logging in or "
+"creating a new account, their Drupal profile data will be updated to "
+"use data from OpenDisc. Select which fields to use to store the first "
+"and last names."
+msgstr ""
+
+#: opendisc.module:89
+msgid "First Name field"
+msgstr ""
+
+#: opendisc.module:96
+msgid "Last Name field"
+msgstr ""
+
+#: opendisc.module:103
+msgid ""
+"<a href=\"@url\">You need to enable the Profile module before using "
+"this feature.</a>"
+msgstr ""
+
+#: opendisc.module:109
+msgid "Overwrite the user account's email address with the one from OpenDisc?"
+msgstr ""
+
+#: opendisc.module:116
+msgid "Custom Error Messages"
+msgstr ""
+
+#: opendisc.module:123
+msgid "Notice above login page when not logged in"
+msgstr ""
+
+#: opendisc.module:124,201
+msgid ""
+"You need to login or create an account before you can view the "
+"exclusive content."
+msgstr ""
+
+#: opendisc.module:129
+msgid "Error displayed if no granted role has been set"
+msgstr ""
+
+#: opendisc.module:130,216
+msgid ""
+"No access role has been set, please contact the site administrator to "
+"configure the OpenDisc module."
+msgstr ""
+
+#: opendisc.module:135
+msgid "Error displayed if OpenDisc authentication fails"
+msgstr ""
+
+#: opendisc.module:136,253
+msgid ""
+"Your account has not been validated by by OpenDisc. Please re-insert "
+"your OpenDisc CD and try again."
+msgstr ""
+
+#: opendisc.module:148
+msgid "Optional Settings"
+msgstr ""
+
+#: opendisc.module:164
+msgid "Error URL"
+msgstr ""
+
+#: opendisc.module:165
+msgid ""
+"A URL for a custom error page, instead of a default OpenDisc error "
+"page.<br />Include <strong>http://</strong> and a trailing slash, like "
+"<strong>http://www.mydomain.com/error</strong>"
+msgstr ""
+
+#: opendisc.module:171
+msgid "Anonymous Error UPC"
+msgstr ""
+
+#: opendisc.module:172
+msgid ""
+"An extra code to customize the error screen. If you don't know what "
+"this is, you can leave it blank."
+msgstr ""
+
+#: opendisc.module:317
+msgid "User's first name, as sent from OpenDisc."
+msgstr ""
+
+#: opendisc.module:318
+msgid "User's last name, as sent from OpenDisc."
+msgstr ""
+
+#: opendisc.module:335
+msgid "I agree to the <a href=\"!href\">Privacy Policy</a>."
+msgstr ""
+
+#: opendisc.module:215,362,371,381
+msgid "opendisc"
+msgstr ""
+
+#: opendisc.module:215
+msgid "No access role has been set."
+msgstr ""
+
+#: opendisc.module:362
+msgid "Opendisc pingback for user @user_id"
+msgstr ""
+
+#: opendisc.module:371
+msgid "Unexpected error during opendisc pingback for user @user_id"
+msgstr ""
+
+#: opendisc.module:381
+msgid "Uncaught exception during opendisc pingback. @error"
+msgstr ""
+
+#: opendisc.module:32
+msgid "administer opendisc settings"
+msgstr ""
+
+#: opendisc.module:11
+msgid "OpenDisc Settings"
+msgstr ""
+
+#: opendisc.module:12
+msgid "Configure the OpenDisc settings."
+msgstr ""
+
+#: opendisc.module:19
+msgid "OpenDisc Exclusive Access"
+msgstr ""
+
+#: opendisc.info:0
+msgid "OpenDisc"
+msgstr ""
+
+#: opendisc.info:0
+msgid "Allows for specific content to be available to OpenDisc customers."
+msgstr ""
+

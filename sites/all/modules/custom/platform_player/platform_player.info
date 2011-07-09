@@ -1,0 +1,10 @@
+; $Id$
+name = Platform Player
+description = Platform Player Link CCK fields.
+core = 6.x
+package = Sony BMG
+dependencies[] = content
+
+l10n server = translate.gdb-dev.com
+project = "platform_player"
+version = "6.x-2.x"

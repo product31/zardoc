@@ -1,0 +1,23 @@
+# Belgium (French) translation of sonybmg (all releases)
+# Copyright (c) 2010 by the Belgium (French) translation team
+# Generated from file: sonybmg/popup/popup.js: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sonybmg (all releases)\n"
+"POT-Creation-Date: 2010-04-05 14:03-0500\n"
+"PO-Revision-Date: 2010-03-30 10:01-0500\n"
+"Language-Team: Belgium (French)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n>1);\n"
+
+#: popup/popup.js:0
+msgid "Continue"
+msgstr "Continuer"
+
+#: popup/popup.js:0
+msgid "Close"
+msgstr "Fermer"
+

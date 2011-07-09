@@ -1,0 +1,84 @@
+<?php
+define('USERPOINTS_THROTTLE',                   'userpoints_throttle');
+define('USERPOINTS_THROTTLE_PERIOD',            'userpoints_throttle_period');
+
+/*
+ * Function: Implementation of hook_userpoints
+ */
+ 
+function userpoints_throttle_userpoints($op = 'setting', $params = array()) {
+  if ($op == 'setting') {
+      $group = 'userpoints_throttle';
+      $form[$group] = array(
+        '#type'        => 'fieldset',
+        '#collapsible' => TRUE,
+        '#collapsed'   => TRUE,
+        '#title'       => t('Limit !points in a time period', userpoints_translation()),
+      );
+      
+      $form[$group]['help'] = array(
+        '#value' => '<p>' . t('Before settting the configuration here you need to set up all the other user points configuration above and associate each with a different category. Setting any of these values to zero will disable the throttling - !points will be unlimited', userpoints_translation()) . '</p>',
+      );
+      
+      // get terms for vocab 
+      $categories = userpoints_get_categories();
+      
+      // loop through all taxonomy terms associated with userpoints, offering a limit
+      foreach ($categories as $tid => $category){
+        $form[$group]['userpoints_throttle_' . $tid] = array(
+	        '#type'          => 'textfield',
+	        '#title'         => t('Maximum for @category', array('@category' => userpoints_throttle_category_substitute($category))),
+	        '#default_value' => variable_get('userpoints_throttle_' . $tid, 0),
+	        '#size'          => 5,
+	        '#maxlength'     => 5,
+	      );
+      }
+      
+      $form[$group][USERPOINTS_THROTTLE_PERIOD] = array(
+	      '#type'          => 'select',
+	      '#title'         => t('Throttle Period'),
+	      '#default_value' => variable_get(USERPOINTS_THROTTLE_PERIOD, 30),
+        '#options'       => array('1' => 'day', '30' => 'month'),
+	      '#description'   => t('The period that the above maximums are for'),
+      );
+      
+    
+      return $form;
+      
+  } else if ($op == 'points before') {
+  
+  	// get max points for this category
+  	$max_points = variable_get('userpoints_throttle_' . $params['tid'], 0);
+  	// count user's points for this category
+  	$current_points = userpoints_throttle_user_total($params['uid'], $params['tid']);
+  	// don't give em points if not allowed
+  	if (($current_points + $params['points']) > $max_points) {
+  	 return FALSE;
+  	}
+  }
+}
+
+/*
+* Rename 'uncategorized' to a more useful description in the UI for the userpoints throttle configuration
+*/
+
+function userpoints_throttle_category_substitute($category) {
+    if ($category != 'Uncategorized'){
+        return $category;
+    } else {
+        return 'Nodes, posting, reviews, etc.';
+    }
+}
+
+/*
+*  Count the number of user points earned in the defined time period for a certain group of actions
+*/
+
+function userpoints_throttle_user_total($uid, $tid) {
+    
+    $throttle_period = variable_get(USERPOINTS_THROTTLE_PERIOD, 30);
+    $throttle_timestamp = time() - ($throttle_period*24*60*60);
+    $result = db_query("select SUM(points) from {userpoints_txn} where uid = %d AND tid = %d AND time_stamp > %d", $uid, $tid, $throttle_timestamp);
+    $total = db_result($result, 0, 0);
+    return $total;
+}

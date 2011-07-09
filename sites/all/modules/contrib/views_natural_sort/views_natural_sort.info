@@ -1,0 +1,6 @@
+; $Id: views_natural_sort.info,v 1.1 2009/05/11 22:45:13 neclimdul Exp $
+name = Views Natural Sort
+description = Sort results naturaly on a text field skipping articles like "the" and "a." 
+dependencies[] = views
+package = Views
+core = 6.x

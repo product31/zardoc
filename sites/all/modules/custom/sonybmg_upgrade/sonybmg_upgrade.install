@@ -1,0 +1,420 @@
+<?php
+
+// $Id$
+
+/**
+ * Implementation of hook_install()
+ */
+function sonybmg_upgrade_install() {
+  // make sonybmg_upgrade the last module to run, this ensures that it is the last
+  // to be updated when updating to Drupal 6 
+  db_query("UPDATE {system} SET weight = 99 WHERE name = 'sonybmg_upgrade'");
+}
+
+/**
+ * Implementation of hook_update_N().
+ * Upgrade from Drupal 5.x to Drupal 6.x
+ * 
+ * This is a 3 step process (zero-based of course)
+ * 0. Set contrib module schema_versions back to what they were in d5. These are
+ *    all set to SCHEMA_UNINSTALLED by sonybmg_upgrade in d5 so that only core
+ *    updates will run on the first pass.  Notice that in this step we only set
+ *    the schema version, we don't enable the modules yet.  Some modules will 
+ *    error out if they are enabled before the updates run.
+ * 1. Enable the previously enabled modules.
+ * 2. Proceed with some additional setup
+ * 
+ * This is done this way because these need to run in separate requests, where
+ * as the update_N functions will run in the same request.
+ */
+function sonybmg_upgrade_update_6000() {
+  $ret = array();
+  $step = $_SESSION['sonybmg_upgrade_step'] ? $_SESSION['sonybmg_upgrade_step'] : 0;
+  
+  switch ($step) {
+    case 0:
+      include_once('includes/install.inc');
+
+      // Enable Install Profile API so that it is available for other steps.
+      drupal_install_modules(array('install_profile_api'));
+
+      $d5_contrib = variable_get('sonybmg_upgrade_drupal5_contrib_modules', array());
+      $modules_to_enable = array();
+      foreach ($d5_contrib as $module => $schema) {
+        drupal_set_installed_schema_version($module, $schema);
+        $modules_to_enable[$module] = $module;
+      }
+
+      // Reset the static cache
+      drupal_get_installed_schema_version('system', TRUE);
+
+      // Allow modules to be renamed through their .info files.
+      $renamed = _sonybmg_upgrade_rename_modules();
+
+      // Remove renamed modules from the list and add the new modules.
+      foreach ($renamed as $old => $new) {
+        if ($modules_to_enable[$old]) {
+          unset($modules_to_enable[$old]);
+          $modules_to_enable[$new] = $new;
+        }
+      }
+
+      // Remove deprecated modules.
+      $deprecated = _sonybmg_upgrade_modules_deprecated();
+      foreach ($deprecated as $module) {
+        unset($modules_to_enable[$module]);
+      }
+
+      // Add additional modules.
+      $additional = _sonybmg_upgrade_modules_additional();
+      foreach ($additional as $module) {
+        $modules_to_enable[$module] = $module;
+      }
+
+      // Don't enable the rest of the modules until after the initial updates.
+      $_SESSION['sonybmg_upgrade_modules_to_enable'] = $modules_to_enable;
+
+      drupal_set_message(t('Drupal core upgrades have been performed and contrib modules are now ready to be upgraded. Please return to <a href="@update-php">update.php</a> and run the remaining updates.', array('@update-php' => base_path() .'update.php?op=selection')), 'warning', FALSE);
+      $ret['#abort'] = array('success' => FALSE, 'query' => t('Contrib modules ready to be upgraded.'));
+      break;
+
+    case 1:
+      // I'm not sure how this function is supposed to work, and it just seems
+      // to cause tons of errors
+      //_sonybmg_upgrade_panels();
+
+      // Re-install/enable D5 contrib modules.
+      drupal_install_modules($_SESSION['sonybmg_upgrade_modules_to_enable']);
+
+//      drupal_set_message(t('Drupal contrib uprades have been performed, but there are still updates remaining. Please return to <a href="@update-php">update.php</a> and run the remaining updates.', array('@update-php' => base_path() .'update.php?op=selection')), 'warning', FALSE);
+//      $ret['#abort'] = array('success' => FALSE, 'query' => t('Contrib modules upgraded.'));
+//      break;
+//      
+//    // Finish
+//    case 2:
+//    default:
+      // Update views blocks.
+      $blocks_query = "UPDATE {blocks} SET delta = CONCAT(delta, '-block_1') WHERE module = 'views'";
+      db_query($blocks_query);
+
+      // Set timezones.
+      variable_set('date_default_timezone', -18000);
+      variable_set('date_default_timezone_name', 'America/New_York');
+
+      // All done.
+      variable_set('sonybmg_upgrade_running', FALSE);
+
+      // continue on to further updates
+      $ret[] = array();
+      break;
+  }
+
+  $_SESSION['sonybmg_upgrade_step'] = $step + 1;
+  
+  return $ret;
+}
+
+function sonybmg_upgrade_update_6001() {
+  if ($abort = content_check_update('sonybmg')) {
+    return $abort;
+  }
+
+  /*
+  // Provide a proper upgrade for the date module.
+  require_once(drupal_get_path('module', 'content') .'/includes/content.admin.inc');
+  require_once(drupal_get_path('module', 'content') .'/includes/content.crud.inc');
+  $new_date_field = content_fields('field_date');
+  //print_r($new_date_field);
+  //$old_date_field = content_fields('field_date');
+  $new_date_field['granularity'] = array(
+    'year' => 'year',
+    'month' => 'month',
+    'day' => 'day',
+  );
+  content_field_instance_update($new_date_field);
+
+  // add widget settings to release date
+  $release_date_field = content_fields('field_release_date');
+  $release_date_field['widget_type'] = 'date_select';
+  $release_date_field['granularity'] = array(
+    'year' => 'year',
+    'month' => 'month',
+    'day' => 'day',
+  );
+  content_field_instance_update($release_date_field);
+  
+  // adding upload file types to album cover
+  $album_cover_field = content_fields('field_album_cover');
+  $album_cover_field['file_extensions'] = 'jpg jpeg png gif';
+  content_field_instance_update($album_cover_field);
+  */
+
+  require_once(drupal_get_path('module', 'content') .'/includes/content.admin.inc');
+  require_once(drupal_get_path('module', 'content') .'/includes/content.crud.inc');
+
+  // Install the "Why I'm A Fan" nodequeue.
+  install_include(array(
+    'nodequeue',
+    'user',
+  ));
+  module_load_include('inc', 'sonybmg_fans', 'nodequeue.fans');
+  sonybmg_fans_install_nodequeue();
+
+  // Upgrade block settings
+  $module_upgrades = _sonybmg_upgrade_modules_replaced();
+  $block_upgrades = array();
+  foreach ($module_upgrades as $old_module => $new_module) {
+    if (substr($new_module, 0, 7) == 'sonybmg') {
+      $block_upgrades[$old_module] = $new_module;
+    }
+  }
+
+  foreach ($block_upgrades as $old_block => $new_block) {
+    // Update non-views blocks.
+    $blocks_query = "UPDATE {blocks} SET module='%s' WHERE module='%s'";
+    db_query($blocks_query, $new_block, $old_block);
+  }
+
+  // Upgrade things one block at a time.
+  $single_block_upgrades = _sonybmg_upgrade_blocks_replaced();
+  foreach ($single_block_upgrades as $old_block => $new_block) {
+    $old_block = explode('/', $old_block);
+    $new_block = explode('/', $new_block);
+    
+    $blocks_query = "UPDATE {blocks} SET module='%s',delta='%s' WHERE module='%s' AND delta='%s'";
+    db_query($blocks_query, $new_block[0], $new_block[1], $old_block[0], $old_block[1]);
+  }
+
+  // Do not want "Concerts I've Seen/Am Attending" block showing anymore
+  db_query("UPDATE {blocks} SET status = 0 WHERE module='views' AND delta='events_attend-block_1'");
+
+  // Upgrade buddylist to friendlist. Were there buddies in the old system?
+  $buddy_count = db_result(db_query('SELECT COUNT(uid) FROM {buddylist} WHERE received=1 LIMIT 2'));
+
+  // If so, fire!
+  if ($buddy_count > 1) {
+    module_load_include('module', 'friendlist_import_bl');
+    
+    $form = array();
+    $form_state = array();
+    friendlist_import_bl_form_submit($form, $form_state);
+
+    // Get the ID to set for sonybmg_profiles.module's blocks
+    $rtid = db_result(db_query("SELECT rtid FROM {friendlist_relation_types} WHERE name='buddy'"));
+    db_query("UPDATE {friendlist_relation_types} SET oneway=1 WHERE rtid=%d", $rtid);
+    variable_set('sonybmg_friendlist_buddy_rtid', $rtid);
+  }
+
+  // First, admins.
+  $rid = install_get_rid('administrator');
+    //bunch of (could be non-core) permissions we want to disallow
+    $disabled_permissions = array('select different theme', 'access devel information', 'execute php code', 'switch users', 'use PHP for block visibility', 'use PHP for fivestar target');
+    $super_permissions = module_invoke_all('perm');
+    // Just give all permissions to admins
+    $super_perms = array_diff($super_permissions, $disabled_permissions);
+    install_add_permissions($rid, $super_perms);
+
+  //  install_add_permissions($rid, array('administer flags', 'access service links', 'administer service links',
+  //    'have relationships with friendlist'));
+
+  // Everyone else just gets to access the service links, and be friends.
+  $rid = install_get_rid('moderator');
+  install_add_permissions($rid, array('access service links', 'have relationships with friendlist'));
+  $rid = install_get_rid('artist');
+  install_add_permissions($rid, array('access service links', 'have relationships with friendlist'));
+  install_add_permissions(DRUPAL_AUTHENTICATED_RID, array('access service links', 'have relationships with friendlist',
+    'access all panel-pages', 'read privatemsg', 'write privatemsg'));
+  
+  // Why can't we be friends? (Because you haven't signed up for an account.)
+  install_add_permissions(DRUPAL_ANONYMOUS_RID, array('access service links', 'access all panel-pages'));
+
+  /* WHY???
+  // Is the poll ctype enabled?
+  $poll_info = content_types('poll');
+  // The reasoning here is that even an empty ctype will include the table and fields as empty arrays
+  if (isset($poll_info['name'])) {
+    include(drupal_get_path('module','sonybmg') . '/node.poll.inc');
+    $fields = $content['fields'][0];
+
+    // Include the necessary install profile api bit to do this.
+    install_include(array('content'));
+    install_create_field('poll', $fields['field_name'], $fields['widget_type'], $fields['label'], $fields);
+  }
+  */
+
+  // user_titles.module
+  if (module_exists('user_titles')) {
+    // No changes in schema, just rebuild all the counts.
+    user_titles_rebuild_counts();
+  }
+
+  // Re-enable custom theme if available. Fallback to the _starter if needed.
+  $themes = drupal_system_listing('\.info$', 'themes');
+  $theme = variable_get('sonybmg_upgrade_theme_default', '_starter');
+  $theme = isset($themes[$theme]) ? $theme : '_starter';
+  install_include(array('system'));
+  install_default_theme($theme);
+
+  drupal_set_message(t('Sony BMG upgrade process complete.  Check the <a href="!report_url">report</a> for a list of upgraded modules.', array('!report_url' => url('admin/reports/sonybmg_upgrade'))), 'upgrade');
+
+  return array();
+}
+
+/**
+ * Fix views_bookmark_node -> flag_content table upgrade.
+ */
+function sonybmg_upgrade_update_6002() {
+  // Removed entirely by Nate. This update runs properly now without hacking.
+  return array();
+}
+
+/**
+ * Fix broken permissions, found on jordinsparks.com.  This has been the only
+ * case of this, but this function won't hurt anything.
+ */
+function sonybmg_upgrade_update_6003() {
+  $ret = array();
+  
+  $result = db_query('SELECT * FROM {permission}');
+  while ($role_permission = db_fetch_object($result)) {
+    $permissions = explode(',', $role_permission->perm);
+    foreach ($permissions as $key => $perm) {
+      $permissions[$key] = trim($perm);
+    }
+    array_filter($permissions);
+    $ret[] = update_sql("UPDATE {permission} SET perm = '". implode(', ', $permissions) ."' WHERE rid = ". $role_permission->rid);
+  }
+    
+  return $ret;
+}
+
+/**
+ * Convert old sonybmg.module blocks (or anything, really) to their new equivalents.
+ * Format is old module/delta => new module/delta
+ */
+function _sonybmg_upgrade_blocks_replaced() {
+  return array(
+    'sonybmg/0' => 'sonybmg_profiles/0',
+    'sonybmg/1' => 'sonybmg_profiles/1',
+    'sonybmg/2' => 'sonybmg_profiles/2',  
+  );
+}
+
+/**
+ * return a list of modules that have been replaced by another module.
+ */
+function _sonybmg_upgrade_modules_replaced() {
+  return array(
+    'discography' => 'sonybmg_discography',
+    'downloadable_extras' => 'sonybmg_extras',
+    'events' => 'sonybmg_events',
+    'photo_gallery' => 'sonybmg_photo_gallery',
+    'profile_helper' => 'install_profile_api',
+    'views_bookmark' => 'flag',
+    'flag_content' => 'sonybmg_offensive',
+  );
+}
+
+function _sonybmg_upgrade_modules_deprecated() {
+  return array(
+    'custom_breadcrumbs',
+    'custom_links',
+    'gsitemap',
+    'service_links_popup',
+    'views_bookmark',
+  );
+}
+
+/**
+ * These modules are installed or enabled immediately upon the D6 upgrade.
+ */
+function _sonybmg_upgrade_modules_additional() {
+  $modules = array(
+    'flag',
+    'flag_actions',
+    'imageapi',
+    'imageapi_gd',
+    'imagecache_ui',
+    'panels',
+    'panels_views',
+    'panels_page',
+    'poll',
+    'nodequeue',
+    'sonybmg_fans',
+    'sonybmg_profiles',
+    'sonybmg_forum',
+    'sonybmg_offensive',
+    'friendlist_api',
+    'friendlist_ui',
+    'friendlist_views',
+  );
+
+  // TODO: A proper test for some of these, like nodequeue (needed for sonybmg_fans/nodequeue, poll, buddylist/friendlist.)
+
+  // The start of some proper testing.
+  
+  // user_titles.module
+  if (is_array(variable_get('user_titles_types', 0))) {
+    $modules[] = 'user_titles';
+  }
+  
+  return $modules;
+}
+
+function _sonybmg_upgrade_panels() {
+  $modules = array(
+    'panels',
+    'panels_mini',
+    'panels_node',
+    'panels_page'
+  );
+
+  foreach ($modules as $module) {
+    db_query('UPDATE {system} SET status = 0 WHERE name = "%s"', $module);
+    module_load_include('install', $module);
+    call_user_func($module . '_uninstall');
+    call_user_func($module . '_install');
+    db_query('UPDATE {system} SET status = 1 WHERE name = "%s"', $module);
+  }
+}
+
+/**
+ * Rename a module.  This function looks for a rename item in the new module's
+ * info file.  It then sets the schema version of the new module to the schema
+ * version of the old module, and sets the schema version of the old module to
+ * SCHEMA_UNISTALLED. This allows updates to happen in the normal hook_update_n
+ * functions.
+ * 
+ * The new module should implement hook_update_n functions starting at n greater
+ * than the the last schema version of the old module.
+ * 
+ * Also note that this function will not do anything after the new module has
+ * been installed, so make sure that this function gets run before the new
+ * module gets installed.
+ * 
+ * @return $renamed
+ *   - An array of renamed modules. The index is the old module name and the 
+ *     value is the new module name.
+ */
+function _sonybmg_upgrade_rename_modules() {
+  $renamed = array();
+  
+  foreach (module_rebuild_cache() as $name => $module) {
+    if (!empty($module->info['rename'])) {
+      $old_schema = drupal_get_installed_schema_version($module->info['rename']);
+      $new_schema = drupal_get_installed_schema_version($module->name);
+      
+      // only update the schema if the new module is yet to be installed and
+      // the old module is not uninstalled. If the old module is not in the db
+      // and also not in the file system the schema will be NULL
+      if ($new_schema == SCHEMA_UNINSTALLED && !is_null($old_schema) && $old_schema >= SCHEMA_INSTALLED) {
+        drupal_set_installed_schema_version($module->name, $old_schema);
+        drupal_set_installed_schema_version($module->info['rename'], SCHEMA_UNINSTALLED);
+        drupal_set_message(t('%old renamed to %new. Schema version set to %schema', array('%old' => $module->info['rename'], '%new' => $module->name, '%schema' => $old_schema)));
+        $renamed[$module->info['rename']] = $module->name;
+      }
+    }
+  }
+  
+  return $renamed;
+}

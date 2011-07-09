@@ -1,0 +1,134 @@
+<?php
+// $Id: pm_block_user.module,v 1.1.2.5 2009/06/08 13:38:41 litwol Exp $
+
+/**
+ * @file
+ * Allows users to block other users from sending them any messages
+ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function pm_block_user_menu() {
+  $items['messages/block/%user'] = array(
+    'title'            => 'Block user messages',
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('pm_block_user_form', 2),
+    'access callback'  => 'privatemsg_user_access',
+    'type'             => MENU_CALLBACK,
+    'weight'           => -10,
+  );
+  return $items;
+}
+
+function pm_block_user_form($form_state, $author) {
+  global $user;
+
+  $form['author'] = array(
+    '#type' => 'value',
+    '#value' => $author->uid,
+  );
+    $form['recipient'] = array(
+    '#type' => 'value',
+    '#value' => $user->uid,
+  );
+  $form['author_name'] = array(
+    '#type' => 'value',
+    '#value' => $author->name,
+  );
+  $form['destination'] = array(
+    '#type' => 'value',
+    '#value' => isset($_GET['destination']) ? $_GET['destination'] : 'messages/',
+  );
+
+  if (db_result(db_query('SELECT COUNT(recipient) FROM {pm_block_user} WHERE author = %d AND recipient = %d', $author->uid, $user->uid))) {
+    $form['block_action'] = array(
+      '#type' => 'value',
+      '#value' => 'unblock_user',
+    );
+    return confirm_form($form,
+      t('You have previously blocked "@author" from sending you any more messages. Are you sure you want to unblock this user?', array('@author' => $author->name)),
+      isset($_GET['destination']) ? $_GET['destination'] : 'messages/',
+      t('This action cannot be undone.'),
+      t('Unblock @author', array('@author' => $author->name)),
+      t('Cancel')
+    );
+  }
+  else {
+    $form['block_action'] = array(
+      '#type' => 'value',
+      '#value' => 'block_user',
+    );
+    return confirm_form($form,
+      t('Are you sure you want to block "@author" from sending you any more messages?', array('@author' => $author->name)),
+      isset($_GET['destination']) ? $_GET['destination'] : 'messages/',
+      t('This action cannot be undone.'),
+      t('Block @author', array('@author' => $author->name)),
+      t('Cancel')
+    );
+  }
+}
+
+function pm_block_user_form_submit($form, &$form_state) {
+
+  if ($form_state['values']['confirm']) {
+    switch ($form_state['values']['block_action']) {
+      case 'block_user':
+        db_query('INSERT INTO {pm_block_user} (author, recipient) VALUES (%d, %d)', $form_state['values']['author'], $form_state['values']['recipient']);
+        drupal_set_message(t('@author has been blocked from sending you any further messages.', array('@author' => $form_state['values']['author_name'])));
+      break;
+      case 'unblock_user':
+        db_query('DELETE FROM {pm_block_user} WHERE author = %d AND recipient = %d', $form_state['values']['author'], $form_state['values']['recipient']);
+        drupal_set_message(t('@author is now allowed to send you new messages.', array('@author' => $form_state['values']['author_name'])));
+      break;
+    }
+  }
+  $form_state['redirect'] = $form_state['values']['destination'];
+}
+
+/**
+ * Implementation of hook_privatemsg_block_message.
+ */
+ function pm_block_user_privatemsg_block_message($author, $recipients) {
+  global $user;
+  $args = array_merge(array($author->uid), array_keys($recipients));
+  $result = db_query('SELECT recipient FROM {pm_block_user} WHERE author = %d AND recipient IN ('. db_placeholders($recipients) .') GROUP BY recipient', $args);
+  $blocked = array();
+  while ($row = db_fetch_array($result)) {
+    $blocked[] = array(
+      'uid' => $row['recipient'],
+      'message' => t('%name has chosen to not recieve any more messages from you.', array('%name' => $recipients[$row['recipient']]->name))
+    );
+  }
+  return $blocked;
+}
+
+function pm_block_user_privatemsg_sql_load_alter(&$fragments, $pmid, $uid) {
+  $fragments['select'][] = 'pmbu.recipient AS is_blocked';
+  $fragments['select'][] = 'pmi.thread_id';
+
+  $fragments['inner_join'][] = 'LEFT JOIN {pm_block_user} pmbu ON (pm.author = pmbu.author AND pmi.uid = pmbu.recipient)';
+}
+
+/**
+ * Implementation of hook_privatemsg_message_view_alter.
+ */
+ function pm_block_user_privatemsg_message_view_alter(&$vars) {
+  global $user;
+
+  $author_id = $vars['message']['author']->uid;
+  if (!isset($vars['message']['thread_id'])) {
+    // No thread id, this is probably only a preview
+    return;
+  }
+  $thread_id = $vars['message']['thread_id'];
+
+  if ($user->uid <> $author_id) {
+    if ($vars['message']['is_blocked']) {
+      $vars['message_actions'][] = array('title' => t('Unblock author'), 'href' => 'messages/block/'. $author_id, array('query' => 'destination=messages/view/' . $thread_id));
+    }
+    else {
+      $vars['message_actions'][] = array('title' => t('Block author'), 'href' => 'messages/block/'. $author_id, array('query' => 'destination=messages/view/' . $thread_id));
+    }
+  }
+}

@@ -1,0 +1,6 @@
+name = FeedAPI Mapper
+description = "Maps feed item elements to node fields."
+dependencies[] = feedapi_node
+dependencies[] = feedapi
+package = FeedAPI Add On
+core = 6.x

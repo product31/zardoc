@@ -1,0 +1,24 @@
+Index: simplemenu.module
+===================================================================
+RCS file: /cvs/drupal-contrib/contributions/modules/simplemenu/simplemenu.module,v
+retrieving revision 1.9.2.11.2.24
+diff -d -p -r1.9.2.11.2.24 simplemenu.module
+*** simplemenu.module	29 Aug 2010 21:22:09 -0000	1.9.2.11.2.24
+--- simplemenu.module	11 Feb 2011 22:45:35 -0000
+*************** function simplemenu_tree_output($tree, $
+*** 415,421 ****
+    // Pull out just the menu items we are going to render so that we
+    // get an accurate count for the first/last classes.
+    foreach ($tree as $data) {
+!     if (!$data['link']['hidden']) {
+        $items[] = $data;
+      }
+    }
+--- 415,421 ----
+    // Pull out just the menu items we are going to render so that we
+    // get an accurate count for the first/last classes.
+    foreach ($tree as $data) {
+!     if (isset($data['link']) && !$data['link']['hidden']) {
+        $items[] = $data;
+      }
+    }

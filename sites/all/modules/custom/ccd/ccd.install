@@ -1,0 +1,63 @@
+<?php
+// $Id$
+
+/**
+ * Drupal 5 port by Trevor Grayson
+ * @file
+ */
+
+/**
+ * Implementation of hook_schema().
+ */
+function ccd_schema() {
+  $schema['ccd_release'] = array(
+    'fields' => array(
+      'id' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE),
+      'name' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => ''),
+      'validate_error_path' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => ''),
+      'validate_success_path' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => ''),
+      'redeem_unauthorized_path' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => ''),
+      'redeem_redeemed_path' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => ''),
+    ),
+    'primary key' => array('id')
+  );
+
+  return $schema;
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function ccd_install() {
+  drupal_install_schema('ccd');
+
+  drupal_load('module', 'content');
+  content_notify('install', 'ccd');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function ccd_uninstall() {
+  drupal_uninstall_schema('ccd');
+
+  drupal_load('module', 'content');
+  content_notify('uninstall', 'ccd');
+}
+
+/**
+* Implementation of hook_enable().
+*/
+function ccd_enable() {
+  drupal_load('module', 'content');
+  content_notify('enable', 'ccd');
+}
+
+/**
+* Implementation of hook_disable().
+*/
+function ccd_disable() {
+  drupal_load('module', 'content');
+  content_notify('disable', 'ccd');
+}
+

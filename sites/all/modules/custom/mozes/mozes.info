@@ -1,0 +1,9 @@
+; $Id$
+name = Mozes integration
+description = Simple Mozes mobile platform integration.
+package = Sony BMG
+core = 6.x
+
+l10n server = translate.gdb-dev.com
+project = "mozes"
+version = "6.x-2.x"

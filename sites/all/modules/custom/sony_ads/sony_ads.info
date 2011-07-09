@@ -1,0 +1,7 @@
+name = Sony Ads
+description = Ad integration with freewheel
+core = 6.x
+
+l10n server = translate.gdb-dev.com
+project = "sony_ads"
+version = "6.x-2.x"

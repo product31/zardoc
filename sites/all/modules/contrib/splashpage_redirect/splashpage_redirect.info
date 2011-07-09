@@ -1,0 +1,4 @@
+; $Id: splashpage_redirect.info,v 1.1.2.1 2010/02/11 21:13:03 andrewlevine Exp $
+name = "Splash Page Redirect"
+description = "Redirect users from a page after they have seen it a specified number of times."
+core = "6.x"

@@ -1,0 +1,16 @@
+; $Id$
+name = Sony BMG Offensive
+description = The ability to flag content as offensive, remove it from the site, and review all offensive content in one place.
+dependencies[] = flag
+dependencies[] = flag_actions
+dependencies[] = token
+dependencies[] = token_actions
+dependencies[] = views_bulk_operations
+dependencies[] = trigger
+dependencies[] = views
+package = Sony BMG
+core = 6.x
+
+l10n server = translate.gdb-dev.com
+project = "sonybmg_offensive"
+version = "6.x-2.x"

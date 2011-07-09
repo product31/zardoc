@@ -1,0 +1,9 @@
+name = MissonControl Server
+description = MissionControl Server
+core = 6.x
+package = MissionControl
+dependencies[] = xmlrpc_hmac
+
+l10n server = translate.gdb-dev.com
+project = "missioncontrol"
+version = "6.x-2.x"

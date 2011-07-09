@@ -1,0 +1,33 @@
+# Israel translation of sony_connect (all releases)
+# Copyright (c) 2010 by the Israel translation team
+# Generated from files:
+#  sony_connect/sony-connect-cancel.tpl.php: n/a
+#  sony_connect/sony-connect-post-authorize.tpl.php: n/a
+#  sony_connect/sony-connect-prompt.tpl.php: n/a
+#  sony_connect/includes/pages.inc: n/a
+#  sony_connect/sony_connect.module: n/a
+#  sony_connect/plugins/networks/facebook/facebook.inc: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sony_connect (all releases)\n"
+"POT-Creation-Date: 2010-04-08 16:30-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Israel\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: sony-connect-cancel.tpl.php:11; sony-connect-post-authorize.tpl.php:13
+msgid "Click here to continue"
+msgstr ""
+
+#: sony-connect-prompt.tpl.php:1; includes/pages.inc:259
+msgid "Welcome %username"
+msgstr ""
+
+#: sony_connect.module:426,480; plugins/networks/facebook/facebook.inc:223
+msgid "sony_connect"
+msgstr ""
+

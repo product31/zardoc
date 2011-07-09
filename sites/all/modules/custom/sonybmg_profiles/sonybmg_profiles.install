@@ -1,0 +1,9 @@
+<?php
+/**
+ * Set block cache to BLOCK_CACHE_PER_PAGE for the photos_pager block.
+ */
+function sonybmg_profiles_update_6001() {
+  $ret = array();
+  $ret[] = update_sql('UPDATE {blocks} SET cache = '. BLOCK_CACHE_PER_PAGE .' WHERE module = "sonybmg_profiles"');
+  return $ret;
+}

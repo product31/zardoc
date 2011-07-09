@@ -1,0 +1,135 @@
+# Mexico translation of sony_tumblr (all releases)
+# Copyright (c) 2010 by the Mexico translation team
+# Generated from files:
+#  sony_tumblr/sony_tumblr.info: n/a
+#  sony_tumblr/sony_tumblr.module: n/a
+#  sony_tumblr/sony_tumblr.install: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sony_tumblr (all releases)\n"
+"POT-Creation-Date: 2010-04-12 11:24-0500\n"
+"PO-Revision-Date: 2010-03-30 12:57-0500\n"
+"Language-Team: Mexico\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: sony_tumblr.info:0
+msgid "Sony BMG"
+msgstr ""
+
+#: sony_tumblr.module:54,125,239
+msgid "Tumblr URL"
+msgstr ""
+
+#: sony_tumblr.module:58,129,243
+msgid "Example: http://demo.tumblr.com"
+msgstr ""
+
+#: sony_tumblr.module:71,142,256
+msgid "Authored by"
+msgstr "Por"
+
+#: sony_tumblr.module:75,146,260
+msgid "Leave blank for %anonymous."
+msgstr "Dejar vacío para %anonymous."
+
+#: sony_tumblr.module:75,146,260
+msgid "Anonymous"
+msgstr "Sin identificar"
+
+#: sony_tumblr.module:80,151,265
+msgid "Create feed"
+msgstr ""
+
+#: sony_tumblr.module:109,182,298
+msgid "Tumblr feed successfully created."
+msgstr ""
+
+#: sony_tumblr.module:113,210,304
+msgid "Could not retrieve title from feed."
+msgstr ""
+
+#: sony_tumblr.module:183
+msgid ""
+"You now need to <a href=\"@link\">map</a> the options->photo_url to "
+"field_photo original file name.  Also map the caption to the body "
+"field."
+msgstr ""
+
+#: sony_tumblr.module:187
+msgid "Mobile uploads"
+msgstr ""
+
+#: sony_tumblr.module:200
+msgid "New term saved for \"Mobile uploads\" gallery"
+msgstr ""
+
+#: sony_tumblr.module:205
+msgid "Unable to load the vocabulary for \"Official Gallery\""
+msgstr ""
+
+#: sony_tumblr.module:235
+msgid ""
+"No content type exists for video. Bug Andrew or Thomas to create a "
+"module that contains this."
+msgstr ""
+
+#: sony_tumblr.module:299
+msgid ""
+"You now need to <a href=\"@link\">map</a> the options->video_source to "
+"video field. Also map the caption to the body field."
+msgstr ""
+
+#: sony_tumblr.module:16
+msgid "Tumblr integration"
+msgstr ""
+
+#: sony_tumblr.module:17
+msgid "Tumblr integration setup utilities."
+msgstr ""
+
+#: sony_tumblr.module:24
+msgid "Tumblr blog setup"
+msgstr ""
+
+#: sony_tumblr.module:25
+msgid "Quick configuration for integration of a Tumblr feed into a blog."
+msgstr ""
+
+#: sony_tumblr.module:31
+msgid "Tumblr photos setup"
+msgstr ""
+
+#: sony_tumblr.module:32
+msgid ""
+"Quick configuration for integration of a Tumblr photos feed into a "
+"photo gallery."
+msgstr ""
+
+#: sony_tumblr.module:38
+msgid "Tumblr videos setup"
+msgstr ""
+
+#: sony_tumblr.module:39
+msgid "Quick configuration for integration of a Tumblr videos feed."
+msgstr ""
+
+#: sony_tumblr.install:26
+msgid "Tumblr Feed"
+msgstr ""
+
+#: sony_tumblr.install:28
+msgid "Items from these Tumblr feeds will be turned into nodes."
+msgstr ""
+
+#: sony_tumblr.info:0
+msgid "Sony Tumblr Integration"
+msgstr ""
+
+#: sony_tumblr.info:0
+msgid "Sony artist site integration with Tumblr.com"
+msgstr ""
+

@@ -1,0 +1,8 @@
+; $Id$
+name = "Swedish Services"
+description = "Provide the Swedish Services: Bloggy, Pusha"
+core = 6.x
+package = Sony Share
+dependencies[] = sony_share
+
+

@@ -1,0 +1,15 @@
+; $Id$ 
+name = Global Discography
+description = Creates a translation of album and track nodes in all active languages.
+package = Multilanguage
+core = 6.x
+
+dependencies[] = views_bulk_operations
+dependencies[] = i18n
+dependencies[] = i18n_access
+dependencies[] = views
+
+l10n server = translate.gdb-dev.com
+project = "global_discography"
+version = "6.x-2.x"
+

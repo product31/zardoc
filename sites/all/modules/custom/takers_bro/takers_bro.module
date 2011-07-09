@@ -1,0 +1,66 @@
+<?php
+
+/**
+ * Implementation of hook_menu().
+ */
+function takers_bro_menu() {
+  $items = array();
+  $items['admin/content/takers_bro'] = array(
+    'title' => 'Browser Overlay (BRO)',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('takers_bro_admin_settings_form'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'takers_bro.admin.inc',
+  );
+  return $items;
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function takers_bro_theme() {
+  $items = array();
+  $items['takers_bro_footer'] = array(
+    'arguments' => array(),
+    'template' => 'takers-bro-footer',
+  );
+  return $items;
+}
+
+function takers_bro_init() {
+  jquery_ui_add(array('ui.core', 'effects.core'));
+
+  $auto_show = variable_get('takers_bro_autoshow', NULL);
+  drupal_add_js(drupal_get_path('module', 'takers_bro') .'/jquery.countdown.min.js');
+  drupal_add_js(drupal_get_path('module', 'takers_bro') .'/takers_bro.js');
+  drupal_add_js(array('takersBro' =>
+    array(
+      'autoShow' => empty($auto_show) ? FALSE : $auto_show,
+      'autoShowDuration' => variable_get('takers_bro_duration', 6) * 1000,
+    )), 'setting');
+
+  drupal_add_css(drupal_get_path('module', 'takers_bro') .'/takers_bro.css');
+}
+
+/**
+ * Implementation of hook_footer().
+ */
+function takers_bro_footer() {
+  return theme('takers_bro_footer');
+}
+
+function template_preprocess_takers_bro_footer(&$variables) {
+  $variables['artist_logo'] = '<img src="/'.drupal_get_path('module', 'takers_bro') .'/img/takers/header-banner.png" />';
+  $variables['sponsor_1'] = '<img src="/'.drupal_get_path('module', 'takers_bro') .'/img/takers/trailer.png" />';
+  $variables['sponsor_2'] = '<a href="http://www.fandango.com/takers_123131/movietimes"><img src="/'.drupal_get_path('module', 'takers_bro') .'/img/takers/fandango.png" /></a>';
+  $variables['sponsor_3'] = '<a href="http://www.whoarethetakers.com/"><img src="/'.drupal_get_path('module', 'takers_bro') .'/img/takers/official.png" /></a>';
+  $variables['sponsor_4'] = '<a href="http://www.whoarethetakers.com/"><img src="/'.drupal_get_path('module', 'takers_bro') .'/img/takers/banner.png" /></a>';
+
+  $timestamp = mktime(0, 0, 0, 8, 27, 2010);
+  $variables['countdown'] = '<div class="countdown" rel="'. $timestamp .'"></div>'
+    . '<div class="description"><span class="days">'. t('Days') .'</span>'
+    . '<span class="hours">'. t('Hours') .'</span><span class="minutes">'. t('Min') .'</span><span class="seconds">'. t('Sec') .'</span></div>';
+
+  $variables['share'] = '<span class="bro-facebook"><a href="http://www.facebook.com/TakersMovie#!/TakersMovie?v=app_141940439149756" id="bro-facebook">Join us on Facebook</a></span><span class="bro-twitter"><a href="http://twitter.com/takersmovie" id="bro-twitter">Follow us on Twitter</a></span>';
+
+}

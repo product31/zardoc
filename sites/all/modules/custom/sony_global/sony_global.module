@@ -1,0 +1,558 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Sony Global Utilities
+ * Utilities for internationalization specific to the Sony Multisite install.
+ */
+
+/**
+ * Implementation of hook_help().
+ */
+function sony_global_help($path, $arg) {
+  switch ($path) {
+    case 'admin/global/configure':
+      return t('<p>This form gathers most of the commonly used settings that
+      	effect global functionality.  Click the <em>Reset</em> button to set or
+      	reset the configuration to the Sony defaults.</p>');
+    case 'admin/global/menus/%':
+      return t('<p>This form allows you to translate the menu titles for this
+        language.  Any items listed here are either language neutral, meaning
+        they will display for all languages, or have been specified to show in
+        this language.  Any item marked as <em>(disabled)</em> is in the menu
+        system, but not set to display on the menus.  It is still a good idea
+        to translate these, since they could possibly be enabled later.</p>
+        <p>If you have sufficient permissions, you will see an edit link next
+        to items that are specific to this language.  The edit link will allow
+        you to edit more properties of the item, including the path.</p>');
+
+  }
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function sony_global_menu() {
+  $items['admin/global'] = array(
+    'title' => 'Global',
+    'description' => '',
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('access administration pages'),
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+  );
+
+  $items['admin/global/overview'] = array(
+    'title' => 'Overview',
+    'access arguments' => array('access administration pages'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -1,
+  );
+
+  $items['admin/global/configure'] = array(
+    'title' => 'Configure',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_global_admin_configure'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'sony_global.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 10,
+  );
+
+  $items['admin/global/upgrade'] = array(
+    'title' => 'Upgrade',
+    'page callback' => 'sony_global_upgrade',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'sony_global.upgrade.inc',
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 11,
+  );
+
+  $items['admin/global/menus'] = array(
+    'title' => 'Menus',
+    'description' => 'Translate the primary links.',
+    'page callback' => 'sony_global_menus_overview',
+    'access arguments' => array('translate interface'),
+    'file' => 'sony_global.menus.inc',
+  );
+
+  $items['admin/global/menus/%'] = array(
+    'title' => 'Edit',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_global_menus_edit', 3),
+    'access arguments' => array('translate interface'),
+    'file' => 'sony_global.menus.inc',
+  );
+
+  $items['admin/global/languages'] = array(
+    'title' => 'Countries & Languages',
+    'description' => 'Manage the available countries and languages.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_global_languages_form'),
+    'access arguments' => array('administer sony global'),
+    'file' => 'sony_global.languages.inc',
+  );
+  $items['admin/global/languages/overview'] = array(
+    'title' => 'List',
+    'access arguments' => array('administer sony global'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -1,
+  );
+  $items['admin/global/languages/add'] = array(
+    'title' => 'Add',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sony_global_language_add'),
+    'access arguments' => array('administer sony global'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'sony_global.languages.inc',
+  );
+  $items['admin/global/languages/available'] = array(
+    'title' => 'Available',
+    'page callback' => 'sony_global_languages_available',
+    'access arguments' => array('administer sony global'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 10,
+    'file' => 'sony_global.languages.inc',
+  );
+  $items['admin/global/languages/import'] = array(
+    'title' => 'Re-import translations',
+    'page callback' => 'sony_global_languages_import_translations',
+    'access arguments' => array('administer sony global'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 15,
+    'file' => 'sony_global.languages.inc',
+  );
+
+  $items['admin/build/menu/item/%menu_link/i10npopulate'] = array(
+    'title' => 'i10n Populate',
+    'page callback' => 'sony_global_menu_populate',
+    'page arguments' => array(4),
+    'access arguments' => array('administer sony global'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 15,
+    'file' => 'sony_global.languages.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_perm().
+ */
+function sony_global_perm() {
+  return array('administer sony global');
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function sony_global_theme() {
+  return array(
+    'sony_global_flag_icon' => array(
+      'arguments' => array('language' => NULL),
+    ),
+    'sony_global_admin_configure_node_types' => array(
+      'arguments' => array('elements' => array()),
+    ),
+    'sony_global_languages_form' => array(
+      'arguments' => array('form' => array()),
+    ),
+    'sony_global_menus_edit' => array(
+      'arguments' => array('form' => array()),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_translation_link_alter().
+ * This is where we add the flags to the country switcher links.
+ */
+function sony_global_translation_link_alter(&$links, $path) {
+  global $language;
+
+  $style = sony_global_language_selector_style();
+
+  if ($style == 'dropdown') {
+    foreach ($links as $langcode => $link) {
+      $country_name = $link['title'];
+      list($langcode_short, $country_code) = $langcode == 'en' ? $langcode : explode('-', $langcode);
+      // special case for 'en' language, which we use for US
+      if (!$country_code) {
+        $country_code = 'us';
+      }
+
+      $icon_path = drupal_get_path('module', 'sony_global') .'/flags/'. drupal_strtolower($country_code) .'.png';
+      if (file_exists($icon_path)) {
+        $img = theme('image', $icon_path, $country_name, $country_name);
+        $links[$langcode]['title'] = $img . $links[$langcode]['title'];
+        $links[$langcode]['html'] = TRUE;
+      }
+
+      // for non-active languages, set the url manually, to avoid the active class
+      // to do this, href must be an absolute URL
+      if ($language->language != $link['language']->language) {
+        $links[$langcode]['href'] = url($link['href'], array('absolute' => TRUE, 'language' => $link['language']));
+        unset($links[$langcode]['language']);
+      }
+    }
+    drupal_add_css(drupal_get_path('module', 'sony_global') .'/sony_global_dropdown.css');
+    drupal_add_js(drupal_get_path('module', 'sony_global') .'/sony_global_dropdown.js');
+  }
+  else {
+    foreach ($links as $langcode => $link) {
+      $country_name = $link['title'];
+      list($langcode_short, $country_code) = $langcode == 'en' ? $langcode : explode('-', $langcode);
+      // special case for 'en' language, which we use for US
+      if (!$country_code) {
+        $country_code = 'us';
+      }
+
+      $icon_path = drupal_get_path('module', 'sony_global') .'/flags/'. drupal_strtolower($country_code) .'.png';
+      if (file_exists($icon_path)) {
+        $img = theme('image', $icon_path, $country_name, $country_name);
+        $links[$langcode]['title'] = $img;
+        $links[$langcode]['html'] = TRUE;
+        $links[$langcode]['attributes']['title'] = $country_name;
+      }
+
+      // for non-active languages, set the url manually, to avoid the active class
+      // to do this, href must be an absolute URL
+      if ($language->language != $link['language']->language) {
+        $links[$langcode]['href'] = url($link['href'], array('absolute' => TRUE, 'language' => $link['language']));
+        unset($links[$langcode]['language']);
+      }
+    }
+    drupal_add_css(drupal_get_path('module', 'sony_global') .'/sony_global.css');
+
+    if ($style == 'slider') {
+      drupal_add_js(drupal_get_path('module', 'sony_global') .'/sony_global_flyout.js');
+    }
+  }
+}
+
+/**
+ * Copy of menu_primary_links(), to be used in place of it for i18n
+ */
+function sony_global_primary_links() {
+  return sony_global_navigation_links(variable_get('menu_primary_links_source', 'primary-links'));
+}
+
+/**
+ * Direct copy of menu_navigation_links, plus i18nmenu_localize_tree()
+ */
+function sony_global_navigation_links($menu_name, $level = 0) {
+  // Don't even bother querying the menu table if no menu is specified.
+  if (empty($menu_name)) {
+    return array();
+  }
+
+  // Get the menu hierarchy for the current page.
+  $tree = menu_tree_page_data($menu_name);
+  i18nmenu_localize_tree($tree);
+
+  // Go down the active trail until the right level is reached.
+  while ($level-- > 0 && $tree) {
+    // Loop through the current level's items until we find one that is in trail.
+    while ($item = array_shift($tree)) {
+      if ($item['link']['in_active_trail']) {
+        // If the item is in the active trail, we continue in the subtree.
+        $tree = empty($item['below']) ? array() : $item['below'];
+        break;
+      }
+    }
+  }
+
+  // Create a single level of links.
+  $links = array();
+  foreach ($tree as $item) {
+    if (!$item['link']['hidden']) {
+      $class = '';
+      $l = $item['link']['localized_options'];
+      $l['href'] = $item['link']['href'];
+      $l['title'] = $item['link']['title'];
+      if ($item['link']['in_active_trail']) {
+        $class = ' active-trail';
+      }
+      // Keyed with the unique mlid to generate classes in theme_links().
+      $links['menu-'. $item['link']['mlid'] . $class] = $l;
+    }
+  }
+  return $links;
+}
+
+/**
+ * Implementation of hook_preprocess_page().
+ */
+function sony_global_preprocess_page(&$variables) {
+  $variables['primary_links'] = sony_global_primary_links();
+}
+
+/**
+ * Implementation of hook_form_menu_overview_form_alter().
+ */
+function sony_global_form_menu_overview_form_alter(&$form, &$form_state) {
+  foreach (element_children($form) as $key) {
+    if (strpos($key, 'mlid:') === 0) {
+      $langcode = $form[$key]['#item']['options']['langcode'];
+      if ($langcode) {
+        $form[$key]['title']['#value'] .= " ($langcode)";
+      }
+    }
+  }
+}
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function sony_global_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'menu_overview_form') {
+    foreach (element_children($form) as $mlid) {
+      if (isset($form[$mlid]['hidden'])) {
+        //
+        $element = &$form[$mlid];
+        $item = $form[$mlid]['#item'];
+        $real_mlid = $item['mlid'];
+
+        // If it meets this basic localizing criteria we figure we can populate it out.
+        if (isset($item['localized_options']['langcode'])) {
+          // HACK - There's no way to handle adding operations like this very well so
+          // just smash it into the delete item.
+          $element['operations']['delete']['#value'] .= '<br />' . l(t('i10n Populate'), "admin/build/menu/item/$real_mlid/i10npopulate");
+        }
+      }
+    }
+  }
+
+  if (isset($form['type']) && isset($form['#node']) && $form['type']['#value'] .'_node_form' == $form_id) {
+    $node = $form['#node'];
+
+    // Add some usability to the node language select box.
+    if ($form['language']['#type'] == 'select' && !$node->nid) {
+      $form['language']['#after_build'] = array('sony_global_node_language_after_build');
+    }
+
+    if (!empty($node->translation_source)) {
+      $tnode = $node->translation_source;
+    }
+    elseif (!empty($node->nid) && !empty($node->tnid) && $node->nid != $node->tnid) {
+      $tnode = node_load($node->tnid);
+    }
+
+    if (isset($tnode)) {
+      $menu_name = variable_get('menu_default_node_menu', 'primary-links');
+      $item = array();
+      if (isset($tnode->nid)) {
+        // Give priority to the default menu
+        $mlid = db_result(db_query_range("SELECT mlid FROM {menu_links} WHERE link_path = 'node/%d' AND menu_name = '%s' AND module = 'menu' ORDER BY mlid ASC", $tnode->nid, $menu_name, 0, 1));
+        // Check all menus if a link does not exist in the default menu.
+        if (!$mlid) {
+          $mlid = db_result(db_query_range("SELECT mlid FROM {menu_links} WHERE link_path = 'node/%d' AND module = 'menu' ORDER BY mlid ASC", $tnode->nid, 0, 1));
+        }
+        if ($mlid) {
+          $item = menu_link_load($mlid);
+        }
+      }
+
+      if ($item) {
+        $form['menu']['weight']['#default_value'] = $item['weight'];
+        $form['menu']['language'] = array('#type' => 'value', '#value' => $node->language);
+      }
+    }
+  }
+}
+
+/**
+ * #after_build callback for the langauge select on node forms.  This cannot be
+ * done in hook_form_alter since i18n kills all of our hard work with its large
+ * module weight.  take that i18n!
+ */
+function sony_global_node_language_after_build($element, &$form_state) {
+  $element['#options'] = array('#' => t('Select a language')) + $element['#options'];
+  if (!$element['#value']) {
+    $element['#value'] = '#';
+  }
+  $element['#element_validate'] = array('sony_global_node_language_validate');
+  return $element;
+}
+
+/**
+ * Validate the node language select box.
+ */
+function sony_global_node_language_validate($element, &$form_state) {
+  if ($element['#value'] == '#') {
+    form_error($element, t('Please select an appropriate language for this post.'));
+  }
+}
+
+/**
+ * Theme a flag icon.
+ */
+function theme_sony_global_flag_icon($country_code, $name) {
+  $path = drupal_get_path('module', 'sony_global') .'/flags/'. drupal_strtolower($country_code) .'.png';
+  $img = theme('image', $path, $name, $name);
+  return $img;
+}
+
+/**
+ * Output a flag icon, possibly without invoking the theme function
+ *
+ * @param $language
+ *   The language object, or language string.
+ * @param
+ *   Pass thru theme function?  If called in hook_init() this should be set to
+ *   FALSE.  Otherwise, dont bother.
+ */
+function sony_global_flag_icon($language, $theme = TRUE) {
+  if (is_object($language)) {
+    $langcode = $language->language;
+    $native = $language->native;
+  }
+  else {
+    $langcode = $language;
+    $native = NULL;
+  }
+
+  list($langcode_short, $country_code) = $langcode == 'en' ? $langcode : explode('-', $langcode);
+  // special case for 'en' language, which we use for US
+  if (!$country_code && $langcode == 'en') {
+    $country_code = 'us';
+  }
+
+  if ($theme) {
+    return theme('sony_global_flag_icon', $country_code, $native);
+  }
+  else {
+    return theme_image(drupal_get_path('module', 'sony_global') .'/flags/'. drupal_strtolower($country_code) .'.png', $native, $native);
+  }
+}
+
+/**
+ * Implementation of hook_preprocess_node().
+ */
+function sony_global_preprocess_node(&$variables) {
+  static $languages;
+
+  if (!isset($languages)) {
+    $languages = language_list();
+  }
+
+  $node = $variables['node'];
+  if ($node->language) {
+    $language = $languages[$node->language];
+    $icon = sony_global_flag_icon($language);
+
+    $variables['flag_icon'] = $icon;
+  }
+
+}
+
+/**
+ * Implementation of hook_simplemenu_tree_alter().
+ */
+function sony_global_simplemenu_tree_alter(&$tree) {
+  $path = drupal_is_front_page() ? '<front>' : $_GET['q'];
+  $languages = language_list('enabled');
+  $links = array();
+  foreach ($languages[1] as $language) {
+    // intentionally only passing the language code, so no alt or title tags appear.
+    // also intentionally calling theme_ function directly since we're in hook_init().
+    $img = sony_global_flag_icon($language->language, FALSE);
+
+    $links[] = l($img .' '. $language->native, $path, array('language' => $language, 'html' => TRUE));
+
+    if ($language->language == $GLOBALS['language']->language) {
+      $default = l($img .' '. $language->native, $path, array('language' => $language, 'html' => TRUE));
+    }
+  }
+
+  $extra = array(
+    'data' => $default,
+    'children' => $links,
+  );
+
+  array_unshift($tree, $extra);
+}
+
+/**
+ * Return the correct node url for the current language.
+ *
+ * @param $tnid
+ *   The translation node id.
+ * @param $options
+ *   Options array as used in url().
+ * @return
+ *   URL to the node page for the appropriate translation, falling back t the
+ *   node page of the base node of the translation set.
+ */
+function sony_global_node_url($tnid, $options = array()) {
+  global $language;
+  $langcode = $language->language;
+
+  $translations = translation_node_get_translations($tnid);
+  $nid = isset($translations[$langcode]) ? $translations[$langcode]->nid : $tnid;
+
+  return url('node/'. $nid, $options);
+}
+
+/**
+ * Implementation of hook_checkup().
+ */
+function sony_global_checkup() {
+  $operations = array();
+  $operations[] = array('sony_global_checkup_operations', array());
+  return $operations;
+}
+
+/**
+ * Determine the configuration for the language selector.  The old variable
+ * sony_global_language_dropdown was a simple yes/no checkbox.  The new variable
+ * is an 3 state option, and is now named sony_global_language_selector_style.
+ */
+function sony_global_language_selector_style() {
+  $style = variable_get('sony_global_language_selector_style', FALSE);
+
+  // If the style variable is empty, attempt to pull the old variable value.
+  if (empty($style)) {
+    $old_dropdown_value = variable_get('sony_global_language_dropdown', 0);
+    if (!empty($old_dropdown_value)) {
+      $style = 'dropdown';
+    }
+    else {
+      $style = 'default';
+    }
+
+    // Set the value
+    variable_set('sony_global_language_selector_style', $style);
+  }
+  return $style;
+}
+
+/**
+ * Implementation of hook_node_operations().
+ */
+function sony_global_node_operations() {
+  $operations = array(
+    'language_neutral' => array(
+      'label' => t('Change language to language neutral'),
+      'callback' => 'node_mass_update',
+      'callback arguments' => array('updates' => array('language' => '')),
+    ),
+    'language_default' => array(
+      'label' => t('Change language to site default'),
+      'callback' => 'node_mass_update',
+      'callback arguments' => array('updates' => array('language' => language_default('language'))),
+    ),
+  );
+
+  $languages = language_list();
+  foreach ($languages as $lang_code => $lang) {
+    $operations['language_'. $lang_code] = array(
+      'label' => t('Change language to !language', array('!language' => $lang->name)),
+      'callback' => 'node_mass_update',
+      'callback arguments' => array('updates' => array('language' => $lang_code)),
+    );
+  }
+
+  return $operations;
+}

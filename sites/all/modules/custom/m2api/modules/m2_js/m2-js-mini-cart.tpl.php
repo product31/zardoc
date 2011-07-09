@@ -1,0 +1,1 @@
+<span class="m2-cart-placeholder"></span>

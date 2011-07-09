@@ -1,0 +1,151 @@
+<?php
+// $Id: nodeforum.install,v 1.1.4.4 2010/01/20 21:29:26 andrewlevine Exp $
+
+/**
+ * @file
+ * Installation file for nodeforum module.
+ */
+
+/**
+ * Implementation of hook_schema().
+ */
+function nodeforum_schema() {
+  $schema['nodeforum'] = array(
+    'fields' => array(
+      'nid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0),
+      'vid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0),
+      'tid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0),
+    ),
+    'indexes' => array(
+      'tid' => array('tid'),
+      'nid' => array('nid'),
+    ),
+    'primary key' => array('vid'),
+  );
+  return $schema;
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function nodeforum_install() {
+  drupal_install_schema('nodeforum');
+  db_query("UPDATE {system} SET weight=3 WHERE name='nodeforum'");
+  // Create the content types we will need.
+  include_once './'. drupal_get_path('module', 'node') .'/content_types.inc';
+  $t = get_t();
+
+  $types = array(
+    // Create the forum content type.
+    array(
+      'type' => 'forum',
+      'name' => 'Forum Topic',
+      'module' => 'node',
+      'description' => st('Create a new topic for discussion in the forums.'),
+      'locked' => 0,
+      'custom' => 1,
+      'title_label' => 'Subject',
+      'body_label' => 'Body',
+      'min_word_count' => '0',
+      'help' => '',
+      'node_options' => array(
+        'status' => TRUE,
+        'promote' => FALSE,
+      ),
+      'upload' => 0,
+      'fivestar' => TRUE,
+      'fivestar_position' => 'above',
+      'comment' => 2,
+      'comment_type' => 'forum_reply',
+      'comment_view' => 'forum_replies',
+      'comments_per_page' => '40',
+    ),
+    // Create the forum reply content type.
+    array(
+      'type' => 'forum_reply',
+      'name' => 'Reply',
+      'module' => 'node',
+      'locked' => 0,
+      'custom' => 1,
+      'title_label' => 'Subject',
+      'body_label' => 'Reply',
+      'min_word_count' => '0',
+      'help' => '',
+      'description' => st('Create a reply to a discussion in the forums.'),
+      'node_options' => array(
+        'status' => TRUE,
+        'promote' => FALSE,
+      ),
+      'upload' => 0,
+      'fivestar' => FALSE,
+      'comment' => 0,
+      'comment_type' => '',
+      'comment_view' => '',
+      'comments_per_page' => 'default',
+    ),
+  );
+
+    $default = array(
+    'module' => 'node',
+    'description' => st(''),
+    'custom' => TRUE,
+    'modified' => TRUE,
+    'has_title' => TRUE,
+    'has_body' => TRUE,
+    'title_label' => 'Title',
+    'body_label' => '',
+    'locked' => FALSE,
+    'min_word_count' => '0',
+    'orig_type' => '',
+    'help' => '',
+  );
+
+  foreach ($types as $new_type) {
+    $type = array_merge($default, $new_type);
+    $type = (object)_node_type_set_defaults($type);
+    node_type_save($type);
+  }
+
+  // Set flag content variables:
+  variable_set('flag_content_node_type_forum_reply', 1);
+  variable_set('node_comment_type_forum', "forum_reply");
+  variable_set('node_comment_view_forum', "forum_replies");
+
+  cache_clear_all();
+  menu_rebuild();
+  node_types_rebuild();
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function nodeforum_uninstall() {
+  drupal_uninstall_schema('nodeforum');
+  variable_del('nodeforum_containers');
+  variable_del('nodeforum_nav_vocabulary');
+  variable_del('nodeforum_hot_topic');
+  variable_del('nodeforum_per_page');
+  variable_del('nodeforum_order');
+  variable_del('nodeforum_block_num_0');
+  variable_del('nodeforum_block_num_1');
+  variable_del('node_comment_type_forum');
+  variable_del('node_comment_view_forum');
+}
+
+function nodeforum_update_6000() {
+  // Node comment has changed variable names
+  $ret = array();
+  if ($forum_comment_type = variable_get('comment_type_forum', FALSE)) {
+    variable_set('node_comment_type_forum', $forum_comment_type);
+  }
+  else {
+    variable_set('node_comment_type_forum', "forum_reply");
+  }
+  if ($forum_comment_view = variable_get('comment_view_forum', FALSE)) {
+    variable_set('node_comment_view_forum', $forum_comment_view);
+  }
+  else {
+    variable_set('node_comment_view_forum', "forum_replies");
+  }
+  return $ret;
+}

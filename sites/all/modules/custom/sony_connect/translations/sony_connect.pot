@@ -1,0 +1,376 @@
+# $Id$
+#
+# LANGUAGE translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  sony-connect-cancel.tpl.php: n/a
+#  sony-connect-post-authorize.tpl.php: n/a
+#  sony-connect-prompt.tpl.php: n/a
+#  includes/pages.inc: n/a
+#  sony_connect.module: n/a
+#  plugins/networks/facebook/facebook.inc: n/a
+#  sony_connect.info: n/a
+#  includes/admin.inc: n/a
+#  plugins/networks/twitter/twitter.inc: n/a
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2010-03-01 14:58-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: sony-connect-cancel.tpl.php:11 sony-connect-post-authorize.tpl.php:13
+msgid "Click here to continue"
+msgstr ""
+
+#: sony-connect-prompt.tpl.php:1 includes/pages.inc:259
+msgid "Welcome %username"
+msgstr ""
+
+#: sony-connect-prompt.tpl.php:3
+msgid "If you already have an account on this site, <a href=\"/user/login\">click here</a>\n  to connect to that account.  Otherwise, <a href=\"/user/register\">click here</a>\n  to finish your registration."
+msgstr ""
+
+#: sony_connect.module:313
+msgid "Disconnect network"
+msgstr ""
+
+#: sony_connect.module:349
+msgid "go"
+msgstr ""
+
+#: sony_connect.module:354
+msgid "Sign In:"
+msgstr ""
+
+#: sony_connect.module:362
+msgid "Forgot your password?"
+msgstr ""
+
+#: sony_connect.module:368
+msgid "Don't have an account? <a href='@signup' title='Sign Up' class='popups'>Sign Up</a>."
+msgstr ""
+
+#: sony_connect.module:470
+msgid "Your %network account has been connected."
+msgstr ""
+
+#: sony_connect.module:486
+msgid "Your %network account has been disconnected."
+msgstr ""
+
+#: sony_connect.module:659
+msgid "The TinyURL link to the node page."
+msgstr ""
+
+#: sony_connect.module:662
+msgid "The artist name as entered when the site was provisioned."
+msgstr ""
+
+#: sony_connect.module:676
+msgid "When I create a forum topic"
+msgstr ""
+
+#: sony_connect.module:677
+msgid "When I post a new blog entry"
+msgstr ""
+
+#: sony_connect.module:680
+msgid "When I comment on a news entry"
+msgstr ""
+
+#: sony_connect.module:681
+msgid "When I reply to a forum topic"
+msgstr ""
+
+#: sony_connect.module:682;683
+msgid "When I comment on a photo"
+msgstr ""
+
+#: sony_connect.module:684
+msgid "When I comment on a blog entry"
+msgstr ""
+
+#: sony_connect.module:685;686
+msgid "When I review music"
+msgstr ""
+
+#: sony_connect.module:689
+msgid "When I'm attending an event"
+msgstr ""
+
+#: sony_connect.module:690
+msgid "When I add something to my favorites"
+msgstr ""
+
+#: sony_connect.module:697
+msgid "Node publishing"
+msgstr ""
+
+#: sony_connect.module:701
+msgid "Comment publishing"
+msgstr ""
+
+#: sony_connect.module:713
+msgid "When I post a @type"
+msgstr ""
+
+#: sony_connect.module:719
+msgid "When I comment on a @type"
+msgstr ""
+
+#: sony_connect.module:727
+msgid "Content flagging"
+msgstr ""
+
+#: sony_connect.module:734
+msgid "When I %flag"
+msgstr ""
+
+#: sony_connect.module:913
+msgid "<strong>Sign In</strong> !networks or <a class=\"ctools-use-modal\" title=\"Login\" href=\"@login_url\">Login</a> Not a member? <a class=\"ctools-use-modal\" title=\"Join\" href=\"@register_url\">Join</a>"
+msgstr ""
+
+#: sony_connect.module:426;480 plugins/networks/facebook/facebook.inc:223
+msgid "sony_connect"
+msgstr ""
+
+#: sony_connect.module:426
+msgid "Social network connections for user %name deleted."
+msgstr ""
+
+#: sony_connect.module:480
+msgid "Disconnected %network account for %username."
+msgstr ""
+
+#: sony_connect.module:205
+msgid "Sony Connect"
+msgstr ""
+
+#: sony_connect.module:212
+msgid "Settings"
+msgstr ""
+
+#: sony_connect.module:217
+msgid "Appearance"
+msgstr ""
+
+#: sony_connect.module:296
+msgid "Facebook & Twitter"
+msgstr ""
+
+#: sony_connect.module:307
+msgid "Sharing Preferences"
+msgstr ""
+
+#: sony_connect.info:0
+msgid "Sony Music Connect"
+msgstr ""
+
+#: sony_connect.info:0
+msgid "Connect to social networks."
+msgstr ""
+
+#: includes/admin.inc:43
+msgid "Replacement tokens"
+msgstr ""
+
+#: includes/admin.inc:83
+msgid "Enabled"
+msgstr ""
+
+#: includes/pages.inc:60
+msgid "Connected"
+msgstr ""
+
+#: includes/pages.inc:113;190
+msgid "Disconnect"
+msgstr ""
+
+#: includes/pages.inc:116
+msgid "Connect now"
+msgstr ""
+
+#: includes/pages.inc:121
+msgid "Network"
+msgstr ""
+
+#: includes/pages.inc:121
+msgid "Operations"
+msgstr ""
+
+#: includes/pages.inc:171;187
+msgid "Disconnect your %network account?"
+msgstr ""
+
+#: includes/pages.inc:189
+msgid "This action cannot be undone."
+msgstr ""
+
+#: includes/pages.inc:191
+msgid "Cancel"
+msgstr ""
+
+#: includes/pages.inc:233
+msgid "Return to page"
+msgstr ""
+
+#: includes/pages.inc:234
+msgid "Continue to profile"
+msgstr ""
+
+#: includes/pages.inc:263;268
+msgid "Registration almost complete... just one more step!"
+msgstr ""
+
+#: includes/pages.inc:264
+msgid "Already have an account on this site?"
+msgstr ""
+
+#: includes/pages.inc:269
+msgid "Don't have an account on this site?"
+msgstr ""
+
+#: includes/pages.inc:273
+msgid "Registration successful!"
+msgstr ""
+
+#: includes/pages.inc:274
+msgid "Your %network account has been connected. Logging in, please be patient."
+msgstr ""
+
+#: includes/pages.inc:278
+msgid "Logging in, please be patient."
+msgstr ""
+
+#: includes/pages.inc:301
+msgid "Please pick a username"
+msgstr ""
+
+#: includes/pages.inc:329
+msgid "Yes, I want to receive the latest news & updates"
+msgstr ""
+
+#: includes/pages.inc:336
+msgid "Email"
+msgstr ""
+
+#: includes/pages.inc:343
+msgid "Finish"
+msgstr ""
+
+#: includes/pages.inc:373
+msgid "Username"
+msgstr ""
+
+#: includes/pages.inc:379
+msgid "Password"
+msgstr ""
+
+#: includes/pages.inc:381
+msgid "Forgot password?"
+msgstr ""
+
+#: includes/pages.inc:386
+msgid "Sign in"
+msgstr ""
+
+#: includes/pages.inc:392
+msgid "Sign in & Complete your profile"
+msgstr ""
+
+#: includes/pages.inc:477
+msgid "Save my preferences"
+msgstr ""
+
+#: includes/pages.inc:519
+msgid "Your sharing preferences have been saved."
+msgstr ""
+
+#: includes/pages.inc:530
+msgid "Share with my networks"
+msgstr ""
+
+#: includes/pages.inc:542
+msgid "Connect"
+msgstr ""
+
+#: includes/pages.inc:583
+msgid "Share this with:"
+msgstr ""
+
+#: includes/pages.inc:614
+msgid "For %plural_title, share with"
+msgstr ""
+
+#: includes/pages.inc:647
+msgid "Continue"
+msgstr ""
+
+#: includes/pages.inc:652
+msgid "Remember this choice & don't show this message again."
+msgstr ""
+
+#: includes/pages.inc:656
+msgid "Set your <a href=\"!sharing-url\" target=\"_blank\">sharing preferences</a> in your profile."
+msgstr ""
+
+#: includes/pages.inc:690
+msgid "Your sharing preferences have been saved.  You can change them at any time in your <a href=\"!profile_link\">profile</a>."
+msgstr ""
+
+#: plugins/networks/facebook/facebook.inc:11
+msgid "Facebook"
+msgstr ""
+
+#: plugins/networks/facebook/facebook.inc:90
+msgid "Click the help icon to view detailed setup information."
+msgstr ""
+
+#: plugins/networks/facebook/facebook.inc:95
+msgid "Facebook API key"
+msgstr ""
+
+#: plugins/networks/facebook/facebook.inc:101
+msgid "Application secret"
+msgstr ""
+
+#: plugins/networks/facebook/facebook.inc:108
+msgid "App Info"
+msgstr ""
+
+#: plugins/networks/facebook/facebook.inc:118
+msgid "Active Users"
+msgstr ""
+
+#: plugins/networks/facebook/facebook.inc:119
+msgid "%num active users in the 30 day period ending %date"
+msgstr ""
+
+#: plugins/networks/facebook/facebook.inc:123
+msgid "No information available."
+msgstr ""
+
+#: plugins/networks/facebook/facebook.inc:223
+msgid "%code: Error publishing to Facebook."
+msgstr ""
+
+#: plugins/networks/twitter/twitter.inc:14
+msgid "Twitter"
+msgstr ""
+
+#: plugins/networks/twitter/twitter.inc:35
+msgid "Consumer key"
+msgstr ""
+
+#: plugins/networks/twitter/twitter.inc:41
+msgid "Consumer secret"
+msgstr ""
+

@@ -1,0 +1,81 @@
+<?php
+// $Id: highslide.install,v 1.2 2009/11/05 20:38:26 q0rban Exp $
+
+/**
+ * @file
+ * Installation functions for Highslide.
+ */
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function highslide_uninstall() {
+  // Delete the variable we created.
+  variable_del('highslide_settings');
+  variable_del('highslide_options');
+}
+
+/**
+ * Implementation of hook_update_N().
+ */
+function highslide_update_6100() {
+  $formatters = variable_get('highslide_formatters', NULL);
+  $ret = array();
+
+  if (is_array($formatters)) {
+    foreach ($formatters as $name => $formatter) {
+      $caption = '';
+      if (is_array($formatter['caption'])) {
+        if (in_array('thumb', $formatter['caption'])) {
+          $caption = 'thumb';
+        }
+        if (in_array('full', $formatter['caption'])) {
+          $caption = ($caption == 'thumb') ? 'both' : 'full';
+        }
+        $formatter['caption'] = $caption;
+      }
+      $formatters[$name] = $formatter;
+      $ret[] = array('success' => TRUE, 'query' => t('Updated !label.', array('!label' => $formatter['label'])));
+    }
+
+    variable_set('highslide_formatters', $formatters);
+  }
+
+  return $ret;
+}
+
+/**
+ * Implementation of hook_update_N().
+ *
+ * Update all formatters, removing 'full' setting, and changing the 
+ * thumb imagecache preset to a formatter.
+ */
+function highslide_update_6101() {
+  $formatters = variable_get('highslide_formatters', NULL);
+  $ret = array();
+
+  if (is_array($formatters)) {
+    foreach ($formatters as $name => $formatter) {
+      if (is_string($formatter['thumb'])) {
+        $preset = $formatter['thumb'];
+        $formatter['thumb'] = array(
+          'formatter' => $preset .'_default',
+          'theme' => 'imagecache_formatter_'. $preset .'_default',
+        );
+      }
+      if (is_string($formatter['full'])) {
+        $preset = $formatter['full'];
+        $formatter['full'] = array(
+          'formatter' => $preset .'_path',
+          'theme' => 'imagecache_formatter_'. $preset .'_path',
+        );
+      }
+      $formatters[$name] = $formatter;
+      $ret[] = array('success' => TRUE, 'query' => t('Updated !label.', array('!label' => $formatter['label'])));
+    }
+
+    variable_set('highslide_formatters', $formatters);
+  }
+
+  return $ret;
+}

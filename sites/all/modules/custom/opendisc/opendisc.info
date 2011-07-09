@@ -1,0 +1,9 @@
+; $Id: Exp $
+name = OpenDisc
+description = Allows for specific content to be available to OpenDisc customers.
+package = Other
+core = 6.x
+
+l10n server = translate.gdb-dev.com
+project = "opendisc"
+version = "6.x-2.x"

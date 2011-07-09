@@ -1,0 +1,1024 @@
+<?php
+// $Id: advanced_forum.module,v 1.149.2.40 2009/07/14 03:44:44 michellec Exp $
+
+/**
+ * @file
+ * Enables the look and feel of other popular forum software.
+ */
+
+// DRUPAL HOOKS **************************************************************/
+
+/**
+ * Implementation of hook_perm().
+ */
+function advanced_forum_perm() {
+  return array('administer advanced forum',
+    'view forum statistics');
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function advanced_forum_menu() {
+  $items['forum/markasread'] = array(
+    'access callback' => 'advanced_forum_markasread_access',
+    'page callback' => 'advanced_forum_markasread',
+    'type' => MENU_CALLBACK,
+  );
+
+  $items['admin/settings/advanced-forum'] = array(
+    'access arguments' => array('administer advanced forum'),
+    'description' => 'Configure Advanced Forum with these settings.',
+    'page arguments' => array('advanced_forum_settings_page'),
+    'page callback' => 'drupal_get_form',
+    'title' => 'Advanced Forum',
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_menu_alter().
+ */
+function advanced_forum_menu_alter(&$callbacks) {
+  // Take over the forum page creation so we can add more information.
+  $callbacks['forum']['page callback'] = 'advanced_forum_page';
+
+  // Turn 'forum' into a normal menu item so it appears in navigation.
+  $callbacks['forum']['type'] = MENU_NORMAL_ITEM;
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function advanced_forum_theme() {
+  $items['advanced_forum_statistics'] = array(
+      'template' => 'advanced_forum-statistics',
+  );
+
+  $items['advanced_forum_topic_legend'] = array(
+      'template' => 'advanced_forum-topic-legend',
+  );
+
+  $items['advanced_forum_topic_header'] = array(
+      'template' => 'advanced_forum-topic-header',
+      'arguments' => array(
+        'node' => NULL,
+        'comment_count' => NULL,
+        )
+  );
+
+  $items['advanced_forum_forum_legend'] = array(
+      'template' => 'advanced_forum-forum-legend',
+  );
+
+  $items['advanced_forum_user_picture'] = array(
+      'arguments' => array(
+        'account' => NULL,
+        )
+  );
+
+  $items['advanced_forum_reply_link'] = array(
+      'arguments' => array(
+        'node' => NULL,
+        )
+  );
+
+  $items['advanced_forum_topic_pager'] = array(
+      'arguments' => array(
+         'pagecount' => NULL,
+         'topic' => NULL,
+        )
+  );
+
+  $items['advanced_forum_shadow_topic'] = array(
+      'arguments' => array(
+         'title' => NULL,
+         'nid' => NULL,
+         'new_forum' => NULL,
+        )
+  );
+
+  $items['advanced_forum_subforum_list'] = array(
+      'arguments' => array(
+         'subforum_list' => NULL,
+       )
+  );
+
+  // These only exist if nodecomment is on.
+  if (module_exists('nodecomment')) {
+    $items['advanced_forum_search_forum'] = array(
+      'arguments' => array('tid' => NULL),
+      'template' => 'advanced_forum-search-forum',
+    );
+
+    $items['advanced_forum_search_topic'] = array(
+      'arguments' => array('node' => NULL),
+      'template' => 'advanced_forum-search-topic',
+    );
+
+    $items['views_view_fields__advanced_forum_search'] = array(
+      'arguments' => array('view' => NULL, 'options' => NULL, 'row' => NULL),
+      'template' => 'advanced_forum_search_result',
+      'original hook' => 'views_view_fields',
+    );
+
+    $items['views_view_fields__advanced_forum_search_topic'] = array(
+      'arguments' => array('view' => NULL, 'options' => NULL, 'row' => NULL),
+      'template' => 'advanced_forum_search_result',
+      'original hook' => 'views_view_fields',
+    );
+  }
+
+  // Topic list as a view
+  if (module_exists('views')) {
+    $items['views_view_forum_topic_list__advanced_forum_topic_list'] = array(
+      'arguments' => array('view' => NULL, 'options' => NULL, 'rows' => NULL, 'title' => NULL),
+      'template' => 'advanced_forum-topic-list-view',
+      'original hook' => 'views_view_forum_topic_list',
+    );
+    $items['views_view__advanced_forum_topic_list'] = array(
+      'arguments' => array('view' => NULL),
+      'template' => 'advanced_forum-topic-list-outer-view',
+      'original hook' => 'views_view',
+    );
+  }
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_theme_registry_alter().
+ */
+function advanced_forum_theme_registry_alter(&$theme_registry) {
+  // Garland's phptemplate_comment_wrapper really sucks. Chances are, a theme
+  // does NOT want to control this on forum nodes anyway, so we're going to take
+  // it over:
+  if (isset($theme_registry['comment_wrapper']['function']) && $theme_registry['comment_wrapper']['function'] == 'phptemplate_comment_wrapper') {
+    $theme_registry['comment_wrapper']['function'] = 'advanced_forum_comment_wrapper';
+  }
+
+  // Optionally kill the next/previous forum topic navigation links because
+  // it is a nasty query that can slow down the forums.
+  if (!variable_get('advanced_forum_use_topic_navigation', FALSE)) {
+    foreach ($theme_registry['forum_topic_navigation']['preprocess functions'] as $key => $value) {
+      if ($value == 'template_preprocess_forum_topic_navigation') {
+        unset($theme_registry['forum_topic_navigation']['preprocess functions'][$key]);
+      }
+    }
+  }
+
+  // When views is enabled, we want to use it to do the topic list pages so
+  // we get rid of the core template preprocess.
+  if (module_exists('views')) {
+    foreach ($theme_registry['forum_topic_list']['preprocess functions'] as $key => $value) {
+      if ($value == 'template_preprocess_forum_topic_list') {
+        unset($theme_registry['forum_topic_list']['preprocess functions'][$key]);
+      }
+    }
+  }
+
+  // --- The following section manipulates the theme registry so the .tpl files
+  // --- for the given templates can be found first in the (sub)theme directory
+  // --- then in ancestor themes, if any, then in the active style directory
+  // --- for advanced forum or any ancestor styles.
+
+  // Affected templates
+  $templates = array('node',
+                     'comment',
+                     'comment_wrapper',
+                     'forums',
+                     'forum_list',
+                     'forum_topic_list',
+                     'forum_icon',
+                     'forum_submitted',
+                     'forum_topic_navigation',
+                     'author_pane',
+                     'advanced_forum_statistics',
+                     'advanced_forum_search_forum',
+                     'advanced_forum_search_topic',
+                     'advanced_forum_topic_list_view',
+                     'views_view_fields__advanced_forum_search',
+                     'views_view_fields__advanced_forum_search_topic',
+                     'views_view_forum_topic_list__advanced_forum_topic_list',
+                     'views_view__advanced_forum_topic_list',
+                     'views_view__advanced_forum_topic_list',
+                     'advanced_forum_topic_legend',
+                     'advanced_forum_forum_legend',
+                     'advanced_forum_topic_header',
+                );
+
+  // Find all our ancestor themes and put them in an array.
+  global $theme;
+  $themes = list_themes();
+
+  $ancestor_paths = array();
+  $ancestor = $theme;
+  while ($ancestor && isset($themes[$ancestor]->base_theme)) {
+    array_unshift($ancestor_paths, dirname($themes[$themes[$ancestor]->base_theme]->filename));
+    $ancestor = $themes[$ancestor]->base_theme;
+  }
+
+  // Get the sequence of styles to look in for templates
+  $lineage = advanced_forum_style_lineage();
+
+  if (!array_key_exists('naked', $lineage)) {
+    // Add naked in at the end of the line to prevent problems if a style
+    // doesn't include all needed templates.
+    $lineage['naked'] = drupal_get_path('module', 'advanced_forum') . '/styles/naked';
+  }
+
+  foreach ($templates as $template) {
+    // Sanity check in case the template is not being used.
+    if (!empty($theme_registry[$template])) {
+
+      // If there was a path in there, store it.
+      $existing_path = array_shift($theme_registry[$template]['theme paths']);
+
+      // Add paths for our style and ancestors before the existing path, if any.
+      foreach ($lineage AS $style => $style_path) {
+        array_unshift($theme_registry[$template]['theme paths'], $existing_path, $style_path);
+        $existing_path = array_shift($theme_registry[$template]['theme paths']);
+      }
+
+      // If there are any ancestor paths (ie: we are in a subtheme, add those)
+      foreach ($ancestor_paths as $ancestor_path) {
+        $theme_registry[$template]['theme paths'][] = $ancestor_path;
+      }
+
+      // Put the active theme's path last since that takes precidence.
+      $theme_registry[$template]['theme paths'][] = advanced_forum_path_to_theme();
+    }
+  }
+}
+
+/**
+ * Implementation of hook_nodeapi().
+ */
+function advanced_forum_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  if ($op == 'update' || $op == 'insert' || $op == 'delete') {
+    // Update the cached statistics.
+    advanced_forum_statistics_replies(TRUE);
+  }
+
+  if ($op == 'view' && !empty($node->content['forum_navigation'])) {
+    if (!empty($node->content['forum_navigation'])) {
+      // Move the forum navigation to a seperate variable so it doesn't
+      // get lumped in with the content.
+      $node->advanced_forum_navigation = $node->content['forum_navigation']['#value'];
+      $node->content['forum_navigation'] = NULL;
+    }
+  }
+}
+
+/**
+ * Implementation of hook_comment().
+ */
+function advanced_forum_comment(&$a1, $op) {
+  if ($op == 'update' || $op == 'insert' || $op == 'delete') {
+    // Update the cached statistics.
+    advanced_forum_statistics_replies(TRUE);
+  }
+}
+
+/**
+ * Implementation of hook_link().
+ */
+function advanced_forum_link($type, $node = NULL, $teaser = FALSE) {
+  $links = array();
+
+  if ($type == 'node') {
+    if (advanced_forum_type_is_in_forum($node->type)) {
+      // Add edit / delete links to the node links to be match replies.
+      if (node_access('update', $node)) {
+        $links['post_edit'] = array(
+          'title' => t('edit'),
+          'href' => 'node/'. $node->nid .'/edit',
+          'query' => drupal_get_destination(),
+        );
+      }
+
+      if (node_access('delete', $node)) {
+        $links['post_delete'] = array(
+          'title' => t('delete'),
+          'href' => 'node/'. $node->nid .'/delete',
+          'query' => drupal_get_destination(),
+        );
+      }
+    }
+  }
+
+  return $links;
+}
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function advanced_forum_form_alter(&$form, &$form_state, $form_id) {
+  if (advanced_forum_type_is_in_forum($form['#node']->type)) {
+    // Remove the teaser splitter.
+    $teaser_js_build = array_search('node_teaser_js', $form['body_field']['#after_build']);
+    unset($form['body_field']['#after_build'][$teaser_js_build]);
+    $form['body_field']['teaser_js']['#access'] = FALSE;
+    $form['body_field']['teaser_include']['#access'] = FALSE;
+  }
+}
+
+// MAKE VIEWS BITS WORK *****************************************************/
+function advanced_forum_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'advanced_forum') . '/includes/views',
+    'file' => 'views.inc',
+  );
+}
+
+// SETTINGS PAGE ************************************************************/
+include_once drupal_get_path('module', 'advanced_forum') . '/includes/settings.inc';
+
+// THEME FUNCTIONS AND TEMPLATE PREPROCESSES ********************************/
+include_once drupal_get_path('module', 'advanced_forum') . '/includes/theme.inc';
+
+// STYLE RELATED FUNCTIONS
+include_once drupal_get_path('module', 'advanced_forum') . '/includes/style.inc';
+
+// CORE FORUM PAGE OVERRIDES ************************************************/
+include_once drupal_get_path('module', 'advanced_forum') . '/includes/core-overrides.inc';
+
+// MARK AS READ **************************************************************/
+
+/**
+ * Marks all posts in forums or in a given forum as read by the current user.
+ */
+function advanced_forum_markasread() {
+  global $user;
+
+  // See if we're on a forum or on the forum overview
+  // Path will be /forum/markasread or /forum/markasread/tid
+  $current_forum_id = arg(2);
+
+  if ($current_forum_id) {
+    // Delete the current history entries so already visited nodes get updated.
+    $sql = "DELETE h
+            FROM {history} AS h
+              INNER JOIN {term_node} AS tn ON (h.nid = tn.nid)
+            WHERE h.uid = %d AND tn.tid = %d";
+    db_query($sql, $user->uid, $current_forum_id);
+
+    // Update the history table with all forum nodes newer than the cutoff.
+    $sql = "INSERT INTO {history} (uid, nid, timestamp)
+            SELECT DISTINCT %d, n.nid, %d
+            FROM {node} AS n
+              INNER JOIN {term_node} AS tn ON n.nid = tn.nid
+              INNER JOIN {node_comment_statistics} AS ncs ON ncs.nid = n.nid
+            WHERE (n.changed > %d OR ncs.last_comment_timestamp > %d) AND tn.tid = %d";
+
+    $args = array($user->uid, time(), NODE_NEW_LIMIT, NODE_NEW_LIMIT, $current_forum_id);
+    db_query($sql, $args);
+
+    // Readpath integration
+    if (module_exists('readpath')) {
+      readpath_clear_readpath();
+    }
+
+    drupal_set_message(t('All content in this forum has been marked as read'));
+    drupal_goto('forum/'. $current_forum_id);
+  }
+  else {
+    // We are on the forum overview, requesting all forums be marked read
+    $forum_vocabulary_id = variable_get('forum_nav_vocabulary', '');
+
+    // Delete the current history entries so already visited nodes get updated.
+    $sql = "DELETE h
+            FROM {history} AS h
+              INNER JOIN {term_node} AS tn ON (h.nid = tn.nid)
+              INNER JOIN {term_data} AS td ON (td.tid = tn.tid)
+            WHERE h.uid = %d AND td.vid = %d";
+    db_query($sql, $user->uid, $forum_vocabulary_id);
+
+    // Update the history table with all forum nodes newer than the cutoff.
+    $sql = "INSERT INTO {history} (uid, nid, timestamp)
+            SELECT DISTINCT %d, n.nid, %d
+            FROM {node} AS n
+              INNER JOIN {term_node} AS tn ON n.nid=tn.nid
+              INNER JOIN {node_comment_statistics} AS ncs ON ncs.nid = n.nid
+              INNER JOIN {term_data} AS td ON tn.tid = td.tid
+            WHERE (n.changed > %d OR ncs.last_comment_timestamp > %d) AND td.vid = %d";
+
+    $args = array($user->uid, time(), NODE_NEW_LIMIT, NODE_NEW_LIMIT, $forum_vocabulary_id);
+
+    db_query($sql, $args);
+
+    drupal_set_message(t('All forum content been marked as read'));
+    drupal_goto('forum');
+  }
+}
+
+/**
+ * Access callback for menus and link display.
+ *
+ * This separate function is needed because the Drupal 6 menu system doesn't
+ * run hook_menu() every time and the logged-in status of the user can get
+ * cached and re-used for other users.
+ */
+function advanced_forum_markasread_access() {
+  global $user;
+  return user_access('access content') && $user->uid;
+}
+
+// STATISTICS ****************************************************************/
+
+/**
+ * Count total amount of forum threads.
+ */
+function advanced_forum_statistics_topics() {
+  return db_result(db_query('SELECT COUNT(DISTINCT(nid)) FROM {forum}'));
+}
+
+/**
+ * Counts total amount of replies. Initial posts are added to this total
+ * in the calling function.
+ *
+ * @param $refresh
+ *   TRUE if the stored count should be updated.
+ * @return
+ *   Total number of replies in the forum.
+ */
+function advanced_forum_statistics_replies($refresh = FALSE) {
+  // Check for cached total.
+  $total_replies = variable_get('advanced_forum_stats_replies', 0);
+
+  // If there's no cache or we need to refresh the cache
+  if ($refresh || $total_replies == 0) {
+    if (module_exists('nodecomment')) {
+      $total_replies = db_result(db_query('SELECT COUNT(cid) FROM {node_comments} c INNER JOIN {forum} f ON (f.nid = c.nid)'));
+    }
+    else {
+      $total_replies = db_result(db_query('SELECT COUNT(cid) FROM {comments} c INNER JOIN {forum} f ON (f.nid = c.nid)'));
+    }
+
+    variable_set('advanced_forum_stats_posts', $total_replies);
+  }
+
+  return $total_replies;
+}
+
+/**
+ * Count total amount of active users.
+ */
+function advanced_forum_statistics_users() {
+  return db_result(db_query('SELECT COUNT(uid) FROM {users} WHERE status = 1'));
+}
+
+/**
+ * Return the latest active user.
+ */
+function advanced_forum_statistics_latest_user() {
+  return db_fetch_object(db_query('SELECT uid, name FROM {users} WHERE status = 1 AND access > 0 ORDER BY created DESC'));
+}
+
+/**
+ * Return an array of online usernames, linked to their profiles.
+ */
+function advanced_forum_statistics_online_users() {
+  $list = array();
+  $interval = time() - variable_get('user_block_seconds_online', 900);
+  $sql = 'SELECT DISTINCT u.uid, u.name, MAX(s.timestamp) as maxtime
+            FROM {users} u
+              INNER JOIN {sessions} s ON u.uid = s.uid
+            WHERE s.timestamp >= %d AND s.uid > 0
+            GROUP BY u.uid, u.name
+            ORDER BY maxtime DESC';
+  $authenticated_users = db_query($sql, $interval);
+
+  while ($account = db_fetch_object($authenticated_users)) {
+    $list[] = theme('username', $account);
+  }
+
+  return $list;
+}
+
+
+// GENERAL UTILITY FUNCTIONS *************************************************/
+
+/**
+ * Returns the path to actual site theme in use because path_to_theme is flaky.
+ */
+function advanced_forum_path_to_theme() {
+  global $theme;
+
+  if (!empty($theme)) {
+    // Normally, the global theme variable is set, so we use that.
+    return drupal_get_path('theme', $theme);
+  }
+
+  // For some reason I've never figured out, some users are reporting
+  // that the global theme variable is not set when this is called.
+  // As a band-aid solution, this will pull the default theme out of the
+  // database and use that.
+  $default_theme = variable_get('theme_default', 'garland');
+  return drupal_get_path('theme', $default_theme);
+}
+
+/**
+ * Manipulate the template suggestions to add in one for each style as well
+ * as the default.
+ */
+function advanced_forum_add_template_suggestions($template, &$template_suggestions) {
+  // We only need to calculate the style lineage once per page load.
+  static $lineage ;
+
+  if (empty($lineage)) {
+    $lineage = advanced_forum_style_lineage();
+    $lineage = array_reverse($lineage, TRUE);
+  }
+
+  // Add in a version without any style name.
+  $template_suggestions[] = "advanced_forum.$template";
+
+  // Add a suggestion for each style in the lineage.
+  foreach ($lineage AS $key => $path) {
+    $template_suggestions[] = "advanced_forum.$key.$template";
+  }
+
+  return;
+}
+
+/**
+ * Adds extra files needed for styling.
+ * This is currently just CSS files but was made generic to allow adding
+ * javascript in the future.
+ */
+function _advanced_forum_add_files() {
+  // This could get called more than once on a page and we only need to do it once.
+  static $added;
+
+  if (!$added) {
+    $added = TRUE;
+    $lineage = advanced_forum_style_lineage();
+    $lineage = array_reverse($lineage, TRUE);
+    $theme_path = advanced_forum_path_to_theme();
+
+    foreach (array('structure.css', 'style.css', 'images.css') as $css_type) {
+      $css_file = "$theme_path/advanced_forum.$css_type";
+      if (file_exists($css_file)) {
+        // CSS files with no style name in the theme directory trump all
+        // to provide a theme specific style override.
+        drupal_add_css($css_file);
+      }
+      else {
+        // For each style from the current style on up through each parent
+        // style, look for the style specific CSS file first in the active
+        // theme and then in the style directory.
+        foreach ($lineage AS $key => $path) {
+          $css_file = "/advanced_forum.$key.$css_type";
+          if (file_exists("$theme_path/$css_file")) {
+            // If the style specific file is in the theme, use that.
+            drupal_add_css("$theme_path/$css_file");
+          }
+          elseif (file_exists("$path/$css_file")) {
+            // Otherwise look in the style for it.
+            drupal_add_css("$path/$css_file");
+          }
+        }
+      }
+    }
+  }
+}
+
+function advanced_forum_get_reply_link($node) {
+  $reply_link = new stdClass;
+
+  // Give nodecomment (if installed) first shot at the comment setting
+  $comment_setting = (empty($node->node_comment)) ? $node->comment : $node->node_comment;
+
+  if ($comment_setting == COMMENT_NODE_READ_WRITE) {
+    if (!empty($node->links['comment_add']['href'])) {
+      // There is an existing link on the node we can pull from.
+      $href = $node->links['comment_add']['href'];
+      $fragment = $node->links['comment_add']['fragment'];
+      $attributes = $node->links['comment_add']['attributes'];
+
+      $reply_link->class = 'reply-allowed';
+      $reply_link->link = l(t('Post Reply') . '<span class="image-replace"></span>', $href, array('fragment' => $fragment, 'html' => TRUE, 'attributes' => $attributes));
+      return $reply_link;
+    }
+
+    if (!module_exists('nodecomment') && user_access('post comments') || !empty($nc_user_access)) {
+      // Comment will not show the link when the form is on the page so we
+      // need to fake it.
+      $href = $_GET['q'];
+      $attributes = array('title' => t('Share your thoughts and opinions related to this posting.'));
+      $current_page = isset($_GET['page']) ? $_GET['page'] : 0;
+      $query = ($current_page) ? "page=$current_page" : NULL;
+      $fragment = 'comment-form';
+
+      $reply_link->class = 'reply-allowed';
+      $reply_link->link = l(t('Post Reply') . '<span class="image-replace"></span>', $href, array('fragment' => $fragment, 'query' => $query, 'html' => TRUE, 'attributes' => $attributes));
+      
+      // Add a couple more properties that lets this function be reused for 
+      // the purpose of getting the link into the node links when the form
+      // is on the same page.
+      $reply_link->href = $href;
+      $reply_link->query = $query;
+      $reply_link->fragment = $fragment;
+
+      return $reply_link;
+    }
+    else {
+      // User does not have access to post replies on this node.
+      $reply_link->class = 'reply-forbidden';
+      $reply_link->link = theme('comment_post_forbidden', $node);
+      return $reply_link;
+    }
+  }
+  else {
+    // Topic is locked
+    $reply_link->class = 'reply-locked';
+    $reply_link->link = t('Locked') . '<span class="image-replace"></span>';
+    return $reply_link;
+  }
+}
+
+/**
+ * Holds the node ID of the thread we are on.
+ *
+ * Used for linking the comment numbers.
+ *
+ * @param $nid
+ *   Node ID
+ */
+function _advanced_forum_topic_nid($node_id = 0) {
+  static $nid;
+
+  if (!empty($node_id)) {
+    $nid = $node_id;
+  }
+
+  return $nid;
+}
+
+/**
+ * Get the page number with the first new post.
+ * This is simply a wrapper to either call the comment module version or the
+ * nodecomment module version.
+ */
+function advanced_forum_page_first_new($num_comments, $new_replies, $node) {
+  $comment_type = module_invoke('nodecomment', 'get_comment_type', $node->type);
+  if (isset($comment_type)) {
+    return nodecomment_new_page_count($num_comments, $new_replies, $node);
+  }
+  else {
+    return comment_new_page_count($num_comments, $new_replies, $node);
+  }
+}
+
+/**
+ * Get the number of new posts on a topic.
+ * This is simply a wrapper to either call the comment module version or the
+ * nodecomment module version.
+ */
+function advanced_forum_reply_num_new($nid, $timestamp = 0) {
+  $node = node_load($nid);
+  $comment_type = module_invoke('nodecomment', 'get_comment_type', $node->type);
+  if (isset($comment_type)) {
+   return nodecomment_num_new($nid, $timestamp);
+ }
+ else {
+   return comment_num_new($nid, $timestamp);
+ }
+}
+
+/**
+ * Get a link to the last post in a topic.
+ *
+ * @param $node
+ *   Node object
+ * @return
+ *   Text linking to the last post in a topic.
+ */
+function advanced_forum_last_post_link($node) {
+  $last_comment_id = advanced_forum_last_post_in_topic($node->nid);
+  $last_page = advanced_forum_get_last_page($node);
+  $query = ($last_page > 0) ? "page=$last_page" : '';
+
+  return l(t('Last post'), "node/$node->nid", array('query' => $query, 'fragment' => "comment-$last_comment_id"));
+}
+
+/**
+ * Get the comment id of the last post in a topic.
+ *
+ * @param $node
+ *   Node object
+ * @return
+ *   cid of last post.
+ */
+function advanced_forum_last_post_in_topic($nid) {
+  $node = node_load($nid);
+  $comment_type = module_invoke('nodecomment', 'get_comment_type', $node->type);
+  if (isset($comment_type)) {
+    // Nodecomment module version
+    $query = 'SELECT nc.cid
+              FROM {node_comments} nc
+                INNER JOIN {node} n ON nc.nid = n.nid
+              WHERE nc.nid = %d AND n.status = 1
+              ORDER BY nc.cid DESC';
+    $result = db_result(db_query_range($query, $nid, 0, 1));
+  }
+  else {
+    // Comment module version
+    $query = 'SELECT c.cid
+              FROM {comments} c
+              WHERE c.nid = %d AND c.status = %d
+              ORDER BY c.cid DESC';
+    $result = db_result(db_query_range($query, $nid, COMMENT_PUBLISHED, 0, 1));
+  }
+
+  return $result;
+}
+
+/**
+ * Returns the page number of the last page starting at 0 like the pager does.
+ */
+function advanced_forum_get_last_page($node) {
+  $comments_per_page = _comment_get_display_setting('comments_per_page', $node);
+  $comment_count = $node->comment_count;
+  $last_page = ceil($comment_count / $comments_per_page) - 1;
+  return $last_page;
+}
+
+/**
+ * Returns the ID of the first unread comment.
+ *
+ * @param $nid
+ *   Node ID
+ * @param $timestamp
+ *   Date/time used to override when the user last viewed the node.
+ * @return
+ *   Comment ID
+ */
+function advanced_forum_first_new_comment($nid, $timestamp = 0) {
+  global $user;
+
+  if ($user->uid) {
+    // Retrieve the timestamp at which the current user last viewed the
+    // specified node.
+    if (!$timestamp) {
+      $timestamp = node_last_viewed($nid);
+    }
+
+    // Set the timestamp to the limit if the node was last read past the cutoff
+    $timestamp = ($timestamp > NODE_NEW_LIMIT ? $timestamp : NODE_NEW_LIMIT);
+
+    // Use the timestamp to retrieve the oldest new comment.
+    $query = 'SELECT c.cid
+              FROM {node} n
+              INNER JOIN {comments} c ON n.nid = c.nid
+              WHERE n.nid = %d AND timestamp > %d AND c.status = %d ORDER BY c.cid';
+    $result = db_result(db_query_range($query, $nid, $timestamp, COMMENT_PUBLISHED, 0, 1));
+
+    return $result;
+  }
+  else {
+    return 0;
+  }
+}
+
+/**
+ * Returns a link directly to the first new post in a topic.
+ *
+ * @param $node
+ *   Node object
+ * @param $comment_count
+ *   Number of comments on passed node.
+ * @return
+ *   Link to the first unread comment with text as "42 new".
+ */
+function advanced_forum_first_new_post_link($node, $comment_count) {
+  $nid = $node->nid;
+  $current_page = isset($_GET['page']) ? $_GET['page'] : 0;
+  $number_new_comments = advanced_forum_reply_num_new($nid);
+
+  if ($number_new_comments > 0) {
+    // Note that we are linking to the cid anchor rather than "new" because
+    // the new links will be gone if we go to another page.
+    $page_of_first_new = advanced_forum_page_first_new($comment_count, $number_new_comments, $node);
+    $cid_of_first_new = advanced_forum_first_new_comment($nid);
+
+    return l($number_new_comments . ' ' . t('new'), 'node/' . $nid, array('query' => $page_of_first_new, 'fragment' => "comment-$cid_of_first_new")) ;
+  }
+}
+
+/**
+ * Creates a pager to place on each multi-page topic of the topic listing page.
+ *
+ * @param $max_pages_to_display
+ *   Number of pages to include on the pager.
+ * @param $topic
+ *   Topic object to create a pager for.
+ * @return
+ *   Object containing the linked pages ready assembly by the theme function.
+ */
+function advanced_forum_create_topic_pager($max_pages_to_display, $topic) {
+  // Find the number of comments per page for the node type of the topic.
+  $comments_per_page = _comment_get_display_setting('comments_per_page', $topic);
+
+  if ($max_pages_to_display > 0 && $topic->num_comments > $comments_per_page) {
+    // Topic has more than one page and a pager is wanted. Start off the
+    // first page because that doesn't have a query.
+    $pager_array = array();
+    $current_display_page = 1;
+    $pager_array[] = l('1', "node/$topic->nid");
+
+    // Find the ending point. The pager URL is always 1 less than
+    // the number being displayed because the first page is 0.
+    $last_display_page = ceil($topic->num_comments / $comments_per_page);
+    $last_pager_page = $last_display_page - 1;
+
+    // Add pages until we run out or until we hit the max to show.
+    while (($current_display_page < $last_display_page) && ($current_display_page < $max_pages_to_display)) {
+      // Move to the next page
+      $current_display_page++;
+
+      // The page number we link to is 1 less than what's displayed
+      $link_to_page = $current_display_page - 1;
+
+      // Add the link to the array
+      $pager_array[] =  l($current_display_page, "node/$topic->nid", array('query' => 'page=' . $link_to_page));
+    }
+
+    // Move to the next page
+    $current_display_page++;
+
+    if ($current_display_page == $last_display_page) {
+      // We are one past the max to display, but it's the last page,
+      // so putting the ...last is silly. Just display it normally.
+      $link_to_page = $current_display_page - 1;
+      $pager_array[] =  l($current_display_page, "node/$topic->nid", array('query' => 'page=' . $link_to_page));
+    }
+
+    $pager_last = '';
+    if ($current_display_page < $last_display_page) {
+      // We are one past the max to display and still aren't
+      // on the last page, so put in ... Last Page(N)
+      $text = t('Last Page');
+      $pager_last_text = l($text, "node/$topic->nid", array('query' => 'page=' . $last_pager_page));
+      $pager_last_number = l($last_display_page, "node/$topic->nid", array('query' => 'page=' . $last_pager_page));
+    }
+
+    $topic_pager = new stdClass();
+    $topic_pager->initial_pages = $pager_array;
+    $topic_pager->last_page_text = $pager_last_text;
+    $topic_pager->last_page_number = $pager_last_number;
+
+    return $topic_pager;
+  }
+}
+
+/**
+ * Retrieves a forum topic's "views count".
+ *
+ * @param $nid
+ *   Node ID
+ * @return
+ *   Total number of times that node has been viewed.
+ */
+function _advanced_forum_get_topic_views_count($nid) {
+  if ($nid > 0) {
+    $views_count = db_result(db_query('SELECT totalcount FROM {node_counter} WHERE nid = %d', $nid));
+  }
+
+  // Make sure it's 0, not blank, for better display.
+  if (empty($views_count)) {
+    $views_count = 0;
+  }
+
+  return $views_count;
+}
+
+/**
+ * Calculates the number of unread replies for each forum and returns the
+ * count for the requested forum.
+ */
+function advanced_forum_unread_replies_in_forum($tid, $uid) {
+  static $result_cache = NULL;
+
+  if (is_NULL($result_cache)) {
+    $result_cache = array();
+    $vid = variable_get('forum_nav_vocabulary', '');
+
+    if (module_exists("nodecomment")) {
+      $sql = "SELECT COUNT(nc.cid) AS count, f.tid
+              FROM {node_comments} nc
+              INNER JOIN {forum} f ON nc.nid = f.nid
+              INNER JOIN {node} n ON nc.cid = n.nid
+              LEFT JOIN {history} h ON nc.nid = h.nid AND h.uid = %d
+              WHERE n.status = 1 AND n.changed > %d AND (n.changed > h.timestamp OR h.timestamp IS NULL)
+              GROUP BY f.tid";
+
+      $sql = db_rewrite_sql($sql);
+    }
+    else {
+      $sql = "SELECT COUNT(c.cid) AS count, f.tid
+              FROM {comments} c
+              INNER JOIN {forum} f ON c.nid = f.nid
+              LEFT JOIN {history} h ON c.nid = h.nid AND h.uid = %d
+              WHERE c.status = 0 AND c.timestamp > %d AND (c.timestamp > h.timestamp OR h.timestamp IS NULL)
+              GROUP BY f.tid";
+
+      $sql = db_rewrite_sql($sql, 'c', 'cid');
+    }
+
+    $result = db_query($sql, $vid, $uid, NODE_NEW_LIMIT);
+    while ($row = db_fetch_array($result)) {
+        $result_cache[$row['tid']] = $row['count'];
+    }
+  }
+
+  return (isset($result_cache[$tid])) ? $result_cache[$tid] : 0;
+}
+
+/**
+ * Returns an array of taxonomy terms in the forum vocabulary.
+ */
+function advanced_forum_get_forum_list($tid = 0) {
+  $forums = array();
+  $vid = variable_get('forum_nav_vocabulary', '');
+  $forums = taxonomy_get_tree($vid, $tid);
+
+  return $forums;
+}
+
+/**
+ * Post render a view and replace any advanced forum tokens.
+ */
+function advanced_forum_views_post_render(&$view, &$output) {
+  if (!$view->style_plugin->uses_row_plugin()) {
+    return;
+  }
+
+  $plugin = $view->display_handler->get_option('row_plugin');
+  if ($plugin == 'node' || $plugin == 'nodecomment_threaded') {
+    // Look for token matches in the output:
+    $matches = array();
+    $tokens = array();
+
+    // We want to change the look of the 'new' marker from the default, slightly:
+    $tokens['<span class="new">' . t('new') . '</span>'] = '<span class="new">(' . t('new') . ')</span>';
+
+    if (preg_match_all('/<!--post:author-pane-([\d]+)-->/us', $output, $matches)) {
+      foreach ($matches[1] as $match => $uid) {
+        $token = $matches[0][$match]; // This is the exact string that matched.
+        if (!isset($tokens[$token])) {
+          $account = user_load($uid);
+          $tokens[$token] = theme('author_pane', $account, 'advanced_forum');
+        }
+      }
+    }
+
+    // Perform replacements.
+    $output = strtr($output, $tokens);
+  }
+}
+
+/**
+ * Allow themable wrapping of all comments.
+ */
+function advanced_forum_comment_wrapper($content, $node) {
+  // See if this is a forum post:
+  $vid = variable_get('forum_nav_vocabulary', '');
+  foreach ($node->taxonomy as $tid => $term) {
+    if ($term->vid == $vid) {
+      return _advanced_forum_comment_wrapper($content, $node);
+    }
+  }
+
+  return phptemplate_comment_wrapper($content, $node);
+}
+
+/**
+ * Wrap forum comments a little differently to make it easier.
+ */
+function _advanced_forum_comment_wrapper($content, $node) {
+  return '<div id="comments" class="forum-comment-wrapper">'. $content .'</div>';
+}
+
+/**
+ * Return an array of node types that can be in the forum.
+ */
+function advanced_forum_get_forum_types() {
+  $vid = variable_get('forum_nav_vocabulary', '');
+  $vocabulary = taxonomy_vocabulary_load($vid);
+  return $vocabulary->nodes;
+}
+
+/**
+ * Return whether a given node type can be in the forum.
+ */
+function advanced_forum_type_is_in_forum($type) {
+  $forum_types = advanced_forum_get_forum_types();
+  if (in_array($type, $forum_types)) {
+    return TRUE;
+  }
+}
+

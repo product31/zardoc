@@ -1,0 +1,382 @@
+# $Id: smileys.pot,v 1.1.2.1 2009/09/13 14:00:40 hass Exp $
+#
+# LANGUAGE translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  smileys.admin.inc,v 1.1.2.3 2009/06/27 14:36:13 Gurpartap
+#  smileys.module,v 1.48.2.17 2009/06/27 15:54:50 Gurpartap
+#  smileys.info,v 1.2.2.2 2008/04/06 19:24:01 Gurpartap
+#  smileys_import.info,v 1.2.2.2 2008/04/06 19:24:01 Gurpartap
+#  smileys_import.module,v 1.2.2.11 2009/06/27 14:48:11 Gurpartap
+#  smileys.js,v 1.1.2.3 2009/01/05 08:50:25 Gurpartap
+#  smileys-admin.js,v 1.1.2.4 2009/06/27 14:36:13 Gurpartap
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2009-09-13 15:59+0200\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: smileys.admin.inc:8
+msgid "Smileys select-box settings"
+msgstr ""
+
+#: smileys.admin.inc:12
+msgid "Enable smileys select box for:"
+msgstr ""
+
+#: smileys.admin.inc:16
+msgid "Nodes"
+msgstr ""
+
+#: smileys.admin.inc:21
+msgid "Comments"
+msgstr ""
+
+#: smileys.admin.inc:26
+msgid "On the following node types"
+msgstr ""
+
+#: smileys.admin.inc:27
+msgid "Select the node types you want to enable Smileys select-box for."
+msgstr ""
+
+#: smileys.admin.inc:33
+msgid "Expand select-box fieldset by default"
+msgstr ""
+
+#: smileys.admin.inc:39
+msgid "Smileys dialog window settings"
+msgstr ""
+
+#: smileys.admin.inc:43
+msgid "Enable Smileys dialog window"
+msgstr ""
+
+#: smileys.admin.inc:44
+msgid "Adds a <em>[more...]</em> link to the end of smileys in select box, which when clicked, opens an inline widget to insert smileys. The widget is an inline popup like approach, allowing ease of usability."
+msgstr ""
+
+#: smileys.admin.inc:49
+msgid "Enable Titles in dialog window"
+msgstr ""
+
+#: smileys.admin.inc:50
+msgid "Groups smileys under their package name."
+msgstr ""
+
+#: smileys.admin.inc:56
+msgid "Make the popup dialog draggable"
+msgstr ""
+
+#: smileys.admin.inc:61
+msgid "Make the popup dialog resizable"
+msgstr ""
+
+#: smileys.admin.inc:66
+msgid "Dialog height (in pixels)"
+msgstr ""
+
+#: smileys.admin.inc:67
+msgid "Enter a value between 200 and 650. Enter <em>0</em> for automatic height (recommended)."
+msgstr ""
+
+#: smileys.admin.inc:74
+msgid "Dialog width (in pixels)"
+msgstr ""
+
+#: smileys.admin.inc:75
+msgid "Enter a value between 200 and 650."
+msgstr ""
+
+#: smileys.admin.inc:89 smileys.module:205
+msgid "Smiley"
+msgstr ""
+
+#: smileys.admin.inc:89;238
+msgid "Visibility"
+msgstr ""
+
+#: smileys.admin.inc:89;231 smileys.module:205
+msgid "Acronyms"
+msgstr ""
+
+#: smileys.admin.inc:89;233
+msgid "Description"
+msgstr ""
+
+#: smileys.admin.inc:89;234
+msgid "Category"
+msgstr ""
+
+#: smileys.admin.inc:89;236
+msgid "Weight"
+msgstr ""
+
+#: smileys.admin.inc:113
+msgid "No smileys in this category"
+msgstr ""
+
+#: smileys.admin.inc:137
+msgid "Edit"
+msgstr ""
+
+#: smileys.admin.inc:137
+msgid "Edit this smiley"
+msgstr ""
+
+#: smileys.admin.inc:138;241
+msgid "Delete"
+msgstr ""
+
+#: smileys.admin.inc:138
+msgid "Delete this smiley"
+msgstr ""
+
+#: smileys.admin.inc:167
+msgid "No smileys found. You may !add, or !import."
+msgstr ""
+
+#: smileys.admin.inc:167
+msgid "add a custom smileys"
+msgstr ""
+
+#: smileys.admin.inc:167
+msgid "import smiley packages"
+msgstr ""
+
+#: smileys.admin.inc:170
+msgid "No smileys found. You may !add, or install smileys_import module & import smiley packages."
+msgstr ""
+
+#: smileys.admin.inc:170
+msgid "add custom smileys"
+msgstr ""
+
+#: smileys.admin.inc:176
+msgid "Visibility Legend"
+msgstr ""
+
+#: smileys.admin.inc:177;238
+msgid "Visible on select box + popup"
+msgstr ""
+
+#: smileys.admin.inc:178;238
+msgid "Visible on only on popup i.e. \"More Smileys\""
+msgstr ""
+
+#: smileys.admin.inc:179;238
+msgid "Invisible (but not disabled)"
+msgstr ""
+
+#: smileys.admin.inc:231
+msgid "Enter a list of shorthands for the smiley you wish to add, separated by spaces. e.g. ':) ;) :smile:'"
+msgstr ""
+
+#: smileys.admin.inc:232
+msgid "Image Path"
+msgstr ""
+
+#: smileys.admin.inc:232
+msgid "Enter the relative of the smiley-image relative to the root of your Drupal site. e.g. 'images/smileys/happy.png'."
+msgstr ""
+
+#: smileys.admin.inc:233
+msgid "A short description of the emotion depicted to be used as tooltip for the image. e.g. 'Laughing out loud'."
+msgstr ""
+
+#: smileys.admin.inc:235
+msgid "Enter new category here"
+msgstr ""
+
+#: smileys.admin.inc:237
+msgid "Stand-alone"
+msgstr ""
+
+#: smileys.admin.inc:237
+msgid "When checked, the smiley will only be inserted when an acronym is found as a separate word. This is useful for preventing accidental smileys with short acronyms."
+msgstr ""
+
+#: smileys.admin.inc:238
+msgid "When checked, the smiley will be shown on the <em>Smiley Select Box</em> in node and comment forms. Unchecked Smileys will be usable only in \"<em>more...</em>\" pop-up widget."
+msgstr ""
+
+#: smileys.admin.inc:239
+msgid "Save"
+msgstr ""
+
+#: smileys.admin.inc:256
+msgid "Updated smiley: %smiley"
+msgstr ""
+
+#: smileys.admin.inc:260
+msgid "Added smiley: %smiley"
+msgstr ""
+
+#: smileys.admin.inc:272
+msgid "Please enter an acronym for your smiley."
+msgstr ""
+
+#: smileys.admin.inc:276
+msgid "Please enter the URL of the smiley image."
+msgstr ""
+
+#: smileys.admin.inc:291
+msgid "Deleted smiley: %smiley"
+msgstr ""
+
+#: smileys.module:11
+msgid "You can edit the Smileys that are recognized in your content."
+msgstr ""
+
+#: smileys.module:27
+msgid "If you include a textual smiley in your post (see chart below), it will be replaced by a graphical smiley."
+msgstr ""
+
+#: smileys.module:31
+msgid "<a href=\"!smileys_help\">Textual smileys</a> will be replaced with graphical ones."
+msgstr ""
+
+#: smileys.module:52
+msgid "Smileys on submission pages"
+msgstr ""
+
+#: smileys.module:58;101;217;301 smileys.info:0;0 smileys_import.info:0
+msgid "Smileys"
+msgstr ""
+
+#: smileys.module:238;242
+msgid "Smileys filter"
+msgstr ""
+
+#: smileys.module:240 smileys.info:0
+msgid "Replaces smileys inside posts with images."
+msgstr ""
+
+#: smileys.module:242
+msgid "You can define a global list of smileys on the !page."
+msgstr ""
+
+#: smileys.module:242
+msgid "smileys settings page"
+msgstr ""
+
+#: smileys.module:19
+msgid "administer smileys"
+msgstr ""
+
+#: smileys.module:19
+msgid "use smiley select box"
+msgstr ""
+
+#: smileys.module:302
+msgid "Manage Smileys and toggle select box behavior for nodes and comments."
+msgstr ""
+
+#: smileys.module:309
+msgid "List"
+msgstr ""
+
+#: smileys.module:317
+msgid "Add"
+msgstr ""
+
+#: smileys.module:325
+msgid "Settings"
+msgstr ""
+
+#: smileys.module:326
+msgid "Smileys configuration."
+msgstr ""
+
+#: smileys.module:336
+msgid "Edit Smiley"
+msgstr ""
+
+#: smileys.module:345
+msgid "Delete Smiley"
+msgstr ""
+
+#: smileys_import.module:10
+msgid "To import new Smileys, download smiley packs for !phpBB or !Adium and extract them in <em>smileys</em> folder under website's files directory."
+msgstr ""
+
+#: smileys_import.module:52;100
+msgid "Smiley Packs"
+msgstr ""
+
+#: smileys_import.module:52;100
+msgid "Operations"
+msgstr ""
+
+#: smileys_import.module:57
+msgid "Uninstall"
+msgstr ""
+
+#: smileys_import.module:57
+msgid "Install"
+msgstr ""
+
+#: smileys_import.module:65
+msgid "No smiley packs found."
+msgstr ""
+
+#: smileys_import.module:79;199;223
+msgid "Cannot find smiley package %pack."
+msgstr ""
+
+#: smileys_import.module:90
+msgid "Bundle a .pak file containing the following text along with each smiley image in the same folder as defined by example:<br /><strong>%package</strong>"
+msgstr ""
+
+#: smileys_import.module:107;28
+msgid "Export"
+msgstr ""
+
+#: smileys_import.module:113
+msgid "No smiley packs to export."
+msgstr ""
+
+#: smileys_import.module:245
+msgid "Smiley package %pack uninstalled."
+msgstr ""
+
+#: smileys_import.module:267
+msgid "Smiley package %pack installed."
+msgstr ""
+
+#: smileys_import.module:21
+msgid "Import"
+msgstr ""
+
+#: smileys_import.info:0
+msgid "Smileys Import"
+msgstr ""
+
+#: smileys_import.info:0
+msgid "Import Smiley packages."
+msgstr ""
+
+#: scripts/smileys.js:0
+msgid "more..."
+msgstr ""
+
+#: scripts/admin/smileys-admin.js:0
+msgid "Saving..."
+msgstr ""
+
+#: scripts/admin/smileys-admin.js:0
+msgid "Saved..."
+msgstr ""
+
+#: scripts/admin/smileys-admin.js:0
+msgid "An error occurred while requesting the server. Be sure that you have proper permission(s), and the server is responding properly."
+msgstr ""
+

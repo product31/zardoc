@@ -1,0 +1,103 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * file_description
+ */
+ 
+/**
+ * Fetch an ArtistData.com events feed.
+ * 
+ * @param $url
+ *   URL of the feed.
+ * @return
+ *   SimpleXML document on success or FALSE on failure.
+ */
+function feedapi_artistdata_fetch($url) {
+  if (!function_exists('simplexml_load_string')) {
+    return FALSE;
+  }
+  $response = drupal_http_request($url);
+
+  if ($response->code == '200') {
+    $xml = new SimpleXMLElement($response->data);
+    if ($xml->getName() == 'shows') {
+      return $xml;
+    }
+  }
+
+  return FALSE;
+}
+
+/**
+ * Implementation of hook_feedapi_feed().
+ */
+function feedapi_artistdata_feedapi_feed($op) {
+  $args = func_get_args();
+  switch ($op) {
+    case 'type':
+      return array('ArtistData.com events feed');
+      
+    case 'compatible':
+      if ($xml = feedapi_artistdata_fetch($args[1]->url)) {
+        return array_shift(feedapi_artistdata_feedapi_feed('type'));
+      }
+      return FALSE;
+      
+    case 'parse':
+      $feed = is_object($args[1]) ? $args[1] : FALSE;
+      $parsed_feed = _feedapi_artistdata_feedapi_parse($feed);
+      return $parsed_feed;
+  }
+}
+
+/**
+ * Parser function for feed api
+ */
+function _feedapi_artistdata_feedapi_parse($feed) {
+  if (is_a($feed, 'SimpleXMLElement')) {
+    $xml = $feed;
+  }
+  else {
+    $xml = feedapi_artistdata_fetch($feed->url);
+    if(!$xml) {
+      return FALSE;
+    }
+  }
+
+  $parsed_source = new stdClass();
+  $parsed_source->title = 'ArtistData.com';
+  $parsed_source->description = 'ArtistData.com events feed';
+  $parsed_source->options = new stdClass();
+  $parsed_source->options->link = $feed->url;
+  $parsed_source->items = array();
+
+  $fields = array('recordKey', 'name', 'city', 'venueName', 'venueZip', 
+    'venuePhone', 'venueAddress', 'ticketURI', 'setType', 'description', 
+    'ageLimit', 'venueURI', 'ticketPrice', 'date', 'timeSet', 'timeDoors', 
+    'stateAbbreviation', 'state', 'countryAbbreviation', 'country', 
+    'artistname', 'artistKey');
+  foreach ($xml->show as $show) {
+    $item = new stdClass();
+    foreach ($fields as $field) {
+      $item->$field = (string)$show->$field;
+    }
+    $item->title = $item->name;
+
+    $item->options = new stdClass();
+    $item->options->guid = $item->recordKey;
+    
+    if ($item->countryAbbreviation == 'US') {
+      $item->location = $item->city .', '. $item->state;
+    }
+    else {
+      $item->location = $item->city .', '. $item->country;
+    }
+
+    $parsed_source->items[] = $item;
+  }
+  return $parsed_source;
+}
+
+

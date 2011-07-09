@@ -1,0 +1,10 @@
+; $Id: wordfilter.info,v 1.1.4.1 2008/04/22 13:14:04 jaydub Exp $
+name = Word Filter
+description = "Replaces words inside posts with filtered versions."
+core = 6.x
+; Information added by drupal.org packaging script on 2010-05-12
+version = "6.x-1.1"
+core = "6.x"
+project = "wordfilter"
+datestamp = "1273645512"
+

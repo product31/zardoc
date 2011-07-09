@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flashheader>
+	
+	<!-- config node will have all the paths to media, css, images and assets and will have global parameters that govern all content (loaded or not) -->
+	<config
+		cssPath='styles/flashheader.css'
+		fontPath='assets/fonts.swf'		
+	/>
+	
+	<textArea id='headline' x='00' y='-75' z='2' transition='alpha' delay='1' width='500' multiline='true' dropshadow='true'><![CDATA[<h1>Alicia Keys</h1>]]></textArea>
+	
+	<!-- this would be an example of a background image -->
+	<!-- <image id='background' x='0' y='0' z='0' src='images/background.png' transition='alpha' delay='0'/> -->
+	<swf id='homeTout' x='25' y='225' z='0' src='swfs/logo.swf' transition='alpha' delay='0'/>
+		
+	<carousel id='mainCarousel' x='0' y='0' z='1' delay='0' transition='alpha' autoRotate='true' defaultTimer='7' useControls='true'>
+	<!--you can change the type to swf or img and load dynamic content for the next and prev buttons -->
+		<control id='next' type='swf' src='images/ui/nextButton.swf' x='55' y='270' transition='alpha'/>		
+		<control id='prev' type='image' src='images/ui/prev.png' x='25' y='270' transition='alpha'/>
+	
+	<!-- each dynamically loaded carousel item will represented by an <item> node
+		node order denotes carousel position. commenting out will stop the content from being 			
+		recognized or loaded by the carousel -->
+		
+		<item tracking='' id='hero' show='true'>
+			<image id='heroImg' x='0' y='0' z='0' src='images/background_alicia_resting.png' transition='alpha' delay='0'/>	
+		</item>
+			
+		<item tracking='' id='hero' overrideTimer='12'>
+			<image x='0' y='0' z='0' src='images/promo_1_background.png' transition='alpha' delay='.2'/>
+			<textArea id="promoHeadline" x='130' y='60' z='1' width='300'  multiline='true' transition='alpha' delay='.4'><![CDATA[<span class='promoHeadline'><b>Buy "The Element of Freedom" <span class="promoHeadlineItalic">Empire Edition</span> Now!</b></span>]]></textArea>
+			<textArea id="promoHeadline" x='130' y= '103' z='2' width='300' multiline='true' transition='alpha' delay='.6'><![CDATA[<span class = 'promoText'>Includes exclusive 7 Track EP. Plus, a chance to win one of 88 Yamaha Piano Keys signed by Alicia.</span>]]></textArea>
+			<textArea id="buyButton" x='343' y= '142' z='3' width='85' multiline='false' transition='alpha' delay='.8'><![CDATA[<span class = 'buyButton'><a href="http://www.aliciakeys.com"><i>buy it now</i></a></span>]]></textArea>
+
+		</item>	
+		
+		<item tracking='' id='hero' overrideTimer='12'>
+			<image x='0' y='0' z='0' src='images/promo_2_background.png' transition='alpha' delay='.2'/>
+			<textArea id="promoHeadlineLarge" x='125' y='35' z='1' width='350'  multiline='true' transition='alpha' delay='.4'><![CDATA[<span class='promoHeadlineLarge'>Alicia's new album<br>"The Element of Freedom"<br><span class="promoHeadlineItalic">In stores now!</span></span>]]></textArea>
+			<image id='heroImg' x='345' y='110' z='2' src='images/logo_itunes.png' transition='alpha' delay='.6' href="http://www.aliciakeys.com" />	
+			<textArea id="buyButton" x='230' y= '125' z='3' width='125' multiline='false' transition='alpha' delay='.8'><![CDATA[<span class = 'buyButton'><a href="http://www.aliciakeys.com">get it at iTunes</a></span>]]></textArea>
+
+		</item>
+		
+		<item tracking='' id='hero' overrideTimer='12'>
+			<image id='heroImg' x='25' y='35' z='1' src='images/text_bubble_with_button.png' transition='alpha' delay='.2' />	
+			<textArea id="promoHeadlineMedium" x='42' y='48' z='2' width='320'  multiline='true' transition='alpha' delay='.4'><![CDATA[<span class='promoHeadlineMedium'>Become and Element of Freedom. <span class="promoHeadlineItalic">Upload your photo<br>to Alicia's Freedom Wall!</span></span>]]></textArea>
+			<image id='heroImg' x='358' y='0' z='3' src='images/becomeAnElement.png' transition='alpha' delay='.6' href="http://www.aliciakeys.com" />	
+			<textArea id="buyButton" x='230' y= '128' z='4' width='125' multiline='false' transition='alpha' delay='.8'><![CDATA[<span class = 'buyButton'><a href="http://www.aliciakeys.com">click here</a></span>]]></textArea>
+
+		</item>
+		
+		<item tracking='' id='hero' overrideTimer='12'>
+			<image id='heroImg' x='0' y='0' z='1' src='images/text_bubble_video_promo.png' transition='alpha' delay='.2' />	
+			<textArea id="promoHeadlineMedium" x='282' y='36' z='2' width='180'  multiline='true' transition='alpha' delay='.4'><![CDATA[<span class='promoHeadlineMedium'>Watch the new video for "Try Sleeping With a Broken Heart."</span>]]></textArea>
+			<image id='heroImg' x='41' y='36' z='3' src='images/video_promo.png' transition='alpha' delay='.6'  href="http://www.aliciakeys.com" />	
+			<textArea id="buyButton" x='265' y= '147' z='4' width='125' multiline='false' transition='alpha' delay='.8'><![CDATA[<span class = 'buyButton'><a href="http://www.aliciakeys.com">watch now</a></span>]]></textArea>
+			<image id='heroImg' x='468' y='32' z='5' src='images/alicia_video_promo.png' transition='alpha' delay='1' />	
+
+		</item>
+		
+		<item tracking='' id='hero' overrideTimer='12'>
+			<image x='0' y='0' z='0' src='images/promo_2_background.png' transition='alpha' delay='.2'/>
+			<textArea id="promoHeadlineLarge" x='175' y='35' z='1' width='300'  multiline='true' transition='alpha' delay='.4'><![CDATA[<span class='promoHeadlineMedium'>Become an AK VIP member today to access unlock exclusive videos, photos, Alicia's blog and more! </span>]]></textArea>
+			<textArea id="buyButton" x='350' y= '137' z='3' width='125' multiline='false' transition='alpha' delay='.8'><![CDATA[<span class = 'buyButton'><a href="http://www.aliciakeys.com">» Sign-Up here!</a></span>]]></textArea>
+			<image x='45' y='27' z='4' src='images/vip_badge.png' transition='alpha' delay='.2'  href='http://www.aliciakeys.com'/>
+
+		</item>
+		
+		<item tracking='' id='hero' overrideTimer='12'>
+			<image x='0' y='0' z='0' src='images/promo_aliciasWords_background.png' transition='alpha' delay='.2'/>
+			<textArea id="promoHeadline" x='140' y='70' z='1' width='300'  multiline='true' transition='alpha' delay='.4'><![CDATA[<span class='promoHeadlineLarge'><span class="promoHeadlineItalic">In Alicia's Words</span></span>]]></textArea>
+			<textArea id="promoHeadline" x='140' y= '100' z='2' width='200' multiline='true' transition='alpha' delay='.6'><![CDATA[<span class = 'promoText'>Alicia breaks down all of her songs in her own words. A new song every week.</span>]]></textArea>
+			<textArea id="buyButton" x='305' y= '170' z='3' width='85' multiline='false' transition='alpha' delay='.8'><![CDATA[<span class = 'buyButton'><a href="http://www.aliciakeys.com">click here</a></span>]]></textArea>
+
+		</item>	
+		
+		<item tracking='' id='hero' overrideTimer='12'>
+			<image id='heroImg' x='0' y='0' z='1' src='images/promo_listenAlbum_background.png' transition='alpha' delay='.2' />	
+			<textArea id="promoHeadlineMedium" x='265' y='36' z='2' width='200'  multiline='true' transition='alpha' delay='.4'><![CDATA[<span class='promoHeadlineMedium'>Listen to the entire "The Element of Freedom" album with lyrics now! </span>]]></textArea>
+			<textArea id="buyButton" x='247' y='152' z='3' width='125' multiline='false' transition='alpha' delay='.6'><![CDATA[<span class = 'buyButton'><a href="http://www.aliciakeys.com">click here!</a></span>]]></textArea>
+
+		</item>
+	
+	</carousel>	
+	
+	<image id='background' x='412' y='207' z='2' src='images/player_background.png' transition='alpha' delay='0'/>
+	
+	<audioPlayer id='audio' autoPlay='false'  x='420' y='217' z='3' showControls='true' volume='.5'><!--state='random'>-->
+	
+		<format 
+			buttonColor='465f80' 
+			buttonRollColor='39466e' 
+			symbolColor='CCCCCC' 
+			symbolRollColor='FFFFFF' 
+			progressBarColor='39466e' 
+			barColor='465f80'
+		/>
+	
+		<track full ='false' startTime ='35000' rtmp ='rtmp://cp52733.edgefcs.net/ondemand/' src='myplay/000/000/000/000/207/946/46/c4d4b6d1e871605b3004c04b4ed905c2/00000000000020794646-64K_22S_2C_cbr1x.mp3' img='http://www.michaelwilson.com/v5/clients/sonymusic/images/album_cover_fpo.jpg'><![CDATA[<span class='trackName'>Home Sweet Home</span>]]></track>
+		
+		<track full ='true' rtmp ='rtmp://cp52733.edgefcs.net/ondemand/' src='myplay/000/000/000/000/128/648/25/ef1217513a3729e3555b8eca0523778a/00000000000012864825-64K_22S_2C_cbr1x.mp3' img='http://creative.sonymusic.com/jrecords/aliciakeys/flashheader/images/album_cover_fpo.jpg'><![CDATA[Crazy Dreams]]></track>
+		
+		<track full ='false' startTime='26000' rtmp ='rtmp://cp52733.edgefcs.net/ondemand/' src='myplay/000/000/000/000/126/258/50/791f626dfed69001582ef1cbc085e003/00000000000012625850-64K_22S_2C_cbr1x.mp3' img='http://creative.sonymusic.com/jrecords/aliciakeys/flashheader/images/album_cover_fpo.jpg'><![CDATA[So Small’]]></track>
+		
+		<track full='true' rtmp ='rtmp://cp52733.edgefcs.net/ondemand/' src='myplay/000/000/000/000/207/943/26/55ddbf83b6e9232f78bf78ca3c54eac0/00000000000020794326-64K_22S_2C_cbr1x.mp3' img='http://creative.sonymusic.com/jrecords/aliciakeys/flashheader/images/album_cover_fpo.jpg'><![CDATA[I Told You So]]></track>
+		
+		<track full ='true' rtmp ='rtmp://cp26115.edgefcs.net/ondemand/' src='Columbia/1-08_Golden_Ticket.flv' img='http://creative.sonymusic.com/jrecords/aliciakeys/flashheader/images/album_cover_fpo.jpg'><![CDATA[Golden Ticket]]></track>
+	</audioPlayer>
+	
+	<contextMenuItem>The Official Alicia Keys Site</contextMenuItem>
+	<contextMenuItem href='http://www.sonymusic.com'>Copyright © 2009 Sony Music Entertainment. All Rights Reserved.</contextMenuItem>
+	
+</flashheader>

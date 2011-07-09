@@ -1,0 +1,13 @@
+To install this module: 
+
+- Copy highslide module to sites/all/modules/highslide
+- Download Highslide JS using one of the following methods:
+  - If you have drush, run the 'drush highslide js' command.
+  - Navigate to http://github.com/q0rban/drupal-highslide-js and download
+    the package.  Copy the highslide-full.min.js from that package into 
+    the sites/all/modules/highslide/highslide directory.
+  - Directly download the JS file from http://j.mp/9VSykG to 
+    sites/all/modules/highslide/highslide
+  - Build your own Highslide JS from http://highlside.com
+- Navigate to admin/build/modules and enable the highslide module.
+- Navigate to admin/user/permissions to set up highslide permissions.

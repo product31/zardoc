@@ -1,0 +1,102 @@
+# Finland translation of sonybmg_profiles (all releases)
+# Copyright (c) 2010 by the Finland translation team
+# Generated from files:
+#  sonybmg_profiles/sonybmg_profiles.info: n/a
+#  sonybmg_profiles/sonybmg_profiles.module: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sonybmg_profiles (all releases)\n"
+"POT-Creation-Date: 2010-04-06 23:06-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Finland\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: sonybmg_profiles.info:0
+msgid "Sony BMG"
+msgstr ""
+
+#: sonybmg_profiles.module:44
+msgid "Profile Favorite Lyric"
+msgstr ""
+
+#: sonybmg_profiles.module:48
+msgid "Profile Fan"
+msgstr ""
+
+#: sonybmg_profiles.module:52
+msgid "Profile Buddylist"
+msgstr ""
+
+#: sonybmg_profiles.module:66
+msgid "Favorite Lyric"
+msgstr ""
+
+#: sonybmg_profiles.module:72
+msgid "Why I'm a Fan"
+msgstr ""
+
+#: sonybmg_profiles.module:80
+msgid "Friends"
+msgstr ""
+
+#: sonybmg_profiles.module:115
+msgid "Usernames must be less than 16 characters."
+msgstr ""
+
+#: sonybmg_profiles.module:137
+msgid ""
+"Many services (AOL, Yahoo Main and others) may mistakenly put your "
+"confirmation email into JUNK or SPAM. If you do not receive an email, "
+"please check there."
+msgstr ""
+
+#: sonybmg_profiles.module:146
+msgid "Please choose a user name that is less than 16 characters."
+msgstr ""
+
+#: sonybmg_profiles.module:158
+msgid ""
+"Your profile image must be at least 160 pixels wide and tall (your "
+"image was @width x @height pixels)."
+msgstr ""
+
+#: sonybmg_profiles.module:210
+msgid "%file removed from the files directory."
+msgstr ""
+
+#: sonybmg_profiles.module:212
+msgid "%file derivatives removed from the imagecache directory."
+msgstr ""
+
+#: sonybmg_profiles.module:217
+msgid "Default user pictures have been reset."
+msgstr ""
+
+#: sonybmg_profiles.module:336
+msgid "<p>No friends listed</p>"
+msgstr ""
+
+#: sonybmg_profiles.module:369
+msgid "Edit your Why I'm a fan"
+msgstr ""
+
+#: sonybmg_profiles.module:378
+msgid "Why are <strong>you</strong> a fan?"
+msgstr ""
+
+#: sonybmg_profiles.module:9
+msgid "Tracks Autocomplete"
+msgstr ""
+
+#: sonybmg_profiles.info:0
+msgid "Sony BMG User Profiles"
+msgstr ""
+
+#: sonybmg_profiles.info:0
+msgid "User profile stuff."
+msgstr ""
+

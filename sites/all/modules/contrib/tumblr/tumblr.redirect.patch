@@ -1,0 +1,17 @@
+? tumblr.redirect.patch
+Index: tumblr.module
+===================================================================
+RCS file: /cvs/drupal-contrib/contributions/modules/tumblr/Attic/tumblr.module,v
+retrieving revision 1.1.2.1
+diff -u -p -r1.1.2.1 tumblr.module
+--- tumblr.module	4 Dec 2007 21:54:43 -0000	1.1.2.1
++++ tumblr.module	30 Mar 2009 16:35:06 -0000
+@@ -46,7 +46,7 @@ function tumblr_check($username, $email,
+ function tumblr_read($username, $options = array()) {
+   $response = drupal_http_request("http://$username.tumblr.com/api/read" . _tumblr_array_to_get($options));
+   
+-  if ($response->code == '200') {
++  if ($response->code == '200' || $response->redirect_code == '200') {
+     $xml = new SimpleXMLElement($response->data);
+     return _tumblr_xml_to_array($xml);
+   }

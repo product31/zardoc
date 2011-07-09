@@ -1,0 +1,322 @@
+# $Id: smileys.es.po,v 1.1.2.1 2009/10/17 22:21:23 hass Exp $
+#
+# LANGUAGE translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  smileys.module,v 1.48.2.3 2008/04/06 19:47:33 Gurpartap
+#  smileys.info,v 1.2.2.2 2008/04/06 19:24:01 Gurpartap
+#  smileys_import.info,v 1.2.2.2 2008/04/06 19:24:01 Gurpartap
+#  smileys_import.module,v 1.2.2.3 2008/04/12 22:12:03 Gurpartap
+#  smileys-admin.js,v 1.1.4.2 2008/04/06 19:24:01 Gurpartap
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Drupal 6.x\n"
+"POT-Creation-Date: 2007-05-02 23:09+0200\n"
+"PO-Revision-Date: 2008-06-05 22:35+0100\n"
+"Last-Translator: Gusgsm <gusgsm@gmail.com>\n"
+"Language-Team: gusgsm <gusgsm@gmail.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-Language: Spanish\n"
+"X-Poedit-Country: SPAIN\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: modules/smileys/smileys.module:8
+msgid "Here you can add/edit the Smileys that are recognised in your content."
+msgstr "Aquí puede editar o añadir los emoticonos que serán reconocidos como tales dentro de sus textos."
+
+#: smileys.module:11
+msgid "You can edit the Smileys that are recognized in your content. Promoted Smileys are shown in the select box only."
+msgstr "Puede editar los emoticonos que sean reconocidos dentro del contenido. Los emoticonos promovidos sólo se muestran en la caja de selección."
+
+#: smileys.module:27
+msgid "If you include a textual smiley in your post (see chart below), it will be replaced by a graphical smiley."
+msgstr "Si incluye un emoticono textual en su envío (véa la tabla más abajo), se remplazará con un emoticono de imagen."
+
+#: smileys.module:31
+msgid "<a href=\"!smileys_help\">Textual smileys</a> will be replaced with graphical ones."
+msgstr "Los <a href=\"!smileys_help\">emoticonos textuales</a> serán reemplazados por imágenes equivalentes."
+
+#: smileys.module:55
+msgid "Smileys on submission pages"
+msgstr "Emoticono en las páginas de enviar"
+
+#: smileys.module:61;100;168;227
+#: smileys.info:0;0
+#: smileys_import.info:0
+msgid "Smileys"
+msgstr "Emoticonos"
+
+#: smileys.module:107
+msgid "[more...]"
+msgstr "[más...]"
+
+#: smileys.module:156;340
+msgid "Smiley"
+msgstr "Emoticono"
+
+#: smileys.module:156;340;415
+msgid "Acronyms"
+msgstr "Emoticonos textuales"
+
+#: smileys.module:180
+msgid "Click to insert acronym"
+msgstr "Haga clic para emoticono textual"
+
+#: smileys.module:189;193
+msgid "Smileys filter"
+msgstr "Filtro de emoticonos"
+
+#: smileys.module:191
+#: smileys.info:0
+msgid "Replaces smileys inside posts with images."
+msgstr "Replaza los emoticonos textuales en los envíos por imágenes equivalentes."
+
+#: smileys.module:193
+msgid "You can define a global list of smileys on the !page."
+msgstr "Puede definir una lista global de emoticonos en la !page."
+
+#: smileys.module:193
+msgid "smileys settings page"
+msgstr "página de opciones de emoticonos"
+
+#: smileys.module:228
+msgid "Manage Smileys and toggle select box behavior for nodes and comments."
+msgstr "Gestionar emoticonos y alternar el comportamiento de la caja de selección para nodos y comentarios."
+
+#: smileys.module:234
+msgid "List"
+msgstr "Lista"
+
+#: smileys.module:241
+msgid "Add"
+msgstr "Añadir"
+
+#: smileys.module:248
+msgid "Settings"
+msgstr "Opciones"
+
+#: smileys.module:249
+msgid "Smileys configuration."
+msgstr "Configuración de emoticonos"
+
+#: smileys.module:258
+msgid "Edit Smiley"
+msgstr "Editar emoticono"
+
+#: smileys.module:266
+msgid "Delete Smiley"
+msgstr "Borrar emoticono"
+
+#: smileys.module:292
+msgid "Smileys select-box settings"
+msgstr "Opciones de la caja de selección de emoticonos"
+
+#: smileys.module:296
+msgid "Enable smileys select box for:"
+msgstr "Activar la caja de selección de emoticonos para:"
+
+#: smileys.module:300
+msgid "Nodes"
+msgstr "Nodos"
+
+#: smileys.module:305
+msgid "Comments"
+msgstr "Comentarios"
+
+#: smileys.module:310
+msgid "On the following node types"
+msgstr "En los siguientes tipos de nodos"
+
+#: smileys.module:311
+msgid "Select the node types you want to enable Smileys select-box for."
+msgstr "Seleccione los tipos de nodos en los que quiere activar la caja de selección de emoticonos."
+
+#: smileys.module:317
+msgid "Expand select-box fieldset by default"
+msgstr "Expandir el campo de la caja de selección de forma predefinida"
+
+#: smileys.module:323
+msgid "Smileys widget-box settings"
+msgstr "Opciones de la ventana emergente de emoticonos"
+
+#: smileys.module:327
+msgid "Enable Smileys Popup box"
+msgstr "Activar caja emergente de emoticonos"
+
+#: smileys.module:328
+msgid "Adds a <em>[more...]</em> link to the end of smileys in select box, which when clicked, opens an inline widget to insert smileys. The widget is an inline popup like approach, allowing ease of usability."
+msgstr "Añade un enlace [más...] al final de la lista de emoticonos en la caja de selección y, cuando se hace clic sobre él, se abre una ventana para poder insertar más emoticonos. Esta ventanilla es una ayuda para la usabilidad."
+
+#: smileys.module:340
+msgid "Promoted"
+msgstr "Promovido"
+
+#: smileys.module:340;417
+msgid "Description"
+msgstr "Descripción"
+
+#: smileys.module:340
+#: smileys_import.module:55;103
+msgid "Operations"
+msgstr "Operaciones"
+
+#: smileys.module:360
+msgid "Edit"
+msgstr "Editar"
+
+#: smileys.module:360;423
+msgid "Delete"
+msgstr "Borrar"
+
+#: smileys.module:380
+msgid "No smileys found. You may !add, or !import."
+msgstr "No se econtraron emoticonos. Puede !add o !import."
+
+#: smileys.module:380;383
+msgid "add custom smileys"
+msgstr "añadir emoticonos personalizados"
+
+#: smileys.module:380
+msgid "import smiley packages"
+msgstr "importar conjuntos de emoticonos"
+
+#: smileys.module:383
+msgid "No smileys found. You may !add, or install smileys_import module & import smiley packages."
+msgstr "No se han encontrado emoticonos. Puede !add o instalar el módulo de importación de emoticonos para importar conjuntos de emoticonos."
+
+#: smileys.module:415
+msgid "Enter a list of shorthands for the smiley you wish to add, separated by spaces. e.g. ':) ;) :smile:'"
+msgstr "Escriba los emoticonos textuales que quiere añadir separándolos con espacios; por ejemplo \":) ;) :) :sonrisa\"."
+
+#: smileys.module:416
+msgid "Image URL"
+msgstr "URL de la imagen"
+
+#: smileys.module:416
+msgid "Enter the URL of the smiley-image relative to the root of your Drupal site. e.g. 'images/smileys/happy.png'."
+msgstr "Escriba la URL de la imagen del emoticono (de forma relativa a la raiz de este sitio Drupal; por ejemplo : \"images/smileys/happy.png\"."
+
+#: smileys.module:417
+msgid "A short description of the emotion depicted to be used as tooltip for the image. e.g. 'Laughing out loud'."
+msgstr "Una breve descripción que se usa como indicación al usuario de qué significa la imagen; por ejemplo: \"Me parto de risa\"."
+
+#: smileys.module:419
+msgid "Stand-alone"
+msgstr "En solitario"
+
+#: smileys.module:419
+msgid "When checked, the smiley will only be inserted when an acronym is found as a separate word. This is useful for preventing accidental smileys with short acronyms."
+msgstr "Si se marca, el emoticono sólo se insertará cuando se encuentre el emoticono textual como palabra suelta. Esto es útil para impedir la sustitución accidental de trozos de palabras con con emoticonos, por ejemplo."
+
+#: smileys.module:420
+msgid "Promote to select box"
+msgstr "Promover a la caja de selección"
+
+#: smileys.module:420
+msgid "When checked, the smiley will be shown on the <em>Smiley Select Box</em> in node and comment forms. Unchecked Smileys will be usable only in \"<em>more...</em>\" pop-up widget."
+msgstr "Si se marca la casilla, el emoticono se mostrará en la caja de selección de emoticonos en los formularios de nodos y comentarios. Los emoticonos que no tengan esta marca sólo se podrán usar a través de una ventana emergente que surge al apretar en enlace \"[más...]\"."
+
+#: smileys.module:421
+msgid "Save"
+msgstr "Guardar"
+
+#: smileys.module:437
+msgid "Updated smiley: %smiley"
+msgstr "Actualizado el emoticono: %smiley"
+
+#: smileys.module:441
+msgid "Added smiley: %smiley"
+msgstr "Añadido el emoticono: %smiley"
+
+#: smileys.module:453
+msgid "Please enter an acronym for your smiley."
+msgstr "Escriba por favor los emoticonos textuales del emoticono."
+
+#: smileys.module:457
+msgid "Please enter the URL of the smiley image."
+msgstr "Escriba por favor la URL de la imagen del emoticono."
+
+#: smileys.module:472
+msgid "Deleted smiley: %smiley"
+msgstr "Borrado el emoticono: %smiley"
+
+#: smileys.module:19
+msgid "administer smileys"
+msgstr "administrar emoticonos"
+
+#: smileys.module:19
+msgid "use smiley select box"
+msgstr "usar caja de selección de emoticonos"
+
+#: smileys.module:0
+msgid "smileys"
+msgstr "emoticonos"
+
+#: smileys_import.module:10
+msgid "Here you can install/uninstall smiley import packs."
+msgstr "Aquí puede instalar y desinstalar los conjuntos de emoticonos importados."
+
+#: smileys_import.module:21
+msgid "Import"
+msgstr "Importar"
+
+#: smileys_import.module:29;110
+msgid "Export"
+msgstr "Exportar"
+
+#: smileys_import.module:55;103
+msgid "Smiley Packs"
+msgstr "Conjuntos de emoticonos"
+
+#: smileys_import.module:60
+msgid "Uninstall"
+msgstr "Desinstalar"
+
+#: smileys_import.module:60
+msgid "Install"
+msgstr "Instalar"
+
+#: smileys_import.module:68
+msgid "No smiley packs found."
+msgstr "No se han encontrado conjuntos de emoticonos"
+
+#: smileys_import.module:82;162
+msgid "Cannot find smiley package %pack."
+msgstr "No se pudo encontrar el conjunto de emoticonos %pack."
+
+#: smileys_import.module:93
+msgid "Please copy and paste the following text into a file at:<br /><strong>%package</strong><br /><em>with each smiley image in the same folder.</em>"
+msgstr "Copie y pegue este texto dentro de un archivo, por favor, en: %package y ponga todos los archivos de imágenes de emoticonos del conjunto en ese mismo directorio."
+
+#: smileys_import.module:116
+msgid "No smiley packs to export."
+msgstr "No hay conjuntos de emoticonos para exportar."
+
+#: smileys_import.module:149
+msgid "Smiley package %pack uninstalled."
+msgstr "El conjunto de emoticonos %pack ha sido desinstalado."
+
+#: smileys_import.module:176
+msgid "Smiley package %pack installed."
+msgstr "El conjunto de emoticonos %pack ha sido instalado."
+
+#: smileys_import.module:0
+msgid "smileys_import"
+msgstr "smileys_import"
+
+#: smileys_import.info:0
+msgid "Smileys Import"
+msgstr "Importar emoticonos"
+
+#: smileys_import.info:0
+msgid "Import Smiley packages."
+msgstr "Importar conjuntos de emoticonos"
+
+#: smileys-admin.js:0
+msgid "An error occurred while requesting the server. Be sure that you have proper permission(s), and the server is responding properly."
+msgstr "Hubo un error al hacer la petición al servidor. Asegúrese de que tiene los permisos necesarios y de que el servidor está respondiendo adecuadamente."
+

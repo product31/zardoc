@@ -1,0 +1,47 @@
+# Italy translation of sonybmg_discography (all releases)
+# Copyright (c) 2010 by the Italy translation team
+# Generated from file: sonybmg_discography/sonybmg_discography.install: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sonybmg_discography (all releases)\n"
+"POT-Creation-Date: 2010-04-08 17:00-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Italy\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: sonybmg_discography.install:15
+msgid "Created content types."
+msgstr ""
+
+#: sonybmg_discography.install:19
+msgid "Initialized content type settings."
+msgstr ""
+
+#: sonybmg_discography.install:23
+msgid "Initialized pathauto variables."
+msgstr ""
+
+#: sonybmg_discography.install:27
+msgid "Initialized custom flags."
+msgstr ""
+
+#: sonybmg_discography.install:31
+msgid "Initialized roles"
+msgstr ""
+
+#: sonybmg_discography.install:35
+msgid "Initialized menu."
+msgstr ""
+
+#: sonybmg_discography.install:39
+msgid "Initialized block placement."
+msgstr ""
+
+#: sonybmg_discography.install:43
+msgid "Set the default fivestar widget display."
+msgstr ""
+

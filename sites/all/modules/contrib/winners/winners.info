@@ -1,0 +1,6 @@
+; $Id: winners.info,v 1.1.2.1 2010/04/01 19:25:35 andrewlevine Exp $
+name = Winners
+description = Allows an administrator to pick winners of contests
+core = 6.x
+dependencies[] = views
+dependencies[] = ctools

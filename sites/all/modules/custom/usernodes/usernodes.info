@@ -1,0 +1,4 @@
+; $Id$
+name = Usernodes
+description = Allows admin to set a limit, by node type, for how many nodes a user can create of that type.
+core = 6.x

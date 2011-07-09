@@ -1,0 +1,916 @@
+<?php
+// $Id$
+/**
+ * @file
+ * Exposes default content types, views, and utility functions for Sony BMG artist sites.
+ */
+
+/**
+ * Implementation of hook_perm().
+ */
+function sonybmg_perm() {
+  return array('sonybmg raised memory limit');
+}
+
+/**
+ * Implementation of hook_init().
+ *
+ * Raise the memory limit for any user with the right permission. Note that this
+ * will not run for cached pages so there is no extra overhead in that case.
+ * Also raise memory limit for anyone using drush on the CLI.
+ */
+function sonybmg_init() {
+  global $conf;
+
+  // Set variables for security (emaillog & errorlog).
+  $conf['emaillog_0'] = 'drupal.security@sonymusicd2c.com';
+  $conf['emaillog_1'] = 'drupal.security@sonymusicd2c.com';
+  $conf['emaillog_2'] = 'drupal.security@sonymusicd2c.com';
+  $conf['errorlog_0'] = 1;
+  $conf['errorlog_1'] = 1;
+  $conf['errorlog_2'] = 1;
+
+  if (user_access('sonybmg raised memory limit') || (function_exists('drush_verify_cli') && drush_verify_cli())) {
+    $mem = intval(ini_get('memory_limit'));
+    if ($mem < 64) {
+      ini_set('memory_limit', '64M');
+    }
+  }
+
+  // Avoid admin pages and panels ajax requests.
+  $menu_item = menu_get_item();
+  if (arg(0) != 'admin' && $menu_item['path'] != 'panels/ajax' && variable_get('sonybmg_use_modals', 0)) {
+    // modals, modals, everywhere!
+    ctools_include('modal');
+    ctools_modal_add_js();
+    drupal_add_js(drupal_get_path('module', 'sony_coppa') .'/sony_coppa.js', 'module', 'footer');
+    drupal_add_js(drupal_get_path('module', 'sonybmg') .'/modal/ajax.js', 'module', 'footer');
+    drupal_add_css(drupal_get_path('module', 'sonybmg') .'/modal/modal.css');
+  }
+}
+
+/**
+ * Implementation of hook_boot().
+ */
+function sonybmg_boot() {
+  $hostname = '';
+  exec('hostname', $hostname);
+  $hostname = trim(implode('', $hostname));
+  header('X-Source-Host: '. $hostname);
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function sonybmg_menu() {
+  $items['category/%'] = array(
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('access content'),
+    'page callback' => 'sonybmg_term_goto',
+    'page arguments' => array(1),
+    'file' => 'sonybmg.pages.inc',
+  );
+
+  $items['admin/settings/sonybmg_label'] = array(
+    'title' => 'Sony BMG record label settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sonybmg_label_admin_settings'),
+    'description' => 'Setup record label settings; affects toolbar, and footer.',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'sonybmg.pages.inc',
+  );
+
+  $items['admin/settings/sonybmg_label/preview'] = array(
+    'page callback' => 'sonybmg_label_admin_preview_footer',
+    'page arguments' => array(4),
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('administer site configuration'),
+    'file' => 'sonybmg.pages.inc',
+  );
+
+  $items['sonybmg/access-denied'] = array(
+    'page callback' => 'sonybmg_access_denied',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'sonybmg.pages.inc',
+  );
+
+  $items['mobileadmin'] = array(
+    'page callback' => 'sonybmg_mobile_admin_cookie',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'sonybmg.pages.inc',
+  );
+
+  $items['admin/sony'] = array(
+    'title' => 'Sony Multisite Configuration',
+    'description' => 'Various settings and utilities for the Sony Multisite Platform.',
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('administer site configuration'),
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+  );
+  $items['admin/sony/add_day_to_dates'] = array(
+    'title' => 'Date fix',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sonybmg_add_day_to_dates_form'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'sonybmg.pages.inc',
+  );
+
+  $items['admin/sony/general'] = array(
+    'title' => 'General',
+    'description' => 'General settings for the Sony Platform.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sonybmg_settings_general'),
+    'access arguments' => array('administer site configuration'),
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_views_api().
+ */
+function sonybmg_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'sonybmg'),
+  );
+}
+
+/**
+ * Implementation of hook_nodeapi().
+ */
+function sonybmg_nodeapi(&$node, $op, $teaser, $page) {
+  // Do not display the rating if empty.
+  if ($node->type == 'review' && $op == 'view') {
+    if (empty($node->field_rating[0]['rating'])) {
+      unset($node->content['field_rating']);
+    }
+  }
+}
+
+/**
+ * Implementation of hook_default_panel_pages().
+ */
+function sonybmg_default_panel_pages() {
+  module_load_include('inc', 'sonybmg', 'sonybmg.panels');
+  return _sonybmg_default_panel_pages();
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function sonybmg_theme() {
+  return array(
+    'sonybmg_footer' => array(),
+    'sonybmg_toolbar' => array(),
+    'sonybmg_block_fans_custom_pics' => array(
+      'accounts' => NULL,
+    ),
+    'sonybmg_upload' => array(
+      'type' => NULL,
+    ),
+    'sonybmg_formatter_links_dropdown' => array(
+      'arguments' => array('element' => NULL),
+      'file' => 'includes/links.inc',
+    ),
+    'sonybmg_dropdown_links' => array(
+      'arguments' => array('links' => array(), 'title' => '', 'attributes' => array()),
+      'file' => 'includes/links.inc',
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_block().
+ */
+function sonybmg_block($op = 'list', $delta = 0, $edit = array()) {
+  if ($op == 'list') {
+    // The three blocks below have been moved to sonybmg_profile.module.
+    /*
+    $blocks[0]['info'] = t("Profile Favorite Lyric");
+    $blocks[1]['info'] = t("Profile Fan");
+    $blocks[2]['info'] = t("Profile Buddylist");
+    */
+    // The blocks below are from the D5 module. We should preserve their deltas so as not to screw up the upgrade path.
+    /*
+    //$blocks[3]['info'] = t("Front Who's Online");
+    //$blocks[4]['info'] = t("Front Flash Switcher");
+    //$blocks[5]['info'] = t("Front Calendar");
+    //$blocks[6]['info'] = t("Front Photos");
+    //$blocks[7]['info'] = t("Front Videos");
+    $blocks[8]['info'] = t("Front Fans & Poll");
+    $blocks[9]['info'] = t("Front Buy It");
+    $blocks[10]['info'] = t('Page sidebar');
+    $blocks[11]['info'] = t("Latest Poll");
+    */
+    // New deltas will now start at 12.
+    $blocks[10]['info'] = t('Page sidebar');
+    // not worth caching since we would need per page and per role caching
+    $blocks[10]['cache'] = BLOCK_NO_CACHE;
+
+    $blocks[12]['info'] = t('Fans with custom avatars');
+
+    return $blocks;
+  }
+  if ($op == 'configure' && $delta == 12) {
+    $form['number_fans'] = array(
+      '#type' => 'select',
+      '#title' => t('Number of fans to display'),
+      '#default_value' => variable_get('sonybmg_block_number_fans', '8'),
+      '#options' => range(0, 20),
+    );
+
+    $options['sonybmg_avatar_original'] = t('no image processing (returns file path only)');
+
+    foreach (imagecache_presets() as $pid => $preset) {
+      $options[$preset['presetname']] = $preset['presetname'];
+    }
+
+    $form['image_cache'] = array(
+      '#type' => 'select',
+      '#title' => t('ImageCache to be used'),
+      '#default_value' => variable_get('sonybmg_block_imagecache', 'icon_large'),
+      '#options' => $options,
+    );
+    return $form;
+  }
+  else if ($op == 'save' && $delta == 12) {
+    variable_set('sonybmg_block_imagecache', $edit['image_cache']);
+    variable_set('sonybmg_block_number_fans', $edit['number_fans']);
+  }
+
+  if ($op == 'view' && user_access('access content')) {
+    global $user;
+
+    if (arg(0) == 'user' && is_numeric(arg(1))) {
+      $account = user_load(array('uid' => arg(1)));
+    }
+    else {
+      $account = $user;
+    }
+
+    switch ($delta) {
+      case 10:
+        if ($node = menu_get_object('node', 1)) {
+          if ($node->type == 'page' && !empty($node->field_sidebar_content)) {
+            $sidebar = $node->field_sidebar_content[0];
+            if ($sidebar['value']) {
+              // We skip the access check, otherwise the block content ends up
+              // "n/a" for anonymous users.
+              $block['content'] = check_markup($sidebar['value'], $sidebar['format'], FALSE);
+            }
+          }
+        }
+        break;
+      case 12:
+        $block = array(
+          'subject' => t('Fans'),
+          'content' => sonybmg_block_display_fans()
+        );
+        break;
+    }
+    return isset($block) ? $block : null;
+  }
+}
+
+/**
+ * Display fans who have custom avatars for block.
+ */
+function sonybmg_block_display_fans() {
+  $query = db_query('SELECT u.uid, u.picture, u.name FROM {users} u WHERE u.uid <> 0 AND u.picture <> "" ORDER BY u.access DESC LIMIT %d', variable_get('sonybmg_block_number_fans', '8'));
+  $imagecache_preset = variable_get('sonybmg_block_imagecache', 'icon_large');
+  while ($account = db_fetch_object($query)) {
+    if ($imagecache_preset != 'sonybmg_avatar_original') {
+      $account->picture = theme('imagecache', $imagecache_preset, $account->picture);
+    }
+    $accounts[] = $account;
+  }
+  if (!empty($accounts)) {
+    return theme('sonybmg_block_fans_custom_pics', $accounts);
+  }
+}
+
+/**
+ * Theme the display for the fans custom avatars block.
+ */
+function theme_sonybmg_block_fans_custom_pics($accounts) {
+  $output = '';
+  $output .= '<div id="home-fans">';
+  $output .= '  <div id="fan-thumbs">';
+  foreach ($accounts as $account) {
+    $title = t('Check out %username\'s profile!', array('%username' => $account->name));
+    $output .= l($account->picture, 'user/'. $account->uid, array('html' => TRUE, 'attributes' => array('title' => $title)));
+  }
+  $output .= '  </div>';
+  $output .= '  <div class="more">'. t('<a href="@fans_url" class="more">More fans</a>', array('@fans_url' => url('profile'))) .'</div>';
+  $output .= '</div>';
+  return $output;
+}
+
+/**
+ * Implementation of hook_form_alter().
+ *
+ * Specific to the system_site_information_settings form
+ */
+function sonybmg_form_system_site_information_settings_alter(&$form, $form_state) {
+  $form['artist_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Artist Name'),
+    '#default_value' => variable_get('artist_name', ''),
+    '#description' => t('This field must only be the Artist Name. It will be used for Page Titles, Footer Links, and Album Imports.'),
+    '#required' => 1,
+    '#weight' => -10,
+  );
+  $form['artist_type'] = array(
+    '#type' => 'radios',
+    '#title' => t('Artist Type'),
+    '#options' => array(
+      'band' => t('Band'),
+      'musician' => t('Musician'),
+    ),
+    '#default_value' => variable_get('artist_type', ''),
+    '#description' => t('This is the artist type, used throughout the site.'),
+  );
+  if (module_exists('nodewords')) {
+    $form['#submit'][] = 'sonybmg_update_nodewords';
+  }
+}
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function sonybmg_form_alter(&$form, $form_state, $form_id) {
+
+  // Kill the teaser splitter.
+  if (preg_match('/_node_form$/', $form_id)) {
+    // Remove the teaser splitter.
+    if (isset($form['body_field']['#after_build'])) {
+      $teaser_js_build = array_search('node_teaser_js', $form['body_field']['#after_build']);
+      unset($form['body_field']['#after_build'][$teaser_js_build]);
+    }
+    $form['body_field']['teaser_js']['#access'] = FALSE;
+    $form['body_field']['teaser_include']['#access'] = FALSE;
+  }
+//  if($form['widget']['label']['#value'] == 'Copyright holder') {
+//   $form['field']['allowed_values_fieldset']['advanced_options']['allowed_values_php']['#default_value'] = '$value[0] = \'n/a\';
+//$value[1] = t(\'I have the right to distribute this photo and it does not violate the <a href=\"http://sonymusic.com/termsandconditions.html\">Terms of use</a>\');
+//return $value;';
+//  }
+}
+
+/**
+ * Submit callback for system_site_information_settings form when nodewords
+ * module is installed.
+ */
+function sonybmg_update_nodewords() {
+  $artist_name = variable_get('artist_name', '');
+  $type = 'page';
+  $id = '';
+  $description = "The official website of $artist_name. Here you'll find the latest news, music, videos, albums, events and more for $artist_name.";
+  $keywords = "$artist_name official website, home page";
+  if (!_nodewords_load('page', '')) {
+    _nodewords_update_tag($type, $id, 'keywords', $keywords);
+    _nodewords_update_tag($type, $id, 'description', $description);
+  }
+}
+
+/**
+ * Based on selected record label, will return the toolbar code.
+ */
+function sonybmg_get_toolbar_code() {
+  $label = variable_get('sonybmg_label', NULL);
+  switch ($label) {
+    case 'j':
+      return 'jrecords';
+    case 'victor';
+    case 'sonybmglatin';
+    case 'columbia':
+    case 'epic':
+    case 'legacy':
+    case 'masterworks':
+    case 'nashville':
+    case 'rca':
+    case 'zomba':
+      return $label;
+    default:
+      return 'sonybmg';
+  }
+}
+
+/**
+ * Outputs the toolbar at the very top of the page. Includes featured artists,
+ * ringtones, videos, etc.
+ *
+ * @ingroup themeable
+ */
+function theme_sonybmg_toolbar() {
+  return '<iframe src="http://toolbar.sonybmg.com/'. sonybmg_get_toolbar_code() .'/" name="toolbarframe" height="26" width="100%" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>';
+}
+
+/**
+ * Outputs the footer at the very top of the page. Includes record label.
+ *
+ * @ingroup themeable
+ */
+function theme_sonybmg_footer($footer = NULL) {
+  if (!isset($footer)) {
+    $footer = variable_get('sonybmg_footer', 'nologo');
+  }
+  if (module_exists('devel_themer') && user_access('access devel information')) {
+    return '';
+  }
+
+  if ($footer == 'custom') {
+    return variable_get('sonybmg_footer_custom', '');
+  }
+
+  return '<script language="javascript" type="text/JavaScript" src="http://www.sonymusic.com/footers/'. $footer .'.js"></script>';
+}
+
+/**
+ * Custom theme function for appearance of upload buttons
+ * @param $type
+ *   The type of node to be uploaded (photo, official_photo, buddy_icon, etc)
+ */
+function theme_sonybmg_upload($type) {
+  $type_url_str = str_replace('_', '-', $type); // taken from node_menu().
+  return '<div class="upload">'. t('<a href="@upload_url" class="upload">Upload</a>', array('@upload_url' => url('node/add/'. $type_url_str))) .'</div>';
+}
+
+/**
+ * Implementation of hook_preprocess_page().
+ */
+function sonybmg_preprocess_page(&$variables) {
+  $variables['namespaces'] = drupal_attributes(sonybmg_namespaces());
+}
+
+/**
+ * Implementation of hook_preprocess_views_view().
+ * Conditionally append the create news article link to the empty text of the
+ * news_blog view.
+ */
+function sonybmg_preprocess_views_view(&$variables) {
+  if ($variables['name'] == 'news_blog') {
+    if (node_access('create', 'news')) {
+      $variables['empty'] .= t('<a href="@news_url">Create a news article</a>', array('@news_url' => url('node/add/news', array('query' => drupal_get_destination()))));
+    }
+  }
+}
+
+/**
+ * Scan a module directory for default views include files.  This allows you to
+ * drop an exported view into a new php file named views.view_name.inc, where
+ * view_name is the name of the view.  The file should contain only the opening
+ * <?php tag, an optional file comment, and the output of the views export. The
+ * hook_views_default_views() implementation should then contain only the call
+ * to this function.  The default views include files should be located in a
+ * sub-directory of the module directory, named views.
+ *
+ * @see sonybmg_views_default_views()
+ *
+ * @param $module
+ *   The module to be scanned for default views.
+ */
+function sonybmg_include_default_views($module) {
+  $views = array();
+
+  $files = file_scan_directory(drupal_get_path('module', $module) .'/views', 'views\..+.\inc');
+  foreach ($files as $file) {
+    $view = _sonybmg_include_default_view($file->filename);
+    if ($view) {
+      $views[$view->name] = $view;
+    }
+  }
+
+  return $views;
+}
+
+/**
+ * Include a single default views include file and return the view object from
+ * it. This is done in a separate function to limit the scope of what can be
+ * modified from the include file. The include files may use the $php_format
+ * variable in the definition to safely reference a php code input format.
+ *
+ * @param $filepath
+ *   The filepath for the views include file.
+ * @return
+ *   The full view object if found, FALSE on failure.
+ */
+function _sonybmg_include_default_view($filepath) {
+  // figure out which format is the php code format.  For drupal 5 upgrades this
+  // will be 2.  For new drupal 6 sites, this will (usually) be 3.  Since these
+  // views need to work in both cases, the format must be figured out.
+  $php_format = db_result(db_query_range('SELECT format FROM {filters} WHERE module = "php"', 0, 1));
+
+  $view = NULL;
+  include_once($filepath);
+  if (is_object($view) && is_a($view, 'view')) {
+    return $view;
+  }
+
+  return FALSE;
+}
+
+/**
+ * Implementation of hook_form_alter().
+ *
+ * Specific to the system_themes_form form
+ */
+function sonybmg_form_system_themes_form_alter(&$form, $form_state) {
+  $hide = array('bluemarine', 'chameleon', 'marvin', 'pushbutton');
+  foreach($form['status']['#options'] as $key => $value) {
+    if(!empty($form[$key]['info']['#value']['hidden']) || in_array($key, $hide)) {
+      unset($form['status']['#options'][$key]);
+      unset($form['theme_default']['#options'][$key]);
+      unset($form[$key]);
+    }
+  }
+}
+
+/**
+ * Implementation of hook_link()
+ */
+function sonybmg_link($type, $object = NULL, $teaser = FALSE) {
+  global $user;
+  $links = array();
+  if ($type == 'node' && $teaser) {
+    $links['sonybmg_permalink'] = array(
+      'title' => $object->type == 'date' ? t('Full Details') : t('Permalink'),
+      'href' => "node/$object->nid",
+    );
+  }
+
+  if ($type == 'node' && node_access('update', $object)) {
+    $links['sonybmg_edit'] = array(
+      'title' => t('Edit'),
+      'href' => "node/$object->nid/edit",
+      'query' => drupal_get_destination(),
+    );
+  }
+
+  if ($type == 'node' && node_access('delete', $object)) {
+    $links['sonybmg_delete'] = array(
+      'title' => t('Delete'),
+      'href' => "node/$object->nid/delete",
+      'query' => drupal_get_destination(),
+    );
+  }
+  return $links;
+}
+
+/**
+ * Implementation of hook_link_alter()
+ */
+function sonybmg_link_alter(&$links, $node) {
+  $new_links = array();
+  foreach ($links as $key => $link) {
+    // Remove comment edit and delete links
+    if ($key == 'comment_edit' || $key == 'comment_delete' || $key == 'comment_reply') {
+      unset($links[$key]);
+    }
+    elseif ($key == 'comment_forbidden' && ($node->type == 'comment' || $node->type == 'review')) {
+      unset($links[$key]);
+    }
+    // Remove Flag as Offensive link from Artist posts or promotted Fan content
+    elseif ($key == 'flag_content' || $key == 'flagged_content') {
+      if ($node->type == 'blog' && $node->uid && user_access('create news content', user_load(array('uid' => $node->uid)))) {
+        unset($links[$key]);
+      }
+      elseif ($node->type == 'fan' && $node->promote) {
+        unset($links[$key]);
+      }
+    }
+  }
+  $links = array_merge($links, $new_links);
+}
+
+/**
+ * Return a "zone" for ad code
+ */
+function sonybmg_zone() {
+  static $zone;
+
+  if (!isset($zone)) {
+
+    if (drupal_is_front_page()) {
+      $zone = 'home';
+    }
+    elseif ($node = menu_get_object('node', 1)) {
+      switch ($node->type) {
+        case 'photo':
+        case 'official_photo':
+          $zone = 'photos';
+          break;
+
+        case 'album':
+        case 'review':
+          $zone = 'music';
+          break;
+
+        case 'track':
+          $zone = 'lyrics';
+          break;
+
+        case 'news':
+        case 'blog':
+          $zone = 'news';
+          break;
+
+        case 'date':
+          $zone = 'events';
+          break;
+
+        case 'buddy_icon':
+        case 'wallpaper':
+          $zone = 'extras';
+          break;
+
+        case 'forum':
+        case 'forum_reply':
+        case 'fan':
+        case 'poll':
+          $zone = 'fanclub';
+          break;
+      }
+    }
+
+    if (!$zone) {
+      $alias = drupal_get_path_alias($_GET['q']);
+      $args = explode('/', $alias);
+      switch ($args[0]) {
+        case 'biography':
+          $zone = 'bio';
+          break;
+
+        case 'user':
+          $zone = 'fanclub';
+          break;
+
+        default:
+          $zone = $args[0];
+          break;
+      }
+    }
+
+  }
+
+  return $zone;
+}
+
+/**
+ * Implementation of hook_popups_skins.
+ */
+function sonybmg_popups_skins() {
+  $skins = array();
+  $skins['Sony Music'] = array(
+    'css' => drupal_get_path('module', 'sonybmg') .'/popup/popup.css',
+    'js' => drupal_get_path('module', 'sonybmg') .'/popup/popup.js',
+  );
+
+  return $skins;
+}
+/**
+ * Implementation of hook_ctools_plugin_api($module, $api).
+ */
+function sonybmg_ctools_plugin_api($module, $api) {
+  if ($module == 'page_manager' && $api == 'pages_default') {
+    return array('version' => 1);
+  }
+}
+
+/**
+ * General settings form builder.
+ */
+function sonybmg_settings_general() {
+  $form = array();
+  $form['sonybmg_use_modals'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use CTools modal windows?'),
+    '#default_value' => variable_get('sonybmg_use_modals', 0),
+  );
+
+  return system_settings_form($form);
+}
+
+function sonybmg_ajax_command_reload() {
+  return array(
+    'command' => 'reload',
+  );
+}
+
+function sonybmg_ajax_command_redirect($url) {
+  return array(
+    'command' => 'redirect',
+    'url' => url($url),
+  );
+}
+
+function sonybmg_ajax_command_load_css($file) {
+  return array(
+    'command' => 'loadCSS',
+    'file' => $file,
+  );
+}
+
+function sonybmg_modal_command_messages($title = NULL) {
+  if ($messages = theme('status_messages')) {
+    $html = '<div class="messages">' . $messages . '</div>';
+    $command = ctools_modal_command_display($title, $html);
+  }
+  else {
+    $command = array();
+  }
+  return $command;
+}
+
+/*
+ * Implementatin of hook_user().
+ * If a role is added to a user, mark it as an 'alert' in the watchdog.
+ * The logging and alerts module will then send an email to the list.
+ */
+function sonybmg_user($type, &$edit, &$account, $category = NULL) {
+  switch ($type) {
+    case 'update':
+    case 'insert':
+      if (isset($edit['roles'])) {
+        sonybmg_user_save((isset($account->uid) ? $account->uid : FALSE), $edit, $account);
+      }
+      break;
+  }
+}
+
+
+/**
+ * Process role add/remove.
+ */
+function sonybmg_user_save($uid, &$form, $account) {
+  // skip scratch or local sites
+  if ((($_SERVER['REMOTE_ADDR'] == '192.168.100.103') && (strpos($_SERVER['SERVER_NAME'], 'scratch') !== FALSE)) || $_SERVER['REMOTE_ADDR'] == '127.0.0.1') {
+    return;
+  }
+
+  $old_roles = array_keys($account->roles);
+  $new_roles = array_keys($form['roles']);
+
+  // strip out opendisc (and potentially other) roles that we don't care about
+  _sonybmg_roles_check($old_roles);
+  _sonybmg_roles_check($new_roles);
+
+  //is role added?
+  foreach ($new_roles as $rid) {
+    _sonybmg_add_role($rid, $old_roles, $account);
+  }
+  //is role removed?
+  foreach ($old_roles as $rid) {
+    _sonybmg_remove_role($rid, $new_roles, $account, FALSE);
+  }
+}
+
+/**
+ * Internal function. Strip out un-needed roles before sending alerts
+ *
+ * @param array $roles
+ * @return array
+ */
+function _sonybmg_roles_check(&$roles) {
+  // add new roles to be ignored to the array below
+  $ignored_role_names = array('opendisc user');
+  $all_roles = user_roles();
+  $ignored_role_ids = array();
+  foreach($ignored_role_names as $ignored_role_name) {
+    if ($ignored_role_id = array_search($ignored_role_name, $all_roles)) {
+      $ignored_role_ids[] = $ignored_role_id;
+    }
+  }
+
+  foreach ($roles as $key => $roleid) {
+    if (in_array($roleid, $ignored_role_ids)) {
+      unset($roles[$key]);
+    }
+  }
+  return $roles;
+}
+
+/**
+ * Internal function
+ *
+ * Handles addition of roles.
+ */
+function _sonybmg_add_role($rid, $old_roles = array(), $account) {
+  if (!in_array($rid, $old_roles)) {
+    global $user;
+    $roles = user_roles();
+    $message = t('Role %role added to %account (%account-mail) by %user (%user-mail)',
+                  array('%user' => $user->name,
+                        '%role' => $roles[$rid],
+                        '%user-mail' => $user->mail,
+                        '%account' => $account->name,
+                        '%account-mail' => $account->mail));
+
+    watchdog('user', $message, NULL, WATCHDOG_ALERT);
+
+    return 1;
+  }
+  return 0;
+}
+
+/**
+ * Internal function
+ *
+ * Handles removal of roles.
+ */
+function _sonybmg_remove_role($rid, $old_roles = array(), $account, $in_array = TRUE) {
+  if ($rid > 2 && (in_array($rid, $old_roles) xor !$in_array)) {
+    global $user;
+    $roles = user_roles();
+    $message = t('Role %role removed from %account (%account-mail) by %user (%user-mail)',
+                  array('%user' => $user->name,
+                        '%role' => $roles[$rid],
+                        '%user-mail' => $user->mail,
+                        '%account' => $account->name,
+                        '%account-mail' => $account->mail));
+
+    watchdog('user', $message, NULL, WATCHDOG_ALERT);
+    return 1;
+  }
+  return 0;
+}
+
+/**
+ * Implementation of hook_field_formatter_info().
+ */
+function sonybmg_field_formatter_info() {
+  return array(
+    'links_dropdown' => array(
+      'label' => t('Dropdown list of links'),
+      'field types' => array('link'),
+      'multiple values' => CONTENT_HANDLE_MODULE,
+    ),
+  );
+}
+
+/**
+* Implementation of hook_action_info().
+*/
+function sonybmg_action_info() {
+  return array(
+    'sonybmg_enable_comments' => array(
+      'description' => t('Enable comments on a node'),
+      'type' => 'node',
+      'configurable' => FALSE,
+      'hooks' => array(
+        'nodeapi' => array('presave', 'insert', 'update', 'view'),
+      ),
+    ),
+  );
+}
+
+/**
+ * Implementation of a Drupal action
+ * Enables comments on a node
+ */
+function sonybmg_enable_comments(&$object, $context = array()) {
+  // get nid from the object
+  if (isset($object->nid)) {
+    $nid = $object->nid;
+  }
+  elseif (isset($context['nid'])) {
+    $nid = $context['nid'];
+  }
+  // make sure we have an nid
+  if ($nid) {
+    $node = node_load($nid);
+    db_query("UPDATE {node} SET comment = 2 WHERE nid = %d", $nid);
+    // record a message noting the action taken
+    watchdog('action', 'Enabled comments on node %title', array('%title' => $node->title), WATCHDOG_NOTICE, l(t('view'), 'node/' . $node->nid));
+  }
+  else {
+    // Something went wrong, no node id was passed
+    drupal_set_message(t('Comments could not be enabled.'), 'error');
+  }
+}
+
+/**
+* Implementation of hook_namespaces().
+*/
+function sonybmg_namespaces(){
+    return array(
+    'xmlns:og' => "http://opengraphprotocol.org/schema/",
+    'xmlns:fb' => "http://www.facebook.com/2008/fbml",
+    );
+}
+
+/**
+ * Implementation of hook_sony_metatags_alter().
+ */
+function sonybmg_sony_metatags_alter(&$meta_tags, $object_type = NULL, $object = NULL) {
+  if ($object_type == 'node' && $object->type == 'news') {
+    $meta_tags['og:type'] = array('property' => 'og:type', 'content' => 'article');
+    $meta_tags['og:title'] = array('property' => 'og:title', 'content' => check_plain($object->title));
+    $meta_tags['og:url'] = array('property' => 'og:url', 'content' => url('node/'. $object->nid, array('absolute' => TRUE)));
+    $meta_tags['og:description'] = array('property' => 'og:description', 'content' => strip_tags($object->teaser, '<p>'));
+  }
+}

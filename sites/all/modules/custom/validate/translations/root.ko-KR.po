@@ -1,0 +1,93 @@
+# Korea translation of validate (all releases)
+# Copyright (c) 2010 by the Korea translation team
+# Generated from files:
+#  validate/validate.pages.inc: n/a
+#  validate/validate.module: n/a
+#  validate/validate.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: validate (all releases)\n"
+"POT-Creation-Date: 2010-04-12 11:06-0500\n"
+"PO-Revision-Date: 2010-03-25 21:12-0500\n"
+"Language-Team: Korea\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: validate.pages.inc:12
+msgid "Name"
+msgstr "이름"
+
+#: validate.pages.inc:21
+msgid ""
+"This field is required and also requires a minimum length of 2 "
+"characters."
+msgstr ""
+
+#: validate.pages.inc:24
+msgid "Email address"
+msgstr ""
+
+#: validate.pages.inc:32
+msgid "This field is required and must validate as an email address."
+msgstr ""
+
+#: validate.pages.inc:35
+msgid "URL"
+msgstr "URL"
+
+#: validate.pages.inc:41
+msgid "This field is not required, but if given must validate as an URL."
+msgstr ""
+
+#: validate.pages.inc:44
+msgid "Favorite number"
+msgstr ""
+
+#: validate.pages.inc:50
+msgid "This field is not required, but if given must validate as a number."
+msgstr ""
+
+#: validate.pages.inc:53
+msgid "Submit"
+msgstr "완료"
+
+#: validate.module:216
+msgid "The name %name is already taken."
+msgstr "%name은 이미 존재하는 아이디입니다."
+
+#: validate.module:219
+msgid "The name %name has been denied access."
+msgstr "%name은 접근 거부된 아이디입니다."
+
+#: validate.module:237
+msgid ""
+"The e-mail address %email is already registered. <a "
+"href=\"@password\">Have you forgotten your password?</a>"
+msgstr ""
+"메일 주소 %email 는 이미 등록되어 있습니다. <br /><a "
+"href=\"@password\">패스워드를 잃어버렸습니까?  "
+"재발행을 원하시는 경우에는 여기를 클릭해 주세요. "
+"</a>"
+
+#: validate.module:240
+msgid "The e-mail address %email has been denied access."
+msgstr "%email은 접근 거부된 이메일 주소입니다."
+
+#: validate.module:15
+msgid "jQuery Validation Test"
+msgstr ""
+
+#: validate.module:138
+msgid "%rule does not exists"
+msgstr ""
+
+#: validate.info:0
+msgid "Validate"
+msgstr ""
+
+#: validate.info:0
+msgid "Combination client-side and server side validation routines."
+msgstr ""
+

@@ -1,0 +1,540 @@
+@CHARSET "UTF-8";
+
+/**
+ * FONT STYLES
+ *
+ * Standardize font sizes and line-height across browsers 
+ */
+
+body {
+  font: 13px Arial, Helvetica, clean, sans-serif;
+}
+
+select, input, textarea {
+  font: 99% Arial, Helvetica, clean, sans-serif;
+}
+
+table {
+  font-size: inherit;
+  font-size: 100%;
+}
+
+a, 
+a:link, 
+a:visited,
+#page #main strong a,
+#page #main a strong {
+  color: #06C;
+  text-decoration: none;
+}
+
+a:hover, 
+a:focus, 
+a:active, 
+a.active,
+#page #main strong a:hover,
+#page #main a:hover strong {
+  color: #000;
+  text-decoration: underline;
+}
+
+a.active {
+  text-decoration: none;
+}
+
+div.view div.views-admin-links li {
+  float: left;
+  list-style: none;
+}
+
+.panel-flexible .panel-row {
+  margin: 0 0 0 0;
+  padding: 0 0 0 0;
+  width: 100%;
+}
+
+/*
+ad-top region
+------------------------------------------------------------------------- */
+
+#ad-top {
+  margin: 10px auto;
+  position: relative;
+  clear: both;
+  width: 100%;
+  padding-left: 10px;
+}
+
+#ad-top #block-block-2 {
+  width: 728px;
+  float: left;
+  padding: 0 0 0 0;
+  margin: 0 0 0 0;
+}
+
+#ad-top .block-sonybmg_discography {
+  width: 190px;
+  margin: 0;
+  padding: 0 10px;
+  float: right;
+}
+
+#ad-top #buy-it-top h2 {
+  margin-top: 0;
+}
+
+#ad-top #buy-it-top ul li {
+  list-style: none;
+}
+
+#ad-top div.ad h2 {
+  display: none;
+}
+
+#ad-top #buy-it-top h2,
+#ad-bottom #buy-it-bottom h2 {
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+
+/*
+login and right
+------------------------------------------------------------------------- */
+
+#login-bar{
+ width: 50%;
+}
+
+
+#login-bar .login {
+  float: left;
+  width: 400px;
+  padding-top: 10px;
+}
+
+.right {
+  float: right;
+  width: 350px;
+  padding-top: 5px;
+}
+
+
+/*
+ad-bottom region
+------------------------------------------------------------------------- */
+
+#ad-bottom {
+  position: relative;
+  clear: both;
+  margin: 0 auto;
+  padding: 10px 0 0 0;
+  width: 100%;
+  min-height: 100px;
+}
+
+#ad-bottom .block-sonybmg_discography {
+  width: 190px;
+  margin: 0;
+  padding: 5px 10px;
+  float: left;
+}
+
+#ad-bottom #block-block-3 {
+  width: 728px;
+  padding: 0 0 0 0;
+  margin: 0 0 0 0;
+  float: right;
+}
+
+#ad-bottom #buy-it-bottom h2 {
+  padding-top: 0;
+}
+
+#footer-links {
+  border-top: 1px solid #999;
+  clear: both;
+  text-align: center;
+  margin: 0 10px;
+  padding: 12px 10px 0 10px;
+  font-size: 11px;
+}
+
+/*
+Common styles
+------------------------------------------------------------------------- */
+
+h1.title, 
+h1.title a, 
+h1.title a:hover {
+  font-family: Arial, "Trebuchet MS", Helvetica, sans-serif;
+  font-weight: normal;
+  font-size: 200%;
+  margin: 0;
+  line-height: normal;
+}
+
+h1, h1 a, h1 a:hover {
+  font-size: 180%;
+  font-family: Arial, "Trebuchet MS", Helvetica, sans-serif;
+  font-weight: normal;
+  margin: .5em 0 .5em 0;
+}
+
+h2, h2 a, h2 a:hover, .block h3, .block h3 a {
+  font-size: 122%;
+  font-family: Arial, "Trebuchet MS", Helvetica, sans-serif;
+  margin: .5em 0 .5em 0;
+}
+
+h3 { 
+  font-size: 107%;
+}
+
+h3, h4, h5, h6 {
+  font-weight: bold;
+  font-family: Arial, "Trebuchet MS", Helvetica, sans-serif;
+}
+
+p {
+  padding: 0 0 0.5em 0;
+  margin: 0;
+}
+
+pre {
+  background: #ddd;
+  border: 1px solid #aaa;
+  padding: 0.75em 1.5em;
+}
+
+blockquote {
+  border-width: 1px 0 1px 0;
+  border-color: #ccc;
+  border-style: solid;
+  margin: 0.5em 1em;
+  padding: 0.3em;
+  font-style: italic;
+}
+
+code {
+  font-size: 100%;
+  font-family: Profont, 'lucida console', 'Courier New', Monaco, monospace;
+}
+
+img { 
+  border: 0; 
+}
+
+/*
+Menu styles
+------------------------------------------------------------------------- */
+div.menu {
+  margin-top: 0;
+}
+
+#navigation {
+  padding: 10px 0;
+}
+
+/* Primary navigation */
+#primary {
+  line-height: normal;
+  padding: 0;
+}
+
+#primary ul {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+#primary li {
+  display: block;
+  float: left;
+  border: none;
+  padding: 0;
+  font-family: arial, helvetica, verdana, sans-serif;
+  text-transform: uppercase;
+}
+
+#primary a {
+  display: block;
+  float: left;
+  padding: 0 5px 0 0;
+  margin: 0;
+}
+
+/* sIFR adjustment of primary navigation 
+.sIFR-active #primary li {
+  height: 1em;
+  line-height: 1em;
+}
+
+.sIFR-active #primary li a {
+  visibility: hidden;
+}
+
+.sIFR-active #primary li a:hover {
+  color: #FF0000;
+}
+*/
+
+/* Secondary navigation */
+#secondary {
+  padding-left: 20px;
+}
+
+#secondary ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#secondary li {
+  margin: 0;
+  padding: 0;
+  display: inline;
+}
+
+#secondary li a {
+  float: left;
+  display: block;
+  font-size: 85%;
+  text-decoration: none;
+  padding: 0 5px 0 5px;
+}
+
+#secondary a.active {
+  font-weight: bold;
+}
+
+/*
+Link styles 
+------------------------------------------------------------------------- */
+
+ul.links {
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+ul.links li {
+  display: inline;
+  list-style-type:none;
+  padding:0 0.5em;
+}
+
+.taxonomy {
+  margin: 0;
+  padding: 0;
+  display: inline;
+}
+
+.taxonomy ul.links li {
+  border: none;
+  padding: 0 .1em 0 .2em;
+}
+
+div.links {
+  border-top: 1px solid #999;
+  border-bottom: 1px solid #999;
+  padding: 4px 0;
+  position: relative;
+}
+
+.submitted, .taxonomy { 
+  font-size: 85%;
+}
+
+ul.links li.share_link {
+  border: none;
+}
+
+ul.links li.share_link ul a:hover {
+  text-decoration: none;
+}
+
+div.service_links ul li {
+  font-size: 85%;
+  display: block;
+  float: left;
+  clear: none;
+  white-space: no-wrap;
+}
+
+div.service_links ul {
+  bottom: 20px;
+  display: block;
+  position: relative;
+  top: 5px;
+  border: none;
+  background: transparent;
+}
+
+/*
+Form styles
+------------------------------------------------------------------------- */
+input, textarea, textfield {
+  margin: 0;
+  font-family: arial;
+  padding: 1px;
+  font-size: 100%;
+}
+
+fieldset {
+  border: solid #ccc 1px;
+}
+
+input.form-checkbox, input.form-radio {
+  border: none;
+}
+
+#search-theme-form label {
+  display: none;
+}
+
+#search .form-text, #user-login-form .form-text {
+  color: #444;
+  border: 1px solid #999;
+  padding: 2px;
+}
+
+.form-submit, .button {
+  padding: 1px;
+}
+
+#search .button, 
+#search .form-submit,
+#user-login-form .button,
+#user-login-form .form-submit {
+  font-weight: normal;
+  text-transform: uppercase;
+}
+
+#user-login-form {
+  text-align: left;
+}
+
+#user-login-form .item-list ul {
+  margin-top: 10px;
+}
+
+/*
+Alerts, Status, Help Messages
+------------------------------------------------------------------------- */
+.messages {
+}
+
+/*
+Footer styles
+------------------------------------------------------------------------- */
+#footer-wrapper {
+  margin: 0;
+  margin-top: 15px;
+}
+
+#footer {
+  text-align: center;
+  margin: 0;
+  font-size: 85%;
+  padding: 1em;
+}
+
+/*
+Comment styles
+------------------------------------------------------------------------- */
+.comment {
+  margin: 0 0 10px 0;
+  padding: 10px;
+}
+
+.comment  h3.title, .comment  h3.title a {
+  font-size: 122%;
+  font-weight: normal;
+  font-family: "Trebuchet MS", Arial, Verdana, Sans-serif;
+  margin-bottom: 3px;
+  margin-top: 0;
+}
+
+.comment .picture, .node .picture {
+  float: left;
+  margin-right: 15px;
+}
+
+.comment .new {
+  font-weight: bold;
+  font-family: "Trebuchet MS", Arial, Verdana, Sans-serif;
+}
+
+.comment .links {
+  text-align: right;
+}
+
+/*
+Pager styles
+------------------------------------------------------------------------- */
+.pager {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.pager  a, 
+.pager-current, 
+strong.pager-current {
+  padding: 3px 8px 3px 8px;
+  margin: 0 2px 0 2px;
+  font-weight: bold;
+  border: solid 1px #eee;
+}
+
+/*
+Node, Block, Content styles
+------------------------------------------------------------------------- */
+.node {
+  margin-bottom: 15px;
+  padding-bottom: 0;
+}
+
+.node h2.title {
+  margin-bottom: .1em;
+}
+
+.node h2.title a {
+  font-size: 18px;
+  font-weight: bold;
+  font-family: arial, helvetica, sans-serif;
+  line-height: 1.4em;
+}
+
+.node .content {
+  padding-top: 10px;
+  padding-bottom: 5px;
+}
+
+.sticky {
+  border-bottom: solid 3px #ddd;
+}
+
+.profile {
+  clear: none;
+}
+
+#sidebar-right .block {
+  padding-bottom: 15px;
+  margin-bottom: 20px;
+}
+
+.block .item-list ul {
+  padding-left: 0;
+}
+
+/*
+Fivestar styles
+------------------------------------------------------------------------- */
+.field-type-fivestar .field-label {
+  float: left;
+}
+.field-type-fivestar {
+  margin-bottom: 10px;
+}
+

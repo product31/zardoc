@@ -1,0 +1,68 @@
+div.translate-overlay {
+  position: absolute;
+  z-index: 9999;
+  opacity: 0.8;
+  background-color: #000000;
+  color: #fff;
+  text-align: center;
+}
+div.translate-overlay-title {
+  padding: 1em 0;
+  font-size: 24px;
+  line-height: 1em;
+}
+
+div.translate-overlay-message {
+  padding: 0 1em 1em;
+  font-size: 18px;
+  line-height: 1.4em; 
+}
+
+div.translate-overlay.translate-error {
+  background-color: #aa0000;
+}
+
+/* google_langauge_translate is the non-js link.
+   google_language_translate_inline is what they are after js is determined */
+ul.links li.google_language_translate {
+  display: none;
+}
+
+
+#glt-overlay {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  z-index: 9998;
+  background: #000;
+  opacity: 0.2;
+}
+#glt-popup {
+  width: 300px;
+  min-height: 300px;
+  border: solid 5px #444;
+  padding: 20px;
+  background: #fff;
+  margin: 0;
+  
+  position: absolute;
+  z-index: 9999;  
+  
+  /* actual top and left will be set in js */
+  top: 50%; 
+  left: 50%;
+  
+}
+
+#glt-popup.loading {
+  background: #fff url(loading.gif) no-repeat 50% 50%;
+}
+#glt-popup.loading * {
+  display: none;
+}
+
+#glt-popup .gBranding {
+  display: inline;
+}

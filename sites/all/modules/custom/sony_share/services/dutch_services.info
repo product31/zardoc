@@ -1,0 +1,9 @@
+; $Id$
+name = "Dutch Services"
+description = "Provide the Dutch Services: eKudos, Hyves, Nujij"
+core = 6.x
+package = Sony Share
+dependencies[] = sony_share
+
+
+

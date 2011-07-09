@@ -1,0 +1,96 @@
+<?php
+// $Id: userpoints_login.module,v 1.3 2009/03/01 09:27:02 jenlampton Exp $
+
+define('USERPOINTS_LOGIN', 					'userpoints_login');
+define('USERPOINTS_LOGIN_INTERVAL', 		'userpoints_login_interval');
+define('USERPOINTS_LOGIN_TID',              'userpoints_login_tid');
+
+function userpoints_login_perm() {
+  return array('earn login points');
+}
+
+/*
+ * Function: Implementation of hook_userpoints
+ */
+function userpoints_login_userpoints($op = 'setting', $params = array()) {
+  if ($op == 'setting') {
+      $group = 'userpoints_login';
+      $form[$group] = array(
+        '#type'        => 'fieldset',
+        '#collapsible' => TRUE,
+        '#collapsed'   => TRUE,
+        '#title'       => t('!Points for user log in', userpoints_translation()),
+      );
+      $form[$group][USERPOINTS_LOGIN] = array(
+        '#type'          => 'textfield',
+        '#title'         => t('!Points for user log in', userpoints_translation()),
+        '#default_value' => variable_get(USERPOINTS_LOGIN, 0),
+        '#size'          => 5,
+        '#maxlength'     => 5,
+      );
+
+      $form[$group][USERPOINTS_LOGIN_INTERVAL] = array(
+        '#type'          => 'select',
+        '#title'         => t('Minimum interval between logins to accrue !Points', userpoints_translation()),
+        '#default_value' => variable_get(USERPOINTS_LOGIN_INTERVAL, '86400'),
+        '#options'       => drupal_map_assoc(array(3600, 10800, 21600, 32400, 43200, 86400, 172800, 259200, 604800, 1209600, 2419200), 'format_interval'),
+      );
+      
+      $form[$group][USERPOINTS_LOGIN_TID] = array(
+      '#type'          => 'select',
+      '#title'         => t('Category'),
+      '#default_value' => variable_get(USERPOINTS_LOGIN_TID, 0),
+      '#options'       => userpoints_get_categories(),
+      '#description'   => t('Login points will be assigned to this category. You can modify what categories are available by modifying the <a href="!url">Userpoints taxonomy</a>.', 
+        array('!url' => url('admin/content/taxonomy/'. variable_get(USERPOINTS_CATEGORY_DEFAULT_VID, '')))),
+    );
+    
+      return $form;
+  }
+}
+
+/*
+ * Implementation of hook_user().
+ */
+function userpoints_login_user($op, &$edit, &$account, $category = NULL) {
+  global $user;
+
+  if($op != 'login') {
+    return;
+  }
+
+  if (!user_access('earn login points')) {
+    // User does not have access to earn points for login
+    return;
+  }
+
+  $num = userpoints_login_check_timeout($user->uid);
+  if ($num) {
+    // Allow points if time between login is greater than defined interval
+    return;
+  }
+  
+  // Delete old record and create a new one, so we can check it later
+  db_query('DELETE FROM {userpoints_login} WHERE uid = %d', $user->uid);
+  db_query('INSERT INTO {userpoints_login} (uid, timestamp) VALUES (%d, %d)', $user->uid, time());
+ 
+  // Award the points
+  userpoints_userpointsapi(array(
+    'points' => variable_get(USERPOINTS_LOGIN, 0),
+    'uid' => $user->uid,
+    'operation' => 'login',
+    'entity_id' => $user->uid,
+    'entity_type' => 'user',
+    'tid'         => variable_get(USERPOINTS_LOGIN_TID, 0),
+  ));
+}
+
+/*
+ * Helper function for userpoints_login
+ */
+function userpoints_login_check_timeout($uid = 0) {
+      return (int)db_result(db_query("SELECT COUNT(*) FROM {userpoints_login}
+        WHERE uid = '%d'
+        AND %d < (timestamp + %d)",
+        $uid, time(), variable_get(USERPOINTS_LOGIN_INTERVAL, 86400)));
+}

@@ -1,0 +1,6 @@
+; $Id$
+name = Node Comment
+description = Allows users to comment on and discuss published content using nodes.
+dependencies[] = views
+dependencies[] = comment
+core = 6.x

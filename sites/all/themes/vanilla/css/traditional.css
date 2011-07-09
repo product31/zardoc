@@ -1,0 +1,81 @@
+﻿/*
+/ the traditional base theme
+*/
+
+/*
+/ make sure all major div's are absolute positioned
+*/
+
+body
+{
+/*  display:inline;
+  position: relative;
+  left:  auto;
+  right: auto;*/
+}
+
+
+#container
+{
+  display:block;
+  position:relative;
+}
+
+
+/*
+/ items to move to core
+*/
+#sony-bar{
+  left: 0;
+}
+#squeeze {
+  padding:0;
+}
+
+
+/*
+/ Search Form
+*/
+#search-theme-form {
+  display:block;
+  position:absolute;
+  top:0;
+  right:0;
+}
+
+
+#search {
+  position:relative;
+}
+
+
+/* Panels Pane Code */
+.panel-col-top .panel-pane-header-bg{
+background: url(../images/backgroundTopLong.png) center top no-repeat ;
+ padding-top:60px; /* make this the height of the background image above (or at least the curved corners of the image) */
+}
+.panel-col-top .panel-pane-footer-bg{
+background: url(../images/backgroundBottomLong.png) center bottom no-repeat ;
+overflow: visible;
+ /* make this the height of the background image above (or at least the curved corners of the image) */
+}
+
+.panel-pane-header-bg{
+background: url(../images/backgroundTop.png) center top no-repeat ;
+ padding-top:60px; /* make this the height of the background image above (or at least the curved corners of the image) */
+}
+
+.panel-pane-content{
+  /*background: url(../images/backgroundInside.png) center repeat-y; */
+  margin:0; /* don't do any margin here if there's a background in this style - use padding instead */
+  padding:20px;  /* left and right padding for pane content*/
+}
+
+.panel-pane h2.title{
+  margin-top: -45px; /* use a negative margin-top to move the title up into the area created by the header background, if used */
+}
+
+.panel-pane-footer-bg{
+  background: url(../images/backgroundBottom.png) center bottom no-repeat;
+  height:75px; /* height of the background image (or at least the curved section of it) */
+}

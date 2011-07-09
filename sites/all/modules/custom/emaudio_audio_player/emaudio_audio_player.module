@@ -1,0 +1,108 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Basic "provider" that just converts urls into players using Wordpress Audio Player 2.0.
+ *
+ * @todo provide theming options to through settings.
+ */
+
+/**
+ * Implementation of hook_theme().
+ */
+function emaudio_audio_player_theme() {
+  return array(
+    'emaudio_audio_player_flash' => array(
+      'arguments' => array('embed' => NULL, 'width' => NULL, 'height' => NULL, 'autoplay' => NULL),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_emfield_providers().
+ */
+function emaudio_audio_player_emfield_providers($module, $provider) {
+  //emfield_providers
+  if ($module == 'emaudio' && $provider == NULL) {
+    //
+    $plugin = new StdClass();
+    $plugin->filename = drupal_get_path('module', 'emaudio_audio_player') . '/emaudio_audio_player.emaudio.inc';
+    $plugin->basename = 'emaudio_audio_player.emaudio.inc';
+    $plugin->name = 'emaudio_audio_player';
+
+    return array(
+      'audio_player' => $plugin
+    );
+  }
+}
+
+
+/**
+ * hook emaudio_PROVIDER_audio
+ *
+ * Include doesn't get called before this function on cache misses.
+ * this actually displays the full/normal-sized video we want, usually on the default page view
+ *  @param $embed
+ *    the video code for the audio to embed
+ *  @param $width
+ *    the width to display the audio
+ *  @param $height
+ *    the height to display the audio
+ *  @param $field
+ *    the field info from the requesting node
+ *  @param $item
+ *    the actual content from the field
+ *  @return
+ *    the html of the embedded audio
+ */
+function emaudio_emaudio_audio_player_audio($embed, $width, $height, $field, $item, $autoplay) {
+  return theme('emaudio_audio_player_flash', $embed, $width, $height, $autoplay);
+}
+
+/**
+ * Theme our flash object.
+ *
+ * @todo Support auto play.
+ *
+ * @ingroup themeable
+ * @param $code
+ * Internal code of the player.
+ * @param $width
+ * The suggested width of the player.
+ * @param $height
+ * The suggested height of the player.
+ * @param $autoplay
+ * Wether to
+ * @return unknown_type
+ */
+function theme_emaudio_audio_player_flash($code, $width, $height, $autoplay) {
+  static $id = 0;
+
+  if ($id == 0) {
+    // Add the audioplayer js but use its version of swfobject. This is just
+    // easier till we can use swfobject 2.x
+    drupal_add_js(drupal_get_path('module','emaudio_audio_player') . '/audio-player/audio-player.js');
+
+    // And some drupal integration js. Loverly!
+    drupal_add_js(drupal_get_path('module','emaudio_audio_player') . '/audio_player.js');
+
+    drupal_add_js(array(
+      'emfieldAudioPlayer' => array(
+        'path' => base_path() . drupal_get_path('module', 'emaudio_audio_player') . '/audio-player/player.swf',
+        'options' => array(
+          // @todo Replace with setting. The $width argument isn't easily set.
+          'width' => '290',
+          'transparentpagebg' => 'yes',
+        ),
+      ),
+    ), 'setting');
+  }
+
+  $output = '';
+  $output .= '<div class="audio-player"">';
+  $output .= '<a id="audio-player-' . $id++ . '" href="' . check_url(url($code)) . '">MP3</a>';
+  $output .= '</div>';
+
+  return $output;
+}

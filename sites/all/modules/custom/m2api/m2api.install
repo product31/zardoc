@@ -1,0 +1,174 @@
+<?php
+/**
+ * M2 API install/schema/update hooks.
+ */
+
+function m2api_install() {
+  drupal_install_schema('m2api');
+}
+
+function m2api_uninstall() {
+  variable_del('m2api_api_url');
+  variable_del('m2api_api_key');
+  variable_del('m2api_default_store');
+  variable_del('m2api_debug_mode');
+  variable_del('m2api_node_types');
+  variable_del('m2api_product_settings');
+
+  drupal_uninstall_schema('m2api');
+}
+
+/**
+ * Implementation of hook_schema().
+ *
+ * @todo provide schema docs.
+ */
+function m2api_schema() {
+  $schema['m2api_document_cache'] = array(
+    'description' => t('Custom document cache.'),
+    'fields' => array(
+      'm2id' => array(
+        'description' => t('The M2 document ID.'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+        'default' => 0,
+      ),
+      'type' => array(
+        'description' => t('The M2 document type.'),
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'data' => array(
+        'description' => t('The serialized M2 document.'),
+        'type' => 'text',
+        'size' => 'big',
+        'not null' => TRUE,
+        'default' => '',
+        'serialize' => TRUE,
+      ),
+      'expire' => array(
+        'description' => t('The timestamp to specify when the document should expire.'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'hash' => array(
+        'description' => t('MD5 hash of the serialized object. Used to detect updated content.'),
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('m2id'),
+  );
+
+  $schema['m2api_nodes'] = array(
+    'description' => t('Join table for mapping nodes to documents.  This is a one-to-one mapping, where a single node is represented by a single document.'),
+    'fields' => array(
+      'nid' => array(
+        'description' => t('The associated node id (optional, since not all documents will have associated nodes).'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+        'default' => 0,
+      ),
+      'm2id' => array(
+        'description' => t('The M2 document ID.'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+        'default' => 0,
+      ),
+      'type' => array(
+        'description' => t('The M2 document type.'),
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('nid'),
+  );
+
+  $schema['m2api_nodes_products'] = array(
+    'description' => t('Join table for mapping nodes to products.  This is a many-to-many relationship, where the mappings represent products associated with a node.'),
+    'fields' => array(
+      'm2id' => array(
+        'description' => t('The M2 document ID.'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+        'default' => 0,
+      ),
+      'type' => array(
+        'description' => t('The M2 document type.'),
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'nid' => array(
+        'description' => t('The Drupal node ID.'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('m2id', 'nid'),
+  );
+
+  return $schema;
+}
+
+/**
+ * Add a type column to the m2 tables and populate it.
+ */
+function m2api_update_6000() {
+  $ret = array();
+
+  $type_field = array(
+    'description' => t('The M2 document type.'),
+    'type' => 'varchar',
+    'length' => 32,
+    'not null' => TRUE,
+    'default' => '',
+  );
+  db_add_field($ret, 'm2api_nodes', 'type', $type_field);
+  db_add_field($ret, 'm2api_nodes_products', 'type', $type_field);
+
+
+  m2api_include('api');
+  $manifest = m2api_get_manifest();
+
+  $by_m2id = array();
+  foreach ($manifest->results as $result) {
+    $by_m2id[$result->id] = $result->type;
+    if (isset($result->album)) {
+      $by_m2id[$result->album] = 'album';
+    }
+  }
+
+  // Remove any un-typed rows.
+  $by_m2id = array_filter($by_m2id);
+
+  // Flip the array so that it's keyed by type.
+  $by_type = array();
+  foreach ($by_m2id as $m2id => $type) {
+    $by_type[$type][] = $m2id;
+  }
+
+  // Update the type columns.
+  foreach ($by_type as $type => $ids) {
+    $placeholders = db_placeholders($ids);
+    $args = array_merge((array) $type, $ids);
+    db_query("UPDATE {m2api_nodes} SET type = '%s' WHERE m2id IN (". $placeholders .")", $args);
+    db_query("UPDATE {m2api_nodes_products} SET type = '%s' WHERE m2id IN (". $placeholders .")", $args);
+  }
+
+  return $ret;
+}

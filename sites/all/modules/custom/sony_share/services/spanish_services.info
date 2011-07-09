@@ -1,0 +1,8 @@
+; $Id$
+name = "Spanish Services"
+description = "Provide the Spanish Services: Barrapunto, Fresqui, Latafanera, Meneame, Tuenti"
+core = 6.x
+package = Sony Share
+dependencies[] = sony_share
+
+

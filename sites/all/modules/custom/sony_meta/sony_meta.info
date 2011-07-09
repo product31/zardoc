@@ -1,0 +1,10 @@
+name = Sony Meta
+description = Meta keywords and tags
+package = Sony BMG
+core = 6.x
+version = 1
+dependencies[] = path
+
+l10n server = translate.gdb-dev.com
+project = "sony_meta"
+version = "6.x-2.x"

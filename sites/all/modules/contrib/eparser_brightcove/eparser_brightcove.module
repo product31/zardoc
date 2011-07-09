@@ -1,0 +1,19 @@
+<?php
+// $Id: eparser_brightcove.module,v 1.1 2009/09/01 18:10:26 andrewlevine Exp $
+
+function eparser_brightcove_eparse_type_plugins() {
+  $base_path = drupal_get_path('module', 'eparser_brightcove') . '/plugins';
+  return array(
+    'brightcove3' => array(
+      'name' => 'Brightcove3',
+      'description' => 'Parses Brightcove JSON feeds and generates a fake brightcove link that can be used with media_brightcove/emfield.',
+      'handler' => array(
+        'class' => 'FeedapiEparserTypeBrightcove3',
+        'parent' => 'json',
+      ),
+      'system' => FALSE,
+      'path' => $base_path,
+    ),
+  );
+}
+

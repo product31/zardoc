@@ -1,0 +1,70 @@
+<?php
+// $Id: winners.install,v 1.1.2.1 2010/04/01 19:25:35 andrewlevine Exp $
+
+/**
+ * Implementation of hook_schema().
+ */
+function winners_schema() {
+  $schema['winners'] = array(
+    'description' => t('The {winners} table stores information about the winners of contests.'),
+    'fields' => array(
+      'winner_id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'contest_id' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'uid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'picked' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0
+      ),
+    ),
+    'primary key' => array('winner_id'),
+    'indexes' => array(
+      'cid_picked' => array('contest_id', 'picked'),
+      'cid_uid' => array('contest_id', 'uid'),
+    ),
+  );
+  $schema['winners_contests'] = array(
+    'description' => t('The {contests} table stores information about contests.'),
+    'fields' => array(
+      'contest_id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'name' => array(
+        'type' => 'varchar',
+        'length' => 255
+      ),
+      'last_picked' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0
+      ),
+    ),
+    'primary key' => array('contest_id'),
+    'indexes' => array(
+      'name' => array('name',),
+      'last_picked' => array('last_picked',),
+    ),
+  );
+
+  return $schema;
+}
+/**
+ * Implementation of hook_install().
+ */
+function winners_install() {
+  drupal_install_schema('winners');
+}

@@ -1,0 +1,8 @@
+<?php
+
+/**
+ * Implementation of hook_enable().
+ */
+function m2_enable() {
+  variable_set('m2_endpoint', 'http://ec2-174-129-193-78.compute-1.amazonaws.com/');
+}

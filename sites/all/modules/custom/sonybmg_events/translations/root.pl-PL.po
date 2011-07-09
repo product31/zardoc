@@ -1,0 +1,71 @@
+# Poland translation of sonybmg_events (all releases)
+# Copyright (c) 2010 by the Poland translation team
+# Generated from files:
+#  sonybmg_events/sonybmg_events.module: n/a
+#  sonybmg_events/sonybmg_events.theme.inc: n/a
+#  sonybmg_events/sonybmg_events.install: n/a
+#  sonybmg_events/sonybmg_events.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sonybmg_events (all releases)\n"
+"POT-Creation-Date: 2010-04-12 13:18-0500\n"
+"PO-Revision-Date: 2010-03-30 13:41-0500\n"
+"Language-Team: Poland\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=((n==1)?(0):(((((n%10)>=2)&&((n%10)<=4))&&(((n%100)<10)||((n%100)>=20)))?(1):2));\n"
+
+#: sonybmg_events.module:137
+msgid "Home"
+msgstr "Start"
+
+#: sonybmg_events.theme.inc:66
+msgid "Login"
+msgstr "Zaloguj się"
+
+#: sonybmg_events.theme.inc:67
+msgid " or "
+msgstr ""
+
+#: sonybmg_events.theme.inc:68
+msgid "register"
+msgstr ""
+
+#: sonybmg_events.theme.inc:69
+msgid " to add yourself to this event"
+msgstr ""
+
+#: sonybmg_events.module:43
+msgid "@title Attendees"
+msgstr "Uczestnicy @title"
+
+#: sonybmg_events.module:73
+msgid "Event Attendees"
+msgstr ""
+
+#: sonybmg_events.module:84
+msgid "Attendees"
+msgstr "Uczestnicy"
+
+#: sonybmg_events.module:138
+msgid "Events"
+msgstr "Wydarzenia"
+
+#: sonybmg_events.module:163
+msgid "!count Attendees"
+msgstr "!count Uczestników"
+
+#: sonybmg_events.install:13
+msgid "Date module must be updated before events can be updated."
+msgstr ""
+
+#: sonybmg_events.info:0
+msgid "Sony BMG Events"
+msgstr ""
+
+#: sonybmg_events.info:0
+msgid "Implements Sony BMG related blocks and events."
+msgstr ""
+

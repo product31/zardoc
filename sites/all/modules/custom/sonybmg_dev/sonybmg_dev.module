@@ -1,0 +1,610 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Provide development functionality to all Sony Multisites.
+ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function sonybmg_dev_menu() {
+  $items = array();
+  $sites = sonybmg_dev_sites();
+  $sitename = sonybmg_dev_sitename();
+
+  $items['sonybmg_dev'] = array(
+    'title' => 'Multisite Dev',
+    'page callback' => 'theme',
+    'page arguments' => array('sonybmg_dev_page', $sites),
+    'access arguments' => array('administer site configuration'),
+  );
+  $items['sonybmg_dev/tools'] = array(
+    'title' => 'Development Tools',
+    'page callback' => 'theme',
+    'page arguments' => array('sonybmg_dev_page', $sites),
+    'access arguments' => array('administer site configuration'),
+    'description' => 'Various tools for managing development and QA sites.',
+    'weight' => -2,
+  );
+  $items['sonybmg_dev/tools/sync'] = array(
+    'title' => 'Sync Database',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sonybmg_dev_sync_database_form', $sitename),
+    'access arguments' => array('administer site configuration'),
+    'description' => 'Update this site (or others) with a copy of the latest live database. Then optionally commit this database dump to SVN.',
+    'weight' => -2,
+  );
+  $items['sonybmg_dev/tools/git'] = array(
+    'title' => 'Git Update',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sonybmg_dev_git_update_form', $sitename),
+    'access arguments' => array('administer site configuration'),
+    'description' => 'Update the Dev or QA multisite with the latest Git revision.',
+    'weight' => -1,
+  );
+  $items['sonybmg_dev/tools/svn'] = array(
+    'title' => 'SVN Update',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sonybmg_dev_svn_update_form', $sitename),
+    'access arguments' => array('administer site configuration'),
+    'description' => 'Update the Dev or QA multisite with the latest SVN revision.',
+    'weight' => -1,
+  );
+  $items['sonybmg_dev/tools/cleanup'] = array(
+    'title' => 'Cleanup test data',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sonybmg_dev_cleanup_form'),
+    'access arguments' => array('administer site configuration'),
+    'description' => 'Remove nodes and users created during testing.',
+    'weight' => -1,
+  );
+  $items['sonybmg_dev/multisites/dev'] = array(
+    'title' => 'Jump to Dev site',
+    'page callback' => 'theme',
+    'page arguments' => array('sonybmg_dev_page', $sites),
+    'description' => 'Devlopment sites display the very latest code available for Multisite. They automatically update their code from SVN every two minutes.',
+    'access arguments' => array('administer site configuration'),
+  );
+  $items['sonybmg_dev/multisites/qa'] = array(
+    'title' => 'Jump to QA site',
+    'page callback' => 'theme',
+    'page arguments' => array('sonybmg_dev_page', $sites),
+    'description' => 'QA sites are used to ensure no sites are broken during a push of code to the live sites. Updates are done on the QA site before pushing new code.',
+    'access arguments' => array('administer site configuration'),
+  );
+  foreach ($sites as $site) {
+    $items['sonybmg_dev/multisites/dev/'. $site] = array(
+      'title' => $site,
+      'page callback' => 'sonybmg_dev_goto',
+      'page arguments' => array('http://'. $site .'.gdb-dev.com'),
+      'access arguments' => array('administer site configuration'),
+    );
+    $items['sonybmg_dev/multisites/qa/'. $site] = array(
+      'title' => $site,
+      'page callback' => 'sonybmg_dev_goto',
+      'page arguments' => array('http://'. $site .'.gdb-qa.com'),
+      'access arguments' => array('administer site configuration'),
+    );
+  }
+  return $items;
+}
+
+/**
+ * Implementation of hook_init().
+ */
+function sonybmg_dev_init() {
+  sonybmg_dev_check_files_dir();
+}
+
+/**
+ * mostly taken from system_main_admin_page().
+ */
+function theme_sonybmg_dev_page($sites) {
+  $blocks = array();
+  if ($admin = db_fetch_array(db_query("SELECT menu_name, mlid FROM {menu_links} WHERE link_path = 'sonybmg_dev' AND module = 'system'"))) {
+    $result = db_query("
+      SELECT m.*, ml.*
+      FROM {menu_links} ml
+      INNER JOIN {menu_router} m ON ml.router_path = m.path
+      WHERE ml.link_path != 'admin/help' AND menu_name = '%s' AND ml.plid = %d AND hidden = 0", $admin);
+    while ($item = db_fetch_array($result)) {
+      _menu_link_translate($item);
+      if (!$item['access']) {
+        continue;
+      }
+      // The link 'description' either derived from the hook_menu 'description'
+      // or entered by the user via menu module is saved as the title attribute.
+      if (!empty($item['localized_options']['attributes']['title'])) {
+        $item['description'] = $item['localized_options']['attributes']['title'];
+      }
+      $block = $item;
+      $block['content'] = '';
+      if ($item['block_callback'] && function_exists($item['block_callback'])) {
+        $function = $item['block_callback'];
+        $block['content'] .= $function();
+      }
+      $block['content'] .= theme('admin_block_content', system_admin_menu_block($item));
+      // Prepare for sorting as in function _menu_tree_check_access().
+      // The weight is offset so it is always positive, with a uniform 5-digits.
+      $blocks[(50000 + $item['weight']) .' '. $item['title'] .' '. $item['mlid']] = $block;
+    }
+  }
+  if ($blocks) {
+    ksort($blocks);
+    $output = theme('admin_page', $blocks);
+  }
+  else {
+    $output = t('You do not have any administrative items.');
+  }
+
+  return preg_replace('$admin/compact/([a-z]+)$', 'admin/compact/\1?destination=sonybmg_dev', $output);
+}
+
+function sonybmg_dev_sync_database_form(&$form_state, $sitename) {
+  $type = sonybmg_dev_type();
+  $user = sonybmg_dev_unix_user();
+  $uid = sonybmg_dev_unix_uid();
+
+  $form = array();
+  $form['sitename'] = array(
+    '#type' => 'select',
+    '#title' => t('Site'),
+    '#options' => array_merge(array('all' => 'all sites'), drupal_map_assoc(sonybmg_dev_sites())),
+    '#default_value' => $sitename,
+    '#description' => t('Choose a site to down-sync from the live site. Selecting "all" will down-sync the live database of every artist site.'),
+  );
+  $form['type'] = array(
+    '#type' => 'radios',
+    '#title' => t('Database type'),
+    '#options' => drupal_map_assoc(array('dev', 'qa')),
+    '#default_value' => $type,
+    '#description' => t('Choose the target database for the down-sync.'),
+  );
+//  no longer commiting db's to svn
+//  $form['user'] = array(
+//    '#type' => 'textfield',
+//    '#title' => t('Run update as user'),
+//    '#size' => 20,
+//    '#default_value' => $user ? $user : $uid,
+//    '#description' => t('If SVN committing, enter the user that owns the svn sandbox. Leave blank to use the default user.'),
+//  );
+  $form['uid'] = array(
+    '#type' => 'hidden',
+    '#value' => $uid,
+  );
+//  no longer commiting db's to svn
+//  $form['commit'] = array(
+//    '#type' => 'checkbox',
+//    '#title' => t('Commit result to SVN'),
+//    '#description' => t('If checked, the created database(s) will be committed to the SVN repository.'),
+//  );
+
+  return confirm_form(
+    array($form),
+    t('Sync database', array('%name' => $workflow->name)),
+    '<front>',
+    t('Are you sure you want to completely replace the current database? All configuration will be replaced with a copy of the live database.'),
+    t('Sync'), t('Cancel')
+  );
+}
+
+function sonybmg_dev_sync_database_form_submit(&$form, &$form_state) {
+  $values = $form_state['values'];
+
+  $sudo = sonybmg_sudo_prefix($values['user'], $values['uid']);
+  $svn_option = $values['commit'] ?  '-s ../databases ' : '';
+
+  $cmd = $sudo .'./db_sync.sh '. $svn_option . $values['sitename'] .'_'. $values['type'];
+  $dir = str_replace('public_html', 'scripts', $_SERVER['DOCUMENT_ROOT']);
+  sonybmg_dev_console_exec($cmd, $dir);
+}
+
+
+function sonybmg_dev_svn_update_form(&$form_state, $sitename) {
+  $user = sonybmg_dev_unix_user();
+  $uid = sonybmg_dev_unix_uid();
+
+  $form['user'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Run update as user'),
+    '#size' => 20,
+    '#default_value' => $user ? $user : $uid,
+    '#description' => t('Updates must always be done by the same user, whose name has been prepopulated (if available). Leave blank to use the default user.'),
+  );
+
+  $form['uid'] = array(
+    '#type' => 'hidden',
+    '#value' => $uid,
+  );
+
+  $form['revision'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Update to revision'),
+    '#default_value' => 'latest',
+    '#size' => 6,
+    '#description' => t('If there is a specific revision you would like to update/revert to, enter that number here. Otherwise, the latest revision will be used.'),
+  );
+
+  $form['path'] = array(
+    '#type' => 'select',
+    '#title' => t('Path'),
+    '#options' => sonybmg_dev_svn_folder_options('sites/all') + sonybmg_dev_svn_folder_options(conf_path()),
+    '#default_value' => drupal_get_path('theme', variable_get('theme_default', 'garland')),
+    '#description' => t('Select the path you wish to update, relative to public_html/sites/all. You should be updating the most specific directory as you can, so that only the work you are doing is updated.  If you need to do updates outside of public_html/sites/all, you should probably be doing it from the command-line.'),
+  );
+
+  return confirm_form(
+    array($form),
+    t('SVN Update'),
+    '<front>',
+    t('Are you sure you want to run <kbd>svn update</kbd>? This will affect ALL @type sites on the server.', array('@type' => sonybmg_dev_type())),
+    t('Update'), t('Cancel')
+  );
+}
+
+function _sonybmg_dev_svn_folder_options($path = '.') {
+  $options = array();
+  $nomask = array('.', '..', 'CVS', '.svn');
+
+  $depth = count(explode('/', $path));
+  $prefix = str_repeat('--', $depth) .' ';
+
+  if (is_dir($path) && $handle = opendir($path)) {
+    while (FALSE !== ($file = readdir($handle))) {
+      if (!in_array($file, $nomask) && $file[0] != '.') {
+        $filename = $path .'/'. $file;
+        if (is_dir($filename)) {
+          $options[$filename] = $prefix . basename($filename);
+          $options += sonybmg_dev_svn_folder_options($filename);
+        }
+      }
+    }
+  }
+
+  return $options;
+}
+
+function sonybmg_dev_svn_folder_options() {
+  $options = array(
+    t('Modules') => array(),
+    t('Themes') => array(),
+  );
+
+  $modules = module_rebuild_cache();
+  foreach ($modules as $module) {
+    $dir = dirname($module->filename);
+    $options[t('Modules')][$dir] = $module->info['name'];
+  }
+
+  $themes = system_theme_data();
+  foreach ($themes as $theme) {
+    $dir = dirname($theme->filename);
+    $options[t('Themes')][$dir] = $theme->info['name'];
+  }
+
+  return $options;
+}
+
+function sonybmg_dev_svn_update_form_submit(&$form, &$form_state) {
+  $values = $form_state['values'];
+
+  $sudo = sonybmg_sudo_prefix($values['user'], $values['uid']);
+  $revision = is_numeric($values['revision']) ? (' -r '. $values['revision']) : '';
+  $path = $values['path'];
+
+  $cmd = $sudo .'svn update'. $revision .' '. $path;
+  $dir = $_SERVER['DOCUMENT_ROOT'];
+  sonybmg_dev_console_exec($cmd, $dir);
+}
+
+
+
+function sonybmg_dev_git_update_form(&$form_state, $sitename) {
+  $site_path = conf_path();
+  if (!is_dir($site_path .'/.git')) {
+    drupal_set_message(t('This site (%path) does not appear to use Git for version control. No .git directory was found.', array('%path' => $site_path)), 'warning');
+    return array();
+  }
+
+  return confirm_form(
+    array(),
+    t('Git Pull', array('%name' => $sitename)),
+    '<front>',
+    t("Are you sure you want to run <kbd>git pull</kbd> for this site (%path)? It will update all files in this site's directory.", array('%path' => $site_path)),
+    t('Pull'), t('Cancel')
+  );
+  return $form;
+}
+
+function sonybmg_dev_git_update_form_submit(&$form, &$form_state) {
+  $cmd = 'git pull';
+  $dir = realpath(conf_path());
+  sonybmg_dev_console_exec($cmd, $dir);
+}
+
+/**
+ * Execute a command and display the results in a console.
+ * @param $cmd
+ *   The command to be executed.
+ * @param $init_dir
+ *   The starting dirctory from which commands will be executed.
+ */
+function sonybmg_dev_console_exec($cmd, $init_dir) {
+  $dir = file_create_path('sonybmg_dev');
+  file_check_directory($dir, FILE_CREATE_DIRECTORY);
+  $output_file = file_create_filename('console-'. date('Y-m-d') .'.txt', $dir);
+
+  // Create the template file
+  if (!is_file($dir .'/console.html')) {
+    $handle = fopen($dir .'/console.html', "w+");
+    fwrite($handle, theme('sonybmg_dev_console_content'));
+    fclose($handle);
+  }
+
+  // Create the output file
+  $handle = fopen($output_file, "w+");
+  fwrite($handle, "/ ". $init_dir ."\n");
+  fwrite($handle, $cmd ."\n");
+
+  // Print the page immediately, as Drupal may be crippled during the command.
+  $content = theme('sonybmg_dev_console', file_create_url($dir .'/console.html'), file_create_url($output_file));
+  print theme('page', $content);
+
+  // Set variables for the script execution
+  $descriptorspec = array(
+    0 => array("pipe", "r"),  // stdin is a pipe that the child will read from
+    1 => array("file", $output_file, "a"),
+    2 => array("file", $output_file, "a"),
+  );
+  $pipes = array();
+  $env = array('shell' => 'bash', 'PATH' => '/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin');
+
+  // Execute the script
+  $pid = proc_open($cmd, $descriptorspec, $pipes, $init_dir, $env);
+
+  do {
+    sleep(1);
+    $proc_status = proc_get_status($pid);
+    if ($proc_status['running']) {
+      // TODO: Cleanup this logic, it's ridiculous.
+      fseek($handle, -3, SEEK_END);
+      $third_from_last = fgetc($handle);
+      fseek($handle, -2, SEEK_END);
+      $second_from_last = fgetc($handle);
+      fseek($handle, -1, SEEK_END);
+      $last = fgetc($handle);
+      if ($last == "\n") {
+        fseek($handle, -1, SEEK_END);
+        if ($second_from_last == "." && ($third_from_last != "." || $third_from_last != "\n")) {
+          fwrite($handle, ".\n");
+        }
+        else {
+          fwrite($handle, "\n.\n");
+        }
+      }
+      fseek($handle, 0, SEEK_END);
+    }
+    else {
+      sleep(1); // Ensure we let proc_open finish writing
+      fseek($handle, 0, SEEK_END);
+      fwrite($handle, "\nScript execution complete.");
+    }
+  } while ($proc_status['running']);
+
+  fclose($handle);
+  exit;
+}
+
+function theme_sonybmg_dev_console($console_template, $console_content) {
+  drupal_add_css(drupal_get_path('module', 'sonybmg_dev') .'/sonybmg_dev.css', 'module');
+  drupal_add_js(drupal_get_path('module', 'sonybmg_dev') .'/script_console.js', 'module');
+  drupal_add_js(array('sony_dev' => array('console_file' => $console_content)), 'setting');
+  drupal_set_title('Script console');
+  $output = '<iframe name="script-console" id="script-console" src="'. $console_template .'"></iframe>';
+  $output .= '<script type="text/javascript">console_file = "'. $console_content .'"; refreshConsole();</script>';
+  return $output;
+}
+
+function theme_sonybmg_dev_console_content() {
+  $css = base_path() . drupal_get_path('module', 'sonybmg_dev') .'/script_console.css';
+  ob_start();
+  echo <<<EOF
+    <html>
+      <head>
+        <style type="text/css" media="all">@import "$css";</style>
+      </head>
+      <body>
+        loading...
+      </body>
+    </html>
+EOF;
+  $content = ob_get_contents();
+  ob_end_clean();
+  return $content;
+}
+
+function sonybmg_dev_check_files_dir() {
+  $sitename = sonybmg_dev_sitename();
+  if (!is_dir('./sites/'. $sitename .'/files')) {
+
+    if (!is_dir('./sites/'. $sitename)) {
+      @mkdir('./sites/'. $sitename);
+    }
+
+    @mkdir('./sites/'. $sitename .'/files');
+    @chmod('./sites/'. $sitename .'/files', 0775);
+  }
+}
+
+/**
+ * Given a user and UID, determine the sudo prefix to be used.
+ */
+function sonybmg_sudo_prefix($user, $uid) {
+  $sudo = '';
+
+  // TODO: This nullifies uid check. For Rackspace development only.
+  return $sudo;
+
+  if (!empty($user) && $user != $_ENV['USER']) {
+    $sudo = 'sudo -u '. $user .' ';
+  }
+  // If no user specified and we're running as web-only user, try to switch to the owner of the sandbox
+  elseif (!empty($uid) && (empty($_ENV['USER']) || in_array($_ENV['USER'], array('daemon', 'www', 'nobody')))) {
+    $sudo = 'sudo -u "#'. $uid .'" ';
+  }
+
+  return $sudo;
+}
+
+function sonybmg_dev_goto($url) {
+  $path = trim(str_replace("http://". $_SERVER['HTTP_HOST'], '', $_SERVER['HTTP_REFERER']), '/');
+  $url = trim($url, '/');
+  drupal_goto($url .'/'. $path);
+}
+
+/**
+ * Unlike the live sites which determine their name based on the site_conf()
+ * directory, development servers all use a single site directory. Instead, we
+ * base our sitename off of the subdomain.
+ */
+function sonybmg_dev_sitename() {
+  $sitename = preg_replace('/^([^\.]+).*/', '\1', $_SERVER['HTTP_HOST']);
+  return $sitename;
+}
+
+/**
+ * Read  the files directory for currently enabled sites
+ */
+function sonybmg_dev_sites() {
+  $directory = file_scan_directory('./sites', '[a-z0-9]+', array('.', '..', '.svn', 'CVS', 'multisite_dev', 'multisite_qa', 'all', 'default'), FALSE, FALSE);
+  $sites = array();
+  foreach ($directory as $site) {
+    if (strpos($site->basename, '.') === FALSE) {
+      $sites[$site->basename] = $site->basename;
+    }
+  }
+  asort($sites);
+  return $sites;
+}
+
+/**
+ * Check the domain to see if this is a QA or dev site being viewed.
+ */
+function sonybmg_dev_type() {
+  static $type;
+  if (!isset($type)) {
+    $type = strstr($_SERVER['HTTP_HOST'], 'qa');
+    if (empty($type)) {
+      $type = 'dev';
+    }
+  }
+  return $type;
+}
+
+/**
+ * Get the owner of this Drupal installation
+ */
+function sonybmg_dev_unix_user() {
+  if (function_exists('fileowner' && 'posix_getpwuid')) {
+    $uid = sonybmg_dev_unix_uid();
+    $user = posix_getpwuid($uid);
+    return $user['name'];
+  }
+  else {
+    return $_ENV['USER'];
+  }
+}
+
+/**
+ * Get the owner of this Drupal installation
+ */
+function sonybmg_dev_unix_uid() {
+  if (function_exists('fileowner')) {
+    return fileowner('./index.php');
+  }
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function sonybmg_dev_theme() {
+  return array(
+    'sonybmg_dev_console' => array(
+      'arguments' => array(
+        'console_template' => NULL,
+        'console_content' => NULL,
+      ),
+    ),
+    'sonybmg_dev_console_content' => array(),
+    'sonybmg_dev_page' => array(
+      'arguments' => array(
+        'sites' => NULL,
+      ),
+    ),
+  );
+}
+
+function sonybmg_dev_cleanup_form() {
+  $form = array();
+
+  return confirm_form($form,
+    t('Are you sure you want to clean up the test data?'),
+    '<front>', NULL,
+    t('Cleanup'), t('Cancel'));
+}
+
+function sonybmg_dev_cleanup_form_submit($form, &$form_state) {
+  $operations = array();
+
+  $result = db_query('SELECT uid, name FROM {users} WHERE name LIKE "test_user_%%"');
+  while ($row = db_fetch_object($result)) {
+    $operations[] = array('sonybmg_dev_cleanup_batch_process', array($row));
+  }
+
+  $operations[] = array('sonybmg_dev_cleanup_batch_process_latin', array('Ma quande'));
+
+  $batch = array(
+    'operations'    => $operations,
+    'title'         => t('Cleaning up test data'),
+    'init_message'  => t('Starting cleanup'),
+    'error_message' => t('Error cleaning up test data'),
+    'finished'      => 'sonybmg_dev_cleanup_batch_finished',
+  );
+
+  batch_set($batch);
+
+  $form_state['redirect'] = 'sonybmg_dev/tools';
+}
+
+function sonybmg_dev_cleanup_batch_process($account, &$context) {
+  $result = db_query('SELECT * FROM {node} WHERE uid = %d', $account->uid);
+  while ($node = db_fetch_object($result)) {
+    node_delete($node->nid);
+    $context['results']['nodes'][] = $node->nid;
+  }
+
+  user_delete(array(), $account->uid);
+
+  $context['results']['users'][] = $account->uid;
+  $context['message'] = t('Deleting content for user %name', array('%name' => $account->name));
+}
+
+function sonybmg_dev_cleanup_batch_process_latin($title, &$context) {
+  $result = db_query('SELECT * FROM {node} WHERE title = "%s"', $title);
+  while ($node = db_fetch_object($result)) {
+    node_delete($node->nid);
+    $context['results']['nodes'][] = $node->nid;
+  }
+}
+
+function sonybmg_dev_cleanup_batch_finished($success, $results, $operations) {
+  if ($success) {
+    $message = t('Cleanup finished successfully. %nodes nodes and %users users deleted.', array('%nodes' => count($results['nodes']), '%users' => count($results['users'])));
+  }
+  else {
+    $message = t('Finished with an error');
+  }
+  drupal_set_message($message);
+}

@@ -1,0 +1,9 @@
+name = Modr8 Taxonomy
+description = Alter assigned taxonomies from modr8 screen
+dependencies[] = modr8
+dependencies[] = taxonomy
+core = 6.x
+
+l10n server = translate.gdb-dev.com
+project = "modr8_taxonomy"
+version = "6.x-2.x"

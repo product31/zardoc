@@ -1,0 +1,158 @@
+<?php
+// $Id:$
+
+/**
+* Implementation of hook_action_info().
+*/
+function sonybmg_offensive_action_info() {
+  return array(
+    'sonybmg_offensive_undo_offensive_action' => array(
+      'description' => t('Restore content'),
+      'type' => 'node',
+      'configurable' => FALSE,
+    ),
+    'sonybmg_offensive_remove_offensive_action' => array(
+      'description' => t('Unpublish content'),
+      'type' => 'node',
+      'configurable' => FALSE,
+    ),
+    'sonybmg_offensive_mollom_delete_action' => array(
+      'type' => 'node',
+      'description' => t('Report to Mollom and delete'),
+      'configurable' => FALSE,
+      'behavior' => array('deletes_node_property'),
+    ),
+    'sonybmg_offensive_mollom_unpublish_action' => array(
+      'type' => 'node',
+      'description' => t('Report to Mollom and unpublish'),
+      'configurable' => FALSE,
+    ),
+  );
+}
+
+/**
+ * Action callback, implemented in sonybmg_offensive_action_info().
+ */
+function sonybmg_offensive_undo_offensive_action(&$object, $context) {
+  if (is_object($object) && is_numeric($object->nid)) {
+    // $object will be the node, $context['node'] will be, too.
+    $flag_counts = flag_get_counts('node', $object->nid);
+
+    if ($flag_counts['offensive']) {
+      $flag_delete_query = "DELETE c FROM {flag_content} c INNER JOIN {flags} f on f.fid = c.fid WHERE c.content_id = %d AND f.name='offensive'";
+      db_query($flag_delete_query, $object->nid);
+
+      $flag_counts_delete_query = "DELETE c FROM {flag_counts} c INNER JOIN {flags} f on f.fid = c.fid WHERE c.content_id=%d AND f.name='offensive'";
+      db_query($flag_counts_delete_query, $object->nid);
+    }
+
+    $object->status = 1;
+    unset($object->path);
+  }
+}
+
+/**
+ * Action callback, implemented in sonybmg_offensive_action_info().
+ */
+function sonybmg_offensive_remove_offensive_action(&$object, $context) {
+  if (is_object($object) && is_numeric($object->nid)) {
+    // $object will be the node, $context['node'] will be, too.
+    $flag_counts = flag_get_counts('node', $object->nid);
+
+    if ($flag_counts['offensive']) {
+      $flag_delete_query = "DELETE c FROM {flag_content} c INNER JOIN {flags} f on f.fid = c.fid WHERE c.content_id = %d AND f.name='offensive'";
+      db_query($flag_delete_query, $object->nid);
+
+      $flag_counts_delete_query = "DELETE c FROM {flag_counts} c INNER JOIN {flags} f on f.fid = c.fid WHERE c.content_id=%d AND f.name='offensive'";
+      db_query($flag_counts_delete_query, $object->nid);
+    }
+
+    $object->status = 0;
+    unset($object->path);
+    node_save($object);
+  }
+}
+
+/**
+ * Implementation of hook_views_api().
+ */
+function sonybmg_offensive_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'sonybmg_offensive'),
+  );
+}
+
+/**
+ * Implementation of hook_flag_default_flags().
+ */
+function sonybmg_offensive_flag_default_flags() {
+  $flags = array();
+  $flags[] = array(
+    'content_type' => 'node',
+    'name'         => 'offensive',
+    'title'        => 'offensive',
+    'flag_short'   => 'Report as offensive',
+    'flag_long'    => 'Report offensive content to an administrator',
+    'flag_confirmation' => 'Are you sure you want to report this content as offensive?',
+    'unflag_short' => 'Undo offensive report',
+    'unflag_long'  => 'Undo your report of this content as offensive',
+    'unflag_confirmation'=> 'Are you sure you want to undo your offensive report of this content?',
+    'roles'        => array(2), // authenticated user.
+    'types'        => array('forum', 'comment', 'blog', 'photo', 'forum_reply', 'review', 'fan'),
+    'global'       => 0,
+    'show_on_teaser' => 1,
+    'show_on_page' => 1,
+    'show_on_form' => 0,
+    'locked' => array('name', 'global'),
+  );
+
+  return $flags;
+}
+
+/**
+* Sets the node to be reported and deleted.
+*
+* @param $node
+* @param $context
+*/
+function sonybmg_offensive_mollom_delete_action(&$node, $context = array()) {
+  sonybmg_offensive_mollom($node, 'delete');
+}
+
+/**
+* Sets the node to be reported and unpublished.
+*
+* @param $node
+* @param $context
+*/
+function sonybmg_offensive_mollom_unpublish_action(&$node, $context = array()) {
+  sonybmg_offensive_mollom($node, 'unpublish');
+}
+
+/**
+* Sends feedback to Mollom.com on multiple nodes and either deletes or unpublishes them.
+*
+* @param $node
+* @param $op
+*/
+function sonybmg_offensive_mollom($node, $op) {
+  $nids[] = $node->nid;
+  foreach ($nids as $nid) {
+    // First, report the nodes as spam to Mollom.
+    if ($data = mollom_data_load('node', $nid)) {
+      _mollom_send_feedback($data->session);
+    }
+    // Then perform action on the node
+    if ($load = node_load($nid)) {
+     if ($op == 'delete') {
+       node_delete($nid);
+     }
+     elseif ($op == 'unpublish') {
+       db_query("UPDATE {node} SET status = 0 WHERE nid = %d", $nid);
+     }
+    }
+  }
+  // Flush caches so the content changes are visible for anonymous users.
+  cache_clear_all();
+}

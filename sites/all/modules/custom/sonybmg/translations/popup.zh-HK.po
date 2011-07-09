@@ -1,0 +1,22 @@
+# Hong Kong translation of sonybmg (all releases)
+# Copyright (c) 2010 by the Hong Kong translation team
+# Generated from file: sonybmg/popup/popup.js: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sonybmg (all releases)\n"
+"POT-Creation-Date: 2010-04-08 15:07-0500\n"
+"PO-Revision-Date: 2010-03-26 09:09-0500\n"
+"Language-Team: Hong Kong\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: popup/popup.js:0
+msgid "Continue"
+msgstr "下一步"
+
+#: popup/popup.js:0
+msgid "Close"
+msgstr ""
+

@@ -1,0 +1,75 @@
+<?php 
+
+function modr8_taxonomy_form_alter(&$form, $form_state, $form_id) {
+  if ($form_id == 'modr8_form') {
+    $form['#submit'][] = 'modr8_taxonomy_form_submit';
+    foreach ($form as $nid => $item) {
+      if (is_numeric($nid)) {
+        $node = node_load($nid);
+        $taxonomy_subform = array(
+          '#node' => $node,
+        'type' => array('#value' => $node->type), 
+        );
+        taxonomy_form_alter($taxonomy_subform, $form_state, $node->type . '_node_form');
+        $form[$node->nid]['taxonomy'] = $taxonomy_subform['taxonomy'];
+      }
+    }
+  }
+}
+
+function modr8_taxonomy_form_submit($form, &$form_state) {
+  foreach ($form_state['values'] as $nid => $values) {
+    switch ($values['ops']) {
+      case 'approve':
+      case 'nada':
+      $node = node_load($nid);
+      taxonomy_node_save($node, $values['taxonomy']);
+      break;
+    }
+  }
+}
+
+function modr8_taxonomy_theme_registry_alter(&$theme_registry) {
+  if (!empty($theme_registry['modr8_form'])) {
+    $theme_registry['modr8_form']['function'] = 'modr8_taxonomy_form';
+  }
+}
+
+function modr8_taxonomy_form(&$form) {
+  $headers = array(
+    t('Operations'),
+    t('Content')
+  );
+  foreach (element_children($form) as $key) {
+    // Only do this for nodes; not the submit button.
+    if (is_numeric($key)) {
+      $row = array();
+      $note_field = '';
+      if (variable_get('modr8_send_approve', FALSE) || variable_get('modr8_send_deny', FALSE)) {
+        $note_field .= drupal_render($form[$key]['note']);
+      }
+      $row[] = array(
+        'data' => drupal_render($form[$key]['ops']) . drupal_render($form[$key]['taxonomy']) . $note_field,
+        'style' => 'vertical-align:top;'
+      );
+      $preview = $form[$key]['preview']['#value'];
+
+      if (!empty($form[$key]['log_link']['#value'])) {
+        $preview .= '<div><em>'. drupal_render($form[$key]['log_link']) .'</em></div>';
+      }
+      $row[] = array(
+        'data' => $preview,
+        'style' => 'vertical-align:top;',
+      );
+      $rows[] = $row;
+    }
+  }
+  $output = theme('table', $headers, $rows);
+  $output .= drupal_render($form);
+
+  return $output;
+}
+
+
+
+?>

@@ -1,0 +1,12 @@
+; $Id$
+name = Sony Register
+description = Sony customization of the user registration process
+package = Sony BMG
+core = 6.x
+dependencies[] = legal
+dependencies[] = validate
+dependencies[] = popups
+
+l10n server = translate.gdb-dev.com
+project = "sony_register"
+version = "6.x-2.x"

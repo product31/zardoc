@@ -1,0 +1,155 @@
+<?php
+
+
+class CommentNotifyTestCase extends DrupalWebTestCase {
+  /**
+   * Implementation of getInfo().
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Comment notify general tests'),
+      'description' => t('Test the various comment notification settings.'),
+      'group' => t('Comment notify'),
+    );
+  }
+
+  /**
+   * Implementation of setUp().
+   */
+  function setUp() {
+    parent::setUp('comment_notify');
+    // Create a content type where commenting is enabled.
+    // Allow contact info for anons on that content type, and make preview optional.
+
+    // Do some default comment notify settings?.
+    // variable_set('some_variable', 'some value');
+  }
+
+  /**
+   * Test various behaviors for anonymous users.
+   */
+  function testCommentNotifyAnonymousUserFunctionalTest() {
+    // Code that does something to be tested.
+    // Create and login administrative user.
+    $admin_user = $this->drupalCreateUser(array('administer comment notify', 'administer permissions'));
+    $this->drupalLogin($admin_user);
+
+    // Enable comment notify on this node and allow anonymous information in comments.
+    variable_set('comment_notify_node_types', array('story' => 'story'));
+    variable_set('comment_anonymous_story', 1);
+
+    // Create a node with comments allowed.
+    $this->node = $this->drupalCreateNode(array('type' => 'story', 'promote' => 1, 'comment' => 2));
+
+    // Get the page and post the comment.
+    $this->drupalGet('comment/reply/' . $this->node->nid);
+
+    // Ensure that the contact form won't be shown without categories.
+    $this->setPermission('anonymous user', array('access comments' => TRUE, 'access content' => TRUE, 'post comments' => TRUE, 'post comments without approval' => TRUE, 'subscribe to comments' => TRUE));
+    $this->drupalLogout();
+
+    $anonymous_comment = $this->postCommentNotifyComment($this->node, $this->randomName(), $this->randomName(), TRUE, TRUE, TRUE);
+    $this->assertText(t('If you want to subscribe to comments you must supply a valid e-mail address.'), t('Anonymous user must leave E-mail if they want to get notifications.'));
+
+    // TODO a whole bunch more tests that check if mail was "sent".
+  }
+
+
+  /**
+   * Set permission.
+   *
+   * @param string $role User role to set permissions for.
+   * @param array $permissions Key-value array of permissions to set.
+   */
+  function setPermission($role, $permissions) {
+    // Get role id (rid) for specified role.
+    $rid = db_result(db_query("SELECT rid FROM {role} WHERE name = '%s'", array('%s' => $role)));
+    if ($rid === FALSE) {
+      $this->fail(t(' [permission] Role "' . $role . '" not found.'));
+    }
+
+    // Create edit array from permission.
+    $edit = array();
+    foreach ($permissions as $name => $value) {
+      $edit[$rid . '[' . $name . ']'] = $value;
+    }
+
+    $this->drupalPost('admin/user/permissions', $edit, t('Save permissions'));
+    $this->assertText(t('The changes have been saved.'), t(' [permission] Saved changes.'));
+  }
+
+  /////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+  ////////////////////////// COPIED FROM 7.X COMMENT.TEST \\\\\\\\\\\\\\\\\\\\\
+  //////////////////////////////and tweaked a little\\\\\\\\\\\\\\\\\\\\\\\\\\\
+  /////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+  /**
+   * Post comment.
+   *
+   * @param object $node Node to post comment on.
+   * @param string $subject Comment subject.
+   * @param string $comment Comment body.
+   * @param boolean $preview Should preview be required.
+   * @param mixed $contact Set to NULL for no contact info, TRUE to ignore success checking, and array of values to set contact info.
+   */
+  function postCommentNotifyComment($node, $subject, $comment, $preview = TRUE, $notify, $contact = NULL) {
+    $edit = array();
+    $edit['subject'] = $subject;
+    $edit['comment'] = $comment;
+    $edit['notify'] = $notify;
+
+    if ($contact !== NULL && is_array($contact)) {
+      $edit += $contact;
+    }
+
+    if ($node !== NULL) {
+      $this->drupalGet('comment/reply/' . $node->nid);
+    }
+
+    if ($preview) {
+      $this->assertNoFieldByName('op', t('Save'), t('Save button not found.')); // Preview required so no save button should be found.
+      $this->drupalPost(NULL, $edit, t('Preview'));
+    }
+    $this->drupalPost(NULL, $edit, t('Save'));
+    $match = array();
+    // Get comment ID
+    preg_match('/#comment-([^"]+)/', $this->getURL(), $match);
+
+    // Get comment.
+    if ($contact !== TRUE) { // If true then attempting to find error message.
+      if ($subject) {
+        $this->assertText($subject, 'Comment subject posted.');
+      }
+      $this->assertText($comment, 'Comment body posted.');
+      $this->assertTrue((!empty($match) && !empty($match[1])), t('Comment id found.'));
+    }
+
+    if (isset($match[1])) {
+      return (object) array('id' => $match[1], 'subject' => $subject, 'comment' => $comment);
+    }
+  }
+
+  /**
+   * Checks current page for specified comment.
+   *
+   * @param object $comment Comment object.
+   * @param boolean $reply The comment is a reply to another comment.
+   * @return boolean Comment found.
+   */
+  function commentExists($comment, $reply = FALSE) {
+    if ($comment && is_object($comment)) {
+      $regex = '/' . ($reply ? '<div class="indented">(.*?)' : '');
+      $regex .= '<a id="comment-' . $comment->id . '"(.*?)'; // Comment anchor.
+      $regex .= '<div(.*?)'; // Begin in comment div.
+      $regex .= $comment->subject . '(.*?)'; // Match subject.
+      $regex .= $comment->comment . '(.*?)'; // Match comment.
+      $regex .= '<\/div>/s'; // Dot matches newlines and ensure that match doesn't bleed outside comment div.
+
+      return (boolean)preg_match($regex, $this->drupalGetContent());
+    }
+    else {
+      return FALSE;
+    }
+  }
+
+}

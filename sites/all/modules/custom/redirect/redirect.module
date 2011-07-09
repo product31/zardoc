@@ -1,0 +1,187 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * file_description
+ */
+ 
+/**
+ * Implementation of hook_menu().
+ */
+function redirect_menu() {
+  $items['admin/build/path/redirect'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Redirect',
+    'page callback' => 'redirect_admin_overview',
+    'access arguments' => array('administer url aliases'),
+  );
+  $items['admin/build/path/redirect/list'] = array(
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'title' => 'List',
+    'access arguments' => array('administer url aliases'),
+    'weight' => -1,
+  );
+  $items['admin/build/path/redirect/add'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Add',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('redirect_admin_edit_form'),
+    'access arguments' => array('administer url aliases'),
+  );
+  $items['admin/build/path/redirect/edit/%redirect'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Edit',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('redirect_admin_edit_form', 5),
+    'access arguments' => array('administer url aliases'),
+  );
+  $items['admin/build/path/redirect/delete/%redirect'] = array(
+    'type' => MENU_CALLBACK,
+    'title' => 'Delete',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('redirect_admin_delete_form', 5),
+    'access arguments' => array('administer url aliases'),
+  );
+  
+  $result = db_query('SELECT * FROM {redirect}');
+  while($row = db_fetch_array($result)) {
+    $items[$row['path']] = array(
+      'type' => MENU_CALLBACK,
+      'access callback' => TRUE,
+      'page callback' => 'drupal_goto',
+      'page arguments' => array($row['url'], NULL, NULL, $row['code']),
+    );
+  }
+  
+  return $items;
+}
+
+/**
+ * Menu object load callback
+ */
+function redirect_load($rid) {  
+  return db_fetch_object(db_query('SELECT * FROM {redirect} WHERE rid = %d', $rid));
+}
+
+/**
+ * Listing of existing path redirects
+ */
+function redirect_admin_overview() {
+  $rows = array();
+  
+  $result = db_query('SELECT * FROM {redirect}');
+  while($row = db_fetch_array($result)) {
+    $ops = array(
+      l('Edit', 'admin/build/path/redirect/edit/'. $row['rid'], array('query' => drupal_get_destination())),
+      l('Delete', 'admin/build/path/redirect/delete/'. $row['rid'], array('query' => drupal_get_destination())),
+    );
+     
+    $rows[] = array(
+      l($row['path'], $row['path']),
+      check_plain($row['url']),
+      check_plain($row['code']),
+      join(' | ', $ops),
+    );  
+  }
+  
+  $header = array(
+    t('Drupal path'), 
+    t('Redirect URL'), 
+    t('Response code'), 
+    t('Operations'),
+  );
+  
+  return theme('table', $header, $rows);
+}
+
+/**
+ * Add/Edit form
+ */
+function redirect_admin_edit_form(&$form_state, $redirect = NULL) {
+  $form['rid'] = array(
+    '#type' => 'value',
+    '#value' => $redirect->rid ? $redirect->rid : NULL,
+  );
+  
+  $form['path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Drupal path'),
+    '#default_value' => $redirect->path ? $redirect->path : '',
+  );
+  
+  $form['url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Redirect URL'),
+    '#default_value' => $redirect->url ? $redirect->url : '',
+  );
+  
+  $form['code'] = array(
+    '#type' => 'select',
+    '#title' => 'HTTP response code',
+    '#default_value' => $redirect->code ? $redirect->code : 302,
+    '#options' => array(
+      301 => t('301: Moved Permanently'),
+      302 => t('302: Found'),
+      303 => t('303: See Other'),
+      304 => t('304: Not Modified'),
+      305 => t('305: Use Proxy'),
+      307 => t('307: Temporary Redirect'),
+    ),
+  );
+  
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+    '#weight' => 10,
+  );
+  
+  return $form;
+}
+
+/**
+ * Add/Edit form submit
+ */
+function redirect_admin_edit_form_submit($form, &$form_state) {
+  $redirect = (object)$form_state['values'];
+
+  if($redirect->rid) {
+    drupal_write_record('redirect', $redirect, 'rid');
+  }
+  else {
+    drupal_write_record('redirect', $redirect);
+  }
+  
+  menu_rebuild();
+  
+  $form_state['redirect'] = 'admin/build/path/redirect';
+}
+
+/**
+ * Delete form
+ */
+function redirect_admin_delete_form(&$form_state, $redirect) {
+  $form['rid'] = array(
+    '#type' => 'value',
+    '#value' => $redirect->rid,
+  );
+  
+  return confirm_form($form,
+    t('Are you sure you want delete this redirect?'),
+    isset($_GET['destination']) ? $_GET['destination'] : 'admin/build/path/redirect',
+    t('%path redirects to %url.  This action cannot be undone.', array('%path' => $redirect->path, '%url' => $redirect->url)),
+    t('Delete'),
+    t('Cancel')
+  );
+}
+
+/**
+ * Delete form submit
+ */
+function redirect_admin_delete_form_submit($form, &$form_state) {
+  db_query('DELETE FROM {redirect} WHERE rid = %d', $form_state['values']['rid']);
+  
+  menu_rebuild();
+  
+  $form_state['redirect'] = 'admin/build/path/redirect';
+}

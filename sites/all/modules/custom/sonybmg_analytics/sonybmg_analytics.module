@@ -1,0 +1,159 @@
+<?php
+/**
+ * @file
+ * Simple module that drops some tracking code at the bottom of all pages for our google tracking.
+ */
+
+/**
+ * Implementation of hook_footer().
+ */
+function sonybmg_analytics_footer() {
+    return '<script type="text/javascript">
+var _smeURL = ((document.location.protocol === "https:" ? "https://" : "http://") +"analytics.sonymusicd2c.com/tag/js?domain=" + document.location.hostname);
+document.write(unescape("%3Cscript src=\'"+_smeURL+"\' type=\'text/javascript\'%3E%3C/script%3E"));
+</script>';
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function sonybmg_analytics_menu() {
+  $items['admin/reports/sony'] = array(
+    'title' => 'Sony CMS reports',
+    'description' => 'A collection of reports for the Sony implementation of Drupal.',
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('access administration pages'),
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+  );
+
+  $items['admin/reports/sony/users'] = array(
+    'title' => 'Registered users',
+    'description' => 'Information about registered users.',
+    'page callback' => 'sonybmg_analytics_reports_users',
+    'access arguments' => array('access sony reports'),
+    'file' => 'sonybmg_analytics.reports.inc',
+  );
+  $items['admin/reports/sony/content'] = array(
+    'title' => 'Content Posts',
+    'description' => 'Information about content posts.',
+    'page callback' => 'sonybmg_analytics_reports_content_posts',
+    'access arguments' => array('access sony reports'),
+    'file' => 'sonybmg_analytics.reports.inc',
+  );
+  return $items;
+}
+
+/**
+ * Implementation of hook_perm().
+ */
+function sonybmg_analytics_perm() {
+  return array('access sony reports');
+}
+
+/**
+ * Implementation of hook_service().
+ */
+function sonybmg_analytics_service() {
+  return array(
+    // stats.user.registrations
+    array(
+      '#method'   => 'stats.user.registrations',
+      '#callback' => 'sonybmg_analytics_stats_user_registrations',
+      '#file'     => array('file' => 'services.inc', 'module' => 'sonybmg_analytics'),
+      '#auth'     => FALSE,
+      '#key'      => TRUE,
+      '#args'     => array(
+        array(
+          '#name'         => 'start',
+          '#type'         => 'date',
+          '#description'  => t('The start date of the range.')
+        ),
+        array(
+          '#name'         => 'end',
+          '#type'         => 'date',
+          '#optional'     => TRUE,
+          '#description'  => t('The end date of the range.')
+        )
+      ),
+      '#return'   => 'struct',
+      '#help'     => t('Returns an object with the number of user registrations over a given time, as well as the total user number of registrations.'),
+    ),
+    // stats.user.countries
+    array(
+      '#method'   => 'stats.user.countries',
+      '#callback' => 'sonybmg_analytics_stats_user_countries',
+      '#file'     => array('file' => 'services.inc', 'module' => 'sonybmg_analytics'),
+      '#auth'     => FALSE,
+      '#key'      => TRUE,
+      '#args'     => array(
+        array(
+          '#name'         => 'start',
+          '#type'         => 'date',
+          '#description'  => t('The start date of the range.')
+        ),
+        array(
+          '#name'         => 'end',
+          '#type'         => 'date',
+          '#optional'     => TRUE,
+          '#description'  => t('The end date of the range.')
+        )
+      ),
+      '#return'   => 'struct',
+      '#help'     => t('Returns an object with the number of user registrations over a given time from various countries, as well as the total user number of registrations.'),
+    ),
+    // stats.user.countries
+    array(
+      '#method'   => 'stats.user.email_domains',
+      '#callback' => 'sonybmg_analytics_stats_user_email_domains',
+      '#file'     => array('file' => 'services.inc', 'module' => 'sonybmg_analytics'),
+      '#auth'     => FALSE,
+      '#key'      => TRUE,
+      '#args'     => array(
+        array(
+          '#name'         => 'start',
+          '#type'         => 'date',
+          '#description'  => t('The start date of the range.')
+        ),
+        array(
+          '#name'         => 'end',
+          '#type'         => 'date',
+          '#optional'     => TRUE,
+          '#description'  => t('The end date of the range.')
+        )
+      ),
+      '#return'   => 'struct',
+      '#help'     => t('Returns an object with the number of user registrations over a given time from various email domains, as well as the total user number of registrations.'),
+    ),
+    // stats.content.posts
+    array(
+      '#method'   => 'stats.content.posts',
+      '#callback' => 'sonybmg_analytics_stats_content_posts',
+      '#file'     => array('file' => 'services.inc', 'module' => 'sonybmg_analytics'),
+      '#auth'     => FALSE,
+      '#key'      => TRUE,
+      '#args'     => array(
+        array(
+          '#name'         => 'type_split',
+          '#type'         => 'boolean',
+          '#optional'     => TRUE,
+          '#description'  => t('Whether or not you want the post counts split out by content-type.')
+        ),
+        array(
+          '#name'         => 'start',
+          '#type'         => 'date',
+          '#optional'     => TRUE,
+          '#description'  => t('The start date of the range.')
+        ),
+        array(
+          '#name'         => 'end',
+          '#type'         => 'date',
+          '#optional'     => TRUE,
+          '#description'  => t('The end date of the range.')
+        )
+      ),
+      '#return'   => 'struct',
+      '#help'     => t('Returns an object with the number of official and unofficial content posts over a given time, optionally split out by content-type.'),
+    ),
+  );
+}

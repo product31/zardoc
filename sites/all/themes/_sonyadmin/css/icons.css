@@ -1,0 +1,26 @@
+@CHARSET "UTF-8";
+
+div.admin-panel h3 {
+	padding-left: 60px;
+	line-height: 48px;
+	background: url(../images/function/folder_48.png) no-repeat 0 0;
+}
+
+div.admin-panel.content-management h3 {
+	background-image: url(../images/function/paper_content_48.png);
+}
+div.admin-panel.global h3 {
+	background-image: url(../images/function/globe_48.png);
+}
+div.admin-panel.user-management h3 {
+	background-image: url(../images/function/users_two_48.png);
+}
+div.admin-panel.reports h3 {
+	background-image: url(../images/function/pie_chart_48.png);
+}
+div.admin-panel.site-building h3 {
+	background-image: url(../images/function/spanner_48.png);
+}
+div.admin-panel.site-configuration h3 {
+	background-image: url(../images/function/app_48.png);
+}

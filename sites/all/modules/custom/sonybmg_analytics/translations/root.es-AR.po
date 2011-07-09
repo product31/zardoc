@@ -1,0 +1,132 @@
+# Argentina translation of sonybmg_analytics (all releases)
+# Copyright (c) 2010 by the Argentina translation team
+# Generated from files:
+#  sonybmg_analytics/sonybmg_analytics.info: n/a
+#  sonybmg_analytics/sonybmg_analytics.reports.inc: n/a
+#  sonybmg_analytics/sonybmg_analytics.module: n/a
+#  sonybmg_analytics/sonybmg_analytics.install: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: sonybmg_analytics (all releases)\n"
+"POT-Creation-Date: 2010-04-02 13:53-0500\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Language-Team: Argentina\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: sonybmg_analytics.info:0
+msgid "Sony BMG"
+msgstr ""
+
+#: sonybmg_analytics.reports.inc:17
+msgid "User registrations"
+msgstr ""
+
+#: sonybmg_analytics.reports.inc:65
+msgid "Users by location"
+msgstr ""
+
+#: sonybmg_analytics.reports.inc:111
+msgid "Official Content"
+msgstr ""
+
+#: sonybmg_analytics.reports.inc:138
+msgid "Unofficial Content"
+msgstr ""
+
+#: sonybmg_analytics.module:67,90,113,143
+msgid "The start date of the range."
+msgstr ""
+
+#: sonybmg_analytics.module:73,96,119,149
+msgid "The end date of the range."
+msgstr ""
+
+#: sonybmg_analytics.module:77
+msgid ""
+"Returns an object with the number of user registrations over a given "
+"time, as well as the total user number of registrations."
+msgstr ""
+
+#: sonybmg_analytics.module:100
+msgid ""
+"Returns an object with the number of user registrations over a given "
+"time from various countries, as well as the total user number of "
+"registrations."
+msgstr ""
+
+#: sonybmg_analytics.module:123
+msgid ""
+"Returns an object with the number of user registrations over a given "
+"time from various email domains, as well as the total user number of "
+"registrations."
+msgstr ""
+
+#: sonybmg_analytics.module:137
+msgid "Whether or not you want the post counts split out by content-type."
+msgstr ""
+
+#: sonybmg_analytics.module:153
+msgid ""
+"Returns an object with the number of official and unofficial content "
+"posts over a given time, optionally split out by content-type."
+msgstr ""
+
+#: sonybmg_analytics.module:48
+msgid "access sony reports"
+msgstr ""
+
+#: sonybmg_analytics.module:19
+msgid "Sony CMS reports"
+msgstr ""
+
+#: sonybmg_analytics.module:20
+msgid "A collection of reports for the Sony implementation of Drupal."
+msgstr ""
+
+#: sonybmg_analytics.module:28
+msgid "Registered users"
+msgstr ""
+
+#: sonybmg_analytics.module:29
+msgid "Information about registered users."
+msgstr ""
+
+#: sonybmg_analytics.module:35
+msgid "Content Posts"
+msgstr ""
+
+#: sonybmg_analytics.module:36
+msgid "Information about content posts."
+msgstr ""
+
+#: sonybmg_analytics.install:17
+msgid "Installed services and rest_server modules."
+msgstr ""
+
+#: sonybmg_analytics.install:59
+msgid "Updated Sony D2C Artist Dashboard API Key: %key"
+msgstr ""
+
+#: sonybmg_analytics.install:63
+msgid "Created Sony D2C Artist Dashboard API Key: %key"
+msgstr ""
+
+#: sonybmg_analytics.install:87
+msgid "Set appropriate permissions of sonybmg_analytics module."
+msgstr ""
+
+#: sonybmg_analytics.info:0
+msgid "SonyBMG Analytics"
+msgstr ""
+
+#: sonybmg_analytics.info:0
+msgid ""
+"This adds the code for our nextgen analytics playtform. Make sure IS&T "
+"has the domain address of the site using this in their analytics "
+"platform."
+msgstr ""
+
